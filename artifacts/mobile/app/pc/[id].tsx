@@ -219,7 +219,13 @@ export default function PCDetailScreen() {
           {m.cpu && <CPUCard cpu={m.cpu} />}
           {m.gpu && <GPUCard gpus={m.gpu} />}
           {m.ram && <RAMCard ram={m.ram} />}
-          {m.fans != null && <FansCard fans={m.fans} />}
+          {m.fans != null && (
+            <FansCard
+              fans={m.fans}
+              baseUrl={`http://${pc.host}:${pc.port}`}
+              apiKey={pc.apiKey}
+            />
+          )}
           {m.disks && m.disks.length > 0 && <DisksCard disks={m.disks} />}
           {m.network && m.network.length > 0 && (
             <NetworkCard interfaces={m.network} />

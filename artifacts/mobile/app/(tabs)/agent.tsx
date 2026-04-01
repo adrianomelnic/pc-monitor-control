@@ -493,6 +493,98 @@ def command():
 
     return jsonify({"success": False, "error": f"Unknown command: {cmd}"})
 
+@app.route("/hwinfo_debug")
+def hwinfo_debug():
+    """Diagnostic endpoint — call from a browser on the PC to check HWiNFO64 shared memory."""
+    if not IS_WINDOWS:
+        return jsonify({"status": "not_windows", "detail": "HWiNFO64 is Windows-only."})
+    try:
+        import ctypes, struct
+        HWINFO_SM2_KEY = "Global\\\\HWiNFO_SENS_SM2"
+        FILE_MAP_READ = 0x0004
+        k32 = ctypes.windll.kernel32
+        k32.OpenFileMappingW.restype = ctypes.c_void_p
+        k32.OpenFileMappingW.argtypes = [ctypes.c_ulong, ctypes.c_int, ctypes.c_wchar_p]
+        k32.MapViewOfFile.restype = ctypes.c_void_p
+        k32.MapViewOfFile.argtypes = [ctypes.c_void_p, ctypes.c_ulong,
+                                       ctypes.c_ulong, ctypes.c_ulong, ctypes.c_size_t]
+        k32.UnmapViewOfFile.argtypes = [ctypes.c_void_p]
+        k32.CloseHandle.argtypes = [ctypes.c_void_p]
+        handle = k32.OpenFileMappingW(FILE_MAP_READ, 0, HWINFO_SM2_KEY)
+        if not handle:
+            err = ctypes.GetLastError()
+            return jsonify({
+                "status": "no_shared_memory",
+                "error_code": err,
+                "detail": (
+                    "OpenFileMappingW returned 0. HWiNFO64 shared memory not found. "
+                    "Fix: Open HWiNFO64 -> Settings -> HWiNFO64 tab -> check 'Shared Memory Support' "
+                    "-> click OK -> then CLOSE AND REOPEN HWiNFO64 completely."
+                )
+            })
+        hdr_size = 88
+        ptr = k32.MapViewOfFile(handle, FILE_MAP_READ, 0, 0, hdr_size)
+        if not ptr:
+            k32.CloseHandle(handle)
+            return jsonify({"status": "map_failed", "detail": "MapViewOfFile failed for header."})
+        hdr = bytes((ctypes.c_byte * hdr_size).from_address(ptr))
+        k32.UnmapViewOfFile(ptr)
+        sig = struct.unpack_from('<I', hdr, 0)[0]
+        ver = struct.unpack_from('<I', hdr, 4)[0]
+        rev = struct.unpack_from('<I', hdr, 8)[0]
+        if sig != 0x12345678:
+            k32.CloseHandle(handle)
+            return jsonify({
+                "status": "bad_signature",
+                "sig_hex": hex(sig),
+                "detail": "Unexpected signature. Expected 0x12345678. Wrong HWiNFO64 version?"
+            })
+        off_sensors, size_sensor, num_sensors = struct.unpack_from('<III', hdr, 20)
+        off_readings, size_reading, num_readings = struct.unpack_from('<III', hdr, 32)
+        if size_reading == 0 or num_readings > 50000:
+            k32.CloseHandle(handle)
+            return jsonify({"status": "bad_header",
+                            "size_reading": size_reading, "num_readings": num_readings})
+        total = off_readings + size_reading * num_readings + 4096
+        ptr = k32.MapViewOfFile(handle, FILE_MAP_READ, 0, 0, total)
+        if not ptr:
+            k32.CloseHandle(handle)
+            return jsonify({"status": "map_full_failed", "total_bytes": total})
+        data = bytes((ctypes.c_byte * total).from_address(ptr))
+        k32.UnmapViewOfFile(ptr)
+        k32.CloseHandle(handle)
+        TEMP, FAN = 1, 3
+        samples = []
+        for i in range(min(num_readings, 500)):
+            base = off_readings + i * size_reading
+            if base + size_reading > len(data):
+                break
+            r_type = struct.unpack_from('<I', data, base)[0]
+            orig_off = base + 12
+            orig = data[orig_off:orig_off+256].decode('utf-16-le', errors='ignore').rstrip('\\x00').strip()
+            user_off = base + 12 + 256
+            user = data[user_off:user_off+256].decode('utf-16-le', errors='ignore').rstrip('\\x00').strip()
+            val_off = base + 12 + 256 + 256 + 32
+            value = struct.unpack_from('<d', data, val_off)[0] if val_off + 8 <= len(data) else None
+            if r_type in (TEMP, FAN):
+                samples.append({
+                    "idx": i, "type": "temp" if r_type == TEMP else "fan",
+                    "orig": orig, "user": user, "value": value
+                })
+        return jsonify({
+            "status": "ok",
+            "hwinfo_version": ver,
+            "hwinfo_revision": rev,
+            "num_sensors": num_sensors,
+            "num_readings": num_readings,
+            "size_reading": size_reading,
+            "temp_fan_samples": samples[:40]
+        })
+    except Exception as e:
+        import traceback
+        return jsonify({"status": "exception", "error": str(e), "trace": traceback.format_exc()})
+
+
 if __name__ == "__main__":
     print(f"PC Agent starting on port {PORT}")
     print(f"API Key: {'set' if API_KEY else 'not set (open access)'}")
