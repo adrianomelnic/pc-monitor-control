@@ -18,7 +18,7 @@ const C = Colors.light;
 const PYTHON_AGENT = `#!/usr/bin/env python3
 """
 PC Monitor Agent - Run this on each computer you want to monitor.
-Requires: pip install psutil flask flask-cors
+Requires: python -m pip install psutil flask flask-cors
 """
 import json, os, platform, time, socket
 import psutil
@@ -141,30 +141,37 @@ const STEPS = [
   {
     step: "1",
     title: "Install Python",
-    desc: "Make sure Python 3.8+ is installed on your PC.",
+    desc: 'Download Python 3.8+ from python.org. On Windows, check "Add Python to PATH" during install.',
     code: "python --version",
   },
   {
     step: "2",
     title: "Install dependencies",
-    desc: "Open a terminal or command prompt and run:",
-    code: "pip install psutil flask flask-cors",
+    desc: "Open Command Prompt (Windows) or Terminal (Mac/Linux) and run:",
+    code: "python -m pip install psutil flask flask-cors",
+    note: 'Use "python -m pip" — plain "pip" may not be recognized on Windows.',
   },
   {
     step: "3",
-    title: "Download the agent",
-    desc: "Copy the agent script below and save it as pc_agent.py on your PC.",
+    title: "Save the agent script",
+    desc: 'Copy the script below and save it as pc_agent.py anywhere on your PC (e.g. your Desktop).',
   },
   {
     step: "4",
     title: "Run the agent",
-    desc: "Start the agent (keep this window open):",
+    desc: "In Command Prompt, navigate to where you saved the file and run:",
     code: "python pc_agent.py",
   },
   {
     step: "5",
-    title: "Add your PC",
-    desc: "Go to the Home tab and tap + to add your PC. Use your PC's local IP address and port 8765.",
+    title: "Find your PC's IP address",
+    desc: 'On Windows, open Command Prompt and type "ipconfig". Look for your IPv4 Address (e.g. 192.168.1.100). Your phone must be on the same Wi-Fi network.',
+    code: "ipconfig",
+  },
+  {
+    step: "6",
+    title: "Add your PC in the app",
+    desc: "Go to the My PCs tab, tap +, enter the name, IP address, and port 8765.",
   },
 ];
 
@@ -206,6 +213,12 @@ export default function AgentScreen() {
             {s.code && (
               <View style={styles.codeBlock}>
                 <Text style={styles.codeText}>{s.code}</Text>
+              </View>
+            )}
+            {s.note && (
+              <View style={styles.noteBox}>
+                <Feather name="info" size={12} color={C.warning} />
+                <Text style={styles.noteText}>{s.note}</Text>
               </View>
             )}
           </View>
@@ -392,5 +405,22 @@ const styles = StyleSheet.create({
   tipCode: {
     fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace",
     color: C.tint,
+  },
+  noteBox: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 6,
+    backgroundColor: "rgba(255, 184, 0, 0.08)",
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "rgba(255, 184, 0, 0.25)",
+    padding: 10,
+    marginTop: 4,
+  },
+  noteText: {
+    flex: 1,
+    fontSize: 12,
+    color: C.warning,
+    lineHeight: 17,
   },
 });
