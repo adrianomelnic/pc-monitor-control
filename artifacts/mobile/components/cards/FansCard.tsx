@@ -75,8 +75,8 @@ export function FansCard({ fans, baseUrl, apiKey }: Props) {
     if (status === "bad_signature") {
       return (
         <View style={styles.diagBox}>
-          <Text style={styles.diagFail}>Bad signature: {diagResult.sig_hex}</Text>
-          <Text style={styles.diagText}>Expected 0x12345678. Try updating HWiNFO64.</Text>
+          <Text style={styles.diagFail}>Unknown signature: {diagResult.sig_hex}</Text>
+          <Text style={styles.diagText}>{diagResult.detail}</Text>
         </View>
       );
     }

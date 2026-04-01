@@ -142,8 +142,11 @@ def read_hwinfo64():
         hdr = bytes((ctypes.c_byte * hdr_size).from_address(ptr))
         k32.UnmapViewOfFile(ptr)
         sig = struct.unpack_from('<I', hdr, 0)[0]
-        if sig != 0x12345678:
+        # Accept both legacy (0x12345678) and newer HWiNFO64 v7+ ('HWiS' = 0x53695748) signatures
+        VALID_SIGS = {0x12345678, 0x53695748}
+        if sig not in VALID_SIGS:
             k32.CloseHandle(handle)
+            print(f"HWiNFO64: unknown signature {hex(sig)}, skipping")
             return None
         off_sensors, size_sensor, num_sensors = struct.unpack_from('<III', hdr, 20)
         off_readings, size_reading, num_readings = struct.unpack_from('<III', hdr, 32)
@@ -532,12 +535,13 @@ def hwinfo_debug():
         sig = struct.unpack_from('<I', hdr, 0)[0]
         ver = struct.unpack_from('<I', hdr, 4)[0]
         rev = struct.unpack_from('<I', hdr, 8)[0]
-        if sig != 0x12345678:
+        VALID_SIGS = {0x12345678, 0x53695748}
+        if sig not in VALID_SIGS:
             k32.CloseHandle(handle)
             return jsonify({
                 "status": "bad_signature",
                 "sig_hex": hex(sig),
-                "detail": "Unexpected signature. Expected 0x12345678. Wrong HWiNFO64 version?"
+                "detail": f"Unexpected signature {hex(sig)}. Known good values: 0x12345678 (classic), 0x53695748 (HWiNFO64 v7+)."
             })
         off_sensors, size_sensor, num_sensors = struct.unpack_from('<III', hdr, 20)
         off_readings, size_reading, num_readings = struct.unpack_from('<III', hdr, 32)
