@@ -122,14 +122,17 @@ def read_hwinfo64():
         k32 = ctypes.windll.kernel32
         # Set correct return types so 64-bit pointers aren't truncated
         k32.OpenFileMappingW.restype = ctypes.c_void_p
-        k32.OpenFileMappingW.argtypes = [ctypes.c_ulong, ctypes.c_bool, ctypes.c_wchar_p]
+        k32.OpenFileMappingW.argtypes = [ctypes.c_ulong, ctypes.c_int, ctypes.c_wchar_p]
         k32.MapViewOfFile.restype = ctypes.c_void_p
         k32.MapViewOfFile.argtypes = [ctypes.c_void_p, ctypes.c_ulong,
                                        ctypes.c_ulong, ctypes.c_ulong, ctypes.c_size_t]
         k32.UnmapViewOfFile.argtypes = [ctypes.c_void_p]
         k32.CloseHandle.argtypes = [ctypes.c_void_p]
-        handle = k32.OpenFileMappingW(FILE_MAP_READ, False, HWINFO_SM2_KEY)
+        handle = k32.OpenFileMappingW(FILE_MAP_READ, 0, HWINFO_SM2_KEY)
         if not handle:
+            err = ctypes.GetLastError()
+            print(f"HWiNFO64: shared memory not found (OpenFileMappingW=0, err={err}). "
+                  "Make sure HWiNFO64 is running with Shared Memory Support enabled and was restarted.")
             return None
         hdr_size = 88
         ptr = k32.MapViewOfFile(handle, FILE_MAP_READ, 0, 0, hdr_size)
@@ -165,9 +168,14 @@ def read_hwinfo64():
             r_type = struct.unpack_from('<I', data, base)[0]
             if r_type not in (TEMP, FAN):
                 continue
-            lbl_off = base + 12 + 256  # tReading(4)+idx(4)+id(4)+szLabelOrig(256)
-            label = data[lbl_off:lbl_off+256].decode('utf-16-le', errors='ignore').split('\\x00')[0].strip()
-            val_off = base + 12 + 256 + 256 + 32  # +szLabelUser(256)+szUnit(32)
+            # szLabelOrig at offset 12 — always populated (szLabelUser may be empty)
+            orig_off = base + 12
+            orig = data[orig_off:orig_off+256].decode('utf-16-le', errors='ignore').rstrip('\\x00').strip()
+            # szLabelUser at offset 12+256 — only set if user renamed it
+            user_off = base + 12 + 256
+            user = data[user_off:user_off+256].decode('utf-16-le', errors='ignore').rstrip('\\x00').strip()
+            label = user if user else orig
+            val_off = base + 12 + 256 + 256 + 32
             if val_off + 8 > len(data):
                 continue
             value = struct.unpack_from('<d', data, val_off)[0]
@@ -175,8 +183,15 @@ def read_hwinfo64():
                 temps.append({"label": label, "value": round(value, 1)})
             elif r_type == FAN and value > 0 and label:
                 fans.append({"label": label, "rpm": round(value)})
+        print(f"HWiNFO64: read {len(temps)} temps, {len(fans)} fans")
+        if temps:
+            print(f"  Sample temps: {[(t['label'], t['value']) for t in temps[:3]]}")
+        if fans:
+            print(f"  Sample fans: {[(f['label'], f['rpm']) for f in fans[:3]]}")
         return {"temps": temps, "fans": fans} if (temps or fans) else None
-    except Exception:
+    except Exception as e:
+        print(f"HWiNFO64 read error: {e}")
+        import traceback; traceback.print_exc()
         return None
 
 def get_cpu_temp_hwinfo(hwinfo_data):
