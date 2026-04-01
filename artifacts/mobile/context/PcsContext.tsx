@@ -51,6 +51,19 @@ const PcsContext = createContext<PcsContextType>({} as PcsContextType);
 
 const STORAGE_KEY = "pcs_v1";
 
+/** React-Native-compatible fetch with timeout using AbortController */
+function fetchWithTimeout(
+  url: string,
+  options: RequestInit,
+  timeoutMs: number
+): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  return fetch(url, { ...options, signal: controller.signal }).finally(() =>
+    clearTimeout(timer)
+  );
+}
+
 export function PcsProvider({ children }: { children: React.ReactNode }) {
   const [pcs, setPcs] = useState<PC[]>([]);
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -82,11 +95,13 @@ export function PcsProvider({ children }: { children: React.ReactNode }) {
         };
         if (pc.apiKey) headers["X-API-Key"] = pc.apiKey;
 
-        const res = await fetch(buildUrl(pc, "/metrics"), {
-          headers,
-          signal: AbortSignal.timeout(5000),
-        });
-        if (!res.ok) throw new Error("not ok");
+        // 10s timeout — the metrics endpoint takes ~1s to sample network speed
+        const res = await fetchWithTimeout(
+          buildUrl(pc, "/metrics"),
+          { headers },
+          10000
+        );
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         return {
           status: "online",
@@ -94,7 +109,7 @@ export function PcsProvider({ children }: { children: React.ReactNode }) {
           os: data.os,
           lastSeen: new Date(),
         };
-      } catch {
+      } catch (e: any) {
         return { status: "offline" };
       }
     },
@@ -135,7 +150,7 @@ export function PcsProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (pcs.length === 0) return;
     refreshAll();
-    pollingRef.current = setInterval(refreshAll, 10000);
+    pollingRef.current = setInterval(refreshAll, 12000);
     return () => {
       if (pollingRef.current) clearInterval(pollingRef.current);
     };
@@ -201,12 +216,15 @@ export function PcsProvider({ children }: { children: React.ReactNode }) {
         };
         if (pc.apiKey) headers["X-API-Key"] = pc.apiKey;
 
-        const res = await fetch(buildUrl(pc, "/command"), {
-          method: "POST",
-          headers,
-          body: JSON.stringify({ command, args }),
-          signal: AbortSignal.timeout(15000),
-        });
+        const res = await fetchWithTimeout(
+          buildUrl(pc, "/command"),
+          {
+            method: "POST",
+            headers,
+            body: JSON.stringify({ command, args }),
+          },
+          20000
+        );
         const data = await res.json();
         return data;
       } catch (e: any) {

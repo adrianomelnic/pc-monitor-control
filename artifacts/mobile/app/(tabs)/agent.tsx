@@ -79,7 +79,7 @@ def metrics():
     ram = psutil.virtual_memory()
     disk = get_disk()
     net = psutil.net_io_counters()
-    time.sleep(1)
+    time.sleep(0.5)
     net2 = psutil.net_io_counters()
     up = (net2.bytes_sent - net.bytes_sent) / 1024
     down = (net2.bytes_recv - net.bytes_recv) / 1024
