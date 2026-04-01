@@ -84,17 +84,28 @@ export function FansCard({ fans, baseUrl, apiKey }: Props) {
       const samples = diagResult.temp_fan_samples ?? [];
       const temps = samples.filter((s) => s.type === "temp");
       const fans2 = samples.filter((s) => s.type === "fan");
+      const labelsLookGarbled = temps.slice(0, 3).some(
+        (t) => !t.orig || /[\u4e00-\u9fff]/.test(t.orig)
+      );
       return (
         <View style={styles.diagBox}>
           <Text style={styles.diagOk}>
             Shared memory OK — {diagResult.num_readings} readings, {temps.length} temps, {fans2.length} fans
           </Text>
+          <Text style={styles.diagSection}>
+            Format: size_reading={diagResult.size_reading}, lbl={diagResult.lbl_bytes_used}B, val@+{diagResult.val_off_base}
+          </Text>
+          {diagResult.first_element_hex && (
+            <Text style={[styles.diagRow, { fontSize: 10 }]} numberOfLines={2}>
+              hex: {diagResult.first_element_hex}
+            </Text>
+          )}
           {temps.length > 0 && (
             <>
               <Text style={styles.diagSection}>Sample temps:</Text>
               {temps.slice(0, 5).map((t, i) => (
                 <Text key={i} style={styles.diagRow}>
-                  {t.orig || t.user}: {t.value?.toFixed(1)}°C
+                  {t.orig || t.user || "?"}: {t.value?.toFixed(1)}°C
                 </Text>
               ))}
             </>
@@ -104,7 +115,7 @@ export function FansCard({ fans, baseUrl, apiKey }: Props) {
               <Text style={styles.diagSection}>Sample fans:</Text>
               {fans2.slice(0, 5).map((f, i) => (
                 <Text key={i} style={styles.diagRow}>
-                  {f.orig || f.user}: {f.value?.toFixed(0)} RPM
+                  {f.orig || f.user || "?"}: {f.value?.toFixed(0)} RPM
                 </Text>
               ))}
             </>
@@ -112,9 +123,15 @@ export function FansCard({ fans, baseUrl, apiKey }: Props) {
           {samples.length === 0 && (
             <Text style={styles.diagText}>No temp/fan readings found in shared memory.</Text>
           )}
-          <Text style={[styles.diagText, { marginTop: 6 }]}>
-            If data looks correct above but the app still shows nothing, you may be running the OLD agent script. Copy the latest version from the Agent Setup tab and restart.
-          </Text>
+          {labelsLookGarbled ? (
+            <Text style={[styles.diagText, { marginTop: 6, color: "#FFB800" }]}>
+              Labels still look garbled. Copy latest pc_agent.py from Agent Setup tab and restart the agent.
+            </Text>
+          ) : (
+            <Text style={[styles.diagText, { marginTop: 6 }]}>
+              If labels look correct but the app still shows nothing, copy the latest agent from Agent Setup and restart.
+            </Text>
+          )}
         </View>
       );
     }

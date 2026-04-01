@@ -162,6 +162,28 @@ def read_hwinfo64():
         data = bytes((ctypes.c_byte * total).from_address(ptr))
         k32.UnmapViewOfFile(ptr)
         k32.CloseHandle(handle)
+
+        # Detect element format from size_reading:
+        # Old HWiNFO64 (<=v6):  WCHAR[128] labels  → 256 bytes each, total ~588
+        # New HWiNFO64 (v7+):   CHAR[128]  labels  → 128 bytes each, total ~316
+        # If ambiguous, auto-detect from whether odd bytes are null (UTF-16-LE) or not (ASCII)
+        if size_reading >= 500:
+            LBL_BYTES = 256; VAL_OFF_BASE = 12 + 256 + 256 + 32   # = 556
+        elif size_reading >= 280:
+            LBL_BYTES = 128; VAL_OFF_BASE = 12 + 128 + 128 + 16   # = 284
+        else:
+            LBL_BYTES = 256; VAL_OFF_BASE = 12 + 256 + 256 + 32   # fallback
+
+        def _label(raw):
+            """Decode label: UTF-16-LE if odd bytes are mostly null, else ASCII."""
+            sample = raw[:min(40, len(raw))]
+            null_odd = sum(1 for j in range(1, len(sample), 2) if sample[j] == 0)
+            if null_odd >= len(sample) // 4:
+                return raw.decode('utf-16-le', errors='ignore').rstrip('\\x00').strip()
+            null_pos = raw.find(b'\\x00')
+            chunk = raw[:null_pos] if null_pos >= 0 else raw
+            return chunk.decode('utf-8', errors='replace').replace('\\ufffd', '').strip()
+
         TEMP, FAN = 1, 3
         temps, fans = [], []
         for i in range(num_readings):
@@ -171,14 +193,10 @@ def read_hwinfo64():
             r_type = struct.unpack_from('<I', data, base)[0]
             if r_type not in (TEMP, FAN):
                 continue
-            # szLabelOrig at offset 12 — always populated (szLabelUser may be empty)
-            orig_off = base + 12
-            orig = data[orig_off:orig_off+256].decode('utf-16-le', errors='ignore').rstrip('\\x00').strip()
-            # szLabelUser at offset 12+256 — only set if user renamed it
-            user_off = base + 12 + 256
-            user = data[user_off:user_off+256].decode('utf-16-le', errors='ignore').rstrip('\\x00').strip()
+            orig = _label(data[base+12 : base+12+LBL_BYTES])
+            user = _label(data[base+12+LBL_BYTES : base+12+LBL_BYTES+LBL_BYTES])
             label = user if user else orig
-            val_off = base + 12 + 256 + 256 + 32
+            val_off = base + VAL_OFF_BASE
             if val_off + 8 > len(data):
                 continue
             value = struct.unpack_from('<d', data, val_off)[0]
@@ -186,7 +204,8 @@ def read_hwinfo64():
                 temps.append({"label": label, "value": round(value, 1)})
             elif r_type == FAN and value > 0 and label:
                 fans.append({"label": label, "rpm": round(value)})
-        print(f"HWiNFO64: read {len(temps)} temps, {len(fans)} fans")
+        print(f"HWiNFO64: {num_readings} readings (size_reading={size_reading}), "
+              f"{len(temps)} temps, {len(fans)} fans")
         if temps:
             print(f"  Sample temps: {[(t['label'], t['value']) for t in temps[:3]]}")
         if fans:
@@ -557,6 +576,28 @@ def hwinfo_debug():
         data = bytes((ctypes.c_byte * total).from_address(ptr))
         k32.UnmapViewOfFile(ptr)
         k32.CloseHandle(handle)
+
+        # Detect format from size_reading
+        if size_reading >= 500:
+            LBL_BYTES = 256; VAL_OFF_BASE = 12 + 256 + 256 + 32
+        elif size_reading >= 280:
+            LBL_BYTES = 128; VAL_OFF_BASE = 12 + 128 + 128 + 16
+        else:
+            LBL_BYTES = 256; VAL_OFF_BASE = 12 + 256 + 256 + 32
+
+        def _lbl(raw):
+            sample = raw[:min(40, len(raw))]
+            null_odd = sum(1 for j in range(1, len(sample), 2) if sample[j] == 0)
+            if null_odd >= len(sample) // 4:
+                return raw.decode('utf-16-le', errors='ignore').rstrip('\\x00').strip()
+            null_pos = raw.find(b'\\x00')
+            chunk = raw[:null_pos] if null_pos >= 0 else raw
+            return chunk.decode('utf-8', errors='replace').replace('\\ufffd', '').strip()
+
+        # Hex dump of first element for diagnosis
+        first_base = off_readings
+        first_hex = data[first_base:first_base+min(32, size_reading)].hex(' ')
+
         TEMP, FAN = 1, 3
         samples = []
         for i in range(min(num_readings, 500)):
@@ -564,11 +605,9 @@ def hwinfo_debug():
             if base + size_reading > len(data):
                 break
             r_type = struct.unpack_from('<I', data, base)[0]
-            orig_off = base + 12
-            orig = data[orig_off:orig_off+256].decode('utf-16-le', errors='ignore').rstrip('\\x00').strip()
-            user_off = base + 12 + 256
-            user = data[user_off:user_off+256].decode('utf-16-le', errors='ignore').rstrip('\\x00').strip()
-            val_off = base + 12 + 256 + 256 + 32
+            orig = _lbl(data[base+12 : base+12+LBL_BYTES])
+            user = _lbl(data[base+12+LBL_BYTES : base+12+LBL_BYTES+LBL_BYTES])
+            val_off = base + VAL_OFF_BASE
             value = struct.unpack_from('<d', data, val_off)[0] if val_off + 8 <= len(data) else None
             if r_type in (TEMP, FAN):
                 samples.append({
@@ -582,6 +621,9 @@ def hwinfo_debug():
             "num_sensors": num_sensors,
             "num_readings": num_readings,
             "size_reading": size_reading,
+            "lbl_bytes_used": LBL_BYTES,
+            "val_off_base": VAL_OFF_BASE,
+            "first_element_hex": first_hex,
             "temp_fan_samples": samples[:40]
         })
     except Exception as e:
