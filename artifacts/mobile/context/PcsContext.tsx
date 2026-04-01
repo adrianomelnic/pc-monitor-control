@@ -134,6 +134,21 @@ export function PcsProvider({ children }: { children: React.ReactNode }) {
     [fetchMetrics]
   );
 
+  /** Silent background poll — never flashes "Connecting..." */
+  const pollAll = useCallback(() => {
+    setPcs((prev) => {
+      prev.forEach((pc) => {
+        fetchMetrics(pc).then((updates) => {
+          setPcs((cur) =>
+            cur.map((p) => (p.id === pc.id ? { ...p, ...updates } : p))
+          );
+        });
+      });
+      return prev; // don't change status during background poll
+    });
+  }, [fetchMetrics]);
+
+  /** Manual refresh — shows "Connecting..." spinner */
   const refreshAll = useCallback(async () => {
     setPcs((prev) => {
       prev.forEach((pc) => {
@@ -149,8 +164,8 @@ export function PcsProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (pcs.length === 0) return;
-    refreshAll();
-    pollingRef.current = setInterval(refreshAll, 12000);
+    pollAll(); // silent initial poll on mount
+    pollingRef.current = setInterval(pollAll, 12000); // silent background polling
     return () => {
       if (pollingRef.current) clearInterval(pollingRef.current);
     };
