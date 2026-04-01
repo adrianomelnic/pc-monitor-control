@@ -35,13 +35,58 @@ CORS(app)
 API_KEY = os.environ.get("PC_AGENT_KEY", "")
 PORT = int(os.environ.get("PC_AGENT_PORT", 8765))
 
-# Module-level state for delta-based speed calculations
+# ── Module-level state ──────────────────────────────────────────────────────
 _prev_net_io = {}
 _prev_disk_io = {}
 _prev_time = time.time()
 
 # Warm up cpu_percent (first call always returns 0)
 psutil.cpu_percent(percpu=True)
+
+# Cache slow one-time queries at startup so metrics endpoint stays fast
+def _init_cpu_name():
+    name = platform.processor() or "Unknown CPU"
+    if IS_WINDOWS:
+        try:
+            r = subprocess.run(["wmic", "cpu", "get", "name"],
+                               capture_output=True, text=True, timeout=5)
+            lines = [l.strip() for l in r.stdout.splitlines()
+                     if l.strip() and l.strip().lower() != "name"]
+            if lines:
+                name = lines[0]
+        except Exception:
+            pass
+    return name
+
+def _init_gpu_names():
+    """Return list of GPU name strings (queried once at startup)."""
+    try:
+        r = subprocess.run(
+            ["nvidia-smi", "--query-gpu=name", "--format=csv,noheader"],
+            capture_output=True, text=True, timeout=8
+        )
+        if r.returncode == 0:
+            return [l.strip() for l in r.stdout.strip().splitlines() if l.strip()]
+    except Exception:
+        pass
+    if IS_WINDOWS:
+        try:
+            r = subprocess.run(
+                ["wmic", "path", "win32_videocontroller", "get", "name"],
+                capture_output=True, text=True, timeout=5
+            )
+            lines = [l.strip() for l in r.stdout.splitlines()
+                     if l.strip() and l.strip().lower() != "name"]
+            return lines
+        except Exception:
+            pass
+    return []
+
+print("Initialising hardware info (first run may take a few seconds)...")
+_CPU_NAME = _init_cpu_name()
+_GPU_NAMES = _init_gpu_names()
+print(f"CPU: {_CPU_NAME}")
+print(f"GPU(s): {_GPU_NAMES or 'none detected'}")
 
 def check_key():
     if API_KEY and request.headers.get("X-API-Key") != API_KEY:
@@ -75,10 +120,17 @@ def read_hwinfo64():
         HWINFO_SM2_KEY = "Global\\\\HWiNFO_SENS_SM2"
         FILE_MAP_READ = 0x0004
         k32 = ctypes.windll.kernel32
+        # Set correct return types so 64-bit pointers aren't truncated
+        k32.OpenFileMappingW.restype = ctypes.c_void_p
+        k32.OpenFileMappingW.argtypes = [ctypes.c_ulong, ctypes.c_bool, ctypes.c_wchar_p]
+        k32.MapViewOfFile.restype = ctypes.c_void_p
+        k32.MapViewOfFile.argtypes = [ctypes.c_void_p, ctypes.c_ulong,
+                                       ctypes.c_ulong, ctypes.c_ulong, ctypes.c_size_t]
+        k32.UnmapViewOfFile.argtypes = [ctypes.c_void_p]
+        k32.CloseHandle.argtypes = [ctypes.c_void_p]
         handle = k32.OpenFileMappingW(FILE_MAP_READ, False, HWINFO_SM2_KEY)
         if not handle:
             return None
-        # Read header (88 bytes) first
         hdr_size = 88
         ptr = k32.MapViewOfFile(handle, FILE_MAP_READ, 0, 0, hdr_size)
         if not ptr:
@@ -92,6 +144,10 @@ def read_hwinfo64():
             return None
         off_sensors, size_sensor, num_sensors = struct.unpack_from('<III', hdr, 20)
         off_readings, size_reading, num_readings = struct.unpack_from('<III', hdr, 32)
+        # Guard against corrupt header values
+        if size_reading == 0 or num_readings > 50000:
+            k32.CloseHandle(handle)
+            return None
         total = off_readings + size_reading * num_readings + 4096
         ptr = k32.MapViewOfFile(handle, FILE_MAP_READ, 0, 0, total)
         if not ptr:
@@ -109,9 +165,9 @@ def read_hwinfo64():
             r_type = struct.unpack_from('<I', data, base)[0]
             if r_type not in (TEMP, FAN):
                 continue
-            lbl_off = base + 4 + 4 + 4 + 256  # after tReading+idx+id+szLabelOrig
-            label = data[lbl_off:lbl_off+256].decode('utf-16-le', errors='ignore').rstrip('\\x00').strip()
-            val_off = base + 4 + 4 + 4 + 256 + 256 + 32
+            lbl_off = base + 12 + 256  # tReading(4)+idx(4)+id(4)+szLabelOrig(256)
+            label = data[lbl_off:lbl_off+256].decode('utf-16-le', errors='ignore').split('\\x00')[0].strip()
+            val_off = base + 12 + 256 + 256 + 32  # +szLabelUser(256)+szUnit(32)
             if val_off + 8 > len(data):
                 continue
             value = struct.unpack_from('<d', data, val_off)[0]
@@ -136,17 +192,7 @@ def get_cpu_temp_hwinfo(hwinfo_data):
 
 def get_cpu_info(hwinfo_data=None):
     try:
-        name = platform.processor() or "Unknown CPU"
-        if IS_WINDOWS:
-            try:
-                r = subprocess.run(["wmic", "cpu", "get", "name"],
-                                   capture_output=True, text=True, timeout=3)
-                lines = [l.strip() for l in r.stdout.splitlines()
-                         if l.strip() and l.strip().lower() != "name"]
-                if lines:
-                    name = lines[0]
-            except Exception:
-                pass
+        name = _CPU_NAME  # Cached at startup — no subprocess on every request
         freq = psutil.cpu_freq()
         cores_logical = psutil.cpu_count(logical=True) or 1
         cores_physical = psutil.cpu_count(logical=False) or 1
@@ -178,44 +224,38 @@ def get_cpu_info(hwinfo_data=None):
         return {"name": "Unknown", "usageTotal": 0, "usagePerCore": []}
 
 def get_gpu_info():
+    """Query only dynamic GPU data per-request. Names come from cached _GPU_NAMES."""
     gpus = []
     try:
         r = subprocess.run(
             ["nvidia-smi",
-             "--query-gpu=name,utilization.gpu,memory.used,memory.total,"
+             "--query-gpu=utilization.gpu,memory.used,memory.total,"
              "temperature.gpu,clocks.current.graphics,clocks.current.memory",
              "--format=csv,noheader,nounits"],
             capture_output=True, text=True, timeout=5
         )
         if r.returncode == 0:
-            for line in r.stdout.strip().splitlines():
+            for i, line in enumerate(r.stdout.strip().splitlines()):
                 p = [x.strip() for x in line.split(",")]
-                if len(p) >= 5:
+                name = _GPU_NAMES[i] if i < len(_GPU_NAMES) else f"GPU {i}"
+                if len(p) >= 4:
                     gpus.append({
-                        "name": p[0],
-                        "usage": float(p[1]) if p[1] not in ("N/A", "") else None,
-                        "vramUsed": int(p[2]) if p[2] not in ("N/A", "") else None,
-                        "vramTotal": int(p[3]) if p[3] not in ("N/A", "") else None,
-                        "temperature": float(p[4]) if p[4] not in ("N/A", "") else None,
-                        "clockGpu": int(p[5]) if len(p) > 5 and p[5] not in ("N/A", "") else None,
-                        "clockMem": int(p[6]) if len(p) > 6 and p[6] not in ("N/A", "") else None,
+                        "name": name,
+                        "usage": float(p[0]) if p[0] not in ("N/A", "") else None,
+                        "vramUsed": int(p[1]) if p[1] not in ("N/A", "") else None,
+                        "vramTotal": int(p[2]) if p[2] not in ("N/A", "") else None,
+                        "temperature": float(p[3]) if p[3] not in ("N/A", "") else None,
+                        "clockGpu": int(p[4]) if len(p) > 4 and p[4] not in ("N/A", "") else None,
+                        "clockMem": int(p[5]) if len(p) > 5 and p[5] not in ("N/A", "") else None,
                     })
     except Exception:
         pass
-    if not gpus and IS_WINDOWS:
-        try:
-            r = subprocess.run(
-                ["wmic", "path", "win32_videocontroller", "get", "name"],
-                capture_output=True, text=True, timeout=3
-            )
-            lines = [l.strip() for l in r.stdout.splitlines()
-                     if l.strip() and l.strip().lower() != "name"]
-            for n in lines:
-                gpus.append({"name": n, "usage": None, "vramUsed": None,
-                             "vramTotal": None, "temperature": None,
-                             "clockGpu": None, "clockMem": None})
-        except Exception:
-            pass
+    # Fallback: show GPU names from cache with no live data
+    if not gpus and _GPU_NAMES:
+        for name in _GPU_NAMES:
+            gpus.append({"name": name, "usage": None, "vramUsed": None,
+                         "vramTotal": None, "temperature": None,
+                         "clockGpu": None, "clockMem": None})
     return gpus
 
 def get_ram_info():
@@ -313,6 +353,16 @@ def metrics():
     global _prev_net_io, _prev_disk_io, _prev_time
     auth = check_key()
     if auth: return auth
+    try:
+        return _collect_metrics()
+    except Exception as exc:
+        import traceback
+        print(f"[ERROR] /metrics failed: {exc}")
+        traceback.print_exc()
+        return jsonify({"error": str(exc)}), 500
+
+def _collect_metrics():
+    global _prev_net_io, _prev_disk_io, _prev_time
 
     now = time.time()
     elapsed = max(now - _prev_time, 0.1)
