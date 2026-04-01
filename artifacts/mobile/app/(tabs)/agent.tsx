@@ -18,22 +18,58 @@ const C = Colors.light;
 const PYTHON_AGENT = `#!/usr/bin/env python3
 """
 PC Monitor Agent - Run this on each computer you want to monitor.
-Requires: python -m pip install psutil flask flask-cors
+Install: python -m pip install psutil flask flask-cors
+Run:     python pc_agent.py
 """
-import json, os, platform, time, socket
+import os, platform, subprocess, time, socket
 import psutil
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 
+IS_WINDOWS = platform.system() == "Windows"
+IS_MAC = platform.system() == "Darwin"
+
 app = Flask(__name__)
 CORS(app)
 
-API_KEY = os.environ.get("PC_AGENT_KEY", "")  # Set for security
+API_KEY = os.environ.get("PC_AGENT_KEY", "")
 PORT = int(os.environ.get("PC_AGENT_PORT", 8765))
 
 def check_key():
     if API_KEY and request.headers.get("X-API-Key") != API_KEY:
         return jsonify({"error": "Unauthorized"}), 401
+
+def get_disk():
+    """Get primary disk usage, cross-platform."""
+    try:
+        if IS_WINDOWS:
+            return psutil.disk_usage("C:\\\\")
+        return psutil.disk_usage("/")
+    except Exception:
+        # Fallback: use first mounted partition
+        for part in psutil.disk_partitions():
+            try:
+                return psutil.disk_usage(part.mountpoint)
+            except Exception:
+                continue
+        return None
+
+def open_firewall_port(port):
+    """Automatically add Windows Firewall rule for the agent port."""
+    if not IS_WINDOWS:
+        return
+    rule_name = f"PC Agent Port {port}"
+    try:
+        subprocess.run(
+            ["netsh", "advfirewall", "firewall", "add", "rule",
+             f"name={rule_name}", "dir=in", "action=allow",
+             "protocol=TCP", f"localport={port}"],
+            capture_output=True, check=False
+        )
+        print(f"Firewall rule added for port {port} (or already exists)")
+    except Exception as e:
+        print(f"Could not add firewall rule automatically: {e}")
+        print(f"Manual fix: Run as Admin: netsh advfirewall firewall add rule name=\\"PC Agent\\" dir=in action=allow protocol=TCP localport={port}")
 
 @app.route("/metrics")
 def metrics():
@@ -41,20 +77,21 @@ def metrics():
     if auth: return auth
     cpu = psutil.cpu_percent(interval=0.5)
     ram = psutil.virtual_memory()
-    disk = psutil.disk_usage("/")
+    disk = get_disk()
     net = psutil.net_io_counters()
-    # rough net speed (sample 1s)
     time.sleep(1)
     net2 = psutil.net_io_counters()
     up = (net2.bytes_sent - net.bytes_sent) / 1024
     down = (net2.bytes_recv - net.bytes_recv) / 1024
-    temps = {}
+    temp = None
     try:
         temps = psutil.sensors_temperatures()
-    except: pass
-    temp = None
-    for k, v in temps.items():
-        if v: temp = v[0].current; break
+        for k, v in (temps or {}).items():
+            if v:
+                temp = v[0].current
+                break
+    except Exception:
+        pass
     return jsonify({
         "os": platform.system() + " " + platform.release(),
         "hostname": socket.gethostname(),
@@ -62,8 +99,8 @@ def metrics():
             "cpuUsage": cpu,
             "ramUsage": round(ram.used / 1024 / 1024),
             "ramTotal": round(ram.total / 1024 / 1024),
-            "diskUsage": round(disk.used / 1024 / 1024),
-            "diskTotal": round(disk.total / 1024 / 1024),
+            "diskUsage": round(disk.used / 1024 / 1024) if disk else 0,
+            "diskTotal": round(disk.total / 1024 / 1024) if disk else 1,
             "networkUp": round(up, 1),
             "networkDown": round(down, 1),
             "uptime": int(time.time() - psutil.boot_time()),
@@ -79,62 +116,75 @@ def command():
     data = request.json or {}
     cmd = data.get("command", "")
     args = data.get("args", [])
+
     if cmd == "shutdown":
-        os.system("shutdown /s /t 5" if platform.system()=="Windows" else "sudo shutdown -h +0")
-        return jsonify({"success": True, "output": "Shutting down..."})
+        if IS_WINDOWS:
+            subprocess.Popen("shutdown /s /t 5", shell=True)
+        elif IS_MAC:
+            subprocess.Popen("sudo shutdown -h +0", shell=True)
+        else:
+            subprocess.Popen("sudo shutdown -h +0", shell=True)
+        return jsonify({"success": True, "output": "Shutting down in 5 seconds..."})
+
     elif cmd == "restart":
-        os.system("shutdown /r /t 5" if platform.system()=="Windows" else "sudo shutdown -r +0")
-        return jsonify({"success": True, "output": "Restarting..."})
+        if IS_WINDOWS:
+            subprocess.Popen("shutdown /r /t 5", shell=True)
+        else:
+            subprocess.Popen("sudo shutdown -r +0", shell=True)
+        return jsonify({"success": True, "output": "Restarting in 5 seconds..."})
+
     elif cmd == "sleep":
-        if platform.system() == "Windows":
-            os.system("rundll32.exe powrprof.dll,SetSuspendState 0,1,0")
-        elif platform.system() == "Darwin":
-            os.system("pmset sleepnow")
+        if IS_WINDOWS:
+            subprocess.Popen("rundll32.exe powrprof.dll,SetSuspendState 0,1,0", shell=True)
+        elif IS_MAC:
+            subprocess.Popen("pmset sleepnow", shell=True)
         else:
-            os.system("systemctl suspend")
-        return jsonify({"success": True, "output": "Sleeping..."})
+            subprocess.Popen("systemctl suspend", shell=True)
+        return jsonify({"success": True, "output": "Going to sleep..."})
+
     elif cmd == "lock":
-        if platform.system() == "Windows":
-            os.system("rundll32.exe user32.dll,LockWorkStation")
-        elif platform.system() == "Darwin":
-            os.system("pmset displaysleepnow")
+        if IS_WINDOWS:
+            subprocess.Popen("rundll32.exe user32.dll,LockWorkStation", shell=True)
+        elif IS_MAC:
+            subprocess.Popen("pmset displaysleepnow", shell=True)
         else:
-            os.system("loginctl lock-session")
-        return jsonify({"success": True, "output": "Locked."})
+            subprocess.Popen("loginctl lock-session", shell=True)
+        return jsonify({"success": True, "output": "Screen locked."})
+
     elif cmd == "run" and args:
-        import subprocess
+        shell_cmd = " ".join(args)
         try:
             result = subprocess.run(
-                args, capture_output=True, text=True, timeout=30, shell=True
+                shell_cmd, capture_output=True, text=True,
+                timeout=30, shell=True
             )
-            return jsonify({
-                "success": result.returncode == 0,
-                "output": result.stdout or result.stderr
-            })
+            output = result.stdout or result.stderr or "(no output)"
+            return jsonify({"success": result.returncode == 0, "output": output})
+        except subprocess.TimeoutExpired:
+            return jsonify({"success": False, "error": "Command timed out (30s)"})
         except Exception as e:
             return jsonify({"success": False, "error": str(e)})
-    elif cmd == "volume":
-        level = args[0] if args else "50"
-        if platform.system() == "Windows":
-            # Use nircmd or PowerShell
-            os.system(f'powershell -command "(New-Object -ComObject WScript.Shell).SendKeys([char]174)"')
-        return jsonify({"success": True, "output": f"Volume set"})
-    elif cmd == "open":
-        import subprocess
+
+    elif cmd == "open" and args:
         app_name = " ".join(args)
-        if platform.system() == "Windows":
-            subprocess.Popen(["start", app_name], shell=True)
-        elif platform.system() == "Darwin":
-            subprocess.Popen(["open", "-a", app_name])
-        else:
-            subprocess.Popen([app_name])
-        return jsonify({"success": True, "output": f"Opened {app_name}"})
+        try:
+            if IS_WINDOWS:
+                subprocess.Popen(f"start {app_name}", shell=True)
+            elif IS_MAC:
+                subprocess.Popen(["open", "-a", app_name])
+            else:
+                subprocess.Popen([app_name])
+            return jsonify({"success": True, "output": f"Opened {app_name}"})
+        except Exception as e:
+            return jsonify({"success": False, "error": str(e)})
+
     return jsonify({"success": False, "error": f"Unknown command: {cmd}"})
 
 if __name__ == "__main__":
     print(f"PC Agent starting on port {PORT}")
     print(f"API Key: {'set' if API_KEY else 'not set (open access)'}")
-    app.run(host="0.0.0.0", port=PORT)
+    open_firewall_port(PORT)
+    app.run(host="0.0.0.0", port=PORT, debug=False)
 `;
 
 const STEPS = [
@@ -154,18 +204,19 @@ const STEPS = [
   {
     step: "3",
     title: "Save the agent script",
-    desc: 'Copy the script below and save it as pc_agent.py anywhere on your PC (e.g. your Desktop).',
+    desc: "Copy the script below and save it as pc_agent.py on your Desktop or Documents folder.",
   },
   {
     step: "4",
-    title: "Run the agent",
-    desc: "In Command Prompt, navigate to where you saved the file and run:",
+    title: "Run as Administrator (Windows)",
+    desc: "Right-click Command Prompt → Run as administrator. Navigate to the file and run:",
     code: "python pc_agent.py",
+    note: "Running as Admin lets the agent automatically open the firewall port so your phone can connect.",
   },
   {
     step: "5",
     title: "Find your PC's IP address",
-    desc: 'On Windows, open Command Prompt and type "ipconfig". Look for your IPv4 Address (e.g. 192.168.1.100). Your phone must be on the same Wi-Fi network.',
+    desc: 'Run ipconfig in Command Prompt and look for your IPv4 Address (e.g. 192.168.1.100). Your phone must be on the same Wi-Fi network.',
     code: "ipconfig",
   },
   {
