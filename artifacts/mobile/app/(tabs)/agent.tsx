@@ -62,7 +62,79 @@ def open_firewall_port(port):
     except Exception as e:
         print(f"Could not add firewall rule: {e}")
 
-def get_cpu_info():
+def read_hwinfo64():
+    """Read sensor data from HWiNFO64 shared memory (Windows only).
+    HWiNFO64 must be running with 'Shared Memory Support' enabled:
+    HWiNFO64 -> Settings -> HWiNFO64 -> check 'Shared Memory Support'.
+    Returns dict with 'temps' and 'fans', or None if unavailable.
+    """
+    if not IS_WINDOWS:
+        return None
+    try:
+        import ctypes, struct
+        HWINFO_SM2_KEY = "Global\\\\HWiNFO_SENS_SM2"
+        FILE_MAP_READ = 0x0004
+        k32 = ctypes.windll.kernel32
+        handle = k32.OpenFileMappingW(FILE_MAP_READ, False, HWINFO_SM2_KEY)
+        if not handle:
+            return None
+        # Read header (88 bytes) first
+        hdr_size = 88
+        ptr = k32.MapViewOfFile(handle, FILE_MAP_READ, 0, 0, hdr_size)
+        if not ptr:
+            k32.CloseHandle(handle)
+            return None
+        hdr = bytes((ctypes.c_byte * hdr_size).from_address(ptr))
+        k32.UnmapViewOfFile(ptr)
+        sig = struct.unpack_from('<I', hdr, 0)[0]
+        if sig != 0x12345678:
+            k32.CloseHandle(handle)
+            return None
+        off_sensors, size_sensor, num_sensors = struct.unpack_from('<III', hdr, 20)
+        off_readings, size_reading, num_readings = struct.unpack_from('<III', hdr, 32)
+        total = off_readings + size_reading * num_readings + 4096
+        ptr = k32.MapViewOfFile(handle, FILE_MAP_READ, 0, 0, total)
+        if not ptr:
+            k32.CloseHandle(handle)
+            return None
+        data = bytes((ctypes.c_byte * total).from_address(ptr))
+        k32.UnmapViewOfFile(ptr)
+        k32.CloseHandle(handle)
+        TEMP, FAN = 1, 3
+        temps, fans = [], []
+        for i in range(num_readings):
+            base = off_readings + i * size_reading
+            if base + size_reading > len(data):
+                break
+            r_type = struct.unpack_from('<I', data, base)[0]
+            if r_type not in (TEMP, FAN):
+                continue
+            lbl_off = base + 4 + 4 + 4 + 256  # after tReading+idx+id+szLabelOrig
+            label = data[lbl_off:lbl_off+256].decode('utf-16-le', errors='ignore').rstrip('\\x00').strip()
+            val_off = base + 4 + 4 + 4 + 256 + 256 + 32
+            if val_off + 8 > len(data):
+                continue
+            value = struct.unpack_from('<d', data, val_off)[0]
+            if r_type == TEMP and label:
+                temps.append({"label": label, "value": round(value, 1)})
+            elif r_type == FAN and value > 0 and label:
+                fans.append({"label": label, "rpm": round(value)})
+        return {"temps": temps, "fans": fans} if (temps or fans) else None
+    except Exception:
+        return None
+
+def get_cpu_temp_hwinfo(hwinfo_data):
+    """Extract CPU package temperature from HWiNFO64 data."""
+    if not hwinfo_data or not hwinfo_data.get("temps"):
+        return None
+    temps = hwinfo_data["temps"]
+    for priority in ["CPU Package", "CPU (Tctl/Tdie)", "Core (Tdie)", "CPU Tctl", "CPU"]:
+        for t in temps:
+            if priority.lower() in t["label"].lower():
+                return t["value"]
+    return None
+
+def get_cpu_info(hwinfo_data=None):
     try:
         name = platform.processor() or "Unknown CPU"
         if IS_WINDOWS:
@@ -80,6 +152,7 @@ def get_cpu_info():
         cores_physical = psutil.cpu_count(logical=False) or 1
         per_core = psutil.cpu_percent(percpu=True)
         usage_total = psutil.cpu_percent(interval=None)
+        # Try psutil temps first, then HWiNFO64 (Windows needs HWiNFO64)
         temp = None
         try:
             temps = psutil.sensors_temperatures()
@@ -89,6 +162,8 @@ def get_cpu_info():
                     break
         except Exception:
             pass
+        if temp is None:
+            temp = get_cpu_temp_hwinfo(hwinfo_data)
         return {
             "name": name,
             "coresPhysical": cores_physical,
@@ -159,7 +234,10 @@ def get_ram_info():
         return {"used": 0, "total": 0, "available": 0, "percent": 0,
                 "swapUsed": 0, "swapTotal": 0}
 
-def get_fans():
+def get_fans(hwinfo_data=None):
+    # HWiNFO64 shared memory gives the richest fan data on Windows
+    if hwinfo_data and hwinfo_data.get("fans"):
+        return hwinfo_data["fans"]
     fans = []
     try:
         data = psutil.sensors_fans()
@@ -239,10 +317,11 @@ def metrics():
     now = time.time()
     elapsed = max(now - _prev_time, 0.1)
 
-    cpu_info = get_cpu_info()
+    hwinfo_data = read_hwinfo64()
+    cpu_info = get_cpu_info(hwinfo_data)
     gpu_info = get_gpu_info()
     ram_info = get_ram_info()
-    fans = get_fans()
+    fans = get_fans(hwinfo_data)
     disks, new_disk_io = get_disks(_prev_disk_io, elapsed)
     network, new_net_io = get_network(_prev_net_io, elapsed)
 

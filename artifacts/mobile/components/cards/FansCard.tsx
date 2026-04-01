@@ -31,12 +31,26 @@ export function FansCard({ fans }: Props) {
       accentColor={ACCENT}
     >
       {fans.length === 0 ? (
-        <View style={styles.emptyRow}>
-          <Feather name="info" size={13} color={C.textMuted} />
+        <View style={styles.emptyWrap}>
+          <View style={styles.emptyRow}>
+            <Feather name="info" size={13} color={C.warning} />
+            <Text style={styles.emptyTitle}>No fan sensors detected</Text>
+          </View>
           <Text style={styles.emptyText}>
-            Fan sensors not available on this system.{"\n"}
-            Common on Windows — try HWiNFO64 for fan data.
+            To get fan speeds and CPU temps on Windows, enable{" "}
+            <Text style={styles.emptyCode}>Shared Memory Support</Text> in
+            HWiNFO64:
           </Text>
+          <View style={styles.steps}>
+            {["Open HWiNFO64 and click Settings", "Go to the HWiNFO64 tab", 'Check "Shared Memory Support"', "Restart pc_agent.py"].map(
+              (s, i) => (
+                <View key={i} style={styles.stepRow}>
+                  <View style={styles.stepDot} />
+                  <Text style={styles.stepText}>{s}</Text>
+                </View>
+              )
+            )}
+          </View>
         </View>
       ) : (
         <View style={styles.fanList}>
@@ -113,16 +127,48 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: "700",
   },
+  emptyWrap: {
+    gap: 8,
+  },
   emptyRow: {
     flexDirection: "row",
-    gap: 8,
-    alignItems: "flex-start",
-    paddingVertical: 4,
+    gap: 7,
+    alignItems: "center",
+  },
+  emptyTitle: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: C.warning,
   },
   emptyText: {
-    flex: 1,
     fontSize: 12,
-    color: C.textMuted,
+    color: C.textSecondary,
+    lineHeight: 18,
+  },
+  emptyCode: {
+    fontFamily: "Menlo, monospace",
+    color: C.text,
+    fontWeight: "600",
+  },
+  steps: {
+    gap: 5,
+    paddingLeft: 4,
+  },
+  stepRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  stepDot: {
+    width: 5,
+    height: 5,
+    borderRadius: 3,
+    backgroundColor: ACCENT,
+    flexShrink: 0,
+  },
+  stepText: {
+    fontSize: 12,
+    color: C.textSecondary,
     lineHeight: 18,
   },
 });
