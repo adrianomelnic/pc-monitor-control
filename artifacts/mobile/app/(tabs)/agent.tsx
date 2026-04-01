@@ -17,9 +17,9 @@ const C = Colors.light;
 
 const PYTHON_AGENT = `#!/usr/bin/env python3
 """
-PC Monitor Agent - Run this on each computer you want to monitor.
+PC Monitor Agent v2 - Full hardware monitoring.
 Install: python -m pip install psutil flask flask-cors
-Run:     python pc_agent.py
+Run as Admin (Windows): python pc_agent.py
 """
 import os, platform, subprocess, time, socket
 import psutil
@@ -35,27 +35,19 @@ CORS(app)
 API_KEY = os.environ.get("PC_AGENT_KEY", "")
 PORT = int(os.environ.get("PC_AGENT_PORT", 8765))
 
+# Module-level state for delta-based speed calculations
+_prev_net_io = {}
+_prev_disk_io = {}
+_prev_time = time.time()
+
+# Warm up cpu_percent (first call always returns 0)
+psutil.cpu_percent(percpu=True)
+
 def check_key():
     if API_KEY and request.headers.get("X-API-Key") != API_KEY:
         return jsonify({"error": "Unauthorized"}), 401
 
-def get_disk():
-    """Get primary disk usage, cross-platform."""
-    try:
-        if IS_WINDOWS:
-            return psutil.disk_usage("C:\\\\")
-        return psutil.disk_usage("/")
-    except Exception:
-        # Fallback: use first mounted partition
-        for part in psutil.disk_partitions():
-            try:
-                return psutil.disk_usage(part.mountpoint)
-            except Exception:
-                continue
-        return None
-
 def open_firewall_port(port):
-    """Automatically add Windows Firewall rule for the agent port."""
     if not IS_WINDOWS:
         return
     rule_name = f"PC Agent Port {port}"
@@ -68,44 +60,221 @@ def open_firewall_port(port):
         )
         print(f"Firewall rule added for port {port} (or already exists)")
     except Exception as e:
-        print(f"Could not add firewall rule automatically: {e}")
-        print(f"Manual fix: Run as Admin: netsh advfirewall firewall add rule name=\\"PC Agent\\" dir=in action=allow protocol=TCP localport={port}")
+        print(f"Could not add firewall rule: {e}")
+
+def get_cpu_info():
+    try:
+        name = platform.processor() or "Unknown CPU"
+        if IS_WINDOWS:
+            try:
+                r = subprocess.run(["wmic", "cpu", "get", "name"],
+                                   capture_output=True, text=True, timeout=3)
+                lines = [l.strip() for l in r.stdout.splitlines()
+                         if l.strip() and l.strip().lower() != "name"]
+                if lines:
+                    name = lines[0]
+            except Exception:
+                pass
+        freq = psutil.cpu_freq()
+        cores_logical = psutil.cpu_count(logical=True) or 1
+        cores_physical = psutil.cpu_count(logical=False) or 1
+        per_core = psutil.cpu_percent(percpu=True)
+        usage_total = psutil.cpu_percent(interval=None)
+        temp = None
+        try:
+            temps = psutil.sensors_temperatures()
+            for key in ["coretemp", "k10temp", "cpu_thermal", "acpitz"]:
+                if key in temps and temps[key]:
+                    temp = round(max(e.current for e in temps[key]), 1)
+                    break
+        except Exception:
+            pass
+        return {
+            "name": name,
+            "coresPhysical": cores_physical,
+            "coresLogical": cores_logical,
+            "freqCurrent": round(freq.current) if freq else 0,
+            "freqMax": round(freq.max) if freq and freq.max else 0,
+            "usageTotal": round(usage_total, 1),
+            "usagePerCore": [round(u, 1) for u in per_core],
+            "temperature": temp,
+        }
+    except Exception as e:
+        return {"name": "Unknown", "usageTotal": 0, "usagePerCore": []}
+
+def get_gpu_info():
+    gpus = []
+    try:
+        r = subprocess.run(
+            ["nvidia-smi",
+             "--query-gpu=name,utilization.gpu,memory.used,memory.total,"
+             "temperature.gpu,clocks.current.graphics,clocks.current.memory",
+             "--format=csv,noheader,nounits"],
+            capture_output=True, text=True, timeout=5
+        )
+        if r.returncode == 0:
+            for line in r.stdout.strip().splitlines():
+                p = [x.strip() for x in line.split(",")]
+                if len(p) >= 5:
+                    gpus.append({
+                        "name": p[0],
+                        "usage": float(p[1]) if p[1] not in ("N/A", "") else None,
+                        "vramUsed": int(p[2]) if p[2] not in ("N/A", "") else None,
+                        "vramTotal": int(p[3]) if p[3] not in ("N/A", "") else None,
+                        "temperature": float(p[4]) if p[4] not in ("N/A", "") else None,
+                        "clockGpu": int(p[5]) if len(p) > 5 and p[5] not in ("N/A", "") else None,
+                        "clockMem": int(p[6]) if len(p) > 6 and p[6] not in ("N/A", "") else None,
+                    })
+    except Exception:
+        pass
+    if not gpus and IS_WINDOWS:
+        try:
+            r = subprocess.run(
+                ["wmic", "path", "win32_videocontroller", "get", "name"],
+                capture_output=True, text=True, timeout=3
+            )
+            lines = [l.strip() for l in r.stdout.splitlines()
+                     if l.strip() and l.strip().lower() != "name"]
+            for n in lines:
+                gpus.append({"name": n, "usage": None, "vramUsed": None,
+                             "vramTotal": None, "temperature": None,
+                             "clockGpu": None, "clockMem": None})
+        except Exception:
+            pass
+    return gpus
+
+def get_ram_info():
+    try:
+        v = psutil.virtual_memory()
+        s = psutil.swap_memory()
+        return {
+            "used": round(v.used / 1024 / 1024),
+            "total": round(v.total / 1024 / 1024),
+            "available": round(v.available / 1024 / 1024),
+            "percent": round(v.percent, 1),
+            "swapUsed": round(s.used / 1024 / 1024),
+            "swapTotal": round(s.total / 1024 / 1024),
+        }
+    except Exception:
+        return {"used": 0, "total": 0, "available": 0, "percent": 0,
+                "swapUsed": 0, "swapTotal": 0}
+
+def get_fans():
+    fans = []
+    try:
+        data = psutil.sensors_fans()
+        if data:
+            for label, entries in data.items():
+                for e in entries:
+                    fans.append({"label": e.label or label, "rpm": e.current})
+    except Exception:
+        pass
+    return fans
+
+def get_disks(prev_io, elapsed):
+    disks = []
+    try:
+        curr_io = psutil.disk_io_counters(perdisk=True) or {}
+        for part in psutil.disk_partitions(all=False):
+            if IS_WINDOWS and "cdrom" in part.opts:
+                continue
+            try:
+                usage = psutil.disk_usage(part.mountpoint)
+                read_spd = write_spd = 0.0
+                dev_key = part.device.replace("\\\\\\\\.\\\\", "").rstrip("\\\\").rstrip(":")
+                for key in [dev_key, part.device, part.mountpoint]:
+                    if key in curr_io and prev_io and key in prev_io:
+                        read_spd = max(0, (curr_io[key].read_bytes - prev_io[key].read_bytes) / elapsed / 1024)
+                        write_spd = max(0, (curr_io[key].write_bytes - prev_io[key].write_bytes) / elapsed / 1024)
+                        break
+                disks.append({
+                    "device": part.device,
+                    "mountpoint": part.mountpoint,
+                    "fstype": part.fstype,
+                    "total": round(usage.total / 1024 / 1024),
+                    "used": round(usage.used / 1024 / 1024),
+                    "free": round(usage.free / 1024 / 1024),
+                    "percent": round(usage.percent, 1),
+                    "readSpeed": round(read_spd, 1),
+                    "writeSpeed": round(write_spd, 1),
+                })
+            except Exception:
+                continue
+        return disks, curr_io
+    except Exception:
+        return [], {}
+
+def get_network(prev_io, elapsed):
+    interfaces = []
+    try:
+        curr_io = psutil.net_io_counters(pernic=True) or {}
+        stats = psutil.net_if_stats() or {}
+        for name, s in curr_io.items():
+            if_stat = stats.get(name)
+            if not if_stat or not if_stat.isup:
+                continue
+            spd_up = spd_down = 0.0
+            if prev_io and name in prev_io:
+                spd_up = max(0, (s.bytes_sent - prev_io[name].bytes_sent) / elapsed / 1024)
+                spd_down = max(0, (s.bytes_recv - prev_io[name].bytes_recv) / elapsed / 1024)
+            interfaces.append({
+                "name": name,
+                "speedUp": round(spd_up, 1),
+                "speedDown": round(spd_down, 1),
+                "totalSent": round(s.bytes_sent / 1024 / 1024, 1),
+                "totalRecv": round(s.bytes_recv / 1024 / 1024, 1),
+                "isUp": True,
+                "speedMax": if_stat.speed if if_stat.speed > 0 else None,
+            })
+        return interfaces, curr_io
+    except Exception:
+        return [], {}
 
 @app.route("/metrics")
 def metrics():
+    global _prev_net_io, _prev_disk_io, _prev_time
     auth = check_key()
     if auth: return auth
-    cpu = psutil.cpu_percent(interval=0.5)
-    ram = psutil.virtual_memory()
-    disk = get_disk()
-    net = psutil.net_io_counters()
-    time.sleep(0.5)
-    net2 = psutil.net_io_counters()
-    up = (net2.bytes_sent - net.bytes_sent) / 1024
-    down = (net2.bytes_recv - net.bytes_recv) / 1024
-    temp = None
-    try:
-        temps = psutil.sensors_temperatures()
-        for k, v in (temps or {}).items():
-            if v:
-                temp = v[0].current
-                break
-    except Exception:
-        pass
+
+    now = time.time()
+    elapsed = max(now - _prev_time, 0.1)
+
+    cpu_info = get_cpu_info()
+    gpu_info = get_gpu_info()
+    ram_info = get_ram_info()
+    fans = get_fans()
+    disks, new_disk_io = get_disks(_prev_disk_io, elapsed)
+    network, new_net_io = get_network(_prev_net_io, elapsed)
+
+    _prev_disk_io = new_disk_io
+    _prev_net_io = new_net_io
+    _prev_time = now
+
+    # Flat fields for backward compat
+    primary_disk = disks[0] if disks else None
+    net_up = sum(i["speedUp"] for i in network)
+    net_down = sum(i["speedDown"] for i in network)
+
     return jsonify({
         "os": platform.system() + " " + platform.release(),
         "hostname": socket.gethostname(),
         "metrics": {
-            "cpuUsage": cpu,
-            "ramUsage": round(ram.used / 1024 / 1024),
-            "ramTotal": round(ram.total / 1024 / 1024),
-            "diskUsage": round(disk.used / 1024 / 1024) if disk else 0,
-            "diskTotal": round(disk.total / 1024 / 1024) if disk else 1,
-            "networkUp": round(up, 1),
-            "networkDown": round(down, 1),
+            "cpuUsage": cpu_info.get("usageTotal", 0),
+            "ramUsage": ram_info["used"],
+            "ramTotal": ram_info["total"],
+            "diskUsage": primary_disk["used"] if primary_disk else 0,
+            "diskTotal": primary_disk["total"] if primary_disk else 1,
+            "networkUp": round(net_up, 1),
+            "networkDown": round(net_down, 1),
             "uptime": int(time.time() - psutil.boot_time()),
-            "temperature": temp,
+            "temperature": cpu_info.get("temperature"),
             "processes": len(psutil.pids()),
+            "cpu": cpu_info,
+            "gpu": gpu_info,
+            "ram": ram_info,
+            "fans": fans,
+            "disks": disks,
+            "network": network,
         }
     })
 

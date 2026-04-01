@@ -8,7 +8,68 @@ import React, {
   useState,
 } from "react";
 
+// ─── Detailed component types ─────────────────────────────────────────────────
+
+export interface CPUInfo {
+  name: string;
+  coresPhysical: number;
+  coresLogical: number;
+  freqCurrent: number;
+  freqMax: number;
+  usageTotal: number;
+  usagePerCore: number[];
+  temperature?: number;
+}
+
+export interface GPUInfo {
+  name: string;
+  usage: number | null;
+  vramUsed: number | null;
+  vramTotal: number | null;
+  temperature?: number | null;
+  clockGpu?: number | null;
+  clockMem?: number | null;
+}
+
+export interface RAMInfo {
+  used: number;
+  total: number;
+  available: number;
+  percent: number;
+  swapUsed: number;
+  swapTotal: number;
+}
+
+export interface FanInfo {
+  label: string;
+  rpm: number;
+}
+
+export interface DiskInfo {
+  device: string;
+  mountpoint: string;
+  fstype: string;
+  total: number;
+  used: number;
+  free: number;
+  percent: number;
+  readSpeed: number;
+  writeSpeed: number;
+  temperature?: number | null;
+}
+
+export interface NetworkInterface {
+  name: string;
+  speedUp: number;
+  speedDown: number;
+  totalSent: number;
+  totalRecv: number;
+  isUp: boolean;
+  speedMax?: number | null;
+}
+
 export interface PCMetrics {
+  // Flat fields (home card)
   cpuUsage: number;
   ramUsage: number;
   ramTotal: number;
@@ -19,6 +80,13 @@ export interface PCMetrics {
   uptime: number;
   temperature?: number;
   processes?: number;
+  // Detailed per-component
+  cpu?: CPUInfo;
+  gpu?: GPUInfo[];
+  ram?: RAMInfo;
+  fans?: FanInfo[];
+  disks?: DiskInfo[];
+  network?: NetworkInterface[];
 }
 
 export interface PC {
@@ -48,10 +116,8 @@ interface PcsContextType {
 }
 
 const PcsContext = createContext<PcsContextType>({} as PcsContextType);
-
 const STORAGE_KEY = "pcs_v1";
 
-/** React-Native-compatible fetch with timeout using AbortController */
 function fetchWithTimeout(
   url: string,
   options: RequestInit,
@@ -87,54 +153,31 @@ export function PcsProvider({ children }: { children: React.ReactNode }) {
   const buildUrl = (pc: PC, path: string) =>
     `http://${pc.host}:${pc.port}${path}`;
 
-  const fetchMetrics = useCallback(
-    async (pc: PC): Promise<Partial<PC>> => {
-      try {
-        const headers: Record<string, string> = {
-          "Content-Type": "application/json",
-        };
-        if (pc.apiKey) headers["X-API-Key"] = pc.apiKey;
+  const fetchMetrics = useCallback(async (pc: PC): Promise<Partial<PC>> => {
+    try {
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+      if (pc.apiKey) headers["X-API-Key"] = pc.apiKey;
 
-        // 10s timeout — the metrics endpoint takes ~1s to sample network speed
-        const res = await fetchWithTimeout(
-          buildUrl(pc, "/metrics"),
-          { headers },
-          10000
-        );
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
-        return {
-          status: "online",
-          metrics: data.metrics,
-          os: data.os,
-          lastSeen: new Date(),
-        };
-      } catch (e: any) {
-        return { status: "offline" };
-      }
-    },
-    []
-  );
+      const res = await fetchWithTimeout(
+        buildUrl(pc, "/metrics"),
+        { headers },
+        12000
+      );
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      return {
+        status: "online",
+        metrics: data.metrics,
+        os: data.os,
+        lastSeen: new Date(),
+      };
+    } catch {
+      return { status: "offline" };
+    }
+  }, []);
 
-  const refreshPc = useCallback(
-    async (id: string) => {
-      setPcs((prev) => {
-        const pc = prev.find((p) => p.id === id);
-        if (!pc) return prev;
-        fetchMetrics(pc).then((updates) => {
-          setPcs((cur) =>
-            cur.map((p) => (p.id === id ? { ...p, ...updates } : p))
-          );
-        });
-        return prev.map((p) =>
-          p.id === id ? { ...p, status: "connecting" } : p
-        );
-      });
-    },
-    [fetchMetrics]
-  );
-
-  /** Silent background poll — never flashes "Connecting..." */
   const pollAll = useCallback(() => {
     setPcs((prev) => {
       prev.forEach((pc) => {
@@ -144,11 +187,10 @@ export function PcsProvider({ children }: { children: React.ReactNode }) {
           );
         });
       });
-      return prev; // don't change status during background poll
+      return prev;
     });
   }, [fetchMetrics]);
 
-  /** Manual refresh — shows "Connecting..." spinner */
   const refreshAll = useCallback(async () => {
     setPcs((prev) => {
       prev.forEach((pc) => {
@@ -164,8 +206,8 @@ export function PcsProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (pcs.length === 0) return;
-    pollAll(); // silent initial poll on mount
-    pollingRef.current = setInterval(pollAll, 12000); // silent background polling
+    pollAll();
+    pollingRef.current = setInterval(pollAll, 12000);
     return () => {
       if (pollingRef.current) clearInterval(pollingRef.current);
     };
@@ -224,24 +266,17 @@ export function PcsProvider({ children }: { children: React.ReactNode }) {
     ): Promise<{ success: boolean; output?: string; error?: string }> => {
       const pc = pcs.find((p) => p.id === id);
       if (!pc) return { success: false, error: "PC not found" };
-
       try {
         const headers: Record<string, string> = {
           "Content-Type": "application/json",
         };
         if (pc.apiKey) headers["X-API-Key"] = pc.apiKey;
-
         const res = await fetchWithTimeout(
           buildUrl(pc, "/command"),
-          {
-            method: "POST",
-            headers,
-            body: JSON.stringify({ command, args }),
-          },
+          { method: "POST", headers, body: JSON.stringify({ command, args }) },
           20000
         );
-        const data = await res.json();
-        return data;
+        return await res.json();
       } catch (e: any) {
         return { success: false, error: e?.message || "Connection failed" };
       }
@@ -251,7 +286,16 @@ export function PcsProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <PcsContext.Provider
-      value={{ pcs, addPc, removePc, updatePc, refreshPc, refreshAll, sendCommand }}
+      value={{ pcs, addPc, removePc, updatePc, refreshPc: async (id) => {
+        setPcs((prev) => {
+          const pc = prev.find((p) => p.id === id);
+          if (!pc) return prev;
+          fetchMetrics(pc).then((updates) => {
+            setPcs((cur) => cur.map((p) => (p.id === id ? { ...p, ...updates } : p)));
+          });
+          return prev.map((p) => p.id === id ? { ...p, status: "connecting" } : p);
+        });
+      }, refreshAll, sendCommand }}
     >
       {children}
     </PcsContext.Provider>

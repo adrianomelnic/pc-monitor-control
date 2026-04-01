@@ -15,17 +15,16 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { CommandButton } from "@/components/CommandButton";
-import { MetricRing } from "@/components/MetricRing";
-import { StatBar } from "@/components/StatBar";
+import { CPUCard } from "@/components/cards/CPUCard";
+import { DisksCard } from "@/components/cards/DisksCard";
+import { FansCard } from "@/components/cards/FansCard";
+import { GPUCard } from "@/components/cards/GPUCard";
+import { NetworkCard } from "@/components/cards/NetworkCard";
+import { RAMCard } from "@/components/cards/RAMCard";
 import Colors from "@/constants/colors";
 import { usePcs } from "@/context/PcsContext";
 
 const C = Colors.light;
-
-function formatBytes(mb: number) {
-  if (mb >= 1024) return `${(mb / 1024).toFixed(1)} GB`;
-  return `${Math.round(mb)} MB`;
-}
 
 function formatUptime(seconds: number) {
   const d = Math.floor(seconds / 86400);
@@ -66,18 +65,18 @@ export default function PCDetailScreen() {
     setRefreshing(false);
   };
 
-  const confirmAction = (title: string, message: string, action: () => void) => {
-    Alert.alert(title, message, [
-      { text: "Cancel", style: "cancel" },
-      { text: title, style: "destructive", onPress: action },
-    ]);
-  };
-
   const handleRemove = () => {
-    confirmAction("Remove PC", `Remove "${pc.name}" from your list?`, () => {
-      removePc(pc.id);
-      router.back();
-    });
+    Alert.alert("Remove PC", `Remove "${pc.name}" from your list?`, [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Remove",
+        style: "destructive",
+        onPress: () => {
+          removePc(pc.id);
+          router.back();
+        },
+      },
+    ]);
   };
 
   const runCommand = async () => {
@@ -105,7 +104,7 @@ export default function PCDetailScreen() {
   return (
     <ScrollView
       style={[styles.root, { paddingTop: topPad }]}
-      contentContainerStyle={{ paddingBottom: 80 + bottomPad }}
+      contentContainerStyle={[styles.content, { paddingBottom: 80 + bottomPad }]}
       showsVerticalScrollIndicator={false}
       refreshControl={
         <RefreshControl
@@ -132,9 +131,7 @@ export default function PCDetailScreen() {
                 ? "Connecting..."
                 : "Offline"}
             </Text>
-            {pc.os ? (
-              <Text style={styles.osText}> · {pc.os}</Text>
-            ) : null}
+            {pc.os ? <Text style={styles.osText}> · {pc.os}</Text> : null}
           </View>
         </View>
         <Pressable onPress={handleRemove} hitSlop={8}>
@@ -142,12 +139,10 @@ export default function PCDetailScreen() {
         </Pressable>
       </View>
 
-      {/* Host info */}
+      {/* Host + last updated */}
       <View style={styles.hostRow}>
         <Feather name="wifi" size={12} color={C.textMuted} />
-        <Text style={styles.hostText}>
-          {pc.host}:{pc.port}
-        </Text>
+        <Text style={styles.hostText}>{pc.host}:{pc.port}</Text>
         {pc.lastSeen ? (
           <Text style={styles.lastSeen}>
             · Updated {new Date(pc.lastSeen).toLocaleTimeString()}
@@ -155,94 +150,8 @@ export default function PCDetailScreen() {
         ) : null}
       </View>
 
-      {/* Rings */}
-      {m && pc.status === "online" ? (
-        <>
-          <View style={styles.section}>
-            <View style={styles.rings}>
-              <MetricRing value={m.cpuUsage} label="CPU" size={90} />
-              <MetricRing
-                value={(m.ramUsage / m.ramTotal) * 100}
-                label="RAM"
-                sublabel={`${formatBytes(m.ramUsage)}`}
-                color="#A78BFA"
-                size={90}
-              />
-              <MetricRing
-                value={(m.diskUsage / m.diskTotal) * 100}
-                label="Disk"
-                sublabel={`${formatBytes(m.diskUsage)}`}
-                color="#34D399"
-                size={90}
-              />
-            </View>
-          </View>
-
-          {/* Stats */}
-          <View style={styles.card}>
-            <Text style={styles.sectionTitle}>System Details</Text>
-            <View style={styles.statsGrid}>
-              <View style={styles.statItem}>
-                <Text style={styles.statLabel}>Uptime</Text>
-                <Text style={styles.statValue}>{formatUptime(m.uptime)}</Text>
-              </View>
-              <View style={styles.statItem}>
-                <Text style={styles.statLabel}>Processes</Text>
-                <Text style={styles.statValue}>{m.processes ?? "—"}</Text>
-              </View>
-              {m.temperature != null && (
-                <View style={styles.statItem}>
-                  <Text style={styles.statLabel}>Temp</Text>
-                  <Text
-                    style={[
-                      styles.statValue,
-                      {
-                        color:
-                          m.temperature > 85
-                            ? C.danger
-                            : m.temperature > 70
-                            ? C.warning
-                            : C.text,
-                      },
-                    ]}
-                  >
-                    {Math.round(m.temperature)}°C
-                  </Text>
-                </View>
-              )}
-              <View style={styles.statItem}>
-                <Text style={styles.statLabel}>Net Up</Text>
-                <Text style={styles.statValue}>
-                  {m.networkUp.toFixed(0)} KB/s
-                </Text>
-              </View>
-              <View style={styles.statItem}>
-                <Text style={styles.statLabel}>Net Down</Text>
-                <Text style={styles.statValue}>
-                  {m.networkDown.toFixed(0)} KB/s
-                </Text>
-              </View>
-            </View>
-
-            <View style={{ gap: 12, marginTop: 12 }}>
-              <StatBar
-                label="RAM"
-                value={m.ramUsage}
-                max={m.ramTotal}
-                unit=" MB"
-                color="#A78BFA"
-              />
-              <StatBar
-                label="Disk"
-                value={m.diskUsage}
-                max={m.diskTotal}
-                unit=" MB"
-                color="#34D399"
-              />
-            </View>
-          </View>
-        </>
-      ) : pc.status !== "online" ? (
+      {/* ── OFFLINE STATE ── */}
+      {pc.status !== "online" && (
         <View style={styles.offlineCard}>
           <Feather
             name={pc.status === "connecting" ? "loader" : "wifi-off"}
@@ -261,9 +170,64 @@ export default function PCDetailScreen() {
             <Text style={styles.retryBtnText}>Retry</Text>
           </Pressable>
         </View>
-      ) : null}
+      )}
 
-      {/* Controls */}
+      {/* ── SYSTEM SUMMARY BAR ── */}
+      {m && pc.status === "online" && (
+        <View style={styles.summaryBar}>
+          {m.uptime != null && (
+            <View style={styles.summaryItem}>
+              <Feather name="clock" size={11} color={C.textMuted} />
+              <Text style={styles.summaryLabel}>Uptime</Text>
+              <Text style={styles.summaryValue}>{formatUptime(m.uptime)}</Text>
+            </View>
+          )}
+          {m.processes != null && (
+            <View style={styles.summaryItem}>
+              <Feather name="layers" size={11} color={C.textMuted} />
+              <Text style={styles.summaryLabel}>Processes</Text>
+              <Text style={styles.summaryValue}>{m.processes}</Text>
+            </View>
+          )}
+          {m.temperature != null && (
+            <View style={styles.summaryItem}>
+              <Feather name="thermometer" size={11} color={C.textMuted} />
+              <Text style={styles.summaryLabel}>Temp</Text>
+              <Text
+                style={[
+                  styles.summaryValue,
+                  {
+                    color:
+                      m.temperature > 85
+                        ? C.danger
+                        : m.temperature > 70
+                        ? C.warning
+                        : C.success,
+                  },
+                ]}
+              >
+                {Math.round(m.temperature)}°C
+              </Text>
+            </View>
+          )}
+        </View>
+      )}
+
+      {/* ── COMPONENT CARDS ── */}
+      {m && pc.status === "online" && (
+        <>
+          {m.cpu && <CPUCard cpu={m.cpu} />}
+          {m.gpu && <GPUCard gpus={m.gpu} />}
+          {m.ram && <RAMCard ram={m.ram} />}
+          {m.fans != null && <FansCard fans={m.fans} />}
+          {m.disks && m.disks.length > 0 && <DisksCard disks={m.disks} />}
+          {m.network && m.network.length > 0 && (
+            <NetworkCard interfaces={m.network} />
+          )}
+        </>
+      )}
+
+      {/* ── CONTROLS ── */}
       <View style={styles.card}>
         <Text style={styles.sectionTitle}>Controls</Text>
         <View style={styles.controlGrid}>
@@ -340,7 +304,7 @@ export default function PCDetailScreen() {
         </View>
       </View>
 
-      {/* Terminal */}
+      {/* ── TERMINAL ── */}
       <View style={styles.card}>
         <Text style={styles.sectionTitle}>Run Command</Text>
         <View style={styles.terminalInput}>
@@ -375,10 +339,7 @@ export default function PCDetailScreen() {
             horizontal
             showsHorizontalScrollIndicator={false}
           >
-            <ScrollView
-              style={{ maxHeight: 200 }}
-              showsVerticalScrollIndicator={false}
-            >
+            <ScrollView style={{ maxHeight: 200 }} showsVerticalScrollIndicator={false}>
               <Text style={styles.outputText}>{cmdOutput}</Text>
             </ScrollView>
           </ScrollView>
@@ -393,6 +354,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: C.background,
   },
+  content: {
+    gap: 12,
+    paddingHorizontal: 16,
+    paddingTop: 0,
+  },
   notFound: {
     color: C.text,
     textAlign: "center",
@@ -402,8 +368,8 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingTop: 4,
+    paddingBottom: 2,
     gap: 12,
   },
   backBtn: {
@@ -444,8 +410,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    paddingHorizontal: 16,
-    paddingBottom: 12,
+    marginTop: -4,
   },
   hostText: {
     fontSize: 12,
@@ -456,22 +421,34 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: C.textMuted,
   },
-  section: {
-    paddingHorizontal: 16,
-    marginBottom: 12,
-  },
-  rings: {
+  summaryBar: {
     flexDirection: "row",
-    justifyContent: "space-around",
     backgroundColor: C.card,
-    borderRadius: 16,
+    borderRadius: 14,
     borderWidth: 1,
     borderColor: C.cardBorder,
-    padding: 20,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    gap: 0,
+  },
+  summaryItem: {
+    flex: 1,
+    alignItems: "center",
+    gap: 3,
+  },
+  summaryLabel: {
+    fontSize: 10,
+    color: C.textMuted,
+    fontWeight: "600",
+    letterSpacing: 0.5,
+    textTransform: "uppercase",
+  },
+  summaryValue: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: C.text,
   },
   card: {
-    marginHorizontal: 16,
-    marginBottom: 12,
     backgroundColor: C.card,
     borderRadius: 16,
     borderWidth: 1,
@@ -480,30 +457,11 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   sectionTitle: {
-    fontSize: 13,
-    fontWeight: "700",
-    color: C.textSecondary,
-    letterSpacing: 0.5,
-    textTransform: "uppercase",
-  },
-  statsGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 16,
-  },
-  statItem: {
-    minWidth: 80,
-  },
-  statLabel: {
     fontSize: 11,
-    color: C.textMuted,
-    fontWeight: "500",
-  },
-  statValue: {
-    fontSize: 15,
     fontWeight: "700",
-    color: C.text,
-    marginTop: 2,
+    color: C.textMuted,
+    letterSpacing: 1,
+    textTransform: "uppercase",
   },
   controlGrid: {
     flexDirection: "row",
@@ -511,7 +469,6 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   offlineCard: {
-    margin: 16,
     backgroundColor: C.card,
     borderRadius: 16,
     borderWidth: 1,
@@ -532,7 +489,7 @@ const styles = StyleSheet.create({
   },
   retryBtn: {
     marginTop: 8,
-    backgroundColor: C.card,
+    backgroundColor: C.backgroundSecondary,
     borderWidth: 1,
     borderColor: C.cardBorder,
     borderRadius: 10,
