@@ -175,14 +175,17 @@ def read_hwinfo64():
             LBL_BYTES = 256; VAL_OFF_BASE = 12 + 256 + 256 + 32   # fallback
 
         def _label(raw):
-            """Decode label: UTF-16-LE if odd bytes are mostly null, else ASCII."""
-            sample = raw[:min(40, len(raw))]
-            null_odd = sum(1 for j in range(1, len(sample), 2) if sample[j] == 0)
-            if null_odd >= len(sample) // 4:
-                return raw.decode('utf-16-le', errors='ignore').rstrip('\\x00').strip()
-            null_pos = raw.find(b'\\x00')
-            chunk = raw[:null_pos] if null_pos >= 0 else raw
-            return chunk.decode('utf-8', errors='replace').replace('\\ufffd', '').strip()
+            """Decode label: byte[1]==0 means UTF-16-LE (ASCII stored wide), else Latin-1."""
+            if len(raw) < 2 or raw[0] == 0:
+                return ""
+            if raw[1] == 0:
+                # High byte of first char is null → UTF-16-LE (old HWiNFO format)
+                s = raw.decode('utf-16-le', errors='ignore')
+                cut = s.find('\\x00')
+                return (s[:cut] if cut >= 0 else s).strip()
+            # Non-null second byte → ASCII / Latin-1 (new HWiNFO v7+ format)
+            cut = raw.find(b'\\x00')
+            return (raw[:cut] if cut >= 0 else raw).decode('latin-1').strip()
 
         TEMP, FAN = 1, 3
         temps, fans = [], []
@@ -586,13 +589,14 @@ def hwinfo_debug():
             LBL_BYTES = 256; VAL_OFF_BASE = 12 + 256 + 256 + 32
 
         def _lbl(raw):
-            sample = raw[:min(40, len(raw))]
-            null_odd = sum(1 for j in range(1, len(sample), 2) if sample[j] == 0)
-            if null_odd >= len(sample) // 4:
-                return raw.decode('utf-16-le', errors='ignore').rstrip('\\x00').strip()
-            null_pos = raw.find(b'\\x00')
-            chunk = raw[:null_pos] if null_pos >= 0 else raw
-            return chunk.decode('utf-8', errors='replace').replace('\\ufffd', '').strip()
+            if len(raw) < 2 or raw[0] == 0:
+                return ""
+            if raw[1] == 0:
+                s = raw.decode('utf-16-le', errors='ignore')
+                cut = s.find('\\x00')
+                return (s[:cut] if cut >= 0 else s).strip()
+            cut = raw.find(b'\\x00')
+            return (raw[:cut] if cut >= 0 else raw).decode('latin-1').strip()
 
         # Hex dump of first element for diagnosis
         first_base = off_readings
