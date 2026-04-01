@@ -1,0 +1,120 @@
+#!/usr/bin/env python3
+"""
+PC Monitor Agent - Run this on each computer you want to monitor.
+Requires: python -m pip install psutil flask flask-cors
+"""
+import json, os, platform, time, socket
+import psutil
+from flask import Flask, jsonify, request
+from flask_cors import CORS
+
+app = Flask(__name__)
+CORS(app)
+
+API_KEY = os.environ.get("PC_AGENT_KEY", "")  # Set for security
+PORT = int(os.environ.get("PC_AGENT_PORT", 8765))
+
+def check_key():
+    if API_KEY and request.headers.get("X-API-Key") != API_KEY:
+        return jsonify({"error": "Unauthorized"}), 401
+
+@app.route("/metrics")
+def metrics():
+    auth = check_key()
+    if auth: return auth
+    cpu = psutil.cpu_percent(interval=0.5)
+    ram = psutil.virtual_memory()
+    disk = psutil.disk_usage("/")
+    net = psutil.net_io_counters()
+    # rough net speed (sample 1s)
+    time.sleep(1)
+    net2 = psutil.net_io_counters()
+    up = (net2.bytes_sent - net.bytes_sent) / 1024
+    down = (net2.bytes_recv - net.bytes_recv) / 1024
+    temps = {}
+    try:
+        temps = psutil.sensors_temperatures()
+    except: pass
+    temp = None
+    for k, v in temps.items():
+        if v: temp = v[0].current; break
+    return jsonify({
+        "os": platform.system() + " " + platform.release(),
+        "hostname": socket.gethostname(),
+        "metrics": {
+            "cpuUsage": cpu,
+            "ramUsage": round(ram.used / 1024 / 1024),
+            "ramTotal": round(ram.total / 1024 / 1024),
+            "diskUsage": round(disk.used / 1024 / 1024),
+            "diskTotal": round(disk.total / 1024 / 1024),
+            "networkUp": round(up, 1),
+            "networkDown": round(down, 1),
+            "uptime": int(time.time() - psutil.boot_time()),
+            "temperature": temp,
+            "processes": len(psutil.pids()),
+        }
+    })
+
+@app.route("/command", methods=["POST"])
+def command():
+    auth = check_key()
+    if auth: return auth
+    data = request.json or {}
+    cmd = data.get("command", "")
+    args = data.get("args", [])
+    if cmd == "shutdown":
+        os.system("shutdown /s /t 5" if platform.system()=="Windows" else "sudo shutdown -h +0")
+        return jsonify({"success": True, "output": "Shutting down..."})
+    elif cmd == "restart":
+        os.system("shutdown /r /t 5" if platform.system()=="Windows" else "sudo shutdown -r +0")
+        return jsonify({"success": True, "output": "Restarting..."})
+    elif cmd == "sleep":
+        if platform.system() == "Windows":
+            os.system("rundll32.exe powrprof.dll,SetSuspendState 0,1,0")
+        elif platform.system() == "Darwin":
+            os.system("pmset sleepnow")
+        else:
+            os.system("systemctl suspend")
+        return jsonify({"success": True, "output": "Sleeping..."})
+    elif cmd == "lock":
+        if platform.system() == "Windows":
+            os.system("rundll32.exe user32.dll,LockWorkStation")
+        elif platform.system() == "Darwin":
+            os.system("pmset displaysleepnow")
+        else:
+            os.system("loginctl lock-session")
+        return jsonify({"success": True, "output": "Locked."})
+    elif cmd == "run" and args:
+        import subprocess
+        try:
+            result = subprocess.run(
+                args, capture_output=True, text=True, timeout=30, shell=True
+            )
+            return jsonify({
+                "success": result.returncode == 0,
+                "output": result.stdout or result.stderr
+            })
+        except Exception as e:
+            return jsonify({"success": False, "error": str(e)})
+    elif cmd == "volume":
+        level = args[0] if args else "50"
+        if platform.system() == "Windows":
+            # Use nircmd or PowerShell
+            os.system(f'powershell -command "(New-Object -ComObject WScript.Shell).SendKeys([char]174)"')
+        return jsonify({"success": True, "output": f"Volume set"})
+    elif cmd == "open":
+        import subprocess
+        app_name = " ".join(args)
+        if platform.system() == "Windows":
+            subprocess.Popen(["start", app_name], shell=True)
+        elif platform.system() == "Darwin":
+            subprocess.Popen(["open", "-a", app_name])
+        else:
+            subprocess.Popen([app_name])
+        return jsonify({"success": True, "output": f"Opened {app_name}"})
+    return jsonify({"success": False, "error": f"Unknown command: {cmd}"})
+
+if __name__ == "__main__":
+    print(f"PC Agent starting on port {PORT}")
+    print(f"API Key: {'set' if API_KEY else 'not set (open access)'}")
+    app.run(host="0.0.0.0", port=PORT)
