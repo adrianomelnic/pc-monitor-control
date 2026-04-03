@@ -117,7 +117,10 @@ export function CompactSensorPicker({
   useEffect(() => {
     if (visible) {
       setSearch("");
-      setCollapsed(new Set());
+      const allGroups = groupSensors(
+        sensors.filter((s) => !excludeLabels.includes(s.label))
+      );
+      setCollapsed(new Set(allGroups.map((g) => g.comp)));
     }
   }, [visible]);
 
