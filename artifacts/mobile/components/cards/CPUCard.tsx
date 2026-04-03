@@ -109,16 +109,16 @@ export function CPUCard({ cpu, titleEdit, cardEdit }: Props) {
       {showPerCoreVertical && (
         <View style={styles.belowSection}>
           <Text style={styles.sectionLabel}>{getLabel("perCoreVertical", "PER CORE")}</Text>
-          <View style={styles.coreVerticalList}>
+          <View style={styles.verticalChartRow}>
             {cores.map((val, i) => {
               const barColor = val > 85 ? "#FF4444" : val > 65 ? "#FFB800" : ACCENT;
+              const fillH = Math.max((val / 100) * 52, 2);
               return (
-                <View key={i} style={styles.coreVerticalRow}>
-                  <Text style={styles.coreVerticalLabel}>C{i}</Text>
-                  <View style={styles.coreVerticalBar}>
-                    <MiniBar value={val} color={ACCENT} height={5} />
+                <View key={i} style={styles.verticalBarCol}>
+                  <View style={styles.verticalBarTrack}>
+                    <View style={[styles.verticalBarFill, { height: fillH, backgroundColor: barColor }]} />
                   </View>
-                  <Text style={[styles.coreVerticalPct, { color: barColor }]}>{Math.round(val)}%</Text>
+                  <Text style={styles.verticalBarNum}>{i}</Text>
                 </View>
               );
             })}
@@ -203,28 +203,32 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: "700",
   },
-  coreVerticalList: {
-    gap: 5,
-  },
-  coreVerticalRow: {
+  verticalChartRow: {
     flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
+    alignItems: "flex-end",
+    gap: 2,
   },
-  coreVerticalLabel: {
-    fontSize: 10,
+  verticalBarCol: {
+    flex: 1,
+    alignItems: "center",
+    gap: 3,
+  },
+  verticalBarTrack: {
+    width: "100%",
+    height: 52,
+    justifyContent: "flex-end",
+    backgroundColor: C.textMuted + "22",
+    borderRadius: 3,
+    overflow: "hidden",
+  },
+  verticalBarFill: {
+    width: "100%",
+    borderRadius: 2,
+  },
+  verticalBarNum: {
+    fontSize: 8,
     color: C.textMuted,
     fontWeight: "600",
-    width: 20,
-  },
-  coreVerticalBar: {
-    flex: 1,
-  },
-  coreVerticalPct: {
-    fontSize: 10,
-    fontWeight: "700",
-    width: 32,
-    textAlign: "right",
   },
   cpuBarHeader: {
     flexDirection: "row",
