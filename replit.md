@@ -6,6 +6,7 @@ iOS/Android Expo app that connects directly to PC agents over local WiFi (HTTP p
 ## Key Features
 - Real-time CPU, GPU, RAM, Fan, Disk, Network monitoring via HWiNFO64
 - **Editable dashboard**: show/hide built-in cards, reorder them, add custom sensor cards
+- **Built-in card editing**: long-press any card to rename, toggle individual fields/sensors, hide fans/disks/interfaces, add any HWiNFO64 sensor as extra rows
 - Custom sensor cards: pick any HWiNFO64 sensor (temp, voltage, power, clock, fan, usage…)
 - PC controls: Sleep, Lock, Restart, Shutdown, remote terminal
 - Per-PC layout persisted in AsyncStorage (survives app restarts)

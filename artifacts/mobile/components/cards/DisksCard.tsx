@@ -2,7 +2,7 @@ import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import Colors from "@/constants/colors";
 import { DiskInfo } from "@/context/PcsContext";
-import { CardBase, CardTitleEditConfig, MiniBar, TempBadge } from "./CardBase";
+import { BuiltinCardEdit, CardBase, CardTitleEditConfig, MiniBar, TempBadge } from "./CardBase";
 
 const C = Colors.light;
 const ACCENT = "#2DD4BF";
@@ -20,16 +20,19 @@ function fmtSpeed(kbs: number) {
 interface Props {
   disks: DiskInfo[];
   titleEdit?: CardTitleEditConfig;
+  cardEdit?: BuiltinCardEdit;
 }
 
-export function DisksCard({ disks, titleEdit }: Props) {
+export function DisksCard({ disks, titleEdit, cardEdit }: Props) {
   if (!disks || disks.length === 0) return null;
+  const hidden = new Set(cardEdit?.hiddenFields ?? []);
+  const visibleDisks = disks.filter((d) => !hidden.has(d.device || d.mountpoint));
 
   return (
     <CardBase
       icon="hard-drive"
       title={titleEdit?.customTitle ?? "Storage"}
-      subtitle={`${disks.length} volume${disks.length > 1 ? "s" : ""}`}
+      subtitle={`${visibleDisks.length} volume${visibleDisks.length !== 1 ? "s" : ""}`}
       accentColor={ACCENT}
       titleEditable={titleEdit?.editable}
       titleDraft={titleEdit?.draft}
@@ -37,9 +40,11 @@ export function DisksCard({ disks, titleEdit }: Props) {
       onTitleSubmit={titleEdit?.onSubmit}
       rightAction={titleEdit?.rightAction}
       style={titleEdit?.borderStyle}
+      extraSensorRows={cardEdit?.extraSensorRows}
+      editPanel={cardEdit?.editPanel}
     >
       <View style={styles.diskList}>
-        {disks.map((disk, i) => {
+        {visibleDisks.map((disk, i) => {
           const label = disk.device.replace(/\\\\.\\/, "").replace(/\/$/, "") || disk.mountpoint;
           const diskColor = disk.percent > 85 ? "#FF4444" : disk.percent > 65 ? "#FFB800" : ACCENT;
 

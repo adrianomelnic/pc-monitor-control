@@ -21,7 +21,7 @@ const C = Colors.light;
 
 // ─── Formatting helpers ───────────────────────────────────────────────────────
 
-function formatValue(s: SensorReading): string {
+export function formatValue(s: SensorReading): string {
   switch (s.type) {
     case "temperature": return `${s.value.toFixed(1)} °C`;
     case "fan":         return `${Math.round(s.value)} RPM`;
@@ -69,7 +69,7 @@ function pickFeatured(sensors: SensorReading[]): SensorReading | null {
   return sensors[0] ?? null;
 }
 
-const TYPE_BADGE: Record<string, string> = {
+export const TYPE_BADGE: Record<string, string> = {
   temperature: "°C",
   fan: "RPM",
   voltage: "V",
@@ -79,7 +79,7 @@ const TYPE_BADGE: Record<string, string> = {
   clock: "MHz",
 };
 
-function groupSensors(sensors: SensorReading[]): { comp: string; items: SensorReading[] }[] {
+export function groupSensors(sensors: SensorReading[]): { comp: string; items: SensorReading[] }[] {
   const map = new Map<string, SensorReading[]>();
   for (const s of sensors) {
     const comp = s.component || "Other";
@@ -101,7 +101,7 @@ interface CompactPickerProps {
   onClose: () => void;
 }
 
-function CompactSensorPicker({
+export function CompactSensorPicker({
   visible,
   title,
   accentColor,

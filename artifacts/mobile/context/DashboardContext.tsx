@@ -16,6 +16,8 @@ export interface BuiltinCardConfig {
   kind: BuiltinCardKind;
   visible: boolean;
   customTitle?: string;
+  extraSensors?: string[];
+  hiddenFields?: string[];
 }
 
 export interface CustomCardConfig {
@@ -58,7 +60,7 @@ interface DashboardContextType {
     cardId: string,
     updates: Partial<Pick<CustomCardConfig, "title" | "sensorLabels" | "accentColor" | "icon" | "sensorAliases">>
   ) => void;
-  updateBuiltinCard: (pcId: string, cardId: BuiltinCardKind, updates: { customTitle?: string }) => void;
+  updateBuiltinCard: (pcId: string, cardId: BuiltinCardKind, updates: { customTitle?: string; extraSensors?: string[]; hiddenFields?: string[] }) => void;
 }
 
 const DashboardContext = createContext<DashboardContextType>({} as DashboardContextType);

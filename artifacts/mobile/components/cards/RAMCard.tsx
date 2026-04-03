@@ -2,7 +2,7 @@ import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import Colors from "@/constants/colors";
 import { RAMInfo } from "@/context/PcsContext";
-import { CardBase, CardTitleEditConfig, MiniBar, StatRow } from "./CardBase";
+import { BuiltinCardEdit, CardBase, CardTitleEditConfig, MiniBar, StatRow } from "./CardBase";
 
 const C = Colors.light;
 const ACCENT = "#A78BFA";
@@ -15,13 +15,15 @@ function fmtMB(mb: number) {
 interface Props {
   ram: RAMInfo;
   titleEdit?: CardTitleEditConfig;
+  cardEdit?: BuiltinCardEdit;
 }
 
-export function RAMCard({ ram, titleEdit }: Props) {
+export function RAMCard({ ram, titleEdit, cardEdit }: Props) {
   const usedColor =
     ram.percent > 85 ? "#FF4444" : ram.percent > 65 ? "#FFB800" : ACCENT;
   const swapPct =
     ram.swapTotal > 0 ? (ram.swapUsed / ram.swapTotal) * 100 : 0;
+  const hidden = new Set(cardEdit?.hiddenFields ?? []);
 
   return (
     <CardBase
@@ -35,6 +37,8 @@ export function RAMCard({ ram, titleEdit }: Props) {
       onTitleSubmit={titleEdit?.onSubmit}
       rightAction={titleEdit?.rightAction}
       style={titleEdit?.borderStyle}
+      extraSensorRows={cardEdit?.extraSensorRows}
+      editPanel={cardEdit?.editPanel}
     >
       {/* Main row */}
       <View style={styles.mainRow}>
@@ -47,24 +51,28 @@ export function RAMCard({ ram, titleEdit }: Props) {
         </View>
         <View style={styles.detailGrid}>
           <StatRow label="Used" value={fmtMB(ram.used)} color={ACCENT} />
-          <StatRow label="Available" value={fmtMB(ram.available)} color="#00CC88" />
+          {!hidden.has("available") && (
+            <StatRow label="Available" value={fmtMB(ram.available)} color="#00CC88" />
+          )}
           <StatRow label="Total" value={fmtMB(ram.total)} />
         </View>
       </View>
 
       {/* RAM bar */}
-      <View style={styles.barSection}>
-        <View style={styles.barHeader}>
-          <Text style={styles.sectionText}>RAM</Text>
-          <Text style={styles.barCaption}>
-            {fmtMB(ram.used)} / {fmtMB(ram.total)}
-          </Text>
+      {!hidden.has("bar") && (
+        <View style={styles.barSection}>
+          <View style={styles.barHeader}>
+            <Text style={styles.sectionText}>RAM</Text>
+            <Text style={styles.barCaption}>
+              {fmtMB(ram.used)} / {fmtMB(ram.total)}
+            </Text>
+          </View>
+          <MiniBar value={ram.percent} color={ACCENT} height={6} />
         </View>
-        <MiniBar value={ram.percent} color={ACCENT} height={6} />
-      </View>
+      )}
 
       {/* Swap */}
-      {ram.swapTotal > 0 && (
+      {ram.swapTotal > 0 && !hidden.has("swap") && (
         <View style={styles.barSection}>
           <View style={styles.barHeader}>
             <Text style={styles.sectionText}>SWAP / PAGE FILE</Text>

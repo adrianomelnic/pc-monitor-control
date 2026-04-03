@@ -3,7 +3,7 @@ import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import Colors from "@/constants/colors";
 import { NetworkInterface } from "@/context/PcsContext";
-import { CardBase, CardTitleEditConfig } from "./CardBase";
+import { BuiltinCardEdit, CardBase, CardTitleEditConfig } from "./CardBase";
 
 const C = Colors.light;
 const ACCENT = "#60A5FA";
@@ -24,10 +24,12 @@ function fmtTotal(mb: number) {
 interface Props {
   interfaces: NetworkInterface[];
   titleEdit?: CardTitleEditConfig;
+  cardEdit?: BuiltinCardEdit;
 }
 
-export function NetworkCard({ interfaces, titleEdit }: Props) {
-  const active = interfaces.filter((i) => i.isUp);
+export function NetworkCard({ interfaces, titleEdit, cardEdit }: Props) {
+  const hidden = new Set(cardEdit?.hiddenFields ?? []);
+  const active = interfaces.filter((i) => i.isUp && !hidden.has(i.name));
 
   return (
     <CardBase
@@ -41,6 +43,8 @@ export function NetworkCard({ interfaces, titleEdit }: Props) {
       onTitleSubmit={titleEdit?.onSubmit}
       rightAction={titleEdit?.rightAction}
       style={titleEdit?.borderStyle}
+      extraSensorRows={cardEdit?.extraSensorRows}
+      editPanel={cardEdit?.editPanel}
     >
       {active.length === 0 ? (
         <Text style={styles.empty}>No active network interfaces</Text>

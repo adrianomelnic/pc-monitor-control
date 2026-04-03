@@ -2,7 +2,7 @@ import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import Colors from "@/constants/colors";
 import { CPUInfo } from "@/context/PcsContext";
-import { CardBase, CardTitleEditConfig, MiniBar, StatRow } from "./CardBase";
+import { BuiltinCardEdit, CardBase, CardTitleEditConfig, MiniBar, StatRow } from "./CardBase";
 
 const C = Colors.light;
 const ACCENT = "#00D4FF";
@@ -14,11 +14,13 @@ function fmt(mhz: number) {
 interface Props {
   cpu: CPUInfo;
   titleEdit?: CardTitleEditConfig;
+  cardEdit?: BuiltinCardEdit;
 }
 
-export function CPUCard({ cpu, titleEdit }: Props) {
+export function CPUCard({ cpu, titleEdit, cardEdit }: Props) {
   const cores = cpu.usagePerCore ?? [];
   const cols = cores.length > 8 ? 4 : 2;
+  const hidden = new Set(cardEdit?.hiddenFields ?? []);
 
   return (
     <CardBase
@@ -33,6 +35,8 @@ export function CPUCard({ cpu, titleEdit }: Props) {
       onTitleSubmit={titleEdit?.onSubmit}
       rightAction={titleEdit?.rightAction}
       style={titleEdit?.borderStyle}
+      extraSensorRows={cardEdit?.extraSensorRows}
+      editPanel={cardEdit?.editPanel}
     >
       {/* Main stats row */}
       <View style={styles.mainRow}>
@@ -44,28 +48,23 @@ export function CPUCard({ cpu, titleEdit }: Props) {
           <Text style={styles.bigLabel}>Usage</Text>
         </View>
         <View style={styles.detailGrid}>
-          <StatRow
-            label="Physical cores"
-            value={String(cpu.coresPhysical ?? "—")}
-          />
-          <StatRow
-            label="Logical cores"
-            value={String(cpu.coresLogical ?? "—")}
-          />
-          <StatRow
-            label="Current freq"
-            value={cpu.freqCurrent ? fmt(cpu.freqCurrent) : "—"}
-          />
-          <StatRow
-            label="Max freq"
-            value={cpu.freqMax ? fmt(cpu.freqMax) : "—"}
-            color={ACCENT}
-          />
+          {!hidden.has("physicalCores") && (
+            <StatRow label="Physical cores" value={String(cpu.coresPhysical ?? "—")} />
+          )}
+          {!hidden.has("logicalCores") && (
+            <StatRow label="Logical cores" value={String(cpu.coresLogical ?? "—")} />
+          )}
+          {!hidden.has("freqCurrent") && (
+            <StatRow label="Current freq" value={cpu.freqCurrent ? fmt(cpu.freqCurrent) : "—"} />
+          )}
+          {!hidden.has("freqMax") && (
+            <StatRow label="Max freq" value={cpu.freqMax ? fmt(cpu.freqMax) : "—"} color={ACCENT} />
+          )}
         </View>
       </View>
 
       {/* Per-core grid */}
-      {cores.length > 0 && (
+      {cores.length > 0 && !hidden.has("perCore") && (
         <>
           <View style={styles.sectionLabel}>
             <Text style={styles.sectionText}>PER CORE</Text>

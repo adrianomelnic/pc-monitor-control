@@ -25,6 +25,19 @@ export function TempBadge({ value }: TempBadgeProps) {
   );
 }
 
+/** Extra sensor row data for built-in cards (resolved from HWiNFO64 sensors) */
+export interface ExtraSensorRow {
+  label: string;
+  value: string;
+}
+
+/** Config for built-in card sensor/field editing (passed alongside titleEdit) */
+export interface BuiltinCardEdit {
+  hiddenFields?: string[];
+  extraSensorRows?: ExtraSensorRow[];
+  editPanel?: React.ReactNode;
+}
+
 /** Passed from [id].tsx into each built-in card to enable inline title editing */
 export interface CardTitleEditConfig {
   customTitle?: string;
@@ -51,6 +64,10 @@ interface CardBaseProps {
   onTitleSubmit?: () => void;
   children: React.ReactNode;
   style?: ViewStyle;
+  /** Extra HWiNFO64 sensor rows appended below main content */
+  extraSensorRows?: ExtraSensorRow[];
+  /** Edit panel node rendered at the very bottom of the card (in edit mode) */
+  editPanel?: React.ReactNode;
 }
 
 export function CardBase({
@@ -66,6 +83,8 @@ export function CardBase({
   onTitleSubmit,
   children,
   style,
+  extraSensorRows,
+  editPanel,
 }: CardBaseProps) {
   const titleInputRef = useRef<TextInput>(null);
 
@@ -103,6 +122,15 @@ export function CardBase({
       </View>
       <View style={styles.divider} />
       {children}
+      {extraSensorRows && extraSensorRows.length > 0 && (
+        <View style={styles.extraRows}>
+          <View style={styles.extraDivider} />
+          {extraSensorRows.map((r, i) => (
+            <StatRow key={i} label={r.label} value={r.value} />
+          ))}
+        </View>
+      )}
+      {editPanel ?? null}
     </View>
   );
 }
@@ -223,5 +251,13 @@ const styles = StyleSheet.create({
   },
   barFill: {
     borderRadius: 3,
+  },
+  extraRows: {
+    gap: 4,
+  },
+  extraDivider: {
+    height: 1,
+    backgroundColor: Colors.light.cardBorder,
+    marginBottom: 4,
   },
 });

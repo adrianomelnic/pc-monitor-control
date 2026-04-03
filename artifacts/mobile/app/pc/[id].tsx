@@ -16,7 +16,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { CommandButton } from "@/components/CommandButton";
 import { SensorPickerModal } from "@/components/SensorPickerModal";
-import { SensorCard } from "@/components/cards/SensorCard";
+import { SensorCard, CompactSensorPicker, formatValue } from "@/components/cards/SensorCard";
 import { CPUCard } from "@/components/cards/CPUCard";
 import { DisksCard } from "@/components/cards/DisksCard";
 import { FansCard } from "@/components/cards/FansCard";
@@ -25,7 +25,7 @@ import { NetworkCard } from "@/components/cards/NetworkCard";
 import { RAMCard } from "@/components/cards/RAMCard";
 import Colors from "@/constants/colors";
 import { BuiltinCardConfig, BuiltinCardKind, CardConfig, CustomCardConfig, useDashboard } from "@/context/DashboardContext";
-import { CardTitleEditConfig } from "@/components/cards/CardBase";
+import { BuiltinCardEdit, CardTitleEditConfig } from "@/components/cards/CardBase";
 import { usePcs } from "@/context/PcsContext";
 
 const C = Colors.light;
@@ -59,6 +59,28 @@ const CARD_ACCENTS: Record<string, string> = {
   network: "#60A5FA",
 };
 
+const BUILTIN_CARD_FIELDS: Record<string, { key: string; label: string }[]> = {
+  cpu: [
+    { key: "physicalCores", label: "Physical cores" },
+    { key: "logicalCores", label: "Logical cores" },
+    { key: "freqCurrent", label: "Current frequency" },
+    { key: "freqMax", label: "Max frequency" },
+    { key: "perCore", label: "Per-core breakdown" },
+  ],
+  gpu: [
+    { key: "usage", label: "GPU load" },
+    { key: "vramRow", label: "VRAM used (row)" },
+    { key: "vram", label: "VRAM bar" },
+    { key: "clockGpu", label: "GPU clock" },
+    { key: "clockMem", label: "Mem clock" },
+  ],
+  ram: [
+    { key: "available", label: "Available memory" },
+    { key: "bar", label: "RAM usage bar" },
+    { key: "swap", label: "Swap / Page file" },
+  ],
+};
+
 export default function PCDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { pcs, removePc, refreshPc, sendCommand } = usePcs();
@@ -75,6 +97,7 @@ export default function PCDetailScreen() {
   const [editingCard, setEditingCard] = useState<CustomCardConfig | null>(null);
   const [inlineEditBuiltin, setInlineEditBuiltin] = useState<BuiltinCardKind | null>(null);
   const [builtinTitleDraft, setBuiltinTitleDraft] = useState("");
+  const [extraSensorPickerFor, setExtraSensorPickerFor] = useState<BuiltinCardKind | null>(null);
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 : insets.bottom;
@@ -104,6 +127,31 @@ export default function PCDetailScreen() {
     setInlineEditBuiltin(null);
   };
 
+  const toggleBuiltinField = (kind: BuiltinCardKind, fieldKey: string) => {
+    const card = cards.find((c) => c.id === kind) as BuiltinCardConfig | undefined;
+    if (!card) return;
+    const hidden = [...(card.hiddenFields ?? [])];
+    const idx = hidden.indexOf(fieldKey);
+    if (idx >= 0) hidden.splice(idx, 1);
+    else hidden.push(fieldKey);
+    updateBuiltinCard(pcId, kind, { hiddenFields: hidden });
+  };
+
+  const addExtraSensor = (kind: BuiltinCardKind, label: string) => {
+    const card = cards.find((c) => c.id === kind) as BuiltinCardConfig | undefined;
+    if (!card) return;
+    const extras = [...(card.extraSensors ?? [])];
+    if (!extras.includes(label)) extras.push(label);
+    updateBuiltinCard(pcId, kind, { extraSensors: extras });
+  };
+
+  const removeExtraSensor = (kind: BuiltinCardKind, label: string) => {
+    const card = cards.find((c) => c.id === kind) as BuiltinCardConfig | undefined;
+    if (!card) return;
+    const extras = (card.extraSensors ?? []).filter((l) => l !== label);
+    updateBuiltinCard(pcId, kind, { extraSensors: extras });
+  };
+
   function BuiltinDoneBtn({ accentColor, kind }: { accentColor: string; kind: BuiltinCardKind }) {
     return (
       <Pressable
@@ -114,6 +162,88 @@ export default function PCDetailScreen() {
         <Feather name="check" size={11} color={accentColor} />
         <Text style={[styles.builtinDoneBtnText, { color: accentColor }]}>Done</Text>
       </Pressable>
+    );
+  }
+
+  function BuiltinCardEditPanel({ card, accent }: { card: BuiltinCardConfig; accent: string }) {
+    const hidden = new Set(card.hiddenFields ?? []);
+    const extras = card.extraSensors ?? [];
+    const staticFields = BUILTIN_CARD_FIELDS[card.kind] ?? [];
+
+    const dynamicItems: { key: string; label: string }[] =
+      card.kind === "network"
+        ? (m?.network ?? []).filter((i) => i.isUp).map((i) => ({ key: i.name, label: i.name }))
+        : card.kind === "fans"
+        ? (m?.fans ?? []).map((f) => ({ key: f.label, label: f.label }))
+        : card.kind === "disks"
+        ? (m?.disks ?? []).map((d) => ({
+            key: d.device || d.mountpoint,
+            label: d.device.replace(/\\\\.\\/, "").replace(/\/$/, "") || d.mountpoint,
+          }))
+        : [];
+
+    const fields = staticFields.length > 0 ? staticFields : dynamicItems;
+    const sectionLabel =
+      card.kind === "network" ? "INTERFACES" :
+      card.kind === "fans" ? "FANS" :
+      card.kind === "disks" ? "VOLUMES" : "FIELDS";
+
+    return (
+      <View style={styles.editPanel}>
+        <View style={styles.editPanelDivider} />
+
+        {fields.length > 0 && (
+          <>
+            <Text style={styles.editPanelSection}>{sectionLabel}</Text>
+            {fields.map((field) => {
+              const isHidden = hidden.has(field.key);
+              return (
+                <Pressable
+                  key={field.key}
+                  onPress={() => toggleBuiltinField(card.kind, field.key)}
+                  style={styles.editPanelRow}
+                  hitSlop={4}
+                >
+                  <View style={[styles.editPanelToggle, {
+                    borderColor: isHidden ? C.textMuted : accent,
+                    backgroundColor: isHidden ? "transparent" : accent + "22",
+                  }]}>
+                    <Feather name={isHidden ? "eye-off" : "eye"} size={11} color={isHidden ? C.textMuted : accent} />
+                  </View>
+                  <Text style={[styles.editPanelRowText, isHidden && { color: C.textMuted }]} numberOfLines={1}>
+                    {field.label}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </>
+        )}
+
+        {extras.length > 0 && (
+          <>
+            <Text style={[styles.editPanelSection, fields.length > 0 && { marginTop: 8 }]}>EXTRA SENSORS</Text>
+            {extras.map((label) => (
+              <View key={label} style={styles.editPanelRow}>
+                <View style={[styles.editPanelToggle, { borderColor: accent, backgroundColor: accent + "22" }]}>
+                  <Feather name="plus" size={11} color={accent} />
+                </View>
+                <Text style={styles.editPanelRowText} numberOfLines={1}>{label}</Text>
+                <Pressable onPress={() => removeExtraSensor(card.kind, label)} hitSlop={8} style={styles.editPanelRemove}>
+                  <Feather name="x" size={14} color={C.danger} />
+                </Pressable>
+              </View>
+            ))}
+          </>
+        )}
+
+        <Pressable
+          onPress={() => setExtraSensorPickerFor(card.kind)}
+          style={[styles.editPanelAddBtn, { borderColor: accent + "55", backgroundColor: accent + "11" }]}
+        >
+          <Feather name="plus" size={13} color={accent} />
+          <Text style={[styles.editPanelAddBtnText, { color: accent }]}>Add HWiNFO64 sensor</Text>
+        </Pressable>
+      </View>
     );
   }
 
@@ -314,6 +444,17 @@ export default function PCDetailScreen() {
       borderStyle: isEditing ? { borderColor: accent + "66", borderWidth: 1.5 } : undefined,
     };
 
+    const extraSensorRows = (builtinCard.extraSensors ?? []).map((label) => {
+      const sensor = allSensors.find((s) => s.label === label);
+      return { label, value: sensor ? formatValue(sensor) : "—" };
+    });
+
+    const cardEdit: BuiltinCardEdit = {
+      hiddenFields: builtinCard.hiddenFields,
+      extraSensorRows,
+      editPanel: isEditing ? <BuiltinCardEditPanel card={builtinCard} accent={accent} /> : undefined,
+    };
+
     const handleLongPress = () => {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       setBuiltinTitleDraft(builtinCard.customTitle ?? (CARD_NAMES[card.kind] ?? card.kind));
@@ -323,13 +464,13 @@ export default function PCDetailScreen() {
     let content: React.ReactNode = null;
     switch (card.kind) {
       case "cpu":
-        content = m.cpu ? <CPUCard cpu={m.cpu} titleEdit={titleEdit} /> : null;
+        content = m.cpu ? <CPUCard cpu={m.cpu} titleEdit={titleEdit} cardEdit={cardEdit} /> : null;
         break;
       case "gpu":
-        content = m.gpu ? <GPUCard gpus={m.gpu} titleEdit={titleEdit} /> : null;
+        content = m.gpu ? <GPUCard gpus={m.gpu} titleEdit={titleEdit} cardEdit={cardEdit} /> : null;
         break;
       case "ram":
-        content = m.ram ? <RAMCard ram={m.ram} titleEdit={titleEdit} /> : null;
+        content = m.ram ? <RAMCard ram={m.ram} titleEdit={titleEdit} cardEdit={cardEdit} /> : null;
         break;
       case "fans":
         content = m.fans != null ? (
@@ -338,14 +479,15 @@ export default function PCDetailScreen() {
             baseUrl={`http://${safePc.host}:${safePc.port}`}
             apiKey={safePc.apiKey}
             titleEdit={titleEdit}
+            cardEdit={cardEdit}
           />
         ) : null;
         break;
       case "disks":
-        content = m.disks && m.disks.length > 0 ? <DisksCard disks={m.disks} titleEdit={titleEdit} /> : null;
+        content = m.disks && m.disks.length > 0 ? <DisksCard disks={m.disks} titleEdit={titleEdit} cardEdit={cardEdit} /> : null;
         break;
       case "network":
-        content = m.network && m.network.length > 0 ? <NetworkCard interfaces={m.network} titleEdit={titleEdit} /> : null;
+        content = m.network && m.network.length > 0 ? <NetworkCard interfaces={m.network} titleEdit={titleEdit} cardEdit={cardEdit} /> : null;
         break;
       default:
         return null;
@@ -673,6 +815,23 @@ export default function PCDetailScreen() {
         ) : null}
       </View>
 
+      {/* ── Extra Sensor Picker for built-in cards ── */}
+      <CompactSensorPicker
+        visible={extraSensorPickerFor != null}
+        title="Add HWiNFO64 Sensor"
+        accentColor={extraSensorPickerFor ? (CARD_ACCENTS[extraSensorPickerFor] ?? C.tint) : C.tint}
+        sensors={allSensors}
+        excludeLabels={
+          extraSensorPickerFor
+            ? ((cards.find((c) => c.id === extraSensorPickerFor) as BuiltinCardConfig | undefined)?.extraSensors ?? [])
+            : []
+        }
+        onSelect={(label) => {
+          if (extraSensorPickerFor) addExtraSensor(extraSensorPickerFor, label);
+        }}
+        onClose={() => setExtraSensorPickerFor(null)}
+      />
+
       {/* ── Sensor Picker Modal ── */}
       <SensorPickerModal
         visible={pickerVisible}
@@ -988,5 +1147,60 @@ const styles = StyleSheet.create({
   builtinDoneBtnText: {
     fontSize: 11,
     fontWeight: "700",
+  },
+  editPanel: {
+    gap: 4,
+    paddingTop: 4,
+  },
+  editPanelDivider: {
+    height: 1,
+    backgroundColor: C.cardBorder,
+    marginBottom: 6,
+  },
+  editPanelSection: {
+    fontSize: 10,
+    fontWeight: "700",
+    color: C.textMuted,
+    letterSpacing: 0.6,
+    marginBottom: 2,
+  },
+  editPanelRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingVertical: 3,
+  },
+  editPanelToggle: {
+    width: 24,
+    height: 24,
+    borderRadius: 6,
+    borderWidth: 1.5,
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+  },
+  editPanelRowText: {
+    fontSize: 12,
+    color: C.text,
+    fontWeight: "500",
+    flex: 1,
+  },
+  editPanelRemove: {
+    paddingLeft: 8,
+  },
+  editPanelAddBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    borderWidth: 1,
+    borderRadius: 8,
+    borderStyle: "dashed",
+    paddingHorizontal: 10,
+    paddingVertical: 7,
+    marginTop: 4,
+  },
+  editPanelAddBtnText: {
+    fontSize: 12,
+    fontWeight: "600",
   },
 });

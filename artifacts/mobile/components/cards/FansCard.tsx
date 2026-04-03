@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import Colors from "@/constants/colors";
 import { FanInfo } from "@/context/PcsContext";
-import { CardBase, CardTitleEditConfig } from "./CardBase";
+import { BuiltinCardEdit, CardBase, CardTitleEditConfig } from "./CardBase";
 
 const C = Colors.light;
 const ACCENT = "#FB923C";
@@ -35,9 +35,12 @@ interface Props {
   baseUrl?: string;
   apiKey?: string;
   titleEdit?: CardTitleEditConfig;
+  cardEdit?: BuiltinCardEdit;
 }
 
-export function FansCard({ fans, baseUrl, apiKey, titleEdit }: Props) {
+export function FansCard({ fans, baseUrl, apiKey, titleEdit, cardEdit }: Props) {
+  const hidden = new Set(cardEdit?.hiddenFields ?? []);
+  const visibleFans = fans.filter((f) => !hidden.has(f.label));
   const [diagLoading, setDiagLoading] = useState(false);
   const [diagResult, setDiagResult] = useState<DiagResult | null>(null);
 
@@ -156,7 +159,7 @@ export function FansCard({ fans, baseUrl, apiKey, titleEdit }: Props) {
     <CardBase
       icon="wind"
       title={titleEdit?.customTitle ?? "Fans"}
-      subtitle={fans.length > 0 ? `${fans.length} fan${fans.length > 1 ? "s" : ""} detected` : undefined}
+      subtitle={fans.length > 0 ? `${visibleFans.length} fan${visibleFans.length !== 1 ? "s" : ""} detected` : undefined}
       accentColor={ACCENT}
       titleEditable={titleEdit?.editable}
       titleDraft={titleEdit?.draft}
@@ -164,6 +167,8 @@ export function FansCard({ fans, baseUrl, apiKey, titleEdit }: Props) {
       onTitleSubmit={titleEdit?.onSubmit}
       rightAction={titleEdit?.rightAction}
       style={titleEdit?.borderStyle}
+      extraSensorRows={cardEdit?.extraSensorRows}
+      editPanel={cardEdit?.editPanel}
     >
       {fans.length === 0 ? (
         <View style={styles.emptyWrap}>
@@ -192,7 +197,7 @@ export function FansCard({ fans, baseUrl, apiKey, titleEdit }: Props) {
         </View>
       ) : (
         <View style={styles.fanList}>
-          {fans.map((fan, i) => {
+          {visibleFans.map((fan, i) => {
             const color = rpmColor(fan.rpm);
             const pct = rpmBar(fan.rpm);
             return (

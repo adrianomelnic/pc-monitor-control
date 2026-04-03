@@ -2,7 +2,7 @@ import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import Colors from "@/constants/colors";
 import { GPUInfo } from "@/context/PcsContext";
-import { CardBase, CardTitleEditConfig, MiniBar, StatRow } from "./CardBase";
+import { BuiltinCardEdit, CardBase, CardTitleEditConfig, MiniBar, StatRow } from "./CardBase";
 
 const C = Colors.light;
 const ACCENT = "#34D399";
@@ -15,10 +15,12 @@ function fmtMB(mb: number | null) {
 interface Props {
   gpus: GPUInfo[];
   titleEdit?: CardTitleEditConfig;
+  cardEdit?: BuiltinCardEdit;
 }
 
-export function GPUCard({ gpus, titleEdit }: Props) {
+export function GPUCard({ gpus, titleEdit, cardEdit }: Props) {
   const base = titleEdit?.customTitle ?? "GPU";
+  const hidden = new Set(cardEdit?.hiddenFields ?? []);
 
   if (!gpus || gpus.length === 0) {
     return (
@@ -32,6 +34,8 @@ export function GPUCard({ gpus, titleEdit }: Props) {
         onTitleSubmit={titleEdit?.onSubmit}
         rightAction={titleEdit?.rightAction}
         style={titleEdit?.borderStyle}
+        extraSensorRows={cardEdit?.extraSensorRows}
+        editPanel={cardEdit?.editPanel}
       >
         <Text style={styles.empty}>No GPU detected or nvidia-smi not available</Text>
       </CardBase>
@@ -62,34 +66,40 @@ export function GPUCard({ gpus, titleEdit }: Props) {
             onTitleSubmit={isFirst ? titleEdit?.onSubmit : undefined}
             rightAction={isFirst ? titleEdit?.rightAction : undefined}
             style={isFirst ? titleEdit?.borderStyle : undefined}
+            extraSensorRows={isFirst ? cardEdit?.extraSensorRows : undefined}
+            editPanel={isFirst ? cardEdit?.editPanel : undefined}
           >
             <View style={styles.mainRow}>
               {/* Usage big number */}
-              <View style={styles.bigStat}>
-                <Text style={[styles.bigNum, { color: gpu.usage != null ? ACCENT : C.textMuted }]}>
-                  {gpu.usage != null ? Math.round(gpu.usage) : "—"}
-                  {gpu.usage != null && <Text style={styles.bigUnit}>%</Text>}
-                </Text>
-                <Text style={styles.bigLabel}>GPU Load</Text>
-              </View>
+              {!hidden.has("usage") && (
+                <View style={styles.bigStat}>
+                  <Text style={[styles.bigNum, { color: gpu.usage != null ? ACCENT : C.textMuted }]}>
+                    {gpu.usage != null ? Math.round(gpu.usage) : "—"}
+                    {gpu.usage != null && <Text style={styles.bigUnit}>%</Text>}
+                  </Text>
+                  <Text style={styles.bigLabel}>GPU Load</Text>
+                </View>
+              )}
 
               <View style={styles.detailGrid}>
-                <StatRow
-                  label="VRAM used"
-                  value={`${fmtMB(gpu.vramUsed)} / ${fmtMB(gpu.vramTotal)}`}
-                  color={ACCENT}
-                />
-                {gpu.clockGpu != null && (
+                {!hidden.has("vramRow") && (
+                  <StatRow
+                    label="VRAM used"
+                    value={`${fmtMB(gpu.vramUsed)} / ${fmtMB(gpu.vramTotal)}`}
+                    color={ACCENT}
+                  />
+                )}
+                {gpu.clockGpu != null && !hidden.has("clockGpu") && (
                   <StatRow label="GPU clock" value={`${gpu.clockGpu} MHz`} />
                 )}
-                {gpu.clockMem != null && (
+                {gpu.clockMem != null && !hidden.has("clockMem") && (
                   <StatRow label="Mem clock" value={`${gpu.clockMem} MHz`} />
                 )}
               </View>
             </View>
 
             {/* VRAM bar */}
-            {vramPct != null && (
+            {vramPct != null && !hidden.has("vram") && (
               <View style={styles.vramSection}>
                 <View style={styles.vramHeader}>
                   <Text style={styles.sectionText}>VRAM</Text>
