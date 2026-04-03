@@ -1,5 +1,5 @@
 import { Feather } from "@expo/vector-icons";
-import React, { useRef, useEffect } from "react";
+import React, { useRef } from "react";
 import { StyleSheet, Text, TextInput, View, ViewStyle } from "react-native";
 import Colors from "@/constants/colors";
 
@@ -87,12 +87,6 @@ export function CardBase({
   editPanel,
 }: CardBaseProps) {
   const titleInputRef = useRef<TextInput>(null);
-
-  useEffect(() => {
-    if (titleEditable) {
-      setTimeout(() => titleInputRef.current?.focus(), 80);
-    }
-  }, [titleEditable]);
 
   return (
     <View style={[styles.card, { borderTopColor: accentColor }, style]}>
