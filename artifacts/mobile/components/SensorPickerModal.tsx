@@ -17,18 +17,28 @@ import Colors from "@/constants/colors";
 
 const C = Colors.light;
 
-const TYPE_LABELS: Record<string, string> = {
-  temperature: "Temperature",
-  fan: "Fan Speed",
-  voltage: "Voltage",
-  power: "Power",
-  current: "Current",
-  clock: "Clock / Frequency",
-  usage: "Usage / Load",
-  other: "Other",
+// Short badge label for each reading type
+const TYPE_BADGE: Record<string, { label: string; color: string }> = {
+  temperature: { label: "°C",  color: "#FB923C" },
+  fan:         { label: "RPM", color: "#60A5FA" },
+  voltage:     { label: "V",   color: "#FBBF24" },
+  power:       { label: "W",   color: "#F472B6" },
+  current:     { label: "A",   color: "#A78BFA" },
+  clock:       { label: "MHz", color: "#34D399" },
+  usage:       { label: "%",   color: "#00D4FF" },
+  other:       { label: "—",   color: "#6B7280" },
 };
 
-const TYPE_ORDER = ["temperature", "fan", "usage", "clock", "power", "voltage", "current", "other"];
+function formatPreview(s: SensorReading): string {
+  if (s.type === "temperature") return `${s.value.toFixed(1)} ${s.unit}`;
+  if (s.type === "fan")         return `${Math.round(s.value)} ${s.unit}`;
+  if (s.type === "clock")       return s.value >= 1000 ? `${(s.value / 1000).toFixed(2)} GHz` : `${Math.round(s.value)} ${s.unit}`;
+  if (s.type === "voltage")     return `${s.value.toFixed(3)} ${s.unit}`;
+  if (s.type === "power")       return `${s.value.toFixed(1)} ${s.unit}`;
+  if (s.type === "current")     return `${s.value.toFixed(2)} ${s.unit}`;
+  if (s.type === "usage")       return `${s.value.toFixed(1)} ${s.unit}`;
+  return s.unit ? `${s.value} ${s.unit}` : String(s.value);
+}
 
 interface Props {
   visible: boolean;
@@ -66,19 +76,29 @@ export function SensorPickerModal({
     }
   }, [visible]);
 
+  // Group by component (hardware device), preserving HWiNFO64 order
   const grouped = useMemo(() => {
     const q = search.toLowerCase();
+    const orderMap: Record<string, number> = {};
     const map: Record<string, SensorReading[]> = {};
+
     for (const s of sensors) {
-      if (q && !s.label.toLowerCase().includes(q)) continue;
-      if (!map[s.type]) map[s.type] = [];
-      map[s.type].push(s);
+      const comp = s.component || "Unknown";
+      const matchLabel = s.label.toLowerCase().includes(q);
+      const matchComp = comp.toLowerCase().includes(q);
+      if (q && !matchLabel && !matchComp) continue;
+
+      if (!(comp in orderMap)) {
+        orderMap[comp] = Object.keys(orderMap).length;
+        map[comp] = [];
+      }
+      map[comp].push(s);
     }
-    return TYPE_ORDER.filter((t) => map[t]?.length).map((t) => ({
-      type: t,
-      label: TYPE_LABELS[t] ?? t,
-      items: map[t],
-    }));
+
+    // Sort by original appearance order (not alphabetically)
+    return Object.keys(map)
+      .sort((a, b) => orderMap[a] - orderMap[b])
+      .map((comp) => ({ comp, items: map[comp] }));
   }, [sensors, search]);
 
   const toggle = (label: string) => {
@@ -90,121 +110,148 @@ export function SensorPickerModal({
     });
   };
 
+  // Select / deselect all sensors for a component group
+  const toggleGroup = (items: SensorReading[]) => {
+    const labels = items.map((s) => s.label);
+    const allSelected = labels.every((l) => selected.has(l));
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (allSelected) {
+        labels.forEach((l) => next.delete(l));
+      } else {
+        labels.forEach((l) => next.add(l));
+      }
+      return next;
+    });
+  };
+
   const handleSave = () => {
-    const t = title.trim() || "Custom Card";
-    onSave(t, Array.from(selected), accentColor);
+    onSave(title.trim() || "Custom Card", Array.from(selected), accentColor);
     onClose();
   };
 
   const canSave = selected.size > 0;
 
-  function formatPreview(s: SensorReading) {
-    if (s.type === "temperature") return `${s.value.toFixed(1)} ${s.unit}`;
-    if (s.type === "fan") return `${Math.round(s.value)} ${s.unit}`;
-    if (s.type === "clock") return s.value >= 1000 ? `${(s.value / 1000).toFixed(2)} GHz` : `${Math.round(s.value)} ${s.unit}`;
-    if (s.unit) return `${s.value.toFixed(1)} ${s.unit}`;
-    return String(s.value);
-  }
-
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
       <View style={[styles.root, { paddingTop: insets.top > 0 ? insets.top : 16 }]}>
-        {/* Header */}
+        {/* ── Header ── */}
         <View style={styles.sheetHeader}>
           <Pressable onPress={onClose} hitSlop={8}>
             <Text style={styles.cancelBtn}>Cancel</Text>
           </Pressable>
           <Text style={styles.sheetTitle}>{isEdit ? "Edit Card" : "New Sensor Card"}</Text>
           <Pressable onPress={handleSave} hitSlop={8} disabled={!canSave}>
-            <Text style={[styles.saveBtn, !canSave && { opacity: 0.4 }]}>Save</Text>
+            <Text style={[styles.saveBtn, !canSave && { opacity: 0.4 }]}>
+              Save{selected.size > 0 ? ` (${selected.size})` : ""}
+            </Text>
           </Pressable>
         </View>
 
         <ScrollView style={styles.scroll} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
-          {/* Title */}
+          {/* ── Card Title ── */}
           <View style={styles.section}>
             <Text style={styles.sectionLabel}>CARD TITLE</Text>
             <TextInput
               style={styles.titleInput}
               value={title}
               onChangeText={setTitle}
-              placeholder="e.g. GPU Sensors, Temps..."
+              placeholder="e.g. GPU Sensors, CPU Clocks..."
               placeholderTextColor={C.textMuted}
               autoCorrect={false}
               returnKeyType="done"
             />
           </View>
 
-          {/* Accent Color */}
+          {/* ── Accent Color ── */}
           <View style={styles.section}>
             <Text style={styles.sectionLabel}>ACCENT COLOR</Text>
             <View style={styles.colorRow}>
               {ACCENT_COLORS.map((col) => (
                 <Pressable
                   key={col}
-                  style={[
-                    styles.colorDot,
-                    { backgroundColor: col },
-                    accentColor === col && styles.colorDotActive,
-                  ]}
+                  style={[styles.colorDot, { backgroundColor: col }, accentColor === col && styles.colorDotActive]}
                   onPress={() => setAccentColor(col)}
                 />
               ))}
             </View>
           </View>
 
-          {/* Selection summary */}
+          {/* ── Search ── */}
           <View style={styles.section}>
             <Text style={styles.sectionLabel}>
-              SENSORS{selected.size > 0 ? ` · ${selected.size} selected` : ""}
+              SELECT SENSORS{selected.size > 0 ? ` · ${selected.size} selected` : ""}
             </Text>
-
-            {/* Search */}
             <View style={styles.searchBar}>
               <Feather name="search" size={14} color={C.textMuted} />
               <TextInput
                 style={styles.searchInput}
                 value={search}
                 onChangeText={setSearch}
-                placeholder="Search sensors..."
+                placeholder="Search sensors or components..."
                 placeholderTextColor={C.textMuted}
                 autoCorrect={false}
                 clearButtonMode="while-editing"
               />
             </View>
 
+            {/* ── Sensor list grouped by hardware component ── */}
             {sensors.length === 0 ? (
               <View style={styles.emptyBox}>
-                <Feather name="alert-circle" size={24} color={C.textMuted} />
-                <Text style={styles.emptyText}>
-                  No HWiNFO64 sensor data available.{"\n"}Make sure HWiNFO64 is running on this PC.
+                <Feather name="alert-circle" size={28} color={C.textMuted} />
+                <Text style={styles.emptyTitle}>No HWiNFO64 Data</Text>
+                <Text style={styles.emptyDesc}>
+                  Make sure HWiNFO64 is running with shared memory enabled on this PC.
                 </Text>
               </View>
             ) : grouped.length === 0 ? (
-              <Text style={styles.emptyText}>No sensors match "{search}"</Text>
+              <Text style={styles.emptyDesc}>No sensors match "{search}"</Text>
             ) : (
-              grouped.map((group) => (
-                <View key={group.type} style={styles.group}>
-                  <Text style={styles.groupLabel}>{group.label}</Text>
-                  {group.items.map((s, si) => {
-                    const isSelected = selected.has(s.label);
-                    return (
-                      <TouchableOpacity
-                        key={`${group.type}_${si}_${s.label}`}
-                        style={[styles.sensorRow, isSelected && styles.sensorRowSelected]}
-                        onPress={() => toggle(s.label)}
-                        activeOpacity={0.7}
-                      >
-                        <View style={[styles.checkbox, isSelected && { backgroundColor: accentColor, borderColor: accentColor }]}>
-                          {isSelected && <Feather name="check" size={11} color="#fff" />}
-                        </View>
-                        <Text style={styles.sensorLabel} numberOfLines={1}>{s.label}</Text>
-                        <Text style={styles.sensorValue}>{formatPreview(s)}</Text>
-                      </TouchableOpacity>
-                    );
-                  })}
-                </View>
-              ))
+              grouped.map(({ comp, items }) => {
+                const allSelected = items.every((s) => selected.has(s.label));
+                const someSelected = !allSelected && items.some((s) => selected.has(s.label));
+                return (
+                  <View key={comp} style={styles.group}>
+                    {/* Component header row */}
+                    <Pressable style={styles.groupHeader} onPress={() => toggleGroup(items)}>
+                      <View style={[
+                        styles.groupCheck,
+                        (allSelected || someSelected) && { backgroundColor: accentColor, borderColor: accentColor }
+                      ]}>
+                        {allSelected && <Feather name="check" size={11} color="#fff" />}
+                        {someSelected && <View style={styles.groupCheckDash} />}
+                      </View>
+                      <Text style={styles.groupName} numberOfLines={2}>{comp}</Text>
+                      <Text style={styles.groupCount}>{items.length}</Text>
+                    </Pressable>
+
+                    {/* Individual sensor rows */}
+                    {items.map((s, si) => {
+                      const isSelected = selected.has(s.label);
+                      const badge = TYPE_BADGE[s.type] ?? TYPE_BADGE.other;
+                      return (
+                        <TouchableOpacity
+                          key={`${comp}_${si}_${s.label}`}
+                          style={[styles.sensorRow, isSelected && { borderColor: accentColor + "60", backgroundColor: accentColor + "10" }]}
+                          onPress={() => toggle(s.label)}
+                          activeOpacity={0.7}
+                        >
+                          <View style={[styles.checkbox, isSelected && { backgroundColor: accentColor, borderColor: accentColor }]}>
+                            {isSelected && <Feather name="check" size={11} color="#fff" />}
+                          </View>
+
+                          <View style={[styles.typeBadge, { backgroundColor: badge.color + "20" }]}>
+                            <Text style={[styles.typeBadgeText, { color: badge.color }]}>{badge.label}</Text>
+                          </View>
+
+                          <Text style={styles.sensorLabel} numberOfLines={1}>{s.label}</Text>
+                          <Text style={styles.sensorValue}>{formatPreview(s)}</Text>
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </View>
+                );
+              })
             )}
           </View>
 
@@ -243,9 +290,7 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: C.tint,
   },
-  scroll: {
-    flex: 1,
-  },
+  scroll: { flex: 1 },
   section: {
     paddingHorizontal: 16,
     paddingTop: 20,
@@ -305,41 +350,77 @@ const styles = StyleSheet.create({
   },
   emptyBox: {
     alignItems: "center",
-    gap: 10,
-    paddingVertical: 32,
+    gap: 8,
+    paddingVertical: 36,
   },
-  emptyText: {
+  emptyTitle: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: C.textSecondary,
+  },
+  emptyDesc: {
     fontSize: 13,
     color: C.textMuted,
     textAlign: "center",
     lineHeight: 20,
+    paddingHorizontal: 8,
   },
   group: {
     marginTop: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: C.cardBorder,
+    overflow: "hidden",
+    backgroundColor: C.card,
   },
-  groupLabel: {
-    fontSize: 11,
+  groupHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    backgroundColor: C.backgroundSecondary,
+    borderBottomWidth: 1,
+    borderBottomColor: C.cardBorder,
+  },
+  groupCheck: {
+    width: 20,
+    height: 20,
+    borderRadius: 6,
+    borderWidth: 1.5,
+    borderColor: C.cardBorder,
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+  },
+  groupCheckDash: {
+    width: 10,
+    height: 2,
+    backgroundColor: "#fff",
+    borderRadius: 1,
+  },
+  groupName: {
+    flex: 1,
+    fontSize: 12,
     fontWeight: "700",
+    color: C.text,
+    lineHeight: 16,
+  },
+  groupCount: {
+    fontSize: 11,
     color: C.textMuted,
-    letterSpacing: 0.8,
-    marginBottom: 6,
-    paddingHorizontal: 2,
+    fontWeight: "600",
   },
   sensorRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 10,
-    paddingVertical: 9,
+    gap: 8,
+    paddingVertical: 8,
     paddingHorizontal: 12,
-    backgroundColor: C.card,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: C.cardBorder,
-    marginBottom: 6,
-  },
-  sensorRowSelected: {
-    borderColor: C.tint + "60",
-    backgroundColor: C.tint + "10",
+    borderBottomWidth: 1,
+    borderBottomColor: C.cardBorder,
+    borderLeftWidth: 2,
+    borderLeftColor: "transparent",
   },
   checkbox: {
     width: 20,
@@ -349,15 +430,30 @@ const styles = StyleSheet.create({
     borderColor: C.cardBorder,
     alignItems: "center",
     justifyContent: "center",
+    flexShrink: 0,
+  },
+  typeBadge: {
+    borderRadius: 4,
+    paddingHorizontal: 5,
+    paddingVertical: 2,
+    flexShrink: 0,
+    minWidth: 32,
+    alignItems: "center",
+  },
+  typeBadgeText: {
+    fontSize: 10,
+    fontWeight: "700",
+    fontVariant: ["tabular-nums"],
   },
   sensorLabel: {
     flex: 1,
-    fontSize: 13,
+    fontSize: 12,
     color: C.text,
   },
   sensorValue: {
     fontSize: 12,
     color: C.textMuted,
     fontVariant: ["tabular-nums"],
+    flexShrink: 0,
   },
 });

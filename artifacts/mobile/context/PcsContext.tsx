@@ -14,6 +14,7 @@ export interface SensorReading {
   value: number;
   unit: string;
   type: 'temperature' | 'voltage' | 'fan' | 'current' | 'power' | 'clock' | 'usage' | 'other';
+  component?: string; // hardware component name from HWiNFO64 (e.g. "CPU [#0]", "GPU [#0]")
 }
 
 // ─── Detailed component types ─────────────────────────────────────────────────

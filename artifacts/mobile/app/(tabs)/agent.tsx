@@ -213,6 +213,22 @@ def read_hwinfo64():
         RTYPE_UNIT = {0:"",1:"°C",2:"V",3:"RPM",4:"A",5:"W",6:"MHz",7:"%",8:""}
         RTYPE_NAME = {0:"other",1:"temperature",2:"voltage",3:"fan",
                       4:"current",5:"power",6:"clock",7:"usage",8:"other"}
+
+        # Parse hardware component names from the sensor section.
+        # HWINFO sensor element layout: [dwSensorID:4][dwSensorInst:4][nameOrig:LBL][nameUser:LBL]
+        component_names = {}
+        for si in range(num_sensors):
+            s_base = off_sensors + si * size_sensor
+            if s_base + size_sensor > len(data):
+                break
+            s_orig = _label(data[s_base+8 : s_base+8+LBL_BYTES])
+            s_user = _label(data[s_base+8+LBL_BYTES : s_base+8+LBL_BYTES+LBL_BYTES])
+            component_names[si] = s_user if s_user else s_orig
+        print(f"HWiNFO64: {len(component_names)} hardware components: "
+              f"{list(component_names.values())[:4]}")
+
+        # Parse all readings and link each to its hardware component.
+        # Reading layout: [type:4][sensorIndex:4][readingID:4][labelOrig:LBL][labelUser:LBL][unit:*][value:8]...
         TEMP, FAN = 1, 3
         temps, fans, sensors = [], [], []
         for i in range(num_readings):
@@ -222,6 +238,7 @@ def read_hwinfo64():
             r_type = struct.unpack_from('<I', data, base)[0]
             if r_type not in RTYPE_UNIT:
                 continue
+            sensor_idx = struct.unpack_from('<I', data, base+4)[0]
             orig = _label(data[base+12 : base+12+LBL_BYTES])
             user = _label(data[base+12+LBL_BYTES : base+12+LBL_BYTES+LBL_BYTES])
             label = user if user else orig
@@ -229,11 +246,13 @@ def read_hwinfo64():
             if val_off + 8 > len(data) or not label:
                 continue
             value = struct.unpack_from('<d', data, val_off)[0]
+            component = component_names.get(sensor_idx, "Unknown")
             sensors.append({
                 "label": label,
                 "value": round(value, 3),
                 "unit": RTYPE_UNIT[r_type],
                 "type": RTYPE_NAME[r_type],
+                "component": component,
             })
             if r_type == TEMP:
                 temps.append({"label": label, "value": round(value, 1)})
