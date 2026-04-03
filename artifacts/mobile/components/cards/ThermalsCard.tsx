@@ -30,12 +30,20 @@ export function ThermalsCard({ temps, fans, titleEdit, cardEdit }: Props) {
   const aliases = cardEdit?.fieldAliases ?? {};
   const getLabel = (key: string, def: string) => aliases[key] ?? def;
 
-  const tempMap = new Map(temps.map(t => ["t:" + t.label, t]));
-  const fanMap = new Map(fans.map(f => ["f:" + f.label, f]));
+  const tempMap = new Map<string, SensorReading>();
+  for (const t of temps) {
+    const key = "t:" + t.label;
+    if (!tempMap.has(key)) tempMap.set(key, t);
+  }
+  const fanMap = new Map<string, FanInfo>();
+  for (const f of fans) {
+    const key = "f:" + f.label;
+    if (!fanMap.has(key)) fanMap.set(key, f);
+  }
 
   const defaultOrder = [
-    ...temps.map(t => "t:" + t.label),
-    ...fans.map(f => "f:" + f.label),
+    ...Array.from(tempMap.keys()),
+    ...Array.from(fanMap.keys()),
   ];
   const order = cardEdit?.fieldOrder ?? defaultOrder;
   const visibleOrder = order.filter(k => !hidden.has(k));

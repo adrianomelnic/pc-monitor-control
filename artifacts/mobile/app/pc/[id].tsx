@@ -211,9 +211,19 @@ export default function PCDetailScreen() {
   const getDefaultKeys = (kind: string): string[] => {
     if (DEFAULT_FIELD_ORDER[kind]) return DEFAULT_FIELD_ORDER[kind];
     if (kind === "thermals") {
-      const allTemps = (m?.sensors ?? []).filter(s => s.type === "temperature");
-      const allFans = m?.fans ?? [];
-      return [...allTemps.map(t => "t:" + t.label), ...allFans.map(f => "f:" + f.label)];
+      const seenT = new Set<string>();
+      const seenF = new Set<string>();
+      const tKeys: string[] = [];
+      const fKeys: string[] = [];
+      for (const s of (m?.sensors ?? []).filter(s => s.type === "temperature")) {
+        const k = "t:" + s.label;
+        if (!seenT.has(k)) { seenT.add(k); tKeys.push(k); }
+      }
+      for (const f of (m?.fans ?? [])) {
+        const k = "f:" + f.label;
+        if (!seenF.has(k)) { seenF.add(k); fKeys.push(k); }
+      }
+      return [...tKeys, ...fKeys];
     }
     if (kind === "fans") return (m?.fans ?? []).map(f => f.label);
     if (kind === "disks") return (m?.disks ?? []).map(d => d.device || d.mountpoint);
@@ -276,16 +286,20 @@ export default function PCDetailScreen() {
 
     const dynamicItems: { key: string; label: string }[] =
       card.kind === "thermals"
-        ? [
-            ...(m?.sensors ?? []).filter(s => s.type === "temperature").map(t => ({
-              key: "t:" + t.label,
-              label: t.label + " (temp)",
-            })),
-            ...(m?.fans ?? []).map(f => ({
-              key: "f:" + f.label,
-              label: f.label + " (fan)",
-            })),
-          ]
+        ? (() => {
+            const seenT = new Set<string>();
+            const seenF = new Set<string>();
+            const result: { key: string; label: string }[] = [];
+            for (const s of (m?.sensors ?? []).filter(s => s.type === "temperature")) {
+              const k = "t:" + s.label;
+              if (!seenT.has(k)) { seenT.add(k); result.push({ key: k, label: s.label + " (temp)" }); }
+            }
+            for (const f of (m?.fans ?? [])) {
+              const k = "f:" + f.label;
+              if (!seenF.has(k)) { seenF.add(k); result.push({ key: k, label: f.label + " (fan)" }); }
+            }
+            return result;
+          })()
         : card.kind === "network"
         ? (m?.network ?? []).filter((i) => i.isUp).map((i) => ({ key: i.name, label: i.name }))
         : card.kind === "fans"
