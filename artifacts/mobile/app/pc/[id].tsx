@@ -198,14 +198,26 @@ export default function PCDetailScreen() {
     setEditingFieldLabel(null);
   };
 
+  const THERMALS_IMPORTANT_RE = [/cpu/i, /gpu/i, /ram/i, /memory/i, /vram/i, /dram/i];
+
   const toggleBuiltinField = (kind: BuiltinCardKind, fieldKey: string) => {
     const card = cards.find((c) => c.id === kind) as BuiltinCardConfig | undefined;
     if (!card) return;
-    const hidden = [...(card.hiddenFields ?? [])];
-    const idx = hidden.indexOf(fieldKey);
-    if (idx >= 0) hidden.splice(idx, 1);
-    else hidden.push(fieldKey);
-    updateBuiltinCard(pcId, kind, { hiddenFields: hidden });
+    let startingHidden: string[];
+    if (card.hiddenFields !== undefined) {
+      startingHidden = [...card.hiddenFields];
+    } else if (kind === "thermals") {
+      startingHidden = (m?.sensors ?? [])
+        .filter(s => s.type === "temperature" && !THERMALS_IMPORTANT_RE.some(p => p.test(s.label)))
+        .map(s => "t:" + s.label)
+        .filter((k, i, arr) => arr.indexOf(k) === i);
+    } else {
+      startingHidden = [];
+    }
+    const idx = startingHidden.indexOf(fieldKey);
+    if (idx >= 0) startingHidden.splice(idx, 1);
+    else startingHidden.push(fieldKey);
+    updateBuiltinCard(pcId, kind, { hiddenFields: startingHidden });
   };
 
   const getDefaultKeys = (kind: string): string[] => {
@@ -279,7 +291,19 @@ export default function PCDetailScreen() {
   }
 
   function BuiltinCardEditPanel({ card, accent }: { card: BuiltinCardConfig; accent: string }) {
-    const hidden = new Set(card.hiddenFields ?? []);
+    const IMPORTANT_TEMP_RE = [/cpu/i, /gpu/i, /ram/i, /memory/i, /vram/i, /dram/i];
+    const hidden: Set<string> = (() => {
+      if (card.hiddenFields !== undefined) return new Set(card.hiddenFields);
+      if (card.kind === "thermals") {
+        const d = new Set<string>();
+        for (const s of (m?.sensors ?? []).filter(s => s.type === "temperature")) {
+          const k = "t:" + s.label;
+          if (!IMPORTANT_TEMP_RE.some(p => p.test(s.label))) d.add(k);
+        }
+        return d;
+      }
+      return new Set<string>();
+    })();
     const extrasSet = new Set(card.extraSensors ?? []);
     const builtinFields = BUILTIN_CARD_FIELDS[card.kind] ?? [];
     const fieldAliases = card.fieldAliases ?? {};

@@ -18,6 +18,12 @@ function rpmBar(rpm: number, max = 3000) {
   return Math.min(100, (rpm / max) * 100);
 }
 
+const IMPORTANT_PATTERNS = [/cpu/i, /gpu/i, /ram/i, /memory/i, /vram/i, /dram/i];
+
+function isImportantTemp(label: string): boolean {
+  return IMPORTANT_PATTERNS.some(p => p.test(label));
+}
+
 interface Props {
   temps: SensorReading[];
   fans: FanInfo[];
@@ -26,7 +32,6 @@ interface Props {
 }
 
 export function ThermalsCard({ temps, fans, titleEdit, cardEdit }: Props) {
-  const hidden = new Set(cardEdit?.hiddenFields ?? []);
   const aliases = cardEdit?.fieldAliases ?? {};
   const getLabel = (key: string, def: string) => aliases[key] ?? def;
 
@@ -45,6 +50,19 @@ export function ThermalsCard({ temps, fans, titleEdit, cardEdit }: Props) {
     ...Array.from(tempMap.keys()),
     ...Array.from(fanMap.keys()),
   ];
+
+  // If the user has never customised hidden fields, hide non-important temps by default.
+  // Once they open the edit panel and toggle anything, hiddenFields becomes an array and
+  // their explicit choices take over.
+  const hidden: Set<string> = (() => {
+    if (cardEdit?.hiddenFields !== undefined) return new Set(cardEdit.hiddenFields);
+    const defaults = new Set<string>();
+    for (const key of tempMap.keys()) {
+      if (!isImportantTemp(key.slice(2))) defaults.add(key);
+    }
+    return defaults;
+  })();
+
   const order = cardEdit?.fieldOrder ?? defaultOrder;
   const visibleOrder = order.filter(k => !hidden.has(k));
 
