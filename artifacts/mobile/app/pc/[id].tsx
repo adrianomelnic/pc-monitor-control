@@ -226,10 +226,20 @@ export default function PCDetailScreen() {
           sensorLabels={c.sensorLabels}
           accentColor={c.accentColor}
           sensors={allSensors}
+          sensorAliases={c.sensorAliases}
           onEdit={() => {
             Haptics.selectionAsync();
             setEditingCard(c);
             setPickerVisible(true);
+          }}
+          onUpdateAlias={(originalLabel, newAlias) => {
+            const current = { ...(c.sensorAliases ?? {}) };
+            if (newAlias && newAlias !== originalLabel) {
+              current[originalLabel] = newAlias;
+            } else {
+              delete current[originalLabel];
+            }
+            updateCustomCard(pcId, c.id, { sensorAliases: current });
           }}
         />
       );

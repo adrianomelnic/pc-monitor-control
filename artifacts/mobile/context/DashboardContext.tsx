@@ -25,6 +25,7 @@ export interface CustomCardConfig {
   sensorLabels: string[];
   accentColor: string;
   icon: string;
+  sensorAliases?: Record<string, string>;
 }
 
 export type CardConfig = BuiltinCardConfig | CustomCardConfig;
@@ -54,7 +55,7 @@ interface DashboardContextType {
   updateCustomCard: (
     pcId: string,
     cardId: string,
-    updates: Partial<Pick<CustomCardConfig, "title" | "sensorLabels" | "accentColor" | "icon">>
+    updates: Partial<Pick<CustomCardConfig, "title" | "sensorLabels" | "accentColor" | "icon" | "sensorAliases">>
   ) => void;
 }
 
