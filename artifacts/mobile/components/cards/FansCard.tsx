@@ -1,9 +1,9 @@
 import { Feather } from "@expo/vector-icons";
 import React, { useState } from "react";
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 import Colors from "@/constants/colors";
 import { FanInfo } from "@/context/PcsContext";
-import { BuiltinCardEdit, CardBase, CardTitleEditConfig } from "./CardBase";
+import { BuiltinCardEdit, CardBase, CardTitleEditConfig, StatRow } from "./CardBase";
 
 const C = Colors.light;
 const ACCENT = "#FB923C";
@@ -25,6 +25,9 @@ interface DiagResult {
   sig_hex?: string;
   num_readings?: number;
   size_reading?: number;
+  lbl_bytes_used?: number;
+  val_off_base?: number;
+  first_element_hex?: string;
   temp_fan_samples?: { idx: number; type: string; orig: string; user: string; value: number }[];
   error?: string;
   trace?: string;
@@ -40,7 +43,12 @@ interface Props {
 
 export function FansCard({ fans, baseUrl, apiKey, titleEdit, cardEdit }: Props) {
   const hidden = new Set(cardEdit?.hiddenFields ?? []);
-  const visibleFans = fans.filter((f) => !hidden.has(f.label));
+  const order = cardEdit?.fieldOrder ?? fans.map(f => f.label);
+  const extraMap = cardEdit?.extraSensorMap ?? {};
+  const fanMap = new Map(fans.map(f => [f.label, f]));
+  const visibleKeys = order.filter(k => !hidden.has(k));
+  const visibleFanCount = visibleKeys.filter(k => fanMap.has(k)).length;
+
   const [diagLoading, setDiagLoading] = useState(false);
   const [diagResult, setDiagResult] = useState<DiagResult | null>(null);
 
@@ -155,11 +163,35 @@ export function FansCard({ fans, baseUrl, apiKey, titleEdit, cardEdit }: Props) 
     );
   }
 
+  function renderItem(key: string): React.ReactNode {
+    const fan = fanMap.get(key);
+    if (fan) {
+      const color = rpmColor(fan.rpm);
+      const pct = rpmBar(fan.rpm);
+      return (
+        <View key={key} style={styles.fanRow}>
+          <View style={styles.fanLeft}>
+            <Feather name="wind" size={12} color={color} />
+            <Text style={styles.fanLabel} numberOfLines={1}>{fan.label}</Text>
+          </View>
+          <View style={styles.fanRight}>
+            <View style={styles.fanBarTrack}>
+              <View style={[styles.fanBarFill, { width: `${pct}%` as any, backgroundColor: color }]} />
+            </View>
+            <Text style={[styles.fanRpm, { color }]}>{fan.rpm.toLocaleString()} RPM</Text>
+          </View>
+        </View>
+      );
+    }
+    const val = extraMap[key];
+    return val ? <StatRow key={key} label={key} value={val} /> : null;
+  }
+
   return (
     <CardBase
       icon="wind"
       title={titleEdit?.customTitle ?? "Fans"}
-      subtitle={fans.length > 0 ? `${visibleFans.length} fan${visibleFans.length !== 1 ? "s" : ""} detected` : undefined}
+      subtitle={fans.length > 0 ? `${visibleFanCount} fan${visibleFanCount !== 1 ? "s" : ""} detected` : undefined}
       accentColor={ACCENT}
       titleEditable={titleEdit?.editable}
       titleDraft={titleEdit?.draft}
@@ -168,7 +200,6 @@ export function FansCard({ fans, baseUrl, apiKey, titleEdit, cardEdit }: Props) 
       onTitlePress={titleEdit?.onTitlePress}
       rightAction={titleEdit?.rightAction}
       style={titleEdit?.borderStyle}
-      extraSensorRows={cardEdit?.extraSensorRows}
       editPanel={cardEdit?.editPanel}
     >
       {fans.length === 0 ? (
@@ -195,40 +226,17 @@ export function FansCard({ fans, baseUrl, apiKey, titleEdit, cardEdit }: Props) 
               </View>
             ))}
           </View>
+          {visibleKeys.filter(k => !fanMap.has(k)).map(key => {
+            const val = extraMap[key];
+            return val ? <StatRow key={key} label={key} value={val} /> : null;
+          })}
         </View>
       ) : (
         <View style={styles.fanList}>
-          {visibleFans.map((fan, i) => {
-            const color = rpmColor(fan.rpm);
-            const pct = rpmBar(fan.rpm);
-            return (
-              <View key={i} style={styles.fanRow}>
-                <View style={styles.fanLeft}>
-                  <Feather name="wind" size={12} color={color} />
-                  <Text style={styles.fanLabel} numberOfLines={1}>
-                    {fan.label}
-                  </Text>
-                </View>
-                <View style={styles.fanRight}>
-                  <View style={styles.fanBarTrack}>
-                    <View
-                      style={[
-                        styles.fanBarFill,
-                        { width: `${pct}%` as any, backgroundColor: color },
-                      ]}
-                    />
-                  </View>
-                  <Text style={[styles.fanRpm, { color }]}>
-                    {fan.rpm.toLocaleString()} RPM
-                  </Text>
-                </View>
-              </View>
-            );
-          })}
+          {visibleKeys.map(key => renderItem(key))}
         </View>
       )}
 
-      {/* Diagnosis button — always visible when connected */}
       {baseUrl && (
         <View style={styles.diagWrap}>
           <Pressable

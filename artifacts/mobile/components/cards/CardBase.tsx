@@ -34,7 +34,8 @@ export interface ExtraSensorRow {
 /** Config for built-in card sensor/field editing (passed alongside titleEdit) */
 export interface BuiltinCardEdit {
   hiddenFields?: string[];
-  extraSensorRows?: ExtraSensorRow[];
+  fieldOrder?: string[];
+  extraSensorMap?: Record<string, string>;
   editPanel?: React.ReactNode;
 }
 
@@ -68,8 +69,6 @@ interface CardBaseProps {
   onTitlePress?: () => void;
   children: React.ReactNode;
   style?: ViewStyle;
-  /** Extra HWiNFO64 sensor rows appended below main content */
-  extraSensorRows?: ExtraSensorRow[];
   /** Edit panel node rendered at the very bottom of the card (in edit mode) */
   editPanel?: React.ReactNode;
 }
@@ -88,7 +87,6 @@ export function CardBase({
   onTitlePress,
   children,
   style,
-  extraSensorRows,
   editPanel,
 }: CardBaseProps) {
   const titleInputRef = useRef<TextInput>(null);
@@ -128,14 +126,6 @@ export function CardBase({
       </View>
       <View style={styles.divider} />
       {children}
-      {extraSensorRows && extraSensorRows.length > 0 && (
-        <View style={styles.extraRows}>
-          <View style={styles.extraDivider} />
-          {extraSensorRows.map((r, i) => (
-            <StatRow key={i} label={r.label} value={r.value} />
-          ))}
-        </View>
-      )}
       {editPanel ?? null}
     </View>
   );

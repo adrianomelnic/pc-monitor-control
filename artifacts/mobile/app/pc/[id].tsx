@@ -61,6 +61,7 @@ const CARD_ACCENTS: Record<string, string> = {
 
 const BUILTIN_CARD_FIELDS: Record<string, { key: string; label: string }[]> = {
   cpu: [
+    { key: "usage", label: "Usage" },
     { key: "physicalCores", label: "Physical cores" },
     { key: "logicalCores", label: "Logical cores" },
     { key: "freqCurrent", label: "Current frequency" },
@@ -69,17 +70,41 @@ const BUILTIN_CARD_FIELDS: Record<string, { key: string; label: string }[]> = {
   ],
   gpu: [
     { key: "usage", label: "GPU load" },
-    { key: "vramRow", label: "VRAM used (row)" },
-    { key: "vram", label: "VRAM bar" },
+    { key: "vramRow", label: "VRAM used" },
     { key: "clockGpu", label: "GPU clock" },
     { key: "clockMem", label: "Mem clock" },
+    { key: "vram", label: "VRAM bar" },
   ],
   ram: [
-    { key: "available", label: "Available memory" },
-    { key: "bar", label: "RAM usage bar" },
+    { key: "usage", label: "In use %" },
+    { key: "used", label: "Used" },
+    { key: "available", label: "Available" },
+    { key: "total", label: "Total" },
+    { key: "bar", label: "RAM bar" },
     { key: "swap", label: "Swap / Page file" },
   ],
 };
+
+const DEFAULT_FIELD_ORDER: Record<string, string[]> = {
+  gpu: ["usage", "vramRow", "clockGpu", "clockMem", "vram"],
+  cpu: ["usage", "physicalCores", "logicalCores", "freqCurrent", "freqMax", "perCore"],
+  ram: ["usage", "used", "available", "total", "bar", "swap"],
+};
+
+function getEffectiveFieldOrder(
+  stored: string[] | undefined,
+  defaults: string[],
+  extras: string[]
+): string[] {
+  const allKeys = [...defaults, ...extras];
+  if (!stored) return allKeys;
+  const validStored = stored.filter(k => allKeys.includes(k));
+  const storedSet = new Set(validStored);
+  const newKeys = allKeys.filter(k => !storedSet.has(k));
+  const combined = [...validStored, ...newKeys];
+  const seen = new Set<string>();
+  return combined.filter(k => { if (seen.has(k)) return false; seen.add(k); return true; });
+}
 
 export default function PCDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -146,19 +171,46 @@ export default function PCDetailScreen() {
     updateBuiltinCard(pcId, kind, { hiddenFields: hidden });
   };
 
+  const getDefaultKeys = (kind: string): string[] => {
+    if (DEFAULT_FIELD_ORDER[kind]) return DEFAULT_FIELD_ORDER[kind];
+    if (kind === "fans") return (m?.fans ?? []).map(f => f.label);
+    if (kind === "disks") return (m?.disks ?? []).map(d => d.device || d.mountpoint);
+    if (kind === "network") return (m?.network ?? []).filter(i => i.isUp).map(i => i.name);
+    return [];
+  };
+
   const addExtraSensor = (kind: BuiltinCardKind, label: string) => {
     const card = cards.find((c) => c.id === kind) as BuiltinCardConfig | undefined;
     if (!card) return;
     const extras = [...(card.extraSensors ?? [])];
     if (!extras.includes(label)) extras.push(label);
-    updateBuiltinCard(pcId, kind, { extraSensors: extras });
+    const defaultKeys = getDefaultKeys(kind);
+    const currentOrder = getEffectiveFieldOrder(card.fieldOrder, defaultKeys, card.extraSensors ?? []);
+    const newOrder = currentOrder.includes(label) ? currentOrder : [...currentOrder, label];
+    updateBuiltinCard(pcId, kind, { extraSensors: extras, fieldOrder: newOrder });
   };
 
   const removeExtraSensor = (kind: BuiltinCardKind, label: string) => {
     const card = cards.find((c) => c.id === kind) as BuiltinCardConfig | undefined;
     if (!card) return;
     const extras = (card.extraSensors ?? []).filter((l) => l !== label);
-    updateBuiltinCard(pcId, kind, { extraSensors: extras });
+    const newOrder = card.fieldOrder?.filter(k => k !== label);
+    updateBuiltinCard(pcId, kind, { extraSensors: extras, fieldOrder: newOrder });
+  };
+
+  const moveBuiltinField = (kind: BuiltinCardKind, key: string, direction: "up" | "down") => {
+    const card = cards.find((c) => c.id === kind) as BuiltinCardConfig | undefined;
+    if (!card) return;
+    const defaultKeys = getDefaultKeys(kind);
+    const extras = card.extraSensors ?? [];
+    const order = getEffectiveFieldOrder(card.fieldOrder, defaultKeys, extras);
+    const idx = order.indexOf(key);
+    if (idx < 0) return;
+    const swapIdx = direction === "up" ? idx - 1 : idx + 1;
+    if (swapIdx < 0 || swapIdx >= order.length) return;
+    const newOrder = [...order];
+    [newOrder[idx], newOrder[swapIdx]] = [newOrder[swapIdx], newOrder[idx]];
+    updateBuiltinCard(pcId, kind, { fieldOrder: newOrder });
   };
 
   function BuiltinDoneBtn({ accentColor, kind }: { accentColor: string; kind: BuiltinCardKind }) {
@@ -176,8 +228,8 @@ export default function PCDetailScreen() {
 
   function BuiltinCardEditPanel({ card, accent }: { card: BuiltinCardConfig; accent: string }) {
     const hidden = new Set(card.hiddenFields ?? []);
-    const extras = card.extraSensors ?? [];
-    const staticFields = BUILTIN_CARD_FIELDS[card.kind] ?? [];
+    const extrasSet = new Set(card.extraSensors ?? []);
+    const builtinFields = BUILTIN_CARD_FIELDS[card.kind] ?? [];
 
     const dynamicItems: { key: string; label: string }[] =
       card.kind === "network"
@@ -191,59 +243,64 @@ export default function PCDetailScreen() {
           }))
         : [];
 
-    const fields = staticFields.length > 0 ? staticFields : dynamicItems;
-    const sectionLabel =
-      card.kind === "network" ? "INTERFACES" :
-      card.kind === "fans" ? "FANS" :
-      card.kind === "disks" ? "VOLUMES" : "FIELDS";
+    const defaultKeys = getDefaultKeys(card.kind);
+    const effectiveOrder = getEffectiveFieldOrder(
+      card.fieldOrder,
+      defaultKeys,
+      card.extraSensors ?? []
+    );
+
+    const labelMap: Record<string, string> = {};
+    builtinFields.forEach(f => { labelMap[f.key] = f.label; });
+    dynamicItems.forEach(d => { labelMap[d.key] = d.label; });
 
     return (
       <View style={styles.editPanel}>
         <View style={styles.editPanelDivider} />
+        {effectiveOrder.map((key, idx) => {
+          const isHidden = hidden.has(key);
+          const isExtra = extrasSet.has(key);
+          const label = labelMap[key] ?? key;
+          const isFirst = idx === 0;
+          const isLast = idx === effectiveOrder.length - 1;
 
-        {fields.length > 0 && (
-          <>
-            <Text style={styles.editPanelSection}>{sectionLabel}</Text>
-            {fields.map((field) => {
-              const isHidden = hidden.has(field.key);
-              return (
+          return (
+            <View key={key} style={styles.editPanelRow}>
+              <View style={styles.editPanelArrows}>
                 <Pressable
-                  key={field.key}
-                  onPress={() => toggleBuiltinField(card.kind, field.key)}
-                  style={styles.editPanelRow}
+                  onPress={() => !isFirst && moveBuiltinField(card.kind, key, "up")}
                   hitSlop={4}
+                  disabled={isFirst}
                 >
-                  <View style={[styles.editPanelToggle, {
-                    borderColor: isHidden ? C.textMuted : accent,
-                    backgroundColor: isHidden ? "transparent" : accent + "22",
-                  }]}>
-                    <Feather name={isHidden ? "eye-off" : "eye"} size={11} color={isHidden ? C.textMuted : accent} />
-                  </View>
-                  <Text style={[styles.editPanelRowText, isHidden && { color: C.textMuted }]} numberOfLines={1}>
-                    {field.label}
-                  </Text>
+                  <Feather name="chevron-up" size={16} color={isFirst ? C.textMuted + "33" : accent} />
                 </Pressable>
-              );
-            })}
-          </>
-        )}
-
-        {extras.length > 0 && (
-          <>
-            <Text style={[styles.editPanelSection, fields.length > 0 && { marginTop: 8 }]}>EXTRA SENSORS</Text>
-            {extras.map((label) => (
-              <View key={label} style={styles.editPanelRow}>
-                <View style={[styles.editPanelToggle, { borderColor: accent, backgroundColor: accent + "22" }]}>
-                  <Feather name="plus" size={11} color={accent} />
-                </View>
-                <Text style={styles.editPanelRowText} numberOfLines={1}>{label}</Text>
-                <Pressable onPress={() => removeExtraSensor(card.kind, label)} hitSlop={8} style={styles.editPanelRemove}>
-                  <Feather name="x" size={14} color={C.danger} />
+                <Pressable
+                  onPress={() => !isLast && moveBuiltinField(card.kind, key, "down")}
+                  hitSlop={4}
+                  disabled={isLast}
+                >
+                  <Feather name="chevron-down" size={16} color={isLast ? C.textMuted + "33" : accent} />
                 </Pressable>
               </View>
-            ))}
-          </>
-        )}
+              <Pressable onPress={() => toggleBuiltinField(card.kind, key)} hitSlop={4}>
+                <View style={[styles.editPanelToggle, {
+                  borderColor: isHidden ? C.textMuted : accent,
+                  backgroundColor: isHidden ? "transparent" : accent + "22",
+                }]}>
+                  <Feather name={isHidden ? "eye-off" : "eye"} size={11} color={isHidden ? C.textMuted : accent} />
+                </View>
+              </Pressable>
+              <Text style={[styles.editPanelRowText, isHidden && { color: C.textMuted }]} numberOfLines={1}>
+                {label}
+              </Text>
+              {isExtra && (
+                <Pressable onPress={() => removeExtraSensor(card.kind, key)} hitSlop={8} style={styles.editPanelRemove}>
+                  <Feather name="x" size={14} color={C.danger} />
+                </Pressable>
+              )}
+            </View>
+          );
+        })}
 
         <Pressable
           onPress={() => setExtraSensorPickerFor(card.kind)}
@@ -458,14 +515,23 @@ export default function PCDetailScreen() {
       borderStyle: isEditing ? { borderColor: accent + "66", borderWidth: 1.5 } : undefined,
     };
 
-    const extraSensorRows = (builtinCard.extraSensors ?? []).map((label) => {
+    const extraSensorMap: Record<string, string> = {};
+    (builtinCard.extraSensors ?? []).forEach((label) => {
       const sensor = allSensors.find((s) => s.label === label);
-      return { label, value: sensor ? formatValue(sensor) : "—" };
+      extraSensorMap[label] = sensor ? formatValue(sensor) : "—";
     });
+
+    const defaultKeys = getDefaultKeys(card.kind);
+    const effectiveOrder = getEffectiveFieldOrder(
+      builtinCard.fieldOrder,
+      defaultKeys,
+      builtinCard.extraSensors ?? []
+    );
 
     const cardEdit: BuiltinCardEdit = {
       hiddenFields: builtinCard.hiddenFields,
-      extraSensorRows,
+      fieldOrder: effectiveOrder,
+      extraSensorMap,
       editPanel: isEditing ? <BuiltinCardEditPanel card={builtinCard} accent={accent} /> : undefined,
     };
 
@@ -1184,6 +1250,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 8,
     paddingVertical: 3,
+  },
+  editPanelArrows: {
+    flexDirection: "column",
+    alignItems: "center",
+    gap: -2,
+    marginRight: 2,
   },
   editPanelToggle: {
     width: 24,

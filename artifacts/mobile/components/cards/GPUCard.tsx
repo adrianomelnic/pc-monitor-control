@@ -12,6 +12,8 @@ function fmtMB(mb: number | null) {
   return mb >= 1024 ? `${(mb / 1024).toFixed(1)} GB` : `${mb} MB`;
 }
 
+const DEFAULT_ORDER = ["usage", "vramRow", "clockGpu", "clockMem", "vram"];
+
 interface Props {
   gpus: GPUInfo[];
   titleEdit?: CardTitleEditConfig;
@@ -21,6 +23,10 @@ interface Props {
 export function GPUCard({ gpus, titleEdit, cardEdit }: Props) {
   const base = titleEdit?.customTitle ?? "GPU";
   const hidden = new Set(cardEdit?.hiddenFields ?? []);
+  const order = cardEdit?.fieldOrder ?? DEFAULT_ORDER;
+  const extraMap = cardEdit?.extraSensorMap ?? {};
+
+  const extraKeys = order.filter(k => !["usage", "vramRow", "clockGpu", "clockMem", "vram"].includes(k) && !hidden.has(k));
 
   if (!gpus || gpus.length === 0) {
     return (
@@ -35,10 +41,17 @@ export function GPUCard({ gpus, titleEdit, cardEdit }: Props) {
         onTitlePress={titleEdit?.onTitlePress}
         rightAction={titleEdit?.rightAction}
         style={titleEdit?.borderStyle}
-        extraSensorRows={cardEdit?.extraSensorRows}
         editPanel={cardEdit?.editPanel}
       >
         <Text style={styles.empty}>No GPU detected or nvidia-smi not available</Text>
+        {extraKeys.length > 0 && (
+          <View style={styles.fieldList}>
+            {extraKeys.map(key => {
+              const val = extraMap[key];
+              return val ? <StatRow key={key} label={key} value={val} /> : null;
+            })}
+          </View>
+        )}
       </CardBase>
     );
   }
@@ -52,6 +65,43 @@ export function GPUCard({ gpus, titleEdit, cardEdit }: Props) {
             : null;
         const isFirst = idx === 0;
         const gpuTitle = gpus.length > 1 ? `${base} ${idx}` : base;
+
+        function renderField(key: string): React.ReactNode {
+          switch (key) {
+            case "usage":
+              return gpu.usage != null ? (
+                <StatRow key={key} label="GPU Load" value={`${Math.round(gpu.usage)}%`} color={ACCENT} />
+              ) : null;
+            case "vramRow":
+              return (
+                <StatRow key={key} label="VRAM used" value={`${fmtMB(gpu.vramUsed)} / ${fmtMB(gpu.vramTotal)}`} color={ACCENT} />
+              );
+            case "clockGpu":
+              return gpu.clockGpu != null ? (
+                <StatRow key={key} label="GPU clock" value={`${gpu.clockGpu} MHz`} />
+              ) : null;
+            case "clockMem":
+              return gpu.clockMem != null ? (
+                <StatRow key={key} label="Mem clock" value={`${gpu.clockMem} MHz`} />
+              ) : null;
+            case "vram":
+              return vramPct != null ? (
+                <View key={key} style={styles.vramSection}>
+                  <View style={styles.vramHeader}>
+                    <Text style={styles.sectionText}>VRAM</Text>
+                    <Text style={[styles.vramPct, { color: vramPct > 85 ? "#FF4444" : ACCENT }]}>
+                      {Math.round(vramPct)}%
+                    </Text>
+                  </View>
+                  <MiniBar value={vramPct} color={ACCENT} height={6} />
+                </View>
+              ) : null;
+            default: {
+              const val = extraMap[key];
+              return val ? <StatRow key={key} label={key} value={val} /> : null;
+            }
+          }
+        }
 
         return (
           <CardBase
@@ -68,50 +118,11 @@ export function GPUCard({ gpus, titleEdit, cardEdit }: Props) {
             onTitlePress={isFirst ? titleEdit?.onTitlePress : undefined}
             rightAction={isFirst ? titleEdit?.rightAction : undefined}
             style={isFirst ? titleEdit?.borderStyle : undefined}
-            extraSensorRows={isFirst ? cardEdit?.extraSensorRows : undefined}
             editPanel={isFirst ? cardEdit?.editPanel : undefined}
           >
-            <View style={styles.mainRow}>
-              {/* Usage big number */}
-              {!hidden.has("usage") && (
-                <View style={styles.bigStat}>
-                  <Text style={[styles.bigNum, { color: gpu.usage != null ? ACCENT : C.textMuted }]}>
-                    {gpu.usage != null ? Math.round(gpu.usage) : "—"}
-                    {gpu.usage != null && <Text style={styles.bigUnit}>%</Text>}
-                  </Text>
-                  <Text style={styles.bigLabel}>GPU Load</Text>
-                </View>
-              )}
-
-              <View style={styles.detailGrid}>
-                {!hidden.has("vramRow") && (
-                  <StatRow
-                    label="VRAM used"
-                    value={`${fmtMB(gpu.vramUsed)} / ${fmtMB(gpu.vramTotal)}`}
-                    color={ACCENT}
-                  />
-                )}
-                {gpu.clockGpu != null && !hidden.has("clockGpu") && (
-                  <StatRow label="GPU clock" value={`${gpu.clockGpu} MHz`} />
-                )}
-                {gpu.clockMem != null && !hidden.has("clockMem") && (
-                  <StatRow label="Mem clock" value={`${gpu.clockMem} MHz`} />
-                )}
-              </View>
+            <View style={styles.fieldList}>
+              {order.filter(k => !hidden.has(k)).map(key => renderField(key))}
             </View>
-
-            {/* VRAM bar */}
-            {vramPct != null && !hidden.has("vram") && (
-              <View style={styles.vramSection}>
-                <View style={styles.vramHeader}>
-                  <Text style={styles.sectionText}>VRAM</Text>
-                  <Text style={[styles.vramPct, { color: vramPct > 85 ? "#FF4444" : ACCENT }]}>
-                    {Math.round(vramPct)}%
-                  </Text>
-                </View>
-                <MiniBar value={vramPct} color={ACCENT} height={6} />
-              </View>
-            )}
           </CardBase>
         );
       })}
@@ -120,32 +131,8 @@ export function GPUCard({ gpus, titleEdit, cardEdit }: Props) {
 }
 
 const styles = StyleSheet.create({
-  mainRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 16,
-  },
-  bigStat: {
-    alignItems: "center",
-    minWidth: 64,
-  },
-  bigNum: {
-    fontSize: 36,
-    fontWeight: "800",
-    letterSpacing: -1,
-  },
-  bigUnit: {
-    fontSize: 18,
-    fontWeight: "400",
-  },
-  bigLabel: {
-    fontSize: 11,
-    color: Colors.light.textSecondary,
-    marginTop: 2,
-  },
-  detailGrid: {
-    flex: 1,
-    gap: 5,
+  fieldList: {
+    gap: 6,
   },
   vramSection: {
     gap: 5,
