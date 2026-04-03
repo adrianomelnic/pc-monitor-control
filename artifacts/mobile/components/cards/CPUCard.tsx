@@ -11,7 +11,7 @@ function fmt(mhz: number) {
   return mhz >= 1000 ? `${(mhz / 1000).toFixed(2)} GHz` : `${mhz} MHz`;
 }
 
-const DEFAULT_ORDER = ["usage", "physicalCores", "logicalCores", "freqCurrent", "freqMax", "perCore"];
+const DEFAULT_ORDER = ["usage", "physicalCores", "logicalCores", "freqCurrent", "freqMax", "perCore", "perCoreVertical", "cpuBar"];
 
 interface Props {
   cpu: CPUInfo;
@@ -30,8 +30,11 @@ export function CPUCard({ cpu, titleEdit, cardEdit }: Props) {
 
   const visibleOrder = order.filter(k => !hidden.has(k));
   const showHero = !hidden.has("usage");
-  const rightFields = visibleOrder.filter(k => k !== "usage" && k !== "perCore");
+  const BELOW_KEYS = new Set(["perCore", "perCoreVertical", "cpuBar"]);
+  const rightFields = visibleOrder.filter(k => k !== "usage" && !BELOW_KEYS.has(k));
   const showPerCore = !hidden.has("perCore") && cores.length > 0;
+  const showPerCoreVertical = !hidden.has("perCoreVertical") && cores.length > 0;
+  const showCpuBar = !hidden.has("cpuBar");
 
   function renderRightField(key: string): React.ReactNode {
     switch (key) {
@@ -84,8 +87,8 @@ export function CPUCard({ cpu, titleEdit, cardEdit }: Props) {
       )}
 
       {showPerCore && (
-        <View style={styles.perCoreSection}>
-          <Text style={styles.sectionLabel}>PER CORE</Text>
+        <View style={styles.belowSection}>
+          <Text style={styles.sectionLabel}>{getLabel("perCore", "PER CORE")}</Text>
           <View style={[styles.coreGrid, { gap: cols === 4 ? 6 : 8 }]}>
             {cores.map((val, i) => {
               const barColor = val > 85 ? "#FF4444" : val > 65 ? "#FFB800" : ACCENT;
@@ -100,6 +103,38 @@ export function CPUCard({ cpu, titleEdit, cardEdit }: Props) {
               );
             })}
           </View>
+        </View>
+      )}
+
+      {showPerCoreVertical && (
+        <View style={styles.belowSection}>
+          <Text style={styles.sectionLabel}>{getLabel("perCoreVertical", "PER CORE")}</Text>
+          <View style={styles.coreVerticalList}>
+            {cores.map((val, i) => {
+              const barColor = val > 85 ? "#FF4444" : val > 65 ? "#FFB800" : ACCENT;
+              return (
+                <View key={i} style={styles.coreVerticalRow}>
+                  <Text style={styles.coreVerticalLabel}>C{i}</Text>
+                  <View style={styles.coreVerticalBar}>
+                    <MiniBar value={val} color={ACCENT} height={5} />
+                  </View>
+                  <Text style={[styles.coreVerticalPct, { color: barColor }]}>{Math.round(val)}%</Text>
+                </View>
+              );
+            })}
+          </View>
+        </View>
+      )}
+
+      {showCpuBar && (
+        <View style={styles.belowSection}>
+          <View style={styles.cpuBarHeader}>
+            <Text style={styles.sectionLabel}>{getLabel("cpuBar", "CPU LOAD")}</Text>
+            <Text style={[styles.cpuBarPct, { color: cpu.usageTotal > 85 ? "#FF4444" : cpu.usageTotal > 65 ? "#FFB800" : ACCENT }]}>
+              {Math.round(cpu.usageTotal)}%
+            </Text>
+          </View>
+          <MiniBar value={cpu.usageTotal} color={ACCENT} height={6} />
         </View>
       )}
     </CardBase>
@@ -136,7 +171,7 @@ const styles = StyleSheet.create({
   fieldList: {
     gap: 5,
   },
-  perCoreSection: {
+  belowSection: {
     marginTop: 6,
     gap: 4,
   },
@@ -166,6 +201,38 @@ const styles = StyleSheet.create({
   },
   corePct: {
     fontSize: 10,
+    fontWeight: "700",
+  },
+  coreVerticalList: {
+    gap: 5,
+  },
+  coreVerticalRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  coreVerticalLabel: {
+    fontSize: 10,
+    color: C.textMuted,
+    fontWeight: "600",
+    width: 20,
+  },
+  coreVerticalBar: {
+    flex: 1,
+  },
+  coreVerticalPct: {
+    fontSize: 10,
+    fontWeight: "700",
+    width: 32,
+    textAlign: "right",
+  },
+  cpuBarHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  cpuBarPct: {
+    fontSize: 11,
     fontWeight: "700",
   },
 });

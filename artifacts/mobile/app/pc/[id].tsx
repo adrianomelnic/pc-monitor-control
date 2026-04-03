@@ -66,7 +66,9 @@ const BUILTIN_CARD_FIELDS: Record<string, { key: string; label: string }[]> = {
     { key: "logicalCores", label: "Logical cores" },
     { key: "freqCurrent", label: "Current frequency" },
     { key: "freqMax", label: "Max frequency" },
-    { key: "perCore", label: "Per-core breakdown" },
+    { key: "perCore", label: "Per-core grid" },
+    { key: "perCoreVertical", label: "Per-core vertical" },
+    { key: "cpuBar", label: "CPU load bar" },
   ],
   gpu: [
     { key: "usage", label: "GPU load" },
@@ -87,7 +89,7 @@ const BUILTIN_CARD_FIELDS: Record<string, { key: string; label: string }[]> = {
 
 const DEFAULT_FIELD_ORDER: Record<string, string[]> = {
   gpu: ["usage", "vramRow", "clockGpu", "clockMem", "vram"],
-  cpu: ["usage", "physicalCores", "logicalCores", "freqCurrent", "freqMax", "perCore"],
+  cpu: ["usage", "physicalCores", "logicalCores", "freqCurrent", "freqMax", "perCore", "perCoreVertical", "cpuBar"],
   ram: ["usage", "used", "available", "total", "bar", "swap"],
 };
 
