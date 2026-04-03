@@ -108,10 +108,10 @@ export function CardBase({
               value={titleDraft}
               onChangeText={onTitleChange}
               onSubmitEditing={onTitleSubmit}
-              onBlur={onTitleSubmit}
               autoCorrect={false}
               returnKeyType="done"
               selectTextOnFocus
+              blurOnSubmit={false}
             />
           ) : (
             <Text style={styles.title} numberOfLines={1}>{title}</Text>

@@ -506,6 +506,7 @@ export default function PCDetailScreen() {
       style={[styles.root, { paddingTop: topPad }]}
       contentContainerStyle={[styles.content, { paddingBottom: 80 + bottomPad }]}
       showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled"
       refreshControl={
         <RefreshControl
           refreshing={refreshing}
