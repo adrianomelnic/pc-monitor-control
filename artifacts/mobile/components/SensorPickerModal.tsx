@@ -66,6 +66,7 @@ export function SensorPickerModal({
   const [selected, setSelected] = useState<Set<string>>(new Set(initialSensors));
   const [accentColor, setAccentColor] = useState(initialColor ?? ACCENT_COLORS[0]);
   const [search, setSearch] = useState("");
+  const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (visible) {
@@ -73,8 +74,18 @@ export function SensorPickerModal({
       setSelected(new Set(initialSensors));
       setAccentColor(initialColor ?? ACCENT_COLORS[0]);
       setSearch("");
+      setCollapsed(new Set());
     }
   }, [visible]);
+
+  const toggleCollapse = (comp: string) => {
+    setCollapsed((prev) => {
+      const next = new Set(prev);
+      if (next.has(comp)) next.delete(comp);
+      else next.add(comp);
+      return next;
+    });
+  };
 
   // Group by component (hardware device), preserving HWiNFO64 order
   const grouped = useMemo(() => {
@@ -210,23 +221,41 @@ export function SensorPickerModal({
               grouped.map(({ comp, items }) => {
                 const allSelected = items.every((s) => selected.has(s.label));
                 const someSelected = !allSelected && items.some((s) => selected.has(s.label));
+                const isCollapsed = collapsed.has(comp);
                 return (
                   <View key={comp} style={styles.group}>
-                    {/* Component header row */}
-                    <Pressable style={styles.groupHeader} onPress={() => toggleGroup(items)}>
-                      <View style={[
-                        styles.groupCheck,
-                        (allSelected || someSelected) && { backgroundColor: accentColor, borderColor: accentColor }
-                      ]}>
+                    {/* Component header row: checkbox = select-all, rest = expand/collapse */}
+                    <View style={styles.groupHeader}>
+                      <Pressable
+                        style={[
+                          styles.groupCheck,
+                          (allSelected || someSelected) && { backgroundColor: accentColor, borderColor: accentColor }
+                        ]}
+                        onPress={() => toggleGroup(items)}
+                        hitSlop={6}
+                      >
                         {allSelected && <Feather name="check" size={11} color="#fff" />}
                         {someSelected && <View style={styles.groupCheckDash} />}
-                      </View>
-                      <Text style={styles.groupName} numberOfLines={2}>{comp}</Text>
-                      <Text style={styles.groupCount}>{items.length}</Text>
-                    </Pressable>
+                      </Pressable>
 
-                    {/* Individual sensor rows */}
-                    {items.map((s, si) => {
+                      <Pressable style={styles.groupHeaderLabel} onPress={() => toggleCollapse(comp)}>
+                        <Text style={styles.groupName} numberOfLines={2}>{comp}</Text>
+                        <Text style={styles.groupCount}>
+                          {someSelected || allSelected
+                            ? `${items.filter((s) => selected.has(s.label)).length}/`
+                            : ""}
+                          {items.length}
+                        </Text>
+                        <Feather
+                          name={isCollapsed ? "chevron-right" : "chevron-down"}
+                          size={14}
+                          color={C.textMuted}
+                        />
+                      </Pressable>
+                    </View>
+
+                    {/* Individual sensor rows — hidden when collapsed */}
+                    {!isCollapsed && items.map((s, si) => {
                       const isSelected = selected.has(s.label);
                       const badge = TYPE_BADGE[s.type] ?? TYPE_BADGE.other;
                       return (
@@ -382,6 +411,12 @@ const styles = StyleSheet.create({
     backgroundColor: C.backgroundSecondary,
     borderBottomWidth: 1,
     borderBottomColor: C.cardBorder,
+  },
+  groupHeaderLabel: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
   },
   groupCheck: {
     width: 20,
