@@ -23,6 +23,7 @@ import { FansCard } from "@/components/cards/FansCard";
 import { GPUCard } from "@/components/cards/GPUCard";
 import { NetworkCard } from "@/components/cards/NetworkCard";
 import { RAMCard } from "@/components/cards/RAMCard";
+import { ThermalsCard } from "@/components/cards/ThermalsCard";
 import Colors from "@/constants/colors";
 import { BuiltinCardConfig, BuiltinCardKind, CardConfig, CustomCardConfig, useDashboard } from "@/context/DashboardContext";
 import { BuiltinCardEdit, CardTitleEditConfig } from "@/components/cards/CardBase";
@@ -30,18 +31,9 @@ import { usePcs } from "@/context/PcsContext";
 
 const C = Colors.light;
 
-function formatUptime(seconds: number) {
-  const d = Math.floor(seconds / 86400);
-  const h = Math.floor((seconds % 86400) / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  const s = seconds % 60;
-  if (d > 0) return `${d}d ${h}h ${m}m`;
-  if (h > 0) return `${h}h ${m}m`;
-  if (m > 0) return `${m}m ${s}s`;
-  return `${s}s`;
-}
 
 const CARD_NAMES: Record<string, string> = {
+  thermals: "Thermals & Fans",
   cpu: "CPU",
   gpu: "GPU",
   ram: "Memory",
@@ -51,6 +43,7 @@ const CARD_NAMES: Record<string, string> = {
 };
 
 const CARD_ACCENTS: Record<string, string> = {
+  thermals: "#F97316",
   cpu: "#00D4FF",
   gpu: "#34D399",
   ram: "#A78BFA",
@@ -160,6 +153,11 @@ export default function PCDetailScreen() {
   const getDefaultFieldLabel = (kind: string, key: string): string => {
     const builtinDef = (BUILTIN_CARD_FIELDS[kind] ?? []).find(f => f.key === key);
     if (builtinDef) return builtinDef.label;
+    if (kind === "thermals") {
+      if (key.startsWith("t:")) return key.slice(2);
+      if (key.startsWith("f:")) return key.slice(2);
+      return key;
+    }
     if (kind === "fans") {
       const fan = (m?.fans ?? []).find(f => f.label === key);
       if (fan) return fan.label;
@@ -212,6 +210,11 @@ export default function PCDetailScreen() {
 
   const getDefaultKeys = (kind: string): string[] => {
     if (DEFAULT_FIELD_ORDER[kind]) return DEFAULT_FIELD_ORDER[kind];
+    if (kind === "thermals") {
+      const allTemps = (m?.sensors ?? []).filter(s => s.type === "temperature");
+      const allFans = m?.fans ?? [];
+      return [...allTemps.map(t => "t:" + t.label), ...allFans.map(f => "f:" + f.label)];
+    }
     if (kind === "fans") return (m?.fans ?? []).map(f => f.label);
     if (kind === "disks") return (m?.disks ?? []).map(d => d.device || d.mountpoint);
     if (kind === "network") return (m?.network ?? []).filter(i => i.isUp).map(i => i.name);
@@ -272,7 +275,18 @@ export default function PCDetailScreen() {
     const fieldAliases = card.fieldAliases ?? {};
 
     const dynamicItems: { key: string; label: string }[] =
-      card.kind === "network"
+      card.kind === "thermals"
+        ? [
+            ...(m?.sensors ?? []).filter(s => s.type === "temperature").map(t => ({
+              key: "t:" + t.label,
+              label: t.label + " (temp)",
+            })),
+            ...(m?.fans ?? []).map(f => ({
+              key: "f:" + f.label,
+              label: f.label + " (fan)",
+            })),
+          ]
+        : card.kind === "network"
         ? (m?.network ?? []).filter((i) => i.isUp).map((i) => ({ key: i.name, label: i.name }))
         : card.kind === "fans"
         ? (m?.fans ?? []).map((f) => ({ key: f.label, label: f.label }))
@@ -628,6 +642,25 @@ export default function PCDetailScreen() {
 
     let content: React.ReactNode = null;
     switch (card.kind) {
+      case "thermals": {
+        const allTemps = (m.sensors ?? []).filter(s => s.type === "temperature");
+        const allFans2 = m.fans ?? [];
+        const thermalsEdit: BuiltinCardEdit = {
+          hiddenFields: builtinCard.hiddenFields,
+          fieldOrder: getEffectiveFieldOrder(builtinCard.fieldOrder, getDefaultKeys("thermals"), []),
+          fieldAliases: builtinCard.fieldAliases,
+          editPanel: isEditing ? <BuiltinCardEditPanel card={builtinCard} accent={accent} /> : undefined,
+        };
+        content = (
+          <ThermalsCard
+            temps={allTemps}
+            fans={allFans2}
+            titleEdit={titleEdit}
+            cardEdit={thermalsEdit}
+          />
+        );
+        break;
+      }
       case "cpu":
         content = m.cpu ? <CPUCard cpu={m.cpu} titleEdit={titleEdit} cardEdit={cardEdit} /> : null;
         break;
@@ -765,47 +798,6 @@ export default function PCDetailScreen() {
           <Pressable style={styles.retryBtn} onPress={onRefresh}>
             <Text style={styles.retryBtnText}>Retry</Text>
           </Pressable>
-        </View>
-      )}
-
-      {/* ── SYSTEM SUMMARY BAR ── */}
-      {m && pc.status === "online" && (
-        <View style={styles.summaryBar}>
-          {m.uptime != null && (
-            <View style={styles.summaryItem}>
-              <Feather name="clock" size={11} color={C.textMuted} />
-              <Text style={styles.summaryLabel}>Uptime</Text>
-              <Text style={styles.summaryValue}>{formatUptime(m.uptime)}</Text>
-            </View>
-          )}
-          {m.processes != null && (
-            <View style={styles.summaryItem}>
-              <Feather name="layers" size={11} color={C.textMuted} />
-              <Text style={styles.summaryLabel}>Processes</Text>
-              <Text style={styles.summaryValue}>{m.processes}</Text>
-            </View>
-          )}
-          {m.temperature != null && (
-            <View style={styles.summaryItem}>
-              <Feather name="thermometer" size={11} color={C.textMuted} />
-              <Text style={styles.summaryLabel}>Temp</Text>
-              <Text
-                style={[
-                  styles.summaryValue,
-                  {
-                    color:
-                      m.temperature > 85
-                        ? C.danger
-                        : m.temperature > 70
-                        ? C.warning
-                        : C.success,
-                  },
-                ]}
-              >
-                {Math.round(m.temperature)}°C
-              </Text>
-            </View>
-          )}
         </View>
       )}
 
@@ -1192,33 +1184,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "700",
     color: C.tint,
-  },
-  summaryBar: {
-    flexDirection: "row",
-    backgroundColor: C.card,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: C.cardBorder,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    gap: 0,
-  },
-  summaryItem: {
-    flex: 1,
-    alignItems: "center",
-    gap: 3,
-  },
-  summaryLabel: {
-    fontSize: 10,
-    color: C.textMuted,
-    fontWeight: "600",
-    letterSpacing: 0.5,
-    textTransform: "uppercase",
-  },
-  summaryValue: {
-    fontSize: 13,
-    fontWeight: "700",
-    color: C.text,
   },
   card: {
     backgroundColor: C.card,

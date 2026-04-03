@@ -9,7 +9,7 @@ import React, {
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-export type BuiltinCardKind = "cpu" | "gpu" | "ram" | "fans" | "disks" | "network";
+export type BuiltinCardKind = "thermals" | "cpu" | "gpu" | "ram" | "fans" | "disks" | "network";
 
 export interface BuiltinCardConfig {
   id: BuiltinCardKind;
@@ -36,12 +36,13 @@ export interface CustomCardConfig {
 export type CardConfig = BuiltinCardConfig | CustomCardConfig;
 
 export const BUILTIN_DEFAULTS: BuiltinCardConfig[] = [
-  { id: "cpu",     kind: "cpu",     visible: true },
-  { id: "gpu",     kind: "gpu",     visible: true },
-  { id: "ram",     kind: "ram",     visible: true },
-  { id: "fans",    kind: "fans",    visible: true },
-  { id: "disks",   kind: "disks",   visible: true },
-  { id: "network", kind: "network", visible: true },
+  { id: "thermals", kind: "thermals", visible: true },
+  { id: "cpu",      kind: "cpu",      visible: true },
+  { id: "gpu",      kind: "gpu",      visible: true },
+  { id: "ram",      kind: "ram",      visible: true },
+  { id: "fans",     kind: "fans",     visible: true },
+  { id: "disks",    kind: "disks",    visible: true },
+  { id: "network",  kind: "network",  visible: true },
 ];
 
 export const ACCENT_COLORS = [
