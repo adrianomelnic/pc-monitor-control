@@ -124,7 +124,7 @@ export function CardBase({
           )}
           {subtitle ? <Text style={styles.subtitle} numberOfLines={1}>{subtitle}</Text> : null}
         </View>
-        {temperature != null ? <TempBadge value={temperature} /> : (rightAction ?? null)}
+        {rightAction != null ? rightAction : (temperature != null ? <TempBadge value={temperature} /> : null)}
       </View>
       <View style={styles.divider} />
       {children}
