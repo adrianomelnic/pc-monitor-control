@@ -3,25 +3,47 @@ import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import Colors from "@/constants/colors";
 import { FanInfo, SensorReading } from "@/context/PcsContext";
-import { BuiltinCardEdit, CardBase, CardTitleEditConfig, TempBadge } from "./CardBase";
+import { BuiltinCardEdit, CardBase, CardTitleEditConfig } from "./CardBase";
 
 const C = Colors.light;
 export const THERMALS_ACCENT = "#F97316";
 
-function rpmColor(rpm: number) {
-  if (rpm > 2500) return "#FF4444";
-  if (rpm > 1500) return "#FFB800";
-  return "#00CC88";
-}
-
-function rpmBar(rpm: number, max = 3000) {
-  return Math.min(100, (rpm / max) * 100);
-}
-
 const IMPORTANT_PATTERNS = [/cpu/i, /gpu/i, /ram/i, /memory/i, /vram/i, /dram/i];
-
-function isImportantTemp(label: string): boolean {
+export function isImportantTemp(label: string): boolean {
   return IMPORTANT_PATTERNS.some(p => p.test(label));
+}
+
+export const SENSOR_ICON_OPTIONS: string[] = [
+  "thermometer", "wind", "droplet", "activity",
+  "cpu", "refresh-cw", "zap", "server",
+  "box", "sun", "settings", "disc",
+];
+
+export function defaultSensorIcon(key: string): string {
+  if (key.startsWith("t:")) return "thermometer";
+  const label = key.slice(2).toLowerCase();
+  if (/pump/i.test(label)) return "activity";
+  if (/water|liquid|loop|coolant/i.test(label)) return "droplet";
+  return "wind";
+}
+
+function tempColor(c: number): string {
+  if (c >= 85) return "#FF4444";
+  if (c >= 70) return "#FF8C00";
+  if (c >= 50) return "#FBBF24";
+  return "#34D399";
+}
+
+function rpmColor(rpm: number): string {
+  if (rpm >= 2000) return "#FF4444";
+  if (rpm >= 1000) return "#FBBF24";
+  return "#34D399";
+}
+
+function chunk<T>(arr: T[], n: number): T[][] {
+  const out: T[][] = [];
+  for (let i = 0; i < arr.length; i += n) out.push(arr.slice(i, i + n));
+  return out;
 }
 
 interface Props {
@@ -33,7 +55,10 @@ interface Props {
 
 export function ThermalsCard({ temps, fans, titleEdit, cardEdit }: Props) {
   const aliases = cardEdit?.fieldAliases ?? {};
+  const sensorIcons = cardEdit?.sensorIcons ?? {};
   const getLabel = (key: string, def: string) => aliases[key] ?? def;
+  const getIcon = (key: string) =>
+    ((sensorIcons[key] ?? defaultSensorIcon(key)) as keyof typeof Feather.glyphMap);
 
   const tempMap = new Map<string, SensorReading>();
   for (const t of temps) {
@@ -46,31 +71,27 @@ export function ThermalsCard({ temps, fans, titleEdit, cardEdit }: Props) {
     if (!fanMap.has(key)) fanMap.set(key, f);
   }
 
-  const defaultOrder = [
-    ...Array.from(tempMap.keys()),
-    ...Array.from(fanMap.keys()),
-  ];
+  const defaultOrder = [...tempMap.keys(), ...fanMap.keys()];
 
-  // If the user has never customised hidden fields, hide non-important temps by default.
-  // Once they open the edit panel and toggle anything, hiddenFields becomes an array and
-  // their explicit choices take over.
   const hidden: Set<string> = (() => {
     if (cardEdit?.hiddenFields !== undefined) return new Set(cardEdit.hiddenFields);
-    const defaults = new Set<string>();
-    for (const key of tempMap.keys()) {
-      if (!isImportantTemp(key.slice(2))) defaults.add(key);
+    const d = new Set<string>();
+    for (const k of tempMap.keys()) {
+      if (!isImportantTemp(k.slice(2))) d.add(k);
     }
-    return defaults;
+    return d;
   })();
 
   const order = cardEdit?.fieldOrder ?? defaultOrder;
-  const visibleOrder = order.filter(k => !hidden.has(k));
+  const visibleOrder = order.filter(k => !hidden.has(k) && (tempMap.has(k) || fanMap.has(k)));
 
-  const visibleTempKeys = visibleOrder.filter(k => k.startsWith("t:") && tempMap.has(k));
-  const visibleFanKeys = visibleOrder.filter(k => k.startsWith("f:") && fanMap.has(k));
+  const visibleTempKeys = visibleOrder.filter(k => tempMap.has(k));
+  const maxTemp =
+    visibleTempKeys.length > 0
+      ? Math.max(...visibleTempKeys.map(k => tempMap.get(k)!.value))
+      : null;
 
-  const allVisibleTempValues = visibleTempKeys.map(k => tempMap.get(k)!.value);
-  const maxTemp = allVisibleTempValues.length > 0 ? Math.max(...allVisibleTempValues) : null;
+  const rows = chunk(visibleOrder, 3);
 
   return (
     <CardBase
@@ -87,119 +108,100 @@ export function ThermalsCard({ temps, fans, titleEdit, cardEdit }: Props) {
       style={titleEdit?.borderStyle}
       editPanel={cardEdit?.editPanel}
     >
-      {visibleTempKeys.length === 0 && visibleFanKeys.length === 0 && (
+      {visibleOrder.length === 0 && (
         <Text style={styles.empty}>No sensors visible — long press to edit</Text>
       )}
 
-      {visibleTempKeys.length > 0 && (
-        <View style={styles.section}>
-          {visibleTempKeys.map(key => {
-            const sensor = tempMap.get(key)!;
-            return (
-              <View key={key} style={styles.tempRow}>
-                <Text style={styles.tempLabel} numberOfLines={1}>
-                  {getLabel(key, sensor.label)}
-                </Text>
-                <TempBadge value={sensor.value} />
-              </View>
-            );
-          })}
-        </View>
-      )}
+      <View style={styles.grid}>
+        {rows.map((rowKeys, rowIdx) => (
+          <View key={rowIdx} style={styles.row}>
+            {rowKeys.map(key => {
+              const isTemp = tempMap.has(key);
+              const sensor = isTemp ? tempMap.get(key)! : null;
+              const fan = !isTemp ? fanMap.get(key)! : null;
 
-      {visibleFanKeys.length > 0 && (
-        <View style={[styles.section, visibleTempKeys.length > 0 && styles.sectionGap]}>
-          {visibleTempKeys.length > 0 && (
-            <Text style={styles.sectionHeader}>FANS</Text>
-          )}
-          {visibleFanKeys.map(key => {
-            const fan = fanMap.get(key)!;
-            const color = rpmColor(fan.rpm);
-            const pct = rpmBar(fan.rpm);
-            return (
-              <View key={key} style={styles.fanRow}>
-                <View style={styles.fanLeft}>
-                  <Feather name="wind" size={12} color={color} />
-                  <Text style={styles.fanLabel} numberOfLines={1}>
-                    {getLabel(key, fan.label)}
+              const label = isTemp
+                ? getLabel(key, sensor!.label)
+                : getLabel(key, fan!.label);
+
+              const valueText = isTemp
+                ? `${Math.round(sensor!.value)}°C`
+                : fan!.rpm >= 1000
+                  ? `${(fan!.rpm / 1000).toFixed(1)}k`
+                  : `${fan!.rpm}`;
+
+              const color = isTemp ? tempColor(sensor!.value) : rpmColor(fan!.rpm);
+              const icon = getIcon(key);
+
+              return (
+                <View key={key} style={styles.tile}>
+                  <Feather name={icon} size={22} color={C.textMuted} style={styles.tileIcon} />
+                  <Text style={styles.tileLabel} numberOfLines={1}>
+                    {label.toUpperCase()}
                   </Text>
+                  <Text style={[styles.tileValue, { color }]}>{valueText}</Text>
+                  {!isTemp && <Text style={[styles.tileUnit, { color }]}>RPM</Text>}
                 </View>
-                <View style={styles.fanRight}>
-                  <View style={styles.fanBarTrack}>
-                    <View style={[styles.fanBarFill, { width: `${pct}%` as any, backgroundColor: color }]} />
-                  </View>
-                  <Text style={[styles.fanRpm, { color }]}>{fan.rpm.toLocaleString()} RPM</Text>
-                </View>
-              </View>
-            );
-          })}
-        </View>
-      )}
+              );
+            })}
+            {rowKeys.length < 3 &&
+              Array(3 - rowKeys.length)
+                .fill(null)
+                .map((_, i) => <View key={`ph-${i}`} style={styles.tilePlaceholder} />)}
+          </View>
+        ))}
+      </View>
     </CardBase>
   );
 }
 
 const styles = StyleSheet.create({
-  section: {
-    gap: 7,
+  grid: {
+    gap: 8,
   },
-  sectionGap: {
-    marginTop: 10,
+  row: {
+    flexDirection: "row",
+    gap: 8,
   },
-  sectionHeader: {
+  tile: {
+    flex: 1,
+    backgroundColor: C.backgroundSecondary,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: C.cardBorder,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 16,
+    paddingHorizontal: 6,
+    minWidth: 0,
+  },
+  tilePlaceholder: {
+    flex: 1,
+  },
+  tileIcon: {
+    marginBottom: 6,
+    opacity: 0.55,
+  },
+  tileLabel: {
     fontSize: 9,
     fontWeight: "700",
     color: C.textMuted,
-    letterSpacing: 1.2,
-    marginBottom: 2,
+    letterSpacing: 1.1,
+    marginBottom: 4,
+    textAlign: "center",
   },
-  tempRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  tempLabel: {
-    fontSize: 12,
-    color: C.textSecondary,
-    fontWeight: "500",
-    flex: 1,
-    marginRight: 8,
-  },
-  fanRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
-  fanLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    width: 110,
-    flexShrink: 0,
-  },
-  fanLabel: {
-    fontSize: 12,
-    color: C.textSecondary,
-    fontWeight: "500",
-    flex: 1,
-  },
-  fanRight: {
-    flex: 1,
-    gap: 4,
-  },
-  fanBarTrack: {
-    height: 5,
-    backgroundColor: C.backgroundTertiary,
-    borderRadius: 3,
-    overflow: "hidden",
-  },
-  fanBarFill: {
-    height: 5,
-    borderRadius: 3,
-  },
-  fanRpm: {
-    fontSize: 11,
+  tileValue: {
+    fontSize: 22,
     fontWeight: "700",
+    textAlign: "center",
+    lineHeight: 26,
+  },
+  tileUnit: {
+    fontSize: 9,
+    fontWeight: "700",
+    letterSpacing: 0.8,
+    marginTop: 1,
+    opacity: 0.75,
   },
   empty: {
     fontSize: 12,

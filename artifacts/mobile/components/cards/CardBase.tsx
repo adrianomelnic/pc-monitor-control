@@ -38,6 +38,7 @@ export interface BuiltinCardEdit {
   extraSensorMap?: Record<string, string>;
   extraTemps?: { label: string; value: number }[];
   fieldAliases?: Record<string, string>;
+  sensorIcons?: Record<string, string>;
   editPanel?: React.ReactNode;
 }
 
