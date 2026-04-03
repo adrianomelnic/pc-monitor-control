@@ -25,6 +25,17 @@ export function TempBadge({ value }: TempBadgeProps) {
   );
 }
 
+/** Passed from [id].tsx into each built-in card to enable inline title editing */
+export interface CardTitleEditConfig {
+  customTitle?: string;
+  editable?: boolean;
+  draft?: string;
+  onChange?: (t: string) => void;
+  onSubmit?: () => void;
+  rightAction?: React.ReactNode;
+  borderStyle?: ViewStyle;
+}
+
 interface CardBaseProps {
   icon: keyof typeof Feather.glyphMap;
   title: string;

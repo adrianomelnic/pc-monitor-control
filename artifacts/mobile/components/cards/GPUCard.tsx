@@ -2,7 +2,7 @@ import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import Colors from "@/constants/colors";
 import { GPUInfo } from "@/context/PcsContext";
-import { CardBase, MiniBar, StatRow } from "./CardBase";
+import { CardBase, CardTitleEditConfig, MiniBar, StatRow } from "./CardBase";
 
 const C = Colors.light;
 const ACCENT = "#34D399";
@@ -14,12 +14,25 @@ function fmtMB(mb: number | null) {
 
 interface Props {
   gpus: GPUInfo[];
+  titleEdit?: CardTitleEditConfig;
 }
 
-export function GPUCard({ gpus }: Props) {
+export function GPUCard({ gpus, titleEdit }: Props) {
+  const base = titleEdit?.customTitle ?? "GPU";
+
   if (!gpus || gpus.length === 0) {
     return (
-      <CardBase icon="monitor" title="GPU" accentColor={ACCENT}>
+      <CardBase
+        icon="monitor"
+        title={base}
+        accentColor={ACCENT}
+        titleEditable={titleEdit?.editable}
+        titleDraft={titleEdit?.draft}
+        onTitleChange={titleEdit?.onChange}
+        onTitleSubmit={titleEdit?.onSubmit}
+        rightAction={titleEdit?.rightAction}
+        style={titleEdit?.borderStyle}
+      >
         <Text style={styles.empty}>No GPU detected or nvidia-smi not available</Text>
       </CardBase>
     );
@@ -32,15 +45,23 @@ export function GPUCard({ gpus }: Props) {
           gpu.vramTotal && gpu.vramUsed != null
             ? (gpu.vramUsed / gpu.vramTotal) * 100
             : null;
+        const isFirst = idx === 0;
+        const gpuTitle = gpus.length > 1 ? `${base} ${idx}` : base;
 
         return (
           <CardBase
             key={idx}
             icon="monitor"
-            title={`GPU${gpus.length > 1 ? ` ${idx}` : ""}`}
+            title={gpuTitle}
             subtitle={gpu.name}
             accentColor={ACCENT}
             temperature={gpu.temperature ?? null}
+            titleEditable={isFirst ? titleEdit?.editable : false}
+            titleDraft={isFirst ? titleEdit?.draft : undefined}
+            onTitleChange={isFirst ? titleEdit?.onChange : undefined}
+            onTitleSubmit={isFirst ? titleEdit?.onSubmit : undefined}
+            rightAction={isFirst ? titleEdit?.rightAction : undefined}
+            style={isFirst ? titleEdit?.borderStyle : undefined}
           >
             <View style={styles.mainRow}>
               {/* Usage big number */}

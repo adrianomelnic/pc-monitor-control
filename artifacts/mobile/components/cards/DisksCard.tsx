@@ -2,7 +2,7 @@ import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import Colors from "@/constants/colors";
 import { DiskInfo } from "@/context/PcsContext";
-import { CardBase, MiniBar, TempBadge } from "./CardBase";
+import { CardBase, CardTitleEditConfig, MiniBar, TempBadge } from "./CardBase";
 
 const C = Colors.light;
 const ACCENT = "#2DD4BF";
@@ -19,17 +19,24 @@ function fmtSpeed(kbs: number) {
 
 interface Props {
   disks: DiskInfo[];
+  titleEdit?: CardTitleEditConfig;
 }
 
-export function DisksCard({ disks }: Props) {
+export function DisksCard({ disks, titleEdit }: Props) {
   if (!disks || disks.length === 0) return null;
 
   return (
     <CardBase
       icon="hard-drive"
-      title="Storage"
+      title={titleEdit?.customTitle ?? "Storage"}
       subtitle={`${disks.length} volume${disks.length > 1 ? "s" : ""}`}
       accentColor={ACCENT}
+      titleEditable={titleEdit?.editable}
+      titleDraft={titleEdit?.draft}
+      onTitleChange={titleEdit?.onChange}
+      onTitleSubmit={titleEdit?.onSubmit}
+      rightAction={titleEdit?.rightAction}
+      style={titleEdit?.borderStyle}
     >
       <View style={styles.diskList}>
         {disks.map((disk, i) => {

@@ -2,7 +2,7 @@ import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import Colors from "@/constants/colors";
 import { CPUInfo } from "@/context/PcsContext";
-import { CardBase, MiniBar, StatRow } from "./CardBase";
+import { CardBase, CardTitleEditConfig, MiniBar, StatRow } from "./CardBase";
 
 const C = Colors.light;
 const ACCENT = "#00D4FF";
@@ -13,19 +13,26 @@ function fmt(mhz: number) {
 
 interface Props {
   cpu: CPUInfo;
+  titleEdit?: CardTitleEditConfig;
 }
 
-export function CPUCard({ cpu }: Props) {
+export function CPUCard({ cpu, titleEdit }: Props) {
   const cores = cpu.usagePerCore ?? [];
   const cols = cores.length > 8 ? 4 : 2;
 
   return (
     <CardBase
       icon="cpu"
-      title="CPU"
+      title={titleEdit?.customTitle ?? "CPU"}
       subtitle={cpu.name}
       accentColor={ACCENT}
       temperature={cpu.temperature ?? null}
+      titleEditable={titleEdit?.editable}
+      titleDraft={titleEdit?.draft}
+      onTitleChange={titleEdit?.onChange}
+      onTitleSubmit={titleEdit?.onSubmit}
+      rightAction={titleEdit?.rightAction}
+      style={titleEdit?.borderStyle}
     >
       {/* Main stats row */}
       <View style={styles.mainRow}>

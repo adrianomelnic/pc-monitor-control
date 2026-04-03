@@ -2,7 +2,7 @@ import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import Colors from "@/constants/colors";
 import { RAMInfo } from "@/context/PcsContext";
-import { CardBase, MiniBar, StatRow } from "./CardBase";
+import { CardBase, CardTitleEditConfig, MiniBar, StatRow } from "./CardBase";
 
 const C = Colors.light;
 const ACCENT = "#A78BFA";
@@ -14,9 +14,10 @@ function fmtMB(mb: number) {
 
 interface Props {
   ram: RAMInfo;
+  titleEdit?: CardTitleEditConfig;
 }
 
-export function RAMCard({ ram }: Props) {
+export function RAMCard({ ram, titleEdit }: Props) {
   const usedColor =
     ram.percent > 85 ? "#FF4444" : ram.percent > 65 ? "#FFB800" : ACCENT;
   const swapPct =
@@ -25,9 +26,15 @@ export function RAMCard({ ram }: Props) {
   return (
     <CardBase
       icon="database"
-      title="Memory"
+      title={titleEdit?.customTitle ?? "Memory"}
       accentColor={ACCENT}
       temperature={ram.temperature ?? undefined}
+      titleEditable={titleEdit?.editable}
+      titleDraft={titleEdit?.draft}
+      onTitleChange={titleEdit?.onChange}
+      onTitleSubmit={titleEdit?.onSubmit}
+      rightAction={titleEdit?.rightAction}
+      style={titleEdit?.borderStyle}
     >
       {/* Main row */}
       <View style={styles.mainRow}>

@@ -15,6 +15,7 @@ export interface BuiltinCardConfig {
   id: BuiltinCardKind;
   kind: BuiltinCardKind;
   visible: boolean;
+  customTitle?: string;
 }
 
 export interface CustomCardConfig {
@@ -57,6 +58,7 @@ interface DashboardContextType {
     cardId: string,
     updates: Partial<Pick<CustomCardConfig, "title" | "sensorLabels" | "accentColor" | "icon" | "sensorAliases">>
   ) => void;
+  updateBuiltinCard: (pcId: string, cardId: BuiltinCardKind, updates: { customTitle?: string }) => void;
 }
 
 const DashboardContext = createContext<DashboardContextType>({} as DashboardContextType);
@@ -164,8 +166,18 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
+  const updateBuiltinCard = useCallback((pcId: string, cardId: BuiltinCardKind, updates: { customTitle?: string }) => {
+    setLayouts((prev) => {
+      const cards = (prev[pcId] ?? [...BUILTIN_DEFAULTS]).map((c) =>
+        c.id === cardId && c.kind !== "custom" ? { ...c, ...updates } : c
+      );
+      AsyncStorage.setItem(storageKey(pcId), JSON.stringify(cards));
+      return { ...prev, [pcId]: cards };
+    });
+  }, []);
+
   return (
-    <DashboardContext.Provider value={{ getCards, toggleCard, moveCard, addCustomCard, removeCard, updateCustomCard }}>
+    <DashboardContext.Provider value={{ getCards, toggleCard, moveCard, addCustomCard, removeCard, updateCustomCard, updateBuiltinCard }}>
       {children}
     </DashboardContext.Provider>
   );

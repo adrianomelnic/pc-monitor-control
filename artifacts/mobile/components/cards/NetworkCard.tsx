@@ -3,7 +3,7 @@ import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import Colors from "@/constants/colors";
 import { NetworkInterface } from "@/context/PcsContext";
-import { CardBase } from "./CardBase";
+import { CardBase, CardTitleEditConfig } from "./CardBase";
 
 const C = Colors.light;
 const ACCENT = "#60A5FA";
@@ -23,17 +23,24 @@ function fmtTotal(mb: number) {
 
 interface Props {
   interfaces: NetworkInterface[];
+  titleEdit?: CardTitleEditConfig;
 }
 
-export function NetworkCard({ interfaces }: Props) {
+export function NetworkCard({ interfaces, titleEdit }: Props) {
   const active = interfaces.filter((i) => i.isUp);
 
   return (
     <CardBase
       icon="wifi"
-      title="Network"
+      title={titleEdit?.customTitle ?? "Network"}
       subtitle={`${active.length} active interface${active.length !== 1 ? "s" : ""}`}
       accentColor={ACCENT}
+      titleEditable={titleEdit?.editable}
+      titleDraft={titleEdit?.draft}
+      onTitleChange={titleEdit?.onChange}
+      onTitleSubmit={titleEdit?.onSubmit}
+      rightAction={titleEdit?.rightAction}
+      style={titleEdit?.borderStyle}
     >
       {active.length === 0 ? (
         <Text style={styles.empty}>No active network interfaces</Text>

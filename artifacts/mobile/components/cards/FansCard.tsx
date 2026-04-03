@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import Colors from "@/constants/colors";
 import { FanInfo } from "@/context/PcsContext";
-import { CardBase } from "./CardBase";
+import { CardBase, CardTitleEditConfig } from "./CardBase";
 
 const C = Colors.light;
 const ACCENT = "#FB923C";
@@ -34,9 +34,10 @@ interface Props {
   fans: FanInfo[];
   baseUrl?: string;
   apiKey?: string;
+  titleEdit?: CardTitleEditConfig;
 }
 
-export function FansCard({ fans, baseUrl, apiKey }: Props) {
+export function FansCard({ fans, baseUrl, apiKey, titleEdit }: Props) {
   const [diagLoading, setDiagLoading] = useState(false);
   const [diagResult, setDiagResult] = useState<DiagResult | null>(null);
 
@@ -154,9 +155,15 @@ export function FansCard({ fans, baseUrl, apiKey }: Props) {
   return (
     <CardBase
       icon="wind"
-      title="Fans"
+      title={titleEdit?.customTitle ?? "Fans"}
       subtitle={fans.length > 0 ? `${fans.length} fan${fans.length > 1 ? "s" : ""} detected` : undefined}
       accentColor={ACCENT}
+      titleEditable={titleEdit?.editable}
+      titleDraft={titleEdit?.draft}
+      onTitleChange={titleEdit?.onChange}
+      onTitleSubmit={titleEdit?.onSubmit}
+      rightAction={titleEdit?.rightAction}
+      style={titleEdit?.borderStyle}
     >
       {fans.length === 0 ? (
         <View style={styles.emptyWrap}>

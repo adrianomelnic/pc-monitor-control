@@ -24,7 +24,8 @@ import { GPUCard } from "@/components/cards/GPUCard";
 import { NetworkCard } from "@/components/cards/NetworkCard";
 import { RAMCard } from "@/components/cards/RAMCard";
 import Colors from "@/constants/colors";
-import { CardConfig, CustomCardConfig, useDashboard } from "@/context/DashboardContext";
+import { BuiltinCardConfig, BuiltinCardKind, CardConfig, CustomCardConfig, useDashboard } from "@/context/DashboardContext";
+import { CardTitleEditConfig } from "@/components/cards/CardBase";
 import { usePcs } from "@/context/PcsContext";
 
 const C = Colors.light;
@@ -43,16 +44,25 @@ function formatUptime(seconds: number) {
 const CARD_NAMES: Record<string, string> = {
   cpu: "CPU",
   gpu: "GPU",
-  ram: "RAM",
+  ram: "Memory",
   fans: "Fans",
-  disks: "Disks",
+  disks: "Storage",
   network: "Network",
+};
+
+const CARD_ACCENTS: Record<string, string> = {
+  cpu: "#00D4FF",
+  gpu: "#34D399",
+  ram: "#A78BFA",
+  fans: "#FB923C",
+  disks: "#2DD4BF",
+  network: "#60A5FA",
 };
 
 export default function PCDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { pcs, removePc, refreshPc, sendCommand } = usePcs();
-  const { getCards, toggleCard, moveCard, addCustomCard, removeCard, updateCustomCard } = useDashboard();
+  const { getCards, toggleCard, moveCard, addCustomCard, removeCard, updateCustomCard, updateBuiltinCard } = useDashboard();
   const pc = pcs.find((p) => p.id === id);
   const insets = useSafeAreaInsets();
 
@@ -63,6 +73,8 @@ export default function PCDetailScreen() {
   const [editMode, setEditMode] = useState(false);
   const [pickerVisible, setPickerVisible] = useState(false);
   const [editingCard, setEditingCard] = useState<CustomCardConfig | null>(null);
+  const [inlineEditBuiltin, setInlineEditBuiltin] = useState<BuiltinCardKind | null>(null);
+  const [builtinTitleDraft, setBuiltinTitleDraft] = useState("");
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 : insets.bottom;
@@ -82,6 +94,28 @@ export default function PCDetailScreen() {
   const cards = getCards(pcId);
   const m = pc.metrics;
   const allSensors = m?.sensors ?? [];
+
+  const commitBuiltinTitle = (kind: BuiltinCardKind, draft: string) => {
+    const trimmed = draft.trim();
+    const defaultTitle = CARD_NAMES[kind] ?? kind;
+    updateBuiltinCard(pcId, kind, {
+      customTitle: trimmed && trimmed !== defaultTitle ? trimmed : undefined,
+    });
+    setInlineEditBuiltin(null);
+  };
+
+  function BuiltinDoneBtn({ accentColor, kind }: { accentColor: string; kind: BuiltinCardKind }) {
+    return (
+      <Pressable
+        onPress={() => commitBuiltinTitle(kind, builtinTitleDraft)}
+        style={[styles.builtinDoneBtn, { backgroundColor: accentColor + "22", borderColor: accentColor + "55" }]}
+        hitSlop={8}
+      >
+        <Feather name="check" size={11} color={accentColor} />
+        <Text style={[styles.builtinDoneBtnText, { color: accentColor }]}>Done</Text>
+      </Pressable>
+    );
+  }
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -127,7 +161,9 @@ export default function PCDetailScreen() {
   // ── Edit bar rendered above each card in edit mode ──────────────────────────
   function EditBar({ card, isFirst, isLast }: { card: CardConfig; isFirst: boolean; isLast: boolean }) {
     const isCustom = card.kind === "custom";
-    const name = isCustom ? (card as CustomCardConfig).title : CARD_NAMES[card.kind] ?? card.kind;
+    const name = isCustom
+      ? (card as CustomCardConfig).title
+      : (card as BuiltinCardConfig).customTitle ?? (CARD_NAMES[card.kind] ?? card.kind);
     return (
       <View style={styles.editBar}>
         <Pressable
@@ -262,28 +298,65 @@ export default function PCDetailScreen() {
         />
       );
     }
+
+    // ── Built-in cards: long-press to inline-edit title ───────────────────────
+    const builtinCard = card as BuiltinCardConfig;
+    const accent = CARD_ACCENTS[card.kind] ?? C.tint;
+    const isEditing = inlineEditBuiltin === card.kind;
+
+    const titleEdit: CardTitleEditConfig = {
+      customTitle: builtinCard.customTitle,
+      editable: isEditing,
+      draft: isEditing ? builtinTitleDraft : undefined,
+      onChange: isEditing ? setBuiltinTitleDraft : undefined,
+      onSubmit: isEditing ? () => commitBuiltinTitle(card.kind as BuiltinCardKind, builtinTitleDraft) : undefined,
+      rightAction: isEditing ? <BuiltinDoneBtn accentColor={accent} kind={card.kind as BuiltinCardKind} /> : undefined,
+      borderStyle: isEditing ? { borderColor: accent + "66", borderWidth: 1.5 } : undefined,
+    };
+
+    const handleLongPress = () => {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      setBuiltinTitleDraft(builtinCard.customTitle ?? (CARD_NAMES[card.kind] ?? card.kind));
+      setInlineEditBuiltin(card.kind as BuiltinCardKind);
+    };
+
+    let content: React.ReactNode = null;
     switch (card.kind) {
       case "cpu":
-        return m.cpu ? <CPUCard cpu={m.cpu} /> : null;
+        content = m.cpu ? <CPUCard cpu={m.cpu} titleEdit={titleEdit} /> : null;
+        break;
       case "gpu":
-        return m.gpu ? <GPUCard gpus={m.gpu} /> : null;
+        content = m.gpu ? <GPUCard gpus={m.gpu} titleEdit={titleEdit} /> : null;
+        break;
       case "ram":
-        return m.ram ? <RAMCard ram={m.ram} /> : null;
+        content = m.ram ? <RAMCard ram={m.ram} titleEdit={titleEdit} /> : null;
+        break;
       case "fans":
-        return m.fans != null ? (
+        content = m.fans != null ? (
           <FansCard
             fans={m.fans}
             baseUrl={`http://${safePc.host}:${safePc.port}`}
             apiKey={safePc.apiKey}
+            titleEdit={titleEdit}
           />
         ) : null;
+        break;
       case "disks":
-        return m.disks && m.disks.length > 0 ? <DisksCard disks={m.disks} /> : null;
+        content = m.disks && m.disks.length > 0 ? <DisksCard disks={m.disks} titleEdit={titleEdit} /> : null;
+        break;
       case "network":
-        return m.network && m.network.length > 0 ? <NetworkCard interfaces={m.network} /> : null;
+        content = m.network && m.network.length > 0 ? <NetworkCard interfaces={m.network} titleEdit={titleEdit} /> : null;
+        break;
       default:
         return null;
     }
+    if (!content) return null;
+
+    return (
+      <Pressable onLongPress={handleLongPress} delayLongPress={500}>
+        {content}
+      </Pressable>
+    );
   }
 
   return (
@@ -902,5 +975,18 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: C.success,
     lineHeight: 18,
+  },
+  builtinDoneBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+    borderWidth: 1,
+  },
+  builtinDoneBtnText: {
+    fontSize: 11,
+    fontWeight: "700",
   },
 });
