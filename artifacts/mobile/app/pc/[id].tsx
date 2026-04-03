@@ -97,6 +97,7 @@ export default function PCDetailScreen() {
   const [editingCard, setEditingCard] = useState<CustomCardConfig | null>(null);
   const [inlineEditBuiltin, setInlineEditBuiltin] = useState<BuiltinCardKind | null>(null);
   const [builtinTitleDraft, setBuiltinTitleDraft] = useState("");
+  const [titleInputActive, setTitleInputActive] = useState<BuiltinCardKind | null>(null);
   const [extraSensorPickerFor, setExtraSensorPickerFor] = useState<BuiltinCardKind | null>(null);
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
@@ -124,7 +125,15 @@ export default function PCDetailScreen() {
     updateBuiltinCard(pcId, kind, {
       customTitle: trimmed && trimmed !== defaultTitle ? trimmed : undefined,
     });
+    setTitleInputActive(null);
+  };
+
+  const closeBuiltinEditMode = (kind: BuiltinCardKind) => {
+    if (titleInputActive === kind) {
+      commitBuiltinTitle(kind, builtinTitleDraft);
+    }
     setInlineEditBuiltin(null);
+    setTitleInputActive(null);
   };
 
   const toggleBuiltinField = (kind: BuiltinCardKind, fieldKey: string) => {
@@ -155,7 +164,7 @@ export default function PCDetailScreen() {
   function BuiltinDoneBtn({ accentColor, kind }: { accentColor: string; kind: BuiltinCardKind }) {
     return (
       <Pressable
-        onPress={() => commitBuiltinTitle(kind, builtinTitleDraft)}
+        onPress={() => closeBuiltinEditMode(kind)}
         style={[styles.builtinDoneBtn, { backgroundColor: accentColor + "22", borderColor: accentColor + "55" }]}
         hitSlop={8}
       >
@@ -433,13 +442,18 @@ export default function PCDetailScreen() {
     const builtinCard = card as BuiltinCardConfig;
     const accent = CARD_ACCENTS[card.kind] ?? C.tint;
     const isEditing = inlineEditBuiltin === card.kind;
+    const isTitleActive = titleInputActive === card.kind;
 
     const titleEdit: CardTitleEditConfig = {
       customTitle: builtinCard.customTitle,
-      editable: isEditing,
-      draft: isEditing ? builtinTitleDraft : undefined,
-      onChange: isEditing ? setBuiltinTitleDraft : undefined,
-      onSubmit: isEditing ? () => commitBuiltinTitle(card.kind as BuiltinCardKind, builtinTitleDraft) : undefined,
+      editable: isTitleActive,
+      draft: isTitleActive ? builtinTitleDraft : undefined,
+      onChange: isTitleActive ? setBuiltinTitleDraft : undefined,
+      onSubmit: isTitleActive ? () => commitBuiltinTitle(card.kind as BuiltinCardKind, builtinTitleDraft) : undefined,
+      onTitlePress: isEditing && !isTitleActive ? () => {
+        setBuiltinTitleDraft(builtinCard.customTitle ?? (CARD_NAMES[card.kind] ?? card.kind));
+        setTitleInputActive(card.kind as BuiltinCardKind);
+      } : undefined,
       rightAction: isEditing ? <BuiltinDoneBtn accentColor={accent} kind={card.kind as BuiltinCardKind} /> : undefined,
       borderStyle: isEditing ? { borderColor: accent + "66", borderWidth: 1.5 } : undefined,
     };
@@ -457,7 +471,7 @@ export default function PCDetailScreen() {
 
     const handleLongPress = () => {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      setBuiltinTitleDraft(builtinCard.customTitle ?? (CARD_NAMES[card.kind] ?? card.kind));
+      setTitleInputActive(null);
       setInlineEditBuiltin(card.kind as BuiltinCardKind);
     };
 

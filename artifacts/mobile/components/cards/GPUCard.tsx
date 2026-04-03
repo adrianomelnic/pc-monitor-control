@@ -32,6 +32,7 @@ export function GPUCard({ gpus, titleEdit, cardEdit }: Props) {
         titleDraft={titleEdit?.draft}
         onTitleChange={titleEdit?.onChange}
         onTitleSubmit={titleEdit?.onSubmit}
+        onTitlePress={titleEdit?.onTitlePress}
         rightAction={titleEdit?.rightAction}
         style={titleEdit?.borderStyle}
         extraSensorRows={cardEdit?.extraSensorRows}
@@ -64,6 +65,7 @@ export function GPUCard({ gpus, titleEdit, cardEdit }: Props) {
             titleDraft={isFirst ? titleEdit?.draft : undefined}
             onTitleChange={isFirst ? titleEdit?.onChange : undefined}
             onTitleSubmit={isFirst ? titleEdit?.onSubmit : undefined}
+            onTitlePress={isFirst ? titleEdit?.onTitlePress : undefined}
             rightAction={isFirst ? titleEdit?.rightAction : undefined}
             style={isFirst ? titleEdit?.borderStyle : undefined}
             extraSensorRows={isFirst ? cardEdit?.extraSensorRows : undefined}

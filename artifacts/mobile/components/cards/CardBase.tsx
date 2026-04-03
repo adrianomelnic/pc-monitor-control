@@ -1,6 +1,6 @@
 import { Feather } from "@expo/vector-icons";
 import React, { useRef } from "react";
-import { StyleSheet, Text, TextInput, View, ViewStyle } from "react-native";
+import { Pressable, StyleSheet, Text, TextInput, View, ViewStyle } from "react-native";
 import Colors from "@/constants/colors";
 
 const C = Colors.light;
@@ -45,6 +45,8 @@ export interface CardTitleEditConfig {
   draft?: string;
   onChange?: (t: string) => void;
   onSubmit?: () => void;
+  /** Called when user taps the title text while in edit mode (activates keyboard) */
+  onTitlePress?: () => void;
   rightAction?: React.ReactNode;
   borderStyle?: ViewStyle;
 }
@@ -62,6 +64,8 @@ interface CardBaseProps {
   titleDraft?: string;
   onTitleChange?: (t: string) => void;
   onTitleSubmit?: () => void;
+  /** Tap handler on the title text — activates keyboard for renaming */
+  onTitlePress?: () => void;
   children: React.ReactNode;
   style?: ViewStyle;
   /** Extra HWiNFO64 sensor rows appended below main content */
@@ -81,6 +85,7 @@ export function CardBase({
   titleDraft,
   onTitleChange,
   onTitleSubmit,
+  onTitlePress,
   children,
   style,
   extraSensorRows,
@@ -105,8 +110,15 @@ export function CardBase({
               autoCorrect={false}
               returnKeyType="done"
               selectTextOnFocus
-              blurOnSubmit={false}
+              autoFocus
             />
+          ) : onTitlePress ? (
+            <Pressable onPress={onTitlePress} hitSlop={6}>
+              <View style={styles.titlePressable}>
+                <Text style={styles.title} numberOfLines={1}>{title}</Text>
+                <Feather name="edit-2" size={10} color={accentColor} style={styles.titleEditIcon} />
+              </View>
+            </Pressable>
           ) : (
             <Text style={styles.title} numberOfLines={1}>{title}</Text>
           )}
@@ -202,6 +214,14 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1.5,
     paddingVertical: 0,
     paddingHorizontal: 0,
+  },
+  titlePressable: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+  },
+  titleEditIcon: {
+    opacity: 0.7,
   },
   subtitle: {
     fontSize: 11,

@@ -35,6 +35,7 @@ export function RAMCard({ ram, titleEdit, cardEdit }: Props) {
       titleDraft={titleEdit?.draft}
       onTitleChange={titleEdit?.onChange}
       onTitleSubmit={titleEdit?.onSubmit}
+      onTitlePress={titleEdit?.onTitlePress}
       rightAction={titleEdit?.rightAction}
       style={titleEdit?.borderStyle}
       extraSensorRows={cardEdit?.extraSensorRows}
