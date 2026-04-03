@@ -45,18 +45,40 @@ psutil.cpu_percent(percpu=True)
 
 # Cache slow one-time queries at startup so metrics endpoint stays fast
 def _init_cpu_name():
-    name = platform.processor() or "Unknown CPU"
     if IS_WINDOWS:
+        # 1) Registry — most reliable on all Windows versions
+        try:
+            import winreg
+            key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE,
+                r"HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0")
+            name = winreg.QueryValueEx(key, "ProcessorNameString")[0].strip()
+            winreg.CloseKey(key)
+            if name:
+                return name
+        except Exception:
+            pass
+        # 2) PowerShell CIM (works on Windows 10/11 where wmic is deprecated)
+        try:
+            r = subprocess.run(
+                ["powershell", "-NoProfile", "-Command",
+                 "(Get-CimInstance Win32_Processor).Name"],
+                capture_output=True, text=True, timeout=8)
+            name = r.stdout.strip()
+            if name:
+                return name
+        except Exception:
+            pass
+        # 3) wmic legacy fallback
         try:
             r = subprocess.run(["wmic", "cpu", "get", "name"],
                                capture_output=True, text=True, timeout=5)
             lines = [l.strip() for l in r.stdout.splitlines()
                      if l.strip() and l.strip().lower() != "name"]
             if lines:
-                name = lines[0]
+                return lines[0]
         except Exception:
             pass
-    return name
+    return platform.processor() or "Unknown CPU"
 
 def _init_gpu_names():
     """Return list of GPU name strings (queried once at startup)."""
