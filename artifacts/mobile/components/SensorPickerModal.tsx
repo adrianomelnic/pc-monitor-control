@@ -186,11 +186,11 @@ export function SensorPickerModal({
               grouped.map((group) => (
                 <View key={group.type} style={styles.group}>
                   <Text style={styles.groupLabel}>{group.label}</Text>
-                  {group.items.map((s) => {
+                  {group.items.map((s, si) => {
                     const isSelected = selected.has(s.label);
                     return (
                       <TouchableOpacity
-                        key={s.label}
+                        key={`${group.type}_${si}_${s.label}`}
                         style={[styles.sensorRow, isSelected && styles.sensorRowSelected]}
                         onPress={() => toggle(s.label)}
                         activeOpacity={0.7}
