@@ -182,26 +182,6 @@ export function FansCard({ fans, baseUrl, apiKey }: Props) {
               </View>
             ))}
           </View>
-
-          {baseUrl && (
-            <View style={styles.diagWrap}>
-              <Pressable
-                style={({ pressed }) => [styles.diagBtn, pressed && { opacity: 0.7 }]}
-                onPress={runDiagnosis}
-                disabled={diagLoading}
-              >
-                {diagLoading ? (
-                  <ActivityIndicator size="small" color={ACCENT} />
-                ) : (
-                  <>
-                    <Feather name="cpu" size={13} color={ACCENT} />
-                    <Text style={styles.diagBtnText}>Run HWiNFO64 Diagnosis</Text>
-                  </>
-                )}
-              </Pressable>
-              {renderDiag()}
-            </View>
-          )}
         </View>
       ) : (
         <View style={styles.fanList}>
@@ -232,6 +212,27 @@ export function FansCard({ fans, baseUrl, apiKey }: Props) {
               </View>
             );
           })}
+        </View>
+      )}
+
+      {/* Diagnosis button — always visible when connected */}
+      {baseUrl && (
+        <View style={styles.diagWrap}>
+          <Pressable
+            style={({ pressed }) => [styles.diagBtn, pressed && { opacity: 0.7 }]}
+            onPress={runDiagnosis}
+            disabled={diagLoading}
+          >
+            {diagLoading ? (
+              <ActivityIndicator size="small" color={ACCENT} />
+            ) : (
+              <>
+                <Feather name="cpu" size={13} color={ACCENT} />
+                <Text style={styles.diagBtnText}>Run HWiNFO64 Diagnosis</Text>
+              </>
+            )}
+          </Pressable>
+          {renderDiag()}
         </View>
       )}
     </CardBase>
