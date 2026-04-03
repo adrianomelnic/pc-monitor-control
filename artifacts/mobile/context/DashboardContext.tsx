@@ -24,6 +24,7 @@ export interface CustomCardConfig {
   title: string;
   sensorLabels: string[];
   accentColor: string;
+  icon: string;
 }
 
 export type CardConfig = BuiltinCardConfig | CustomCardConfig;
@@ -48,12 +49,12 @@ interface DashboardContextType {
   getCards: (pcId: string) => CardConfig[];
   toggleCard: (pcId: string, cardId: string) => void;
   moveCard: (pcId: string, cardId: string, direction: "up" | "down") => void;
-  addCustomCard: (pcId: string, title: string, sensorLabels: string[], accentColor: string) => void;
+  addCustomCard: (pcId: string, title: string, sensorLabels: string[], accentColor: string, icon: string) => void;
   removeCard: (pcId: string, cardId: string) => void;
   updateCustomCard: (
     pcId: string,
     cardId: string,
-    updates: Partial<Pick<CustomCardConfig, "title" | "sensorLabels" | "accentColor">>
+    updates: Partial<Pick<CustomCardConfig, "title" | "sensorLabels" | "accentColor" | "icon">>
   ) => void;
 }
 
@@ -122,7 +123,7 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
-  const addCustomCard = useCallback((pcId: string, title: string, sensorLabels: string[], accentColor: string) => {
+  const addCustomCard = useCallback((pcId: string, title: string, sensorLabels: string[], accentColor: string, icon: string) => {
     setLayouts((prev) => {
       const cards = [...(prev[pcId] ?? [...BUILTIN_DEFAULTS])];
       const newCard: CustomCardConfig = {
@@ -132,6 +133,7 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
         title,
         sensorLabels,
         accentColor,
+        icon,
       };
       const updated = [...cards, newCard];
       AsyncStorage.setItem(storageKey(pcId), JSON.stringify(updated));

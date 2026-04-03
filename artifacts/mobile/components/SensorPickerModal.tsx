@@ -17,6 +17,31 @@ import Colors from "@/constants/colors";
 
 const C = Colors.light;
 
+// ─── Icon picker options ──────────────────────────────────────────────────────
+
+export const ICON_OPTIONS: { name: string; label: string }[] = [
+  { name: "layers",      label: "General"  },
+  { name: "thermometer", label: "Temp"     },
+  { name: "cpu",         label: "CPU"      },
+  { name: "monitor",     label: "GPU"      },
+  { name: "database",    label: "RAM"      },
+  { name: "wind",        label: "Fans"     },
+  { name: "hard-drive",  label: "Drive"    },
+  { name: "zap",         label: "Power"    },
+  { name: "activity",    label: "Load"     },
+  { name: "wifi",        label: "Network"  },
+  { name: "server",      label: "Server"   },
+  { name: "battery",     label: "Battery"  },
+  { name: "bar-chart-2", label: "Stats"    },
+  { name: "hash",        label: "Values"   },
+  { name: "settings",    label: "System"   },
+  { name: "sliders",     label: "Sensors"  },
+  { name: "radio",       label: "Radio"    },
+  { name: "box",         label: "Box"      },
+  { name: "feather",     label: "Custom"   },
+  { name: "eye",         label: "Monitor"  },
+];
+
 // Short badge label for each reading type
 const TYPE_BADGE: Record<string, { label: string; color: string }> = {
   temperature: { label: "°C",  color: "#FB923C" },
@@ -43,11 +68,12 @@ function formatPreview(s: SensorReading): string {
 interface Props {
   visible: boolean;
   onClose: () => void;
-  onSave: (title: string, sensorLabels: string[], accentColor: string) => void;
+  onSave: (title: string, sensorLabels: string[], accentColor: string, icon: string) => void;
   sensors: SensorReading[];
   initialTitle?: string;
   initialSensors?: string[];
   initialColor?: string;
+  initialIcon?: string;
   isEdit?: boolean;
 }
 
@@ -59,12 +85,14 @@ export function SensorPickerModal({
   initialTitle = "",
   initialSensors = [],
   initialColor,
+  initialIcon,
   isEdit = false,
 }: Props) {
   const insets = useSafeAreaInsets();
   const [title, setTitle] = useState(initialTitle);
   const [selected, setSelected] = useState<Set<string>>(new Set(initialSensors));
   const [accentColor, setAccentColor] = useState(initialColor ?? ACCENT_COLORS[0]);
+  const [icon, setIcon] = useState(initialIcon ?? ICON_OPTIONS[0].name);
   const [search, setSearch] = useState("");
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
 
@@ -73,6 +101,7 @@ export function SensorPickerModal({
       setTitle(initialTitle);
       setSelected(new Set(initialSensors));
       setAccentColor(initialColor ?? ACCENT_COLORS[0]);
+      setIcon(initialIcon ?? ICON_OPTIONS[0].name);
       setSearch("");
       setCollapsed(new Set());
     }
@@ -137,7 +166,7 @@ export function SensorPickerModal({
   };
 
   const handleSave = () => {
-    onSave(title.trim() || "Custom Card", Array.from(selected), accentColor);
+    onSave(title.trim() || "Custom Card", Array.from(selected), accentColor, icon);
     onClose();
   };
 
@@ -172,6 +201,30 @@ export function SensorPickerModal({
               autoCorrect={false}
               returnKeyType="done"
             />
+          </View>
+
+          {/* ── Icon Picker ── */}
+          <View style={styles.section}>
+            <Text style={styles.sectionLabel}>ICON</Text>
+            <View style={styles.iconGrid}>
+              {ICON_OPTIONS.map((opt) => {
+                const active = icon === opt.name;
+                return (
+                  <Pressable
+                    key={opt.name}
+                    style={[styles.iconCell, active && { backgroundColor: accentColor + "22", borderColor: accentColor }]}
+                    onPress={() => setIcon(opt.name)}
+                  >
+                    <Feather
+                      name={opt.name as keyof typeof Feather.glyphMap}
+                      size={20}
+                      color={active ? accentColor : C.textMuted}
+                    />
+                    <Text style={[styles.iconLabel, active && { color: accentColor }]}>{opt.label}</Text>
+                  </Pressable>
+                );
+              })}
+            </View>
           </View>
 
           {/* ── Accent Color ── */}
@@ -490,5 +543,27 @@ const styles = StyleSheet.create({
     color: C.textMuted,
     fontVariant: ["tabular-nums"],
     flexShrink: 0,
+  },
+  iconGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginTop: 4,
+  },
+  iconCell: {
+    width: "22%",
+    alignItems: "center",
+    gap: 5,
+    paddingVertical: 10,
+    borderRadius: 10,
+    borderWidth: 1.5,
+    borderColor: C.cardBorder,
+    backgroundColor: C.card,
+  },
+  iconLabel: {
+    fontSize: 9,
+    fontWeight: "600",
+    color: C.textMuted,
+    letterSpacing: 0.2,
   },
 });

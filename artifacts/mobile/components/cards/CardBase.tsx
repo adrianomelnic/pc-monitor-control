@@ -31,6 +31,8 @@ interface CardBaseProps {
   subtitle?: string;
   accentColor: string;
   temperature?: number | null;
+  /** Optional element shown in the header right slot (used when temperature is null) */
+  rightAction?: React.ReactNode;
   children: React.ReactNode;
   style?: ViewStyle;
 }
@@ -41,6 +43,7 @@ export function CardBase({
   subtitle,
   accentColor,
   temperature,
+  rightAction,
   children,
   style,
 }: CardBaseProps) {
@@ -54,7 +57,7 @@ export function CardBase({
           <Text style={styles.title} numberOfLines={1}>{title}</Text>
           {subtitle ? <Text style={styles.subtitle} numberOfLines={1}>{subtitle}</Text> : null}
         </View>
-        {temperature != null ? <TempBadge value={temperature} /> : null}
+        {temperature != null ? <TempBadge value={temperature} /> : (rightAction ?? null)}
       </View>
       <View style={styles.divider} />
       {children}
