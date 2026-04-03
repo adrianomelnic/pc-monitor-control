@@ -60,7 +60,8 @@ export function GPUCard({ gpus, titleEdit, cardEdit }: Props) {
         const gpuTitle = gpus.length > 1 ? `${base} ${idx}` : base;
         const visibleOrder = order.filter(k => !hidden.has(k));
         const showHero = !hidden.has("usage") && gpu.usage != null;
-        const rightFields = visibleOrder.filter(k => k !== "usage");
+        const showVram = !hidden.has("vram") && vramPct != null;
+        const rightFields = visibleOrder.filter(k => k !== "usage" && k !== "vram");
 
         function renderRightField(key: string): React.ReactNode {
           switch (key) {
@@ -75,18 +76,6 @@ export function GPUCard({ gpus, titleEdit, cardEdit }: Props) {
             case "clockMem":
               return gpu.clockMem != null ? (
                 <StatRow key={key} label={getLabel("clockMem", "Mem clock")} value={`${gpu.clockMem} MHz`} />
-              ) : null;
-            case "vram":
-              return vramPct != null ? (
-                <View key={key} style={styles.barSection}>
-                  <View style={styles.barHeader}>
-                    <Text style={styles.sectionLabel}>VRAM</Text>
-                    <Text style={[styles.barPct, { color: vramPct > 85 ? "#FF4444" : ACCENT }]}>
-                      {Math.round(vramPct)}%
-                    </Text>
-                  </View>
-                  <MiniBar value={vramPct} color={ACCENT} height={5} />
-                </View>
               ) : null;
             default: {
               const val = extraMap[key];
@@ -126,6 +115,17 @@ export function GPUCard({ gpus, titleEdit, cardEdit }: Props) {
             ) : (
               <View style={styles.fieldList}>
                 {rightFields.map(key => renderRightField(key))}
+              </View>
+            )}
+            {showVram && (
+              <View style={styles.barSection}>
+                <View style={styles.barHeader}>
+                  <Text style={styles.sectionLabel}>VRAM</Text>
+                  <Text style={styles.barCaption}>
+                    {fmtMB(gpu.vramUsed)} / {fmtMB(gpu.vramTotal)}
+                  </Text>
+                </View>
+                <MiniBar value={vramPct!} color={ACCENT} height={6} />
               </View>
             )}
           </CardBase>
@@ -182,6 +182,11 @@ const styles = StyleSheet.create({
   barPct: {
     fontSize: 11,
     fontWeight: "700",
+  },
+  barCaption: {
+    fontSize: 11,
+    color: C.textSecondary,
+    fontWeight: "600",
   },
   empty: {
     fontSize: 12,
