@@ -232,6 +232,9 @@ export default function PCDetailScreen() {
             setEditingCard(c);
             setPickerVisible(true);
           }}
+          onUpdateTitle={(newTitle) => {
+            updateCustomCard(pcId, c.id, { title: newTitle });
+          }}
           onUpdateAlias={(originalLabel, newAlias) => {
             const current = { ...(c.sensorAliases ?? {}) };
             if (newAlias && newAlias !== originalLabel) {
@@ -240,6 +243,21 @@ export default function PCDetailScreen() {
               delete current[originalLabel];
             }
             updateCustomCard(pcId, c.id, { sensorAliases: current });
+          }}
+          onSwapSensor={(oldLabel, newLabel) => {
+            const newLabels = c.sensorLabels.map((l) => (l === oldLabel ? newLabel : l));
+            const newAliases = { ...(c.sensorAliases ?? {}) };
+            delete newAliases[oldLabel];
+            updateCustomCard(pcId, c.id, { sensorLabels: newLabels, sensorAliases: newAliases });
+          }}
+          onAddSensor={(newLabel) => {
+            updateCustomCard(pcId, c.id, { sensorLabels: [...c.sensorLabels, newLabel] });
+          }}
+          onRemoveSensor={(label) => {
+            const newLabels = c.sensorLabels.filter((l) => l !== label);
+            const newAliases = { ...(c.sensorAliases ?? {}) };
+            delete newAliases[label];
+            updateCustomCard(pcId, c.id, { sensorLabels: newLabels, sensorAliases: newAliases });
           }}
         />
       );

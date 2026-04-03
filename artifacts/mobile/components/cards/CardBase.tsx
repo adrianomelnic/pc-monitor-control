@@ -1,6 +1,6 @@
 import { Feather } from "@expo/vector-icons";
-import React from "react";
-import { StyleSheet, Text, View, ViewStyle } from "react-native";
+import React, { useRef, useEffect } from "react";
+import { StyleSheet, Text, TextInput, View, ViewStyle } from "react-native";
 import Colors from "@/constants/colors";
 
 const C = Colors.light;
@@ -33,6 +33,11 @@ interface CardBaseProps {
   temperature?: number | null;
   /** Optional element shown in the header right slot (used when temperature is null) */
   rightAction?: React.ReactNode;
+  /** When true, the title renders as a TextInput for inline editing */
+  titleEditable?: boolean;
+  titleDraft?: string;
+  onTitleChange?: (t: string) => void;
+  onTitleSubmit?: () => void;
   children: React.ReactNode;
   style?: ViewStyle;
 }
@@ -44,9 +49,21 @@ export function CardBase({
   accentColor,
   temperature,
   rightAction,
+  titleEditable,
+  titleDraft,
+  onTitleChange,
+  onTitleSubmit,
   children,
   style,
 }: CardBaseProps) {
+  const titleInputRef = useRef<TextInput>(null);
+
+  useEffect(() => {
+    if (titleEditable) {
+      setTimeout(() => titleInputRef.current?.focus(), 80);
+    }
+  }, [titleEditable]);
+
   return (
     <View style={[styles.card, { borderTopColor: accentColor }, style]}>
       <View style={styles.header}>
@@ -54,7 +71,21 @@ export function CardBase({
           <Feather name={icon} size={16} color={accentColor} />
         </View>
         <View style={styles.titleBlock}>
-          <Text style={styles.title} numberOfLines={1}>{title}</Text>
+          {titleEditable ? (
+            <TextInput
+              ref={titleInputRef}
+              style={[styles.title, styles.titleInput, { borderBottomColor: accentColor }]}
+              value={titleDraft}
+              onChangeText={onTitleChange}
+              onSubmitEditing={onTitleSubmit}
+              onBlur={onTitleSubmit}
+              autoCorrect={false}
+              returnKeyType="done"
+              selectTextOnFocus
+            />
+          ) : (
+            <Text style={styles.title} numberOfLines={1}>{title}</Text>
+          )}
           {subtitle ? <Text style={styles.subtitle} numberOfLines={1}>{subtitle}</Text> : null}
         </View>
         {temperature != null ? <TempBadge value={temperature} /> : (rightAction ?? null)}
@@ -133,6 +164,11 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: C.text,
     letterSpacing: 0.2,
+  },
+  titleInput: {
+    borderBottomWidth: 1.5,
+    paddingVertical: 0,
+    paddingHorizontal: 0,
   },
   subtitle: {
     fontSize: 11,
