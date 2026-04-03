@@ -28,10 +28,6 @@ export function GPUCard({ gpus, titleEdit, cardEdit }: Props) {
   const aliases = cardEdit?.fieldAliases ?? {};
   const getLabel = (key: string, def: string) => aliases[key] ?? def;
 
-  const extraKeys = order.filter(k =>
-    !["usage", "vramRow", "clockGpu", "clockMem", "vram"].includes(k) && !hidden.has(k)
-  );
-
   if (!gpus || gpus.length === 0) {
     return (
       <CardBase
@@ -49,14 +45,6 @@ export function GPUCard({ gpus, titleEdit, cardEdit }: Props) {
         extraTemps={cardEdit?.extraTemps}
       >
         <Text style={styles.empty}>No GPU detected or nvidia-smi not available</Text>
-        {extraKeys.length > 0 && (
-          <View style={styles.fieldList}>
-            {extraKeys.map(key => {
-              const val = extraMap[key];
-              return val ? <StatRow key={key} label={getLabel(key, key)} value={val} /> : null;
-            })}
-          </View>
-        )}
       </CardBase>
     );
   }
@@ -71,16 +59,11 @@ export function GPUCard({ gpus, titleEdit, cardEdit }: Props) {
         const isFirst = idx === 0;
         const gpuTitle = gpus.length > 1 ? `${base} ${idx}` : base;
         const visibleOrder = order.filter(k => !hidden.has(k));
+        const showHero = !hidden.has("usage") && gpu.usage != null;
+        const rightFields = visibleOrder.filter(k => k !== "usage");
 
-        function renderField(key: string): React.ReactNode {
+        function renderRightField(key: string): React.ReactNode {
           switch (key) {
-            case "usage":
-              return gpu.usage != null ? (
-                <View key={key} style={styles.usageBadge}>
-                  <Text style={[styles.bigNum, { color: ACCENT }]}>{Math.round(gpu.usage)}%</Text>
-                  <Text style={styles.bigLabel}>{getLabel("usage", "GPU Load")}</Text>
-                </View>
-              ) : null;
             case "vramRow":
               return (
                 <StatRow key={key} label={getLabel("vramRow", "VRAM used")} value={`${fmtMB(gpu.vramUsed)} / ${fmtMB(gpu.vramTotal)}`} color={ACCENT} />
@@ -95,14 +78,14 @@ export function GPUCard({ gpus, titleEdit, cardEdit }: Props) {
               ) : null;
             case "vram":
               return vramPct != null ? (
-                <View key={key} style={styles.vramSection}>
-                  <View style={styles.vramHeader}>
-                    <Text style={styles.sectionText}>VRAM</Text>
-                    <Text style={[styles.vramPct, { color: vramPct > 85 ? "#FF4444" : ACCENT }]}>
+                <View key={key} style={styles.barSection}>
+                  <View style={styles.barHeader}>
+                    <Text style={styles.sectionLabel}>VRAM</Text>
+                    <Text style={[styles.barPct, { color: vramPct > 85 ? "#FF4444" : ACCENT }]}>
                       {Math.round(vramPct)}%
                     </Text>
                   </View>
-                  <MiniBar value={vramPct} color={ACCENT} height={6} />
+                  <MiniBar value={vramPct} color={ACCENT} height={5} />
                 </View>
               ) : null;
             default: {
@@ -130,9 +113,21 @@ export function GPUCard({ gpus, titleEdit, cardEdit }: Props) {
             style={isFirst ? titleEdit?.borderStyle : undefined}
             editPanel={isFirst ? cardEdit?.editPanel : undefined}
           >
-            <View style={styles.fieldList}>
-              {visibleOrder.map(key => renderField(key))}
-            </View>
+            {showHero ? (
+              <View style={styles.heroRow}>
+                <View style={styles.heroLeft}>
+                  <Text style={[styles.bigNum, { color: ACCENT }]}>{Math.round(gpu.usage!)}%</Text>
+                  <Text style={styles.bigLabel}>{getLabel("usage", "GPU Load")}</Text>
+                </View>
+                <View style={styles.heroRight}>
+                  {rightFields.map(key => renderRightField(key))}
+                </View>
+              </View>
+            ) : (
+              <View style={styles.fieldList}>
+                {rightFields.map(key => renderRightField(key))}
+              </View>
+            )}
           </CardBase>
         );
       })}
@@ -141,14 +136,20 @@ export function GPUCard({ gpus, titleEdit, cardEdit }: Props) {
 }
 
 const styles = StyleSheet.create({
-  fieldList: {
-    gap: 6,
-  },
-  usageBadge: {
+  heroRow: {
     flexDirection: "row",
-    alignItems: "baseline",
-    gap: 8,
-    paddingBottom: 2,
+    gap: 12,
+    alignItems: "flex-start",
+  },
+  heroLeft: {
+    alignItems: "center",
+    justifyContent: "flex-start",
+    minWidth: 54,
+    paddingTop: 2,
+  },
+  heroRight: {
+    flex: 1,
+    gap: 5,
   },
   bigNum: {
     fontSize: 28,
@@ -159,23 +160,27 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: C.textSecondary,
     fontWeight: "600",
+    marginTop: 1,
   },
-  vramSection: {
+  fieldList: {
     gap: 5,
   },
-  vramHeader: {
+  barSection: {
+    gap: 4,
+  },
+  barHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
   },
-  sectionText: {
+  sectionLabel: {
     fontSize: 9,
     fontWeight: "700",
     color: C.textMuted,
     letterSpacing: 1.2,
   },
-  vramPct: {
-    fontSize: 12,
+  barPct: {
+    fontSize: 11,
     fontWeight: "700",
   },
   empty: {
