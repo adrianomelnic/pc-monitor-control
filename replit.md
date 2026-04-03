@@ -1,3 +1,36 @@
+# PC Monitor & Control — Mobile App
+
+## Project Overview
+iOS/Android Expo app that connects directly to PC agents over local WiFi (HTTP port 8765). Users run `pc_agent.py` on each Windows PC; the app monitors live system metrics and sends control commands.
+
+## Key Features
+- Real-time CPU, GPU, RAM, Fan, Disk, Network monitoring via HWiNFO64
+- **Editable dashboard**: show/hide built-in cards, reorder them, add custom sensor cards
+- Custom sensor cards: pick any HWiNFO64 sensor (temp, voltage, power, clock, fan, usage…)
+- PC controls: Sleep, Lock, Restart, Shutdown, remote terminal
+- Per-PC layout persisted in AsyncStorage (survives app restarts)
+
+## Architecture
+- Direct HTTP from phone to agent on port 8765 (no server middleman)
+- `AbortController + setTimeout` for fetch timeouts (no AbortSignal.timeout — Expo compat)
+- 12s silent background poll; pull-to-refresh shows spinner
+
+## New Files (Dashboard Editor)
+- `context/DashboardContext.tsx` — per-PC card layout (AsyncStorage-backed)
+- `components/cards/SensorCard.tsx` — custom sensor card component
+- `components/SensorPickerModal.tsx` — searchable HWiNFO64 sensor picker
+
+## HWiNFO64 Integration
+- Shared memory format: signature `{0x12345678, 0x53695748}`
+- Label encoding: `raw[1] == 0` → UTF-16-LE; else → Latin-1
+- Format auto-detection: `size_reading >= 500` → LBL_BYTES=256, VAL_OFF_BASE=556
+- ALL sensor types now exposed: temp, voltage, fan, current, power, clock, usage
+- Sensor types 0–8 mapped to units (°C, V, RPM, A, W, MHz, %)
+
+## Colors
+CPU=#00D4FF, GPU=#34D399, RAM=#A78BFA, Fans=#FB923C, Disk=#2DD4BF, Network=#60A5FA
+
+---
 # Workspace
 
 ## Overview

@@ -209,33 +209,39 @@ def read_hwinfo64():
             cut = raw.find(b'\\x00')
             return (raw[:cut] if cut >= 0 else raw).decode('latin-1').strip()
 
+        # All HWiNFO64 sensor reading types and their units
+        RTYPE_UNIT = {0:"",1:"°C",2:"V",3:"RPM",4:"A",5:"W",6:"MHz",7:"%",8:""}
+        RTYPE_NAME = {0:"other",1:"temperature",2:"voltage",3:"fan",
+                      4:"current",5:"power",6:"clock",7:"usage",8:"other"}
         TEMP, FAN = 1, 3
-        temps, fans = [], []
+        temps, fans, sensors = [], [], []
         for i in range(num_readings):
             base = off_readings + i * size_reading
             if base + size_reading > len(data):
                 break
             r_type = struct.unpack_from('<I', data, base)[0]
-            if r_type not in (TEMP, FAN):
+            if r_type not in RTYPE_UNIT:
                 continue
             orig = _label(data[base+12 : base+12+LBL_BYTES])
             user = _label(data[base+12+LBL_BYTES : base+12+LBL_BYTES+LBL_BYTES])
             label = user if user else orig
             val_off = base + VAL_OFF_BASE
-            if val_off + 8 > len(data):
+            if val_off + 8 > len(data) or not label:
                 continue
             value = struct.unpack_from('<d', data, val_off)[0]
-            if r_type == TEMP and label:
+            sensors.append({
+                "label": label,
+                "value": round(value, 3),
+                "unit": RTYPE_UNIT[r_type],
+                "type": RTYPE_NAME[r_type],
+            })
+            if r_type == TEMP:
                 temps.append({"label": label, "value": round(value, 1)})
-            elif r_type == FAN and value > 0 and label:
+            elif r_type == FAN and value > 0:
                 fans.append({"label": label, "rpm": round(value)})
-        print(f"HWiNFO64: {num_readings} readings (size_reading={size_reading}), "
-              f"{len(temps)} temps, {len(fans)} fans")
-        if temps:
-            print(f"  Sample temps: {[(t['label'], t['value']) for t in temps[:3]]}")
-        if fans:
-            print(f"  Sample fans: {[(f['label'], f['rpm']) for f in fans[:3]]}")
-        return {"temps": temps, "fans": fans} if (temps or fans) else None
+        print(f"HWiNFO64: {num_readings} readings, {len(sensors)} sensors "
+              f"({len(temps)} temps, {len(fans)} fans)")
+        return {"temps": temps, "fans": fans, "sensors": sensors}
     except Exception as e:
         print(f"HWiNFO64 read error: {e}")
         import traceback; traceback.print_exc()
@@ -487,6 +493,7 @@ def _collect_metrics():
             "fans": fans,
             "disks": disks,
             "network": network,
+            "sensors": hwinfo_data.get("sensors", []) if hwinfo_data else [],
         }
     })
 

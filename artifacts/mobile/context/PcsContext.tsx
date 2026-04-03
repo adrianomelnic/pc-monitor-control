@@ -8,6 +8,14 @@ import React, {
   useState,
 } from "react";
 
+// ─── Sensor reading from HWiNFO64 (all types) ─────────────────────────────────
+export interface SensorReading {
+  label: string;
+  value: number;
+  unit: string;
+  type: 'temperature' | 'voltage' | 'fan' | 'current' | 'power' | 'clock' | 'usage' | 'other';
+}
+
 // ─── Detailed component types ─────────────────────────────────────────────────
 
 export interface CPUInfo {
@@ -88,6 +96,8 @@ export interface PCMetrics {
   fans?: FanInfo[];
   disks?: DiskInfo[];
   network?: NetworkInterface[];
+  // All HWiNFO64 readings (for custom sensor cards)
+  sensors?: SensorReading[];
 }
 
 export interface PC {

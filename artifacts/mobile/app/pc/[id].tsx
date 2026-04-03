@@ -15,6 +15,8 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { CommandButton } from "@/components/CommandButton";
+import { SensorPickerModal } from "@/components/SensorPickerModal";
+import { SensorCard } from "@/components/cards/SensorCard";
 import { CPUCard } from "@/components/cards/CPUCard";
 import { DisksCard } from "@/components/cards/DisksCard";
 import { FansCard } from "@/components/cards/FansCard";
@@ -22,6 +24,7 @@ import { GPUCard } from "@/components/cards/GPUCard";
 import { NetworkCard } from "@/components/cards/NetworkCard";
 import { RAMCard } from "@/components/cards/RAMCard";
 import Colors from "@/constants/colors";
+import { CardConfig, CustomCardConfig, useDashboard } from "@/context/DashboardContext";
 import { usePcs } from "@/context/PcsContext";
 
 const C = Colors.light;
@@ -37,9 +40,19 @@ function formatUptime(seconds: number) {
   return `${s}s`;
 }
 
+const CARD_NAMES: Record<string, string> = {
+  cpu: "CPU",
+  gpu: "GPU",
+  ram: "RAM",
+  fans: "Fans",
+  disks: "Disks",
+  network: "Network",
+};
+
 export default function PCDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { pcs, removePc, refreshPc, sendCommand } = usePcs();
+  const { getCards, toggleCard, moveCard, addCustomCard, removeCard, updateCustomCard } = useDashboard();
   const pc = pcs.find((p) => p.id === id);
   const insets = useSafeAreaInsets();
 
@@ -47,6 +60,9 @@ export default function PCDetailScreen() {
   const [cmdInput, setCmdInput] = useState("");
   const [cmdOutput, setCmdOutput] = useState("");
   const [cmdRunning, setCmdRunning] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const [pickerVisible, setPickerVisible] = useState(false);
+  const [editingCard, setEditingCard] = useState<CustomCardConfig | null>(null);
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 : insets.bottom;
@@ -58,6 +74,14 @@ export default function PCDetailScreen() {
       </View>
     );
   }
+
+  // Stash non-nullable reference (TypeScript can't narrow through inner functions)
+  const safePc = pc;
+  const pcId = pc.id;
+
+  const cards = getCards(pcId);
+  const m = pc.metrics;
+  const allSensors = m?.sensors ?? [];
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -93,13 +117,140 @@ export default function PCDetailScreen() {
     setCmdRunning(false);
   };
 
-  const m = pc.metrics;
   const statusColor =
     pc.status === "online"
       ? C.online
       : pc.status === "connecting"
       ? C.warning
       : C.offline;
+
+  // ── Edit bar rendered above each card in edit mode ──────────────────────────
+  function EditBar({ card, isFirst, isLast }: { card: CardConfig; isFirst: boolean; isLast: boolean }) {
+    const isCustom = card.kind === "custom";
+    const name = isCustom ? (card as CustomCardConfig).title : CARD_NAMES[card.kind] ?? card.kind;
+    return (
+      <View style={styles.editBar}>
+        <Pressable
+          style={styles.editBtn}
+          onPress={() => {
+            Haptics.selectionAsync();
+            toggleCard(pcId, card.id);
+          }}
+          hitSlop={6}
+        >
+          <Feather
+            name={card.visible ? "eye" : "eye-off"}
+            size={15}
+            color={card.visible ? C.text : C.textMuted}
+          />
+        </Pressable>
+
+        <Text style={styles.editCardName} numberOfLines={1}>{name}</Text>
+
+        <Pressable
+          style={[styles.editBtn, isFirst && styles.editBtnDisabled]}
+          onPress={() => {
+            if (!isFirst) {
+              Haptics.selectionAsync();
+              moveCard(pcId, card.id, "up");
+            }
+          }}
+          hitSlop={6}
+          disabled={isFirst}
+        >
+          <Feather name="chevron-up" size={16} color={isFirst ? C.textMuted : C.text} />
+        </Pressable>
+
+        <Pressable
+          style={[styles.editBtn, isLast && styles.editBtnDisabled]}
+          onPress={() => {
+            if (!isLast) {
+              Haptics.selectionAsync();
+              moveCard(pcId, card.id, "down");
+            }
+          }}
+          hitSlop={6}
+          disabled={isLast}
+        >
+          <Feather name="chevron-down" size={16} color={isLast ? C.textMuted : C.text} />
+        </Pressable>
+
+        {isCustom && (
+          <>
+            <Pressable
+              style={styles.editBtn}
+              onPress={() => {
+                Haptics.selectionAsync();
+                setEditingCard(card as CustomCardConfig);
+                setPickerVisible(true);
+              }}
+              hitSlop={6}
+            >
+              <Feather name="edit-2" size={14} color={C.tint} />
+            </Pressable>
+
+            <Pressable
+              style={styles.editBtn}
+              onPress={() => {
+                Alert.alert("Remove Card", `Remove "${name}"?`, [
+                  { text: "Cancel", style: "cancel" },
+                  {
+                    text: "Remove",
+                    style: "destructive",
+                    onPress: () => {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                      removeCard(pcId, card.id);
+                    },
+                  },
+                ]);
+              }}
+              hitSlop={6}
+            >
+              <Feather name="x" size={16} color={C.danger} />
+            </Pressable>
+          </>
+        )}
+      </View>
+    );
+  }
+
+  // ── Render a single card by kind ─────────────────────────────────────────────
+  function renderCardContent(card: CardConfig) {
+    if (!m) return null;
+    if (card.kind === "custom") {
+      const c = card as CustomCardConfig;
+      return (
+        <SensorCard
+          title={c.title}
+          sensorLabels={c.sensorLabels}
+          accentColor={c.accentColor}
+          sensors={allSensors}
+        />
+      );
+    }
+    switch (card.kind) {
+      case "cpu":
+        return m.cpu ? <CPUCard cpu={m.cpu} /> : null;
+      case "gpu":
+        return m.gpu ? <GPUCard gpus={m.gpu} /> : null;
+      case "ram":
+        return m.ram ? <RAMCard ram={m.ram} /> : null;
+      case "fans":
+        return m.fans != null ? (
+          <FansCard
+            fans={m.fans}
+            baseUrl={`http://${safePc.host}:${safePc.port}`}
+            apiKey={safePc.apiKey}
+          />
+        ) : null;
+      case "disks":
+        return m.disks && m.disks.length > 0 ? <DisksCard disks={m.disks} /> : null;
+      case "network":
+        return m.network && m.network.length > 0 ? <NetworkCard interfaces={m.network} /> : null;
+      default:
+        return null;
+    }
+  }
 
   return (
     <ScrollView
@@ -115,7 +266,7 @@ export default function PCDetailScreen() {
         />
       }
     >
-      {/* Header */}
+      {/* ── Header ── */}
       <View style={styles.header}>
         <Pressable onPress={() => router.back()} style={styles.backBtn} hitSlop={8}>
           <Feather name="arrow-left" size={22} color={C.text} />
@@ -134,6 +285,26 @@ export default function PCDetailScreen() {
             {pc.os ? <Text style={styles.osText}> · {pc.os}</Text> : null}
           </View>
         </View>
+        {/* Edit toggle */}
+        {pc.status === "online" && (
+          <Pressable
+            onPress={() => {
+              Haptics.selectionAsync();
+              setEditMode((e) => !e);
+            }}
+            style={[styles.editToggle, editMode && styles.editToggleActive]}
+            hitSlop={8}
+          >
+            <Feather
+              name={editMode ? "check" : "sliders"}
+              size={16}
+              color={editMode ? C.tint : C.textSecondary}
+            />
+            <Text style={[styles.editToggleText, editMode && { color: C.tint }]}>
+              {editMode ? "Done" : "Edit"}
+            </Text>
+          </Pressable>
+        )}
         <Pressable onPress={handleRemove} hitSlop={8}>
           <Feather name="trash-2" size={18} color={C.danger} />
         </Pressable>
@@ -149,6 +320,16 @@ export default function PCDetailScreen() {
           </Text>
         ) : null}
       </View>
+
+      {/* ── Edit mode banner ── */}
+      {editMode && (
+        <View style={styles.editBanner}>
+          <Feather name="info" size={13} color={C.tint} />
+          <Text style={styles.editBannerText}>
+            Tap the eye to show/hide cards. Use arrows to reorder. Tap + to add a sensor card.
+          </Text>
+        </View>
+      )}
 
       {/* ── OFFLINE STATE ── */}
       {pc.status !== "online" && (
@@ -216,19 +397,52 @@ export default function PCDetailScreen() {
       {/* ── COMPONENT CARDS ── */}
       {m && pc.status === "online" && (
         <>
-          {m.cpu && <CPUCard cpu={m.cpu} />}
-          {m.gpu && <GPUCard gpus={m.gpu} />}
-          {m.ram && <RAMCard ram={m.ram} />}
-          {m.fans != null && (
-            <FansCard
-              fans={m.fans}
-              baseUrl={`http://${pc.host}:${pc.port}`}
-              apiKey={pc.apiKey}
-            />
-          )}
-          {m.disks && m.disks.length > 0 && <DisksCard disks={m.disks} />}
-          {m.network && m.network.length > 0 && (
-            <NetworkCard interfaces={m.network} />
+          {cards.map((card, idx) => {
+            const content = renderCardContent(card);
+            // In normal mode: skip hidden cards and empty cards
+            if (!editMode && (!card.visible || !content)) return null;
+
+            const isFirst = idx === 0;
+            const isLast = idx === cards.length - 1;
+
+            return (
+              <View key={card.id}>
+                {editMode && (
+                  <EditBar card={card} isFirst={isFirst} isLast={isLast} />
+                )}
+                {card.visible ? (
+                  content
+                ) : (
+                  /* Hidden card placeholder — only shown in edit mode */
+                  editMode ? (
+                    <View style={styles.hiddenPlaceholder}>
+                      <Feather name="eye-off" size={13} color={C.textMuted} />
+                      <Text style={styles.hiddenPlaceholderText}>
+                        {card.kind === "custom"
+                          ? (card as CustomCardConfig).title
+                          : CARD_NAMES[card.kind] ?? card.kind}{" "}
+                        card is hidden
+                      </Text>
+                    </View>
+                  ) : null
+                )}
+              </View>
+            );
+          })}
+
+          {/* Add Sensor Card button (edit mode only) */}
+          {editMode && (
+            <Pressable
+              style={styles.addCardBtn}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                setEditingCard(null);
+                setPickerVisible(true);
+              }}
+            >
+              <Feather name="plus-circle" size={18} color={C.tint} />
+              <Text style={styles.addCardBtnText}>Add Sensor Card</Text>
+            </Pressable>
           )}
         </>
       )}
@@ -351,6 +565,27 @@ export default function PCDetailScreen() {
           </ScrollView>
         ) : null}
       </View>
+
+      {/* ── Sensor Picker Modal ── */}
+      <SensorPickerModal
+        visible={pickerVisible}
+        onClose={() => {
+          setPickerVisible(false);
+          setEditingCard(null);
+        }}
+        onSave={(title, sensorLabels, accentColor) => {
+          if (editingCard) {
+            updateCustomCard(pcId, editingCard.id, { title, sensorLabels, accentColor });
+          } else {
+            addCustomCard(pcId, title, sensorLabels, accentColor);
+          }
+        }}
+        sensors={allSensors}
+        initialTitle={editingCard?.title ?? ""}
+        initialSensors={editingCard?.sensorLabels ?? []}
+        initialColor={editingCard?.accentColor}
+        isEdit={!!editingCard}
+      />
     </ScrollView>
   );
 }
@@ -376,7 +611,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingTop: 4,
     paddingBottom: 2,
-    gap: 12,
+    gap: 10,
   },
   backBtn: {
     width: 36,
@@ -412,6 +647,26 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: C.textSecondary,
   },
+  editToggle: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: C.cardBorder,
+    backgroundColor: C.card,
+  },
+  editToggleActive: {
+    borderColor: C.tint + "60",
+    backgroundColor: C.tint + "15",
+  },
+  editToggleText: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: C.textSecondary,
+  },
   hostRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -426,6 +681,84 @@ const styles = StyleSheet.create({
   lastSeen: {
     fontSize: 12,
     color: C.textMuted,
+  },
+  editBanner: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 8,
+    backgroundColor: C.tint + "12",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: C.tint + "30",
+    padding: 12,
+  },
+  editBannerText: {
+    flex: 1,
+    fontSize: 12,
+    color: C.textSecondary,
+    lineHeight: 17,
+  },
+  editBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: 4,
+    paddingBottom: 6,
+  },
+  editBtn: {
+    width: 30,
+    height: 30,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 8,
+    backgroundColor: C.backgroundSecondary,
+    borderWidth: 1,
+    borderColor: C.cardBorder,
+  },
+  editBtnDisabled: {
+    opacity: 0.35,
+  },
+  editCardName: {
+    flex: 1,
+    fontSize: 12,
+    fontWeight: "600",
+    color: C.textSecondary,
+    marginHorizontal: 4,
+  },
+  hiddenPlaceholder: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    backgroundColor: C.card,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: C.cardBorder,
+    borderStyle: "dashed",
+    opacity: 0.5,
+  },
+  hiddenPlaceholderText: {
+    fontSize: 13,
+    color: C.textMuted,
+    fontStyle: "italic",
+  },
+  addCardBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
+    paddingVertical: 14,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: C.tint + "50",
+    borderStyle: "dashed",
+    backgroundColor: C.tint + "08",
+  },
+  addCardBtnText: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: C.tint,
   },
   summaryBar: {
     flexDirection: "row",
