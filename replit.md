@@ -6,8 +6,11 @@ iOS/Android Expo app that connects directly to PC agents over local WiFi (HTTP p
 ## Key Features
 - Real-time CPU, GPU, RAM, Fan, Disk, Network monitoring via HWiNFO64
 - **Editable dashboard**: show/hide built-in cards, reorder them, add custom sensor cards
-- **Built-in card editing**: long-press any card to rename, toggle individual fields/sensors, hide fans/disks/interfaces, add any HWiNFO64 sensor — all fields (built-in AND extra sensors) are fully reorderable with up/down arrows in a unified edit panel
+- **Built-in card editing**: long-press any card to rename, toggle individual fields/sensors, hide fans/disks/interfaces, add any HWiNFO64 sensor — all fields (built-in AND extra sensors) are fully reorderable with up/down arrows in a unified edit panel. Every field label is also editable (tap label in edit panel → inline TextInput).
+- **Hero layouts**: GPU, CPU, and RAM cards show a big percentage number on the left with detail stats on the right (hero section). When "usage" is hidden, hero detail fields fall through to normal row rendering.
+- **Temperature badges**: Extra HWiNFO64 sensors of type "temperature" auto-display as temp badges in the card header (like built-in CPU/GPU temps). Supports multiple badges (e.g. two DIMM temps on a RAM card).
 - **Field ordering**: `fieldOrder?: string[]` in `BuiltinCardConfig` stores custom field order per card; `getEffectiveFieldOrder()` merges stored order with defaults + extras, deduplicates, and handles missing keys
+- **Field aliases**: `fieldAliases?: Record<string, string>` in `BuiltinCardConfig` stores custom labels for any field
 - Custom sensor cards: pick any HWiNFO64 sensor (temp, voltage, power, clock, fan, usage…)
 - PC controls: Sleep, Lock, Restart, Shutdown, remote terminal
 - Per-PC layout persisted in AsyncStorage (survives app restarts)

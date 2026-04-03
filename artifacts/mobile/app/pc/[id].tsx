@@ -124,6 +124,8 @@ export default function PCDetailScreen() {
   const [builtinTitleDraft, setBuiltinTitleDraft] = useState("");
   const [titleInputActive, setTitleInputActive] = useState<BuiltinCardKind | null>(null);
   const [extraSensorPickerFor, setExtraSensorPickerFor] = useState<BuiltinCardKind | null>(null);
+  const [editingFieldLabel, setEditingFieldLabel] = useState<{ kind: BuiltinCardKind; key: string } | null>(null);
+  const [fieldLabelDraft, setFieldLabelDraft] = useState("");
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 : insets.bottom;
@@ -153,12 +155,47 @@ export default function PCDetailScreen() {
     setTitleInputActive(null);
   };
 
+  const getDefaultFieldLabel = (kind: string, key: string): string => {
+    const builtinDef = (BUILTIN_CARD_FIELDS[kind] ?? []).find(f => f.key === key);
+    if (builtinDef) return builtinDef.label;
+    if (kind === "fans") {
+      const fan = (m?.fans ?? []).find(f => f.label === key);
+      if (fan) return fan.label;
+    } else if (kind === "disks") {
+      const disk = (m?.disks ?? []).find(d => (d.device || d.mountpoint) === key);
+      if (disk) return disk.device.replace(/\\\\.\\/, "").replace(/\/$/, "") || disk.mountpoint;
+    } else if (kind === "network") {
+      const iface = (m?.network ?? []).find(i => i.name === key);
+      if (iface) return iface.name;
+    }
+    return key;
+  };
+
+  const commitFieldAlias = (kind: BuiltinCardKind, key: string, draft: string) => {
+    const card = cards.find((c) => c.id === kind) as BuiltinCardConfig | undefined;
+    if (!card) return;
+    const trimmed = draft.trim();
+    const defaultLabel = getDefaultFieldLabel(kind, key);
+    const newAliases = { ...(card.fieldAliases ?? {}) };
+    if (!trimmed || trimmed === defaultLabel) {
+      delete newAliases[key];
+    } else {
+      newAliases[key] = trimmed;
+    }
+    updateBuiltinCard(pcId, kind, { fieldAliases: newAliases });
+    setEditingFieldLabel(null);
+  };
+
   const closeBuiltinEditMode = (kind: BuiltinCardKind) => {
     if (titleInputActive === kind) {
       commitBuiltinTitle(kind, builtinTitleDraft);
     }
+    if (editingFieldLabel && editingFieldLabel.kind === kind) {
+      commitFieldAlias(kind, editingFieldLabel.key, fieldLabelDraft);
+    }
     setInlineEditBuiltin(null);
     setTitleInputActive(null);
+    setEditingFieldLabel(null);
   };
 
   const toggleBuiltinField = (kind: BuiltinCardKind, fieldKey: string) => {
@@ -230,6 +267,7 @@ export default function PCDetailScreen() {
     const hidden = new Set(card.hiddenFields ?? []);
     const extrasSet = new Set(card.extraSensors ?? []);
     const builtinFields = BUILTIN_CARD_FIELDS[card.kind] ?? [];
+    const fieldAliases = card.fieldAliases ?? {};
 
     const dynamicItems: { key: string; label: string }[] =
       card.kind === "network"
@@ -250,9 +288,9 @@ export default function PCDetailScreen() {
       card.extraSensors ?? []
     );
 
-    const labelMap: Record<string, string> = {};
-    builtinFields.forEach(f => { labelMap[f.key] = f.label; });
-    dynamicItems.forEach(d => { labelMap[d.key] = d.label; });
+    const defaultLabelMap: Record<string, string> = {};
+    builtinFields.forEach(f => { defaultLabelMap[f.key] = f.label; });
+    dynamicItems.forEach(d => { defaultLabelMap[d.key] = d.label; });
 
     return (
       <View style={styles.editPanel}>
@@ -260,9 +298,11 @@ export default function PCDetailScreen() {
         {effectiveOrder.map((key, idx) => {
           const isHidden = hidden.has(key);
           const isExtra = extrasSet.has(key);
-          const label = labelMap[key] ?? key;
+          const defaultLabel = defaultLabelMap[key] ?? key;
+          const displayLabel = fieldAliases[key] ?? defaultLabel;
           const isFirst = idx === 0;
           const isLast = idx === effectiveOrder.length - 1;
+          const isEditingThisLabel = editingFieldLabel?.kind === card.kind && editingFieldLabel?.key === key;
 
           return (
             <View key={key} style={styles.editPanelRow}>
@@ -290,9 +330,33 @@ export default function PCDetailScreen() {
                   <Feather name={isHidden ? "eye-off" : "eye"} size={11} color={isHidden ? C.textMuted : accent} />
                 </View>
               </Pressable>
-              <Text style={[styles.editPanelRowText, isHidden && { color: C.textMuted }]} numberOfLines={1}>
-                {label}
-              </Text>
+              {isEditingThisLabel ? (
+                <TextInput
+                  style={[styles.editPanelRowText, styles.editPanelLabelInput, { borderBottomColor: accent }]}
+                  value={fieldLabelDraft}
+                  onChangeText={setFieldLabelDraft}
+                  onSubmitEditing={() => commitFieldAlias(card.kind, key, fieldLabelDraft)}
+                  onBlur={() => commitFieldAlias(card.kind, key, fieldLabelDraft)}
+                  autoFocus
+                  autoCorrect={false}
+                  returnKeyType="done"
+                  selectTextOnFocus
+                />
+              ) : (
+                <Pressable
+                  style={styles.editPanelLabelPress}
+                  onPress={() => {
+                    setEditingFieldLabel({ kind: card.kind, key });
+                    setFieldLabelDraft(displayLabel);
+                  }}
+                  hitSlop={4}
+                >
+                  <Text style={[styles.editPanelRowText, isHidden && { color: C.textMuted }]} numberOfLines={1}>
+                    {displayLabel}
+                  </Text>
+                  <Feather name="edit-2" size={9} color={accent} style={{ opacity: 0.5 }} />
+                </Pressable>
+              )}
               {isExtra && (
                 <Pressable onPress={() => removeExtraSensor(card.kind, key)} hitSlop={8} style={styles.editPanelRemove}>
                   <Feather name="x" size={14} color={C.danger} />
@@ -515,23 +579,42 @@ export default function PCDetailScreen() {
       borderStyle: isEditing ? { borderColor: accent + "66", borderWidth: 1.5 } : undefined,
     };
 
-    const extraSensorMap: Record<string, string> = {};
-    (builtinCard.extraSensors ?? []).forEach((label) => {
-      const sensor = allSensors.find((s) => s.label === label);
-      extraSensorMap[label] = sensor ? formatValue(sensor) : "—";
+    const allExtras = builtinCard.extraSensors ?? [];
+    const tempLabelSet = new Set<string>();
+    const sensorLookup = new Map(allSensors.map(s => [s.label, s]));
+    allExtras.forEach(label => {
+      const sensor = sensorLookup.get(label);
+      if (sensor && sensor.type === "temperature") tempLabelSet.add(label);
     });
 
     const defaultKeys = getDefaultKeys(card.kind);
+    const fullOrder = getEffectiveFieldOrder(builtinCard.fieldOrder, defaultKeys, allExtras);
+
+    const extraSensorMap: Record<string, string> = {};
+    const extraTemps: { label: string; value: number }[] = [];
+    fullOrder.forEach(key => {
+      if (!allExtras.includes(key)) return;
+      const sensor = sensorLookup.get(key);
+      if (tempLabelSet.has(key)) {
+        if (sensor) extraTemps.push({ label: key, value: sensor.value });
+      } else {
+        extraSensorMap[key] = sensor ? formatValue(sensor) : "—";
+      }
+    });
+
+    const nonTempExtras = allExtras.filter(l => !tempLabelSet.has(l));
     const effectiveOrder = getEffectiveFieldOrder(
       builtinCard.fieldOrder,
       defaultKeys,
-      builtinCard.extraSensors ?? []
+      nonTempExtras
     );
 
     const cardEdit: BuiltinCardEdit = {
       hiddenFields: builtinCard.hiddenFields,
       fieldOrder: effectiveOrder,
       extraSensorMap,
+      extraTemps: extraTemps.length > 0 ? extraTemps : undefined,
+      fieldAliases: builtinCard.fieldAliases,
       editPanel: isEditing ? <BuiltinCardEditPanel card={builtinCard} accent={accent} /> : undefined,
     };
 
@@ -1271,6 +1354,17 @@ const styles = StyleSheet.create({
     color: C.text,
     fontWeight: "500",
     flex: 1,
+  },
+  editPanelLabelPress: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+  },
+  editPanelLabelInput: {
+    borderBottomWidth: 1.5,
+    paddingVertical: 0,
+    paddingHorizontal: 0,
   },
   editPanelRemove: {
     paddingLeft: 8,

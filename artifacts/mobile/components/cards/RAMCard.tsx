@@ -13,6 +13,7 @@ function fmtMB(mb: number) {
 }
 
 const DEFAULT_ORDER = ["usage", "used", "available", "total", "bar", "swap"];
+const HERO_DETAIL_KEYS = new Set(["used", "available", "total"]);
 
 interface Props {
   ram: RAMInfo;
@@ -28,17 +29,53 @@ export function RAMCard({ ram, titleEdit, cardEdit }: Props) {
   const hidden = new Set(cardEdit?.hiddenFields ?? []);
   const order = cardEdit?.fieldOrder ?? DEFAULT_ORDER;
   const extraMap = cardEdit?.extraSensorMap ?? {};
+  const aliases = cardEdit?.fieldAliases ?? {};
+  const getLabel = (key: string, def: string) => aliases[key] ?? def;
+
+  const visibleOrder = order.filter(k => !hidden.has(k));
+  const showHero = !hidden.has("usage");
+  const heroDetails = showHero ? visibleOrder.filter(k => HERO_DETAIL_KEYS.has(k)) : [];
+  const heroSet = new Set(showHero ? ["usage", ...heroDetails] : []);
+  const belowFields = visibleOrder.filter(k => !heroSet.has(k));
+
+  function renderHeroDetail(key: string): React.ReactNode {
+    switch (key) {
+      case "used":
+        return (
+          <View key={key} style={styles.detailRow}>
+            <Text style={styles.detailLabel}>{getLabel("used", "Used")}</Text>
+            <Text style={[styles.detailValue, { color: ACCENT }]}>{fmtMB(ram.used)}</Text>
+          </View>
+        );
+      case "available":
+        return (
+          <View key={key} style={styles.detailRow}>
+            <Text style={styles.detailLabel}>{getLabel("available", "Available")}</Text>
+            <Text style={[styles.detailValue, { color: "#00CC88" }]}>{fmtMB(ram.available)}</Text>
+          </View>
+        );
+      case "total":
+        return (
+          <View key={key} style={styles.detailRow}>
+            <Text style={styles.detailLabel}>{getLabel("total", "Total")}</Text>
+            <Text style={styles.detailValue}>{fmtMB(ram.total)}</Text>
+          </View>
+        );
+      default:
+        return null;
+    }
+  }
 
   function renderField(key: string): React.ReactNode {
     switch (key) {
       case "usage":
-        return <StatRow key={key} label="In use" value={`${Math.round(ram.percent)}%`} color={usedColor} />;
+        return <StatRow key={key} label={getLabel("usage", "In use")} value={`${Math.round(ram.percent)}%`} color={usedColor} />;
       case "used":
-        return <StatRow key={key} label="Used" value={fmtMB(ram.used)} color={ACCENT} />;
+        return <StatRow key={key} label={getLabel("used", "Used")} value={fmtMB(ram.used)} color={ACCENT} />;
       case "available":
-        return <StatRow key={key} label="Available" value={fmtMB(ram.available)} color="#00CC88" />;
+        return <StatRow key={key} label={getLabel("available", "Available")} value={fmtMB(ram.available)} color="#00CC88" />;
       case "total":
-        return <StatRow key={key} label="Total" value={fmtMB(ram.total)} />;
+        return <StatRow key={key} label={getLabel("total", "Total")} value={fmtMB(ram.total)} />;
       case "bar":
         return (
           <View key={key} style={styles.barSection}>
@@ -65,7 +102,7 @@ export function RAMCard({ ram, titleEdit, cardEdit }: Props) {
         ) : null;
       default: {
         const val = extraMap[key];
-        return val ? <StatRow key={key} label={key} value={val} /> : null;
+        return val ? <StatRow key={key} label={getLabel(key, key)} value={val} /> : null;
       }
     }
   }
@@ -76,6 +113,7 @@ export function RAMCard({ ram, titleEdit, cardEdit }: Props) {
       title={titleEdit?.customTitle ?? "Memory"}
       accentColor={ACCENT}
       temperature={ram.temperature ?? undefined}
+      extraTemps={cardEdit?.extraTemps}
       titleEditable={titleEdit?.editable}
       titleDraft={titleEdit?.draft}
       onTitleChange={titleEdit?.onChange}
@@ -85,9 +123,24 @@ export function RAMCard({ ram, titleEdit, cardEdit }: Props) {
       style={titleEdit?.borderStyle}
       editPanel={cardEdit?.editPanel}
     >
-      <View style={styles.fieldList}>
-        {order.filter(k => !hidden.has(k)).map(key => renderField(key))}
-      </View>
+      {showHero && (
+        <View style={styles.heroRow}>
+          <View style={styles.heroBig}>
+            <Text style={[styles.bigNum, { color: usedColor }]}>{Math.round(ram.percent)}%</Text>
+            <Text style={styles.bigLabel}>{getLabel("usage", "In use")}</Text>
+          </View>
+          {heroDetails.length > 0 && (
+            <View style={styles.heroDetails}>
+              {heroDetails.map(k => renderHeroDetail(k))}
+            </View>
+          )}
+        </View>
+      )}
+      {belowFields.length > 0 && (
+        <View style={styles.fieldList}>
+          {belowFields.map(key => renderField(key))}
+        </View>
+      )}
     </CardBase>
   );
 }
@@ -95,6 +148,46 @@ export function RAMCard({ ram, titleEdit, cardEdit }: Props) {
 const styles = StyleSheet.create({
   fieldList: {
     gap: 5,
+  },
+  heroRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 12,
+  },
+  heroBig: {
+    alignItems: "center",
+    minWidth: 54,
+  },
+  bigNum: {
+    fontSize: 28,
+    fontWeight: "800",
+    letterSpacing: -1,
+  },
+  bigLabel: {
+    fontSize: 10,
+    color: C.textSecondary,
+    fontWeight: "600",
+    marginTop: -2,
+  },
+  heroDetails: {
+    flex: 1,
+    gap: 2,
+    paddingTop: 2,
+  },
+  detailRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  detailLabel: {
+    fontSize: 12,
+    color: C.textSecondary,
+    fontWeight: "500",
+  },
+  detailValue: {
+    fontSize: 12,
+    color: C.text,
+    fontWeight: "700",
   },
   barSection: {
     gap: 5,

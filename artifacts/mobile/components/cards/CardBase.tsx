@@ -36,6 +36,8 @@ export interface BuiltinCardEdit {
   hiddenFields?: string[];
   fieldOrder?: string[];
   extraSensorMap?: Record<string, string>;
+  extraTemps?: { label: string; value: number }[];
+  fieldAliases?: Record<string, string>;
   editPanel?: React.ReactNode;
 }
 
@@ -58,6 +60,7 @@ interface CardBaseProps {
   subtitle?: string;
   accentColor: string;
   temperature?: number | null;
+  extraTemps?: { label: string; value: number }[];
   /** Optional element shown in the header right slot (used when temperature is null) */
   rightAction?: React.ReactNode;
   /** When true, the title renders as a TextInput for inline editing */
@@ -79,6 +82,7 @@ export function CardBase({
   subtitle,
   accentColor,
   temperature,
+  extraTemps,
   rightAction,
   titleEditable,
   titleDraft,
@@ -122,7 +126,11 @@ export function CardBase({
           )}
           {subtitle ? <Text style={styles.subtitle} numberOfLines={1}>{subtitle}</Text> : null}
         </View>
-        {rightAction != null ? rightAction : (temperature != null ? <TempBadge value={temperature} /> : null)}
+        <View style={styles.headerRight}>
+          {temperature != null && <TempBadge value={temperature} />}
+          {extraTemps?.map((t, i) => <TempBadge key={i} value={t.value} />)}
+          {rightAction}
+        </View>
       </View>
       <View style={styles.divider} />
       {children}
@@ -212,6 +220,11 @@ const styles = StyleSheet.create({
   },
   titleEditIcon: {
     opacity: 0.7,
+  },
+  headerRight: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
   },
   subtitle: {
     fontSize: 11,

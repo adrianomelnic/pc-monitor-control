@@ -29,6 +29,8 @@ export function DisksCard({ disks, titleEdit, cardEdit }: Props) {
   const defaultKeys = disks.map(d => d.device || d.mountpoint);
   const order = cardEdit?.fieldOrder ?? defaultKeys;
   const extraMap = cardEdit?.extraSensorMap ?? {};
+  const aliases = cardEdit?.fieldAliases ?? {};
+  const getLabel = (key: string, def: string) => aliases[key] ?? def;
   const diskMap = new Map(disks.map(d => [d.device || d.mountpoint, d]));
   const visibleKeys = order.filter(k => !hidden.has(k));
   const visibleDiskCount = visibleKeys.filter(k => diskMap.has(k)).length;
@@ -81,7 +83,7 @@ export function DisksCard({ disks, titleEdit, cardEdit }: Props) {
       );
     }
     const val = extraMap[key];
-    return val ? <StatRow key={key} label={key} value={val} /> : null;
+    return val ? <StatRow key={key} label={getLabel(key, key)} value={val} /> : null;
   }
 
   return (
@@ -95,6 +97,7 @@ export function DisksCard({ disks, titleEdit, cardEdit }: Props) {
       onTitleChange={titleEdit?.onChange}
       onTitleSubmit={titleEdit?.onSubmit}
       onTitlePress={titleEdit?.onTitlePress}
+      extraTemps={cardEdit?.extraTemps}
       rightAction={titleEdit?.rightAction}
       style={titleEdit?.borderStyle}
       editPanel={cardEdit?.editPanel}

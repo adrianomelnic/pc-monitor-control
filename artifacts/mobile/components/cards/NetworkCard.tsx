@@ -33,6 +33,8 @@ export function NetworkCard({ interfaces, titleEdit, cardEdit }: Props) {
   const defaultKeys = allUp.map(i => i.name);
   const order = cardEdit?.fieldOrder ?? defaultKeys;
   const extraMap = cardEdit?.extraSensorMap ?? {};
+  const aliases = cardEdit?.fieldAliases ?? {};
+  const getLabel = (key: string, def: string) => aliases[key] ?? def;
   const ifaceMap = new Map(allUp.map(i => [i.name, i]));
   const visibleKeys = order.filter(k => !hidden.has(k));
   const visibleIfaceCount = visibleKeys.filter(k => ifaceMap.has(k)).length;
@@ -86,7 +88,7 @@ export function NetworkCard({ interfaces, titleEdit, cardEdit }: Props) {
       );
     }
     const val = extraMap[key];
-    return val ? <StatRow key={key} label={key} value={val} /> : null;
+    return val ? <StatRow key={key} label={getLabel(key, key)} value={val} /> : null;
   }
 
   return (
@@ -100,6 +102,7 @@ export function NetworkCard({ interfaces, titleEdit, cardEdit }: Props) {
       onTitleChange={titleEdit?.onChange}
       onTitleSubmit={titleEdit?.onSubmit}
       onTitlePress={titleEdit?.onTitlePress}
+      extraTemps={cardEdit?.extraTemps}
       rightAction={titleEdit?.rightAction}
       style={titleEdit?.borderStyle}
       editPanel={cardEdit?.editPanel}
@@ -109,7 +112,7 @@ export function NetworkCard({ interfaces, titleEdit, cardEdit }: Props) {
           <Text style={styles.empty}>No active network interfaces</Text>
           {visibleKeys.filter(k => !ifaceMap.has(k)).map(key => {
             const val = extraMap[key];
-            return val ? <StatRow key={key} label={key} value={val} /> : null;
+            return val ? <StatRow key={key} label={getLabel(key, key)} value={val} /> : null;
           })}
         </View>
       ) : (

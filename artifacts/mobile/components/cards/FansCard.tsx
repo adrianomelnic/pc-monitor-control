@@ -45,6 +45,8 @@ export function FansCard({ fans, baseUrl, apiKey, titleEdit, cardEdit }: Props) 
   const hidden = new Set(cardEdit?.hiddenFields ?? []);
   const order = cardEdit?.fieldOrder ?? fans.map(f => f.label);
   const extraMap = cardEdit?.extraSensorMap ?? {};
+  const aliases = cardEdit?.fieldAliases ?? {};
+  const getLabel = (key: string, def: string) => aliases[key] ?? def;
   const fanMap = new Map(fans.map(f => [f.label, f]));
   const visibleKeys = order.filter(k => !hidden.has(k));
   const visibleFanCount = visibleKeys.filter(k => fanMap.has(k)).length;
@@ -184,7 +186,7 @@ export function FansCard({ fans, baseUrl, apiKey, titleEdit, cardEdit }: Props) 
       );
     }
     const val = extraMap[key];
-    return val ? <StatRow key={key} label={key} value={val} /> : null;
+    return val ? <StatRow key={key} label={getLabel(key, key)} value={val} /> : null;
   }
 
   return (
@@ -198,6 +200,7 @@ export function FansCard({ fans, baseUrl, apiKey, titleEdit, cardEdit }: Props) 
       onTitleChange={titleEdit?.onChange}
       onTitleSubmit={titleEdit?.onSubmit}
       onTitlePress={titleEdit?.onTitlePress}
+      extraTemps={cardEdit?.extraTemps}
       rightAction={titleEdit?.rightAction}
       style={titleEdit?.borderStyle}
       editPanel={cardEdit?.editPanel}
@@ -228,7 +231,7 @@ export function FansCard({ fans, baseUrl, apiKey, titleEdit, cardEdit }: Props) 
           </View>
           {visibleKeys.filter(k => !fanMap.has(k)).map(key => {
             const val = extraMap[key];
-            return val ? <StatRow key={key} label={key} value={val} /> : null;
+            return val ? <StatRow key={key} label={getLabel(key, key)} value={val} /> : null;
           })}
         </View>
       ) : (
