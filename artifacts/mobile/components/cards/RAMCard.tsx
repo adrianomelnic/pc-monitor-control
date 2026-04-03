@@ -13,7 +13,6 @@ function fmtMB(mb: number) {
 }
 
 const DEFAULT_ORDER = ["usage", "used", "available", "total", "bar", "swap"];
-const HERO_DETAIL_KEYS = new Set(["used", "available", "total"]);
 
 interface Props {
   ram: RAMInfo;
@@ -33,43 +32,16 @@ export function RAMCard({ ram, titleEdit, cardEdit }: Props) {
   const getLabel = (key: string, def: string) => aliases[key] ?? def;
 
   const visibleOrder = order.filter(k => !hidden.has(k));
-  const showHero = !hidden.has("usage");
-  const heroDetails = showHero ? visibleOrder.filter(k => HERO_DETAIL_KEYS.has(k)) : [];
-  const heroSet = new Set(showHero ? ["usage", ...heroDetails] : []);
-  const belowFields = visibleOrder.filter(k => !heroSet.has(k));
-
-  function renderHeroDetail(key: string): React.ReactNode {
-    switch (key) {
-      case "used":
-        return (
-          <View key={key} style={styles.detailRow}>
-            <Text style={styles.detailLabel}>{getLabel("used", "Used")}</Text>
-            <Text style={[styles.detailValue, { color: ACCENT }]}>{fmtMB(ram.used)}</Text>
-          </View>
-        );
-      case "available":
-        return (
-          <View key={key} style={styles.detailRow}>
-            <Text style={styles.detailLabel}>{getLabel("available", "Available")}</Text>
-            <Text style={[styles.detailValue, { color: "#00CC88" }]}>{fmtMB(ram.available)}</Text>
-          </View>
-        );
-      case "total":
-        return (
-          <View key={key} style={styles.detailRow}>
-            <Text style={styles.detailLabel}>{getLabel("total", "Total")}</Text>
-            <Text style={styles.detailValue}>{fmtMB(ram.total)}</Text>
-          </View>
-        );
-      default:
-        return null;
-    }
-  }
 
   function renderField(key: string): React.ReactNode {
     switch (key) {
       case "usage":
-        return <StatRow key={key} label={getLabel("usage", "In use")} value={`${Math.round(ram.percent)}%`} color={usedColor} />;
+        return (
+          <View key={key} style={styles.usageBadge}>
+            <Text style={[styles.bigNum, { color: usedColor }]}>{Math.round(ram.percent)}%</Text>
+            <Text style={styles.bigLabel}>{getLabel("usage", "In use")}</Text>
+          </View>
+        );
       case "used":
         return <StatRow key={key} label={getLabel("used", "Used")} value={fmtMB(ram.used)} color={ACCENT} />;
       case "available":
@@ -123,40 +95,22 @@ export function RAMCard({ ram, titleEdit, cardEdit }: Props) {
       style={titleEdit?.borderStyle}
       editPanel={cardEdit?.editPanel}
     >
-      {showHero && (
-        <View style={styles.heroRow}>
-          <View style={styles.heroBig}>
-            <Text style={[styles.bigNum, { color: usedColor }]}>{Math.round(ram.percent)}%</Text>
-            <Text style={styles.bigLabel}>{getLabel("usage", "In use")}</Text>
-          </View>
-          {heroDetails.length > 0 && (
-            <View style={styles.heroDetails}>
-              {heroDetails.map(k => renderHeroDetail(k))}
-            </View>
-          )}
-        </View>
-      )}
-      {belowFields.length > 0 && (
-        <View style={styles.fieldList}>
-          {belowFields.map(key => renderField(key))}
-        </View>
-      )}
+      <View style={styles.fieldList}>
+        {visibleOrder.map(key => renderField(key))}
+      </View>
     </CardBase>
   );
 }
 
 const styles = StyleSheet.create({
   fieldList: {
-    gap: 5,
+    gap: 6,
   },
-  heroRow: {
+  usageBadge: {
     flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 12,
-  },
-  heroBig: {
-    alignItems: "center",
-    minWidth: 54,
+    alignItems: "baseline",
+    gap: 8,
+    paddingBottom: 2,
   },
   bigNum: {
     fontSize: 28,
@@ -164,30 +118,9 @@ const styles = StyleSheet.create({
     letterSpacing: -1,
   },
   bigLabel: {
-    fontSize: 10,
+    fontSize: 11,
     color: C.textSecondary,
     fontWeight: "600",
-    marginTop: -2,
-  },
-  heroDetails: {
-    flex: 1,
-    gap: 2,
-    paddingTop: 2,
-  },
-  detailRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  detailLabel: {
-    fontSize: 12,
-    color: C.textSecondary,
-    fontWeight: "500",
-  },
-  detailValue: {
-    fontSize: 12,
-    color: C.text,
-    fontWeight: "700",
   },
   barSection: {
     gap: 5,
@@ -200,12 +133,12 @@ const styles = StyleSheet.create({
   sectionText: {
     fontSize: 9,
     fontWeight: "700",
-    color: Colors.light.textMuted,
+    color: C.textMuted,
     letterSpacing: 1.2,
   },
   barCaption: {
     fontSize: 11,
-    color: Colors.light.textSecondary,
+    color: C.textSecondary,
     fontWeight: "600",
   },
 });
