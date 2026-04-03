@@ -336,6 +336,26 @@ def get_ram_info():
         return {"used": 0, "total": 0, "available": 0, "percent": 0,
                 "swapUsed": 0, "swapTotal": 0}
 
+def get_memory_temp_hwinfo(hwinfo_data):
+    """Extract memory/DIMM temperature from HWiNFO64 data.
+    Returns the highest reported DIMM/RAM temperature, or None if unavailable.
+    Common HWiNFO64 labels: 'DIMM1', 'DRAM', 'Memory Temperature', 'DDR5 Temp', etc.
+    """
+    if not hwinfo_data or not hwinfo_data.get("temps"):
+        return None
+    keywords = ["dimm", "dram", "memory temp", "ram temp", "ddr"]
+    exclude  = ["gpu", "vram", "video"]
+    best = None
+    for t in hwinfo_data["temps"]:
+        lbl = t["label"].lower()
+        if any(k in lbl for k in exclude):
+            continue
+        if any(k in lbl for k in keywords):
+            v = t["value"]
+            if v and v > 0 and (best is None or v > best):
+                best = v
+    return best
+
 def get_fans(hwinfo_data=None):
     # HWiNFO64 shared memory gives the richest fan data on Windows
     if hwinfo_data and hwinfo_data.get("fans"):
@@ -433,6 +453,7 @@ def _collect_metrics():
     cpu_info = get_cpu_info(hwinfo_data)
     gpu_info = get_gpu_info()
     ram_info = get_ram_info()
+    ram_info["temperature"] = get_memory_temp_hwinfo(hwinfo_data)
     fans = get_fans(hwinfo_data)
     disks, new_disk_io = get_disks(_prev_disk_io, elapsed)
     network, new_net_io = get_network(_prev_net_io, elapsed)

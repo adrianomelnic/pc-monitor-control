@@ -38,6 +38,7 @@ export interface RAMInfo {
   percent: number;
   swapUsed: number;
   swapTotal: number;
+  temperature?: number | null;
 }
 
 export interface FanInfo {

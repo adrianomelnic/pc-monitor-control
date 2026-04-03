@@ -23,7 +23,12 @@ export function RAMCard({ ram }: Props) {
     ram.swapTotal > 0 ? (ram.swapUsed / ram.swapTotal) * 100 : 0;
 
   return (
-    <CardBase icon="database" title="Memory" accentColor={ACCENT}>
+    <CardBase
+      icon="database"
+      title="Memory"
+      accentColor={ACCENT}
+      temperature={ram.temperature ?? undefined}
+    >
       {/* Main row */}
       <View style={styles.mainRow}>
         <View style={styles.bigStat}>
