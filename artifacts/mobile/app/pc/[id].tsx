@@ -234,7 +234,11 @@ export default function PCDetailScreen() {
     if (!card) return;
     const key = (isTemp ? "t:" : "f:") + label;
     const base = card.hiddenFields ?? getThermalsSmartDefault();
-    updateBuiltinCard(pcId, "thermals", { hiddenFields: base.filter(k => k !== key) });
+    const newHidden = base.filter(k => k !== key);
+    // Move key to the absolute end of fieldOrder so it appears last in the visible list
+    const currentOrder = getEffectiveFieldOrder(card.fieldOrder, getDefaultKeys("thermals"), []);
+    const newFieldOrder = [...currentOrder.filter(k => k !== key), key];
+    updateBuiltinCard(pcId, "thermals", { hiddenFields: newHidden, fieldOrder: newFieldOrder });
   };
 
   const replaceThermalSensor = (oldKey: string, newLabel: string, isTemp: boolean) => {
@@ -319,7 +323,8 @@ export default function PCDetailScreen() {
     if (!extras.includes(label)) extras.push(label);
     const defaultKeys = getDefaultKeys(kind);
     const currentOrder = getEffectiveFieldOrder(card.fieldOrder, defaultKeys, card.extraSensors ?? []);
-    const newOrder = currentOrder.includes(label) ? currentOrder : [...currentOrder, label];
+    // Always place new sensor at the absolute end
+    const newOrder = [...currentOrder.filter(k => k !== label), label];
     updateBuiltinCard(pcId, kind, { extraSensors: extras, fieldOrder: newOrder });
   };
 
