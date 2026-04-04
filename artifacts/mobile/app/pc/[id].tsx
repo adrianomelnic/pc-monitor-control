@@ -86,6 +86,27 @@ const DEFAULT_FIELD_ORDER: Record<string, string[]> = {
   ram: ["usage", "used", "available", "total", "bar", "swap"],
 };
 
+function isVirtualIface(name: string): boolean {
+  const n = name.toLowerCase();
+  return (
+    n === "lo" ||
+    n.includes("loopback") ||
+    n.includes("pseudo") ||
+    n.includes("virtual") ||
+    n.includes("tailscale") ||
+    n.includes("tunnel") ||
+    n.includes("teredo") ||
+    n.includes("isatap") ||
+    n.includes("6to4") ||
+    n.includes("docker") ||
+    n.includes("vmware") ||
+    n.includes("vethernet") ||
+    n.startsWith("tun") ||
+    n.startsWith("tap") ||
+    n.startsWith("veth")
+  );
+}
+
 function getEffectiveFieldOrder(
   stored: string[] | undefined,
   defaults: string[],
@@ -279,7 +300,7 @@ export default function PCDetailScreen() {
     }
     if (kind === "fans") return (m?.fans ?? []).map(f => f.label);
     if (kind === "disks") return (m?.disks ?? []).map(d => d.device || d.mountpoint);
-    if (kind === "network") return (m?.network ?? []).filter(i => i.isUp).map(i => i.name);
+    if (kind === "network") return (m?.network ?? []).filter(i => i.isUp && !isVirtualIface(i.name)).map(i => i.name);
     return [];
   };
 
