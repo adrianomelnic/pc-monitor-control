@@ -370,16 +370,22 @@ export default function PCDetailScreen() {
     builtinFields.forEach(f => { defaultLabelMap[f.key] = f.label; });
     dynamicItems.forEach(d => { defaultLabelMap[d.key] = d.label; });
 
+    // For thermals: hide temperature sensors that the user hasn't added yet (hidden t: keys).
+    // Fans always appear; temp sensors appear only once made visible.
+    const panelOrder = card.kind === "thermals"
+      ? effectiveOrder.filter(k => k.startsWith("f:") || !hidden.has(k))
+      : effectiveOrder;
+
     return (
       <View style={styles.editPanel}>
         <View style={styles.editPanelDivider} />
-        {effectiveOrder.map((key, idx) => {
+        {panelOrder.map((key, idx) => {
           const isHidden = hidden.has(key);
           const isExtra = extrasSet.has(key);
           const defaultLabel = defaultLabelMap[key] ?? key;
           const displayLabel = fieldAliases[key] ?? defaultLabel;
           const isFirst = idx === 0;
-          const isLast = idx === effectiveOrder.length - 1;
+          const isLast = idx === panelOrder.length - 1;
           const isEditingThisLabel = editingFieldLabel?.kind === card.kind && editingFieldLabel?.key === key;
           const currentIcon = sensorIcons[key] ?? defaultSensorIcon(key);
           const isPickerOpen = iconPickerKey === key;
