@@ -302,35 +302,56 @@ def get_cpu_info(hwinfo_data=None):
         freq_current_mhz = None
         hw_sensors = (hwinfo_data.get("sensors") or []) if hwinfo_data else []
         clock_sensors = [s for s in hw_sensors if s.get("type") == "clock"]
-        # Debug: print available clock sensor names on first few calls
-        if clock_sensors:
-            print(f"[CPU freq] {len(clock_sensors)} clock sensors: {[s['label'] for s in clock_sensors[:8]]}")
-        # Match per-core clocks: "CPU Core #1 Clock", "Core #1 Clock", "Core #1 T0 Clock", etc.
-        core_clocks = [
+        # 1. Best: "Average Effective Clock" — HWiNFO64 blended P/E-core average
+        avg_eff = next((
             s["value"] for s in clock_sensors
-            if re.search(r"\bcore\b", s.get("label", ""), re.I)
-        ]
-        if core_clocks:
-            freq_current_mhz = round(sum(core_clocks) / len(core_clocks))
+            if re.search(r"average.*effective|effective.*average", s.get("label", ""), re.I)
+        ), None)
+        if avg_eff is not None:
+            freq_current_mhz = round(avg_eff)
         else:
-            # Fall back to any CPU-level clock sensor
-            cpu_clk = next((
+            # 2. Average all per-thread effective clocks (P-core/E-core Effective Clock)
+            eff_clocks = [
                 s["value"] for s in clock_sensors
-                if re.search(r"\bcpu\b", s.get("label", ""), re.I)
-            ), None)
-            if cpu_clk is not None:
-                freq_current_mhz = round(cpu_clk)
-        print(f"[CPU freq] current={freq_current_mhz} MHz (core_clocks={len(core_clocks)}, total_clock_sensors={len(clock_sensors)})")
-        # Final fallback: psutil (will be the static base clock on Windows)
+                if re.search(r"effective\s+clock", s.get("label", ""), re.I)
+            ]
+            if eff_clocks:
+                freq_current_mhz = round(sum(eff_clocks) / len(eff_clocks))
+            else:
+                # 3. Average all core clocks: "P-core X Clock", "E-core X Clock", "CPU Core #X Clock"
+                core_clocks = [
+                    s["value"] for s in clock_sensors
+                    if re.search(r"[pe]-core \d+ clock|cpu core #?\d+ clock", s.get("label", ""), re.I)
+                ]
+                if core_clocks:
+                    freq_current_mhz = round(sum(core_clocks) / len(core_clocks))
+                else:
+                    # 4. Any clock sensor with "core" in name, skip Bus/Ring/LLC
+                    misc = [
+                        s["value"] for s in clock_sensors
+                        if re.search(r"\bcore\b", s.get("label", ""), re.I)
+                        and not re.search(r"bus|ring|llc|effective", s.get("label", ""), re.I)
+                    ]
+                    if misc:
+                        freq_current_mhz = round(sum(misc) / len(misc))
+        # Final fallback: psutil (static base clock on Windows)
         if freq_current_mhz is None:
             freq_current_mhz = round(freq.current) if freq else 0
+
+        # freqMax: highest single-core clock from HWiNFO64 (real boost), fallback to psutil
+        p_core_clocks = [
+            s["value"] for s in clock_sensors
+            if re.search(r"[pe]-core \d+ clock$|cpu core #?\d+ clock$", s.get("label", ""), re.I)
+            and not re.search(r"effective", s.get("label", ""), re.I)
+        ]
+        freq_max_mhz = round(max(p_core_clocks)) if p_core_clocks else (round(freq.max) if freq and freq.max else 0)
 
         return {
             "name": name,
             "coresPhysical": cores_physical,
             "coresLogical": cores_logical,
             "freqCurrent": freq_current_mhz,
-            "freqMax": round(freq.max) if freq and freq.max else 0,
+            "freqMax": freq_max_mhz,
             "usageTotal": round(usage_total, 1),
             "usagePerCore": [round(u, 1) for u in per_core],
             "temperature": temp,
