@@ -21,6 +21,7 @@ export interface BuiltinCardConfig {
   fieldOrder?: string[];
   fieldAliases?: Record<string, string>;
   sensorIcons?: Record<string, string>;
+  sensorSource?: Record<string, string>; // fieldKey → sensor label override
 }
 
 export interface CustomCardConfig {
@@ -64,7 +65,7 @@ interface DashboardContextType {
     cardId: string,
     updates: Partial<Pick<CustomCardConfig, "title" | "sensorLabels" | "accentColor" | "icon" | "sensorAliases">>
   ) => void;
-  updateBuiltinCard: (pcId: string, cardId: BuiltinCardKind, updates: { customTitle?: string; extraSensors?: string[]; hiddenFields?: string[]; fieldOrder?: string[]; fieldAliases?: Record<string, string>; sensorIcons?: Record<string, string> }) => void;
+  updateBuiltinCard: (pcId: string, cardId: BuiltinCardKind, updates: { customTitle?: string; extraSensors?: string[]; hiddenFields?: string[]; fieldOrder?: string[]; fieldAliases?: Record<string, string>; sensorIcons?: Record<string, string>; sensorSource?: Record<string, string> }) => void;
 }
 
 const DashboardContext = createContext<DashboardContextType>({} as DashboardContextType);
@@ -185,7 +186,7 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
-  const updateBuiltinCard = useCallback((pcId: string, cardId: BuiltinCardKind, updates: { customTitle?: string; extraSensors?: string[]; hiddenFields?: string[]; fieldOrder?: string[]; fieldAliases?: Record<string, string>; sensorIcons?: Record<string, string> }) => {
+  const updateBuiltinCard = useCallback((pcId: string, cardId: BuiltinCardKind, updates: { customTitle?: string; extraSensors?: string[]; hiddenFields?: string[]; fieldOrder?: string[]; fieldAliases?: Record<string, string>; sensorIcons?: Record<string, string>; sensorSource?: Record<string, string> }) => {
     setLayouts((prev) => {
       const cards = (prev[pcId] ?? [...BUILTIN_DEFAULTS]).map((c) =>
         c.id === cardId && c.kind !== "custom" ? { ...c, ...updates } : c

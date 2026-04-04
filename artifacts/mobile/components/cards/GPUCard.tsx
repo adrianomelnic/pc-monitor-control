@@ -66,6 +66,10 @@ export function GPUCard({ gpus, titleEdit, cardEdit }: Props) {
         const rightFields = visibleOrder.filter(k => k !== "usage" && k !== "vram");
 
         function renderRightField(key: string): React.ReactNode {
+          // If a sensor source override exists for this built-in field, use it
+          if (extraMap[key] !== undefined && key !== "vram") {
+            return <StatRow key={key} label={getLabel(key, key)} value={extraMap[key]} />;
+          }
           switch (key) {
             case "voltage":
               return <StatRow key={key} label={getLabel("voltage", "GPU voltage")} value={gpu.voltage != null ? `${gpu.voltage.toFixed(3)} V` : "—"} color={ACCENT} />;

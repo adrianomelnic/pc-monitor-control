@@ -147,6 +147,7 @@ export default function PCDetailScreen() {
   const [thermalsSensorPickerOpen, setThermalsSensorPickerOpen] = useState(false);
   const [replacingThermalKey, setReplacingThermalKey] = useState<string | null>(null);
   const [replacingExtraFor, setReplacingExtraFor] = useState<{ kind: BuiltinCardKind; key: string } | null>(null);
+  const [replacingBuiltinField, setReplacingBuiltinField] = useState<{ kind: BuiltinCardKind; key: string } | null>(null);
   const [iconPickerKey, setIconPickerKey] = useState<string | null>(null);
   const [editingFieldLabel, setEditingFieldLabel] = useState<{ kind: BuiltinCardKind; key: string } | null>(null);
   const [fieldLabelDraft, setFieldLabelDraft] = useState("");
@@ -244,6 +245,12 @@ export default function PCDetailScreen() {
     const updated = base.filter(k => k !== newKey);
     if (!updated.includes(oldKey)) updated.push(oldKey);
     updateBuiltinCard(pcId, "thermals", { hiddenFields: updated });
+  };
+
+  const updateSensorSource = (kind: BuiltinCardKind, fieldKey: string, sensorLabel: string) => {
+    const card = cards.find((c) => c.id === kind) as BuiltinCardConfig | undefined;
+    if (!card) return;
+    updateBuiltinCard(pcId, kind, { sensorSource: { ...(card.sensorSource ?? {}), [fieldKey]: sensorLabel } });
   };
 
   const replaceExtraSensor = (kind: BuiltinCardKind, oldLabel: string, newLabel: string) => {
@@ -490,24 +497,25 @@ export default function PCDetailScreen() {
                     </Text>
                   </Pressable>
                 )}
-                {/* Replace button — thermals or extra sensors */}
-                {(card.kind === "thermals" || isExtra) && (
-                  <Pressable
-                    onPress={() => {
-                      if (card.kind === "thermals") {
-                        setReplacingThermalKey(key);
-                        setThermalsSensorPickerOpen(true);
-                      } else {
-                        setReplacingExtraFor({ kind: card.kind, key });
-                        setExtraSensorPickerFor(card.kind);
-                      }
-                    }}
-                    hitSlop={8}
-                    style={styles.editPanelActionBtn}
-                  >
-                    <Feather name="refresh-cw" size={13} color={accent} style={{ opacity: 0.7 }} />
-                  </Pressable>
-                )}
+                {/* Replace button — all sensors in all cards */}
+                <Pressable
+                  onPress={() => {
+                    if (card.kind === "thermals") {
+                      setReplacingThermalKey(key);
+                      setThermalsSensorPickerOpen(true);
+                    } else if (isExtra) {
+                      setReplacingExtraFor({ kind: card.kind, key });
+                      setExtraSensorPickerFor(card.kind);
+                    } else {
+                      setReplacingBuiltinField({ kind: card.kind, key });
+                      setExtraSensorPickerFor(card.kind);
+                    }
+                  }}
+                  hitSlop={8}
+                  style={styles.editPanelActionBtn}
+                >
+                  <Feather name="refresh-cw" size={13} color={accent} style={{ opacity: 0.7 }} />
+                </Pressable>
                 {/* Remove button */}
                 <Pressable
                   onPress={() => {
@@ -784,6 +792,12 @@ export default function PCDetailScreen() {
         extraSensorMap[key] = sensor ? formatValue(sensor) : "—";
       }
     });
+    // Inject sensorSource overrides for built-in fields
+    Object.entries(builtinCard.sensorSource ?? {}).forEach(([fieldKey, sensorLabel]) => {
+      if (allExtras.includes(fieldKey)) return; // extra sensor already handled
+      const sensor = sensorLookup.get(sensorLabel);
+      extraSensorMap[fieldKey] = sensor ? formatValue(sensor) : "—";
+    });
 
     const nonTempExtras = allExtras.filter(l => !tempLabelSet.has(l));
     const effectiveOrder = getEffectiveFieldOrder(
@@ -831,12 +845,13 @@ export default function PCDetailScreen() {
       }
       case "cpu": {
         if (!m.cpu) { content = null; break; }
-        const cpuVoltageSensor = allSensors.find(
-          s => s.type === "voltage" && /cpu.*core|vcore|cpu.*volt/i.test(s.label)
-        );
-        const cpuPowerSensor = allSensors.find(
-          s => s.type === "power" && /cpu.*package|package.*power|cpu.*power|cpu.*tdp/i.test(s.label)
-        );
+        const cpuSrc = builtinCard.sensorSource ?? {};
+        const cpuVoltageSensor = cpuSrc.voltage
+          ? allSensors.find(s => s.label === cpuSrc.voltage)
+          : allSensors.find(s => s.type === "voltage" && /cpu.*core|vcore|cpu.*volt/i.test(s.label));
+        const cpuPowerSensor = cpuSrc.wattage
+          ? allSensors.find(s => s.label === cpuSrc.wattage)
+          : allSensors.find(s => s.type === "power" && /cpu.*package|package.*power|cpu.*power|cpu.*tdp/i.test(s.label));
         const augCpu = {
           ...m.cpu,
           voltage: cpuVoltageSensor?.value ?? null,
@@ -847,12 +862,13 @@ export default function PCDetailScreen() {
       }
       case "gpu": {
         if (!m.gpu) { content = null; break; }
-        const gpuVoltageSensors = allSensors.filter(
-          s => s.type === "voltage" && /gpu.*core.*volt|gpu.*volt|gpu.*vdd/i.test(s.label)
-        );
-        const gpuPowerSensors = allSensors.filter(
-          s => s.type === "power" && /gpu.*power|gpu.*wattage|gpu.*tdp/i.test(s.label)
-        );
+        const gpuSrc = builtinCard.sensorSource ?? {};
+        const gpuVoltageSensors = gpuSrc.voltage
+          ? allSensors.filter(s => s.label === gpuSrc.voltage)
+          : allSensors.filter(s => s.type === "voltage" && /gpu.*core.*volt|gpu.*volt|gpu.*vdd/i.test(s.label));
+        const gpuPowerSensors = gpuSrc.wattage
+          ? allSensors.filter(s => s.label === gpuSrc.wattage)
+          : allSensors.filter(s => s.type === "power" && /gpu.*power|gpu.*wattage|gpu.*tdp/i.test(s.label));
         const augGpus = m.gpu.map((g, i) => ({
           ...g,
           voltage: gpuVoltageSensors[i]?.value ?? null,
@@ -1148,7 +1164,7 @@ export default function PCDetailScreen() {
       {/* ── Extra Sensor Picker for built-in cards ── */}
       <CompactSensorPicker
         visible={extraSensorPickerFor != null}
-        title={replacingExtraFor ? "Replace Sensor" : "Add HWiNFO64 Sensor"}
+        title={replacingBuiltinField ? "Replace Field Sensor" : replacingExtraFor ? "Replace Sensor" : "Add HWiNFO64 Sensor"}
         accentColor={extraSensorPickerFor ? (CARD_ACCENTS[extraSensorPickerFor] ?? C.tint) : C.tint}
         sensors={allSensors}
         excludeLabels={
@@ -1157,14 +1173,17 @@ export default function PCDetailScreen() {
             : []
         }
         onSelect={(s) => {
-          if (replacingExtraFor) {
+          if (replacingBuiltinField) {
+            updateSensorSource(replacingBuiltinField.kind, replacingBuiltinField.key, s.label);
+            setReplacingBuiltinField(null);
+          } else if (replacingExtraFor) {
             replaceExtraSensor(replacingExtraFor.kind, replacingExtraFor.key, s.label);
             setReplacingExtraFor(null);
           } else if (extraSensorPickerFor) {
             addExtraSensor(extraSensorPickerFor, s.label);
           }
         }}
-        onClose={() => { setExtraSensorPickerFor(null); setReplacingExtraFor(null); }}
+        onClose={() => { setExtraSensorPickerFor(null); setReplacingExtraFor(null); setReplacingBuiltinField(null); }}
       />
 
       {/* ── Thermals Sensor Picker ── */}

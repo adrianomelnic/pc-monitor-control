@@ -39,6 +39,10 @@ export function CPUCard({ cpu, titleEdit, cardEdit }: Props) {
   const showCpuBar = !hidden.has("cpuBar");
 
   function renderRightField(key: string): React.ReactNode {
+    // If a sensor source override exists for this field, use it
+    if (extraMap[key] !== undefined && key !== "perCore" && key !== "perCoreVertical" && key !== "cpuBar") {
+      return <StatRow key={key} label={getLabel(key, key)} value={extraMap[key]} />;
+    }
     switch (key) {
       case "voltage":
         return <StatRow key={key} label={getLabel("voltage", "CPU voltage")} value={cpu.voltage != null ? `${cpu.voltage.toFixed(3)} V` : "—"} color={ACCENT} />;

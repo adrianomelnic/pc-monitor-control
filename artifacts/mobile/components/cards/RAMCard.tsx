@@ -38,6 +38,10 @@ export function RAMCard({ ram, titleEdit, cardEdit }: Props) {
   const showSwap = !hidden.has("swap") && ram.swapTotal > 0;
 
   function renderRightField(key: string): React.ReactNode {
+    // If a sensor source override exists for this field, use it
+    if (extraMap[key] !== undefined) {
+      return <StatRow key={key} label={getLabel(key, key)} value={extraMap[key]} />;
+    }
     switch (key) {
       case "used":
         return <StatRow key={key} label={getLabel("used", "Used")} value={fmtMB(ram.used)} color={ACCENT} />;
