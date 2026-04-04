@@ -197,10 +197,9 @@ export default function PCDetailScreen() {
     updateBuiltinCard(pcId, kind, { sensorIcons: newIcons });
   };
 
-  const showThermalSensor = (label: string) => {
+  const showThermalSensor = (label: string, isTemp: boolean) => {
     const card = cards.find((c) => c.id === "thermals") as BuiltinCardConfig | undefined;
     if (!card) return;
-    const isTemp = (m?.sensors ?? []).some(s => s.label === label && s.type === "temperature");
     const key = (isTemp ? "t:" : "f:") + label;
     if (card.hiddenFields !== undefined) {
       updateBuiltinCard(pcId, "thermals", { hiddenFields: card.hiddenFields.filter(k => k !== key) });
@@ -210,10 +209,9 @@ export default function PCDetailScreen() {
     }
   };
 
-  const replaceThermalSensor = (oldKey: string, newLabel: string) => {
+  const replaceThermalSensor = (oldKey: string, newLabel: string, isTemp: boolean) => {
     const card = cards.find((c) => c.id === "thermals") as BuiltinCardConfig | undefined;
     if (!card) return;
-    const isTemp = (m?.sensors ?? []).some(s => s.label === newLabel && s.type === "temperature");
     const newKey = (isTemp ? "t:" : "f:") + newLabel;
     const base = card.hiddenFields ?? getDefaultKeys("thermals");
     const updated = base.filter(k => k !== newKey);
@@ -1134,12 +1132,12 @@ export default function PCDetailScreen() {
             ? ((cards.find((c) => c.id === extraSensorPickerFor) as BuiltinCardConfig | undefined)?.extraSensors ?? [])
             : []
         }
-        onSelect={(label) => {
+        onSelect={(s) => {
           if (replacingExtraFor) {
-            replaceExtraSensor(replacingExtraFor.kind, replacingExtraFor.key, label);
+            replaceExtraSensor(replacingExtraFor.kind, replacingExtraFor.key, s.label);
             setReplacingExtraFor(null);
           } else if (extraSensorPickerFor) {
-            addExtraSensor(extraSensorPickerFor, label);
+            addExtraSensor(extraSensorPickerFor, s.label);
           }
         }}
         onClose={() => { setExtraSensorPickerFor(null); setReplacingExtraFor(null); }}
@@ -1169,12 +1167,14 @@ export default function PCDetailScreen() {
             accentColor="#F97316"
             sensors={thermalsSensors}
             excludeLabels={thermalsExcludeLabels}
-            onSelect={(label) => {
+            onSelect={(s) => {
+              // s.type is exactly what the user selected — no label-collision guessing needed.
+              const isTemp = s.type === "temperature";
               if (replacingThermalKey) {
-                replaceThermalSensor(replacingThermalKey, label);
+                replaceThermalSensor(replacingThermalKey, s.label, isTemp);
                 setReplacingThermalKey(null);
               } else {
-                showThermalSensor(label);
+                showThermalSensor(s.label, isTemp);
               }
               setThermalsSensorPickerOpen(false);
             }}

@@ -97,7 +97,7 @@ interface CompactPickerProps {
   accentColor: string;
   sensors: SensorReading[];
   excludeLabels: string[];
-  onSelect: (label: string) => void;
+  onSelect: (sensor: SensorReading) => void;
   onClose: () => void;
 }
 
@@ -198,7 +198,7 @@ export function CompactSensorPicker({
                       key={i}
                       style={pickerStyles.sensorRow}
                       onPress={() => {
-                        onSelect(s.label);
+                        onSelect(s);
                         onClose();
                       }}
                     >
@@ -826,11 +826,11 @@ export function SensorCard({
         accentColor={accentColor}
         sensors={sensors ?? []}
         excludeLabels={excludeForPicker}
-        onSelect={(label) => {
+        onSelect={(s) => {
           if (pickerMode === "add") {
-            onAddSensor?.(label);
+            onAddSensor?.(s.label);
           } else if (pickerMode === "swap" && swappingOriginal) {
-            onSwapSensor?.(swappingOriginal, label);
+            onSwapSensor?.(swappingOriginal, s.label);
           }
           setPickerMode(null);
           setSwappingOriginal(null);
