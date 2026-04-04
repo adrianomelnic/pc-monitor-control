@@ -732,7 +732,7 @@ export default function PCDetailScreen() {
       extraSensorMap,
       extraTemps: extraTemps.length > 0 ? extraTemps : undefined,
       fieldAliases: builtinCard.fieldAliases,
-      editPanel: isEditing ? <BuiltinCardEditPanel card={builtinCard} accent={accent} /> : undefined,
+      editPanel: isEditing ? BuiltinCardEditPanel({ card: builtinCard, accent }) : undefined,
     };
 
     const handleLongPress = () => {
@@ -751,7 +751,7 @@ export default function PCDetailScreen() {
           fieldOrder: getEffectiveFieldOrder(builtinCard.fieldOrder, getDefaultKeys("thermals"), []),
           fieldAliases: builtinCard.fieldAliases,
           sensorIcons: builtinCard.sensorIcons,
-          editPanel: isEditing ? <BuiltinCardEditPanel card={builtinCard} accent={accent} /> : undefined,
+          editPanel: isEditing ? BuiltinCardEditPanel({ card: builtinCard, accent }) : undefined,
         };
         content = (
           <ThermalsCard
