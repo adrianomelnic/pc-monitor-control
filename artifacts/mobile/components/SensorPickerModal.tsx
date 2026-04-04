@@ -94,7 +94,7 @@ export function SensorPickerModal({
   const [accentColor, setAccentColor] = useState(initialColor ?? ACCENT_COLORS[0]);
   const [icon, setIcon] = useState(initialIcon ?? ICON_OPTIONS[0].name);
   const [search, setSearch] = useState("");
-  const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (visible) {
@@ -103,12 +103,12 @@ export function SensorPickerModal({
       setAccentColor(initialColor ?? ACCENT_COLORS[0]);
       setIcon(initialIcon ?? ICON_OPTIONS[0].name);
       setSearch("");
-      setCollapsed(new Set());
+      setExpanded(new Set());
     }
   }, [visible]);
 
   const toggleCollapse = (comp: string) => {
-    setCollapsed((prev) => {
+    setExpanded((prev) => {
       const next = new Set(prev);
       if (next.has(comp)) next.delete(comp);
       else next.add(comp);
@@ -274,7 +274,7 @@ export function SensorPickerModal({
               grouped.map(({ comp, items }) => {
                 const allSelected = items.every((s) => selected.has(s.label));
                 const someSelected = !allSelected && items.some((s) => selected.has(s.label));
-                const isCollapsed = collapsed.has(comp);
+                const isCollapsed = search.trim() ? false : !expanded.has(comp);
                 return (
                   <View key={comp} style={styles.group}>
                     {/* Component header row: checkbox = select-all, rest = expand/collapse */}
