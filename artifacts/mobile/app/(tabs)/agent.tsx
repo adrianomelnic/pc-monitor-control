@@ -302,15 +302,15 @@ def get_cpu_info(hwinfo_data=None):
         freq_current_mhz = None
         hw_sensors = (hwinfo_data.get("sensors") or []) if hwinfo_data else []
         clock_sensors = [s for s in hw_sensors if s.get("type") == "clock"]
-        # 1. Best: "Average Effective Clock" — HWiNFO64 blended P/E-core average
-        avg_eff = next((
+        # 1. Best: average of P-core effective clocks only (excludes slower E-cores)
+        p_eff_clocks = [
             s["value"] for s in clock_sensors
-            if re.search(r"average.*effective|effective.*average", s.get("label", ""), re.I)
-        ), None)
-        if avg_eff is not None:
-            freq_current_mhz = round(avg_eff)
+            if re.search(r"p-core.*effective", s.get("label", ""), re.I)
+        ]
+        if p_eff_clocks:
+            freq_current_mhz = round(sum(p_eff_clocks) / len(p_eff_clocks))
         else:
-            # 2. Average all per-thread effective clocks (P-core/E-core Effective Clock)
+            # 2. Average of all effective clocks (includes E-cores, but better than static)
             eff_clocks = [
                 s["value"] for s in clock_sensors
                 if re.search(r"effective\s+clock", s.get("label", ""), re.I)
@@ -321,19 +321,12 @@ def get_cpu_info(hwinfo_data=None):
                 # 3. Average all core clocks: "P-core X Clock", "E-core X Clock", "CPU Core #X Clock"
                 core_clocks = [
                     s["value"] for s in clock_sensors
-                    if re.search(r"[pe]-core \d+ clock|cpu core #?\d+ clock", s.get("label", ""), re.I)
+                    if re.search(r"[pe]-core.*clock|cpu.*core.*clock", s.get("label", ""), re.I)
+                    and not re.search(r"effective|bus|ring|llc", s.get("label", ""), re.I)
+                    and s.get("value", 0) > 500
                 ]
                 if core_clocks:
                     freq_current_mhz = round(sum(core_clocks) / len(core_clocks))
-                else:
-                    # 4. Any clock sensor with "core" in name, skip Bus/Ring/LLC
-                    misc = [
-                        s["value"] for s in clock_sensors
-                        if re.search(r"\bcore\b", s.get("label", ""), re.I)
-                        and not re.search(r"bus|ring|llc|effective", s.get("label", ""), re.I)
-                    ]
-                    if misc:
-                        freq_current_mhz = round(sum(misc) / len(misc))
         # Final fallback: psutil (static base clock on Windows)
         if freq_current_mhz is None:
             freq_current_mhz = round(freq.current) if freq else 0
