@@ -18,6 +18,7 @@ import { CustomCardLayout } from "@/context/DashboardContext";
 import Colors from "@/constants/colors";
 import { CardBase, MiniBar, StatRow } from "./CardBase";
 import { DraggableFieldList } from "@/components/DraggableFieldList";
+import { SENSOR_ICON_OPTIONS, renderSensorIcon } from "./ThermalsCard";
 
 const C = Colors.light;
 
@@ -364,6 +365,8 @@ interface Props {
   sensors?: SensorReading[];
   sensorAliases?: Record<string, string>;
   layout?: CustomCardLayout;
+  hiddenSensors?: string[];
+  sensorIcons?: Record<string, string>;
   onEdit?: () => void;
   onUpdateTitle?: (newTitle: string) => void;
   onUpdateAlias?: (originalLabel: string, newAlias: string) => void;
@@ -371,6 +374,8 @@ interface Props {
   onSwapSensor?: (oldLabel: string, newLabel: string) => void;
   onAddSensor?: (newLabel: string) => void;
   onRemoveSensor?: (label: string) => void;
+  onToggleHidden?: (label: string) => void;
+  onUpdateSensorIcon?: (label: string, icon: string) => void;
 }
 
 export function SensorCard({
@@ -381,6 +386,8 @@ export function SensorCard({
   sensors,
   sensorAliases,
   layout = "auto",
+  hiddenSensors,
+  sensorIcons,
   onEdit,
   onUpdateTitle,
   onUpdateAlias,
@@ -388,6 +395,8 @@ export function SensorCard({
   onSwapSensor,
   onAddSensor,
   onRemoveSensor,
+  onToggleHidden,
+  onUpdateSensorIcon,
 }: Props) {
   // ── Inline edit state ──────────────────────────────────────────────────────
   const [inlineEdit, setInlineEdit] = useState(false);
@@ -401,6 +410,9 @@ export function SensorCard({
   // Compact sensor picker for swap/add
   const [pickerMode, setPickerMode] = useState<"swap" | "add" | null>(null);
   const [swappingOriginal, setSwappingOriginal] = useState<string | null>(null);
+
+  // Icon picker (per-sensor)
+  const [iconPickerKey, setIconPickerKey] = useState<string | null>(null);
 
   // Sync aliases from props
   useEffect(() => {
@@ -462,16 +474,23 @@ export function SensorCard({
     .map((lbl) => ({ original: lbl, sensor: sensorMap.get(lbl) }))
     .filter((r) => r.sensor !== undefined) as { original: string; sensor: SensorReading }[];
 
+  const hiddenSet = new Set(hiddenSensors ?? []);
+  const resolvedVisible = resolved.filter((r) => !hiddenSet.has(r.original));
+
   const missing = sensorLabels.filter((lbl) => !sensorMap.has(lbl));
+
+  // ── Sensor icon helper ─────────────────────────────────────────────────────
+  const getSensorIcon = (key: string, type?: string): string =>
+    sensorIcons?.[key] ?? (type ? sensorTypeIcon(type) : "sliders");
 
   // ── Layout decision ────────────────────────────────────────────────────────
   const effectiveLayout = layout === "auto"
-    ? (resolved.length >= 2 && resolved.length <= 8 ? "split" : "list")
+    ? (resolvedVisible.length >= 2 && resolvedVisible.length <= 8 ? "split" : "list")
     : layout;
   const useSplitLayout = effectiveLayout === "split";
-  const featured = useSplitLayout ? pickFeatured(resolved.map((r) => r.sensor)) : null;
-  const featuredItem = featured ? resolved.find((r) => r.sensor === featured) ?? null : null;
-  const rest = featuredItem ? resolved.filter((r) => r !== featuredItem) : resolved;
+  const featured = useSplitLayout ? pickFeatured(resolvedVisible.map((r) => r.sensor)) : null;
+  const featuredItem = featured ? resolvedVisible.find((r) => r.sensor === featured) ?? null : null;
+  const rest = featuredItem ? resolvedVisible.filter((r) => r !== featuredItem) : resolvedVisible;
 
   const bigColor = featured ? valueColor(featured, accentColor) : accentColor;
   const bigNum = featured ? formatBigNum(featured) : null;
@@ -512,63 +531,110 @@ export function SensorCard({
     const sensorReading = sensorMap.get(key);
     const isEditingThisLabel = editingOriginal === key;
     const notFound = !sensorReading;
-    const typeIcon = sensorReading ? sensorTypeIcon(sensorReading.type) : "sliders";
+    const isHidden = hiddenSet.has(key);
+    const isPickerOpen = iconPickerKey === key;
+    const currentIcon = getSensorIcon(key, sensorReading?.type);
+
     return (
-      <View key={key} style={[dragStyles.row, isActive && { opacity: 0.85 }]}>
-        <Pressable
-          onLongPress={drag}
-          delayLongPress={150}
-          hitSlop={6}
-          style={dragStyles.handle}
-        >
-          <Feather name="menu" size={15} color={isActive ? accentColor : C.textMuted + "99"} />
-        </Pressable>
-        <Feather
-          name={typeIcon}
-          size={13}
-          color={notFound ? C.textMuted : accentColor}
-          style={dragStyles.typeIcon}
-        />
-        {isEditingThisLabel ? (
-          <TextInput
-            style={[dragStyles.labelInput, { borderBottomColor: accentColor }]}
-            value={editText}
-            onChangeText={setEditText}
-            onSubmitEditing={commitLabel}
-            onBlur={commitLabel}
-            autoFocus
-            autoCorrect={false}
-            returnKeyType="done"
-            selectTextOnFocus
-          />
-        ) : (
-          <Pressable style={dragStyles.labelPress} onPress={() => startLabelEdit(key)} hitSlop={4}>
-            <Text style={[dragStyles.labelText, notFound && { color: C.textMuted, fontStyle: "italic" }]} numberOfLines={1}>
-              {getDisplayLabel(key)}
-            </Text>
+      <View key={key}>
+        <View style={[dragStyles.editPanelRow, isActive && { opacity: 0.85 }]}>
+          {/* ≡ drag handle */}
+          <Pressable
+            onLongPress={drag}
+            delayLongPress={150}
+            hitSlop={6}
+            style={dragStyles.editPanelDragHandle}
+          >
+            <Feather name="menu" size={15} color={isActive ? accentColor : C.textMuted + "99"} />
           </Pressable>
+
+          {/* Eye toggle */}
+          <Pressable onPress={() => onToggleHidden?.(key)} hitSlop={4}>
+            <View style={[dragStyles.editPanelToggle, {
+              borderColor: isHidden ? C.textMuted : accentColor,
+              backgroundColor: isHidden ? "transparent" : accentColor + "22",
+            }]}>
+              <Feather name={isHidden ? "eye-off" : "eye"} size={11} color={isHidden ? C.textMuted : accentColor} />
+            </View>
+          </Pressable>
+
+          {/* Icon picker button */}
+          <Pressable
+            onPress={() => { commitLabel(); setIconPickerKey(isPickerOpen ? null : key); }}
+            hitSlop={4}
+            style={[dragStyles.editPanelIconBtn, isPickerOpen && { backgroundColor: accentColor + "22", borderColor: accentColor + "55" }]}
+          >
+            {renderSensorIcon(currentIcon, 13, isPickerOpen ? accentColor : C.textMuted)}
+          </Pressable>
+
+          {/* Label */}
+          {isEditingThisLabel ? (
+            <TextInput
+              style={[dragStyles.editPanelRowText, dragStyles.editPanelLabelInput, { borderBottomColor: accentColor }]}
+              value={editText}
+              onChangeText={setEditText}
+              onSubmitEditing={commitLabel}
+              onBlur={commitLabel}
+              autoFocus
+              autoCorrect={false}
+              returnKeyType="done"
+              selectTextOnFocus
+            />
+          ) : (
+            <Pressable
+              style={dragStyles.editPanelLabelPress}
+              onPress={() => { setIconPickerKey(null); startLabelEdit(key); }}
+              hitSlop={4}
+            >
+              <Text
+                style={[dragStyles.editPanelRowText, (isHidden || notFound) && { color: C.textMuted }]}
+                numberOfLines={1}
+              >
+                {getDisplayLabel(key)}
+              </Text>
+            </Pressable>
+          )}
+
+          {/* Replace */}
+          <Pressable
+            onPress={() => { commitLabel(); setIconPickerKey(null); setSwappingOriginal(key); setPickerMode("swap"); }}
+            hitSlop={8}
+            style={dragStyles.editPanelActionBtn}
+          >
+            <Feather name="refresh-cw" size={13} color={accentColor} style={{ opacity: 0.7 }} />
+          </Pressable>
+
+          {/* Remove */}
+          <Pressable
+            onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onRemoveSensor?.(key); }}
+            hitSlop={8}
+            style={dragStyles.editPanelActionBtn}
+          >
+            <Feather name="x" size={14} color={C.danger} />
+          </Pressable>
+        </View>
+
+        {/* Icon picker (opens below row) */}
+        {isPickerOpen && (
+          <View style={[dragStyles.iconPickerRow, { borderColor: accentColor + "33" }]}>
+            {SENSOR_ICON_OPTIONS.map((iconName) => {
+              const isSelected = currentIcon === iconName;
+              return (
+                <Pressable
+                  key={iconName}
+                  onPress={() => { onUpdateSensorIcon?.(key, iconName); setIconPickerKey(null); }}
+                  hitSlop={4}
+                  style={[
+                    dragStyles.iconPickerBtn,
+                    isSelected && { backgroundColor: accentColor + "22", borderColor: accentColor + "66" },
+                  ]}
+                >
+                  {renderSensorIcon(iconName, 16, isSelected ? accentColor : C.textMuted)}
+                </Pressable>
+              );
+            })}
+          </View>
         )}
-        {sensorReading ? (
-          <Text style={[dragStyles.valueText, { color: valueColor(sensorReading, accentColor) }]}>
-            {formatValue(sensorReading)}
-          </Text>
-        ) : (
-          <Text style={dragStyles.notFound}>not found</Text>
-        )}
-        <Pressable
-          onPress={() => { commitLabel(); setSwappingOriginal(key); setPickerMode("swap"); }}
-          hitSlop={8}
-          style={dragStyles.actionBtn}
-        >
-          <Feather name="refresh-cw" size={13} color={accentColor} style={{ opacity: 0.7 }} />
-        </Pressable>
-        <Pressable
-          onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onRemoveSensor?.(key); }}
-          hitSlop={8}
-          style={dragStyles.actionBtn}
-        >
-          <Feather name="x" size={14} color="#FF6B6B" />
-        </Pressable>
       </View>
     );
   };
@@ -585,7 +651,7 @@ export function SensorCard({
         <CardBase
           icon={(icon as keyof typeof Feather.glyphMap) || "layers"}
           title={title}
-          subtitle={inlineEdit ? "≡ drag to reorder · tap label to rename · ⇄ swap · × remove" : `${sensorLabels.length} sensor${sensorLabels.length !== 1 ? "s" : ""}`}
+          subtitle={inlineEdit ? "≡ drag · 👁 hide · icon · tap label · ⇄ swap · × remove" : `${sensorLabels.length} sensor${sensorLabels.length !== 1 ? "s" : ""}`}
           accentColor={accentColor}
           temperature={headerTemp}
           rightAction={rightAction}
@@ -605,10 +671,10 @@ export function SensorCard({
             <DraggableFieldList
               keys={sensorLabels}
               onReorder={(newOrder) => onReorder?.(newOrder)}
-              onDragBegin={() => setEditingOriginal(null)}
+              onDragBegin={() => { setEditingOriginal(null); setIconPickerKey(null); }}
               renderRow={renderEditRow}
             />
-          ) : resolved.length === 0 ? (
+          ) : resolvedVisible.length === 0 ? (
             <Text style={styles.empty}>
               Sensor data unavailable — make sure HWiNFO64 is running.
             </Text>
@@ -643,36 +709,33 @@ export function SensorCard({
                 </View>
               )}
             </>
-          ) : resolved.length === 1 ? (
+          ) : resolvedVisible.length === 1 ? (
             /* ── SINGLE SENSOR ── */
             <View style={styles.singleStat}>
               <Text style={[styles.singleNum, { color: bigColor }]}>
-                {formatBigNum(resolved[0].sensor).num}
-                <Text style={styles.singleUnit}>{formatBigNum(resolved[0].sensor).unit}</Text>
+                {formatBigNum(resolvedVisible[0].sensor).num}
+                <Text style={styles.singleUnit}>{formatBigNum(resolvedVisible[0].sensor).unit}</Text>
               </Text>
-              {renderBigLabel(resolved[0].original)}
-              {resolved[0].sensor.type === "usage" && (
+              {renderBigLabel(resolvedVisible[0].original)}
+              {resolvedVisible[0].sensor.type === "usage" && (
                 <View style={{ marginTop: 8, width: "100%" }}>
-                  <MiniBar value={resolved[0].sensor.value} color={accentColor} height={5} />
+                  <MiniBar value={resolvedVisible[0].sensor.value} color={accentColor} height={5} />
                 </View>
               )}
             </View>
           ) : effectiveLayout === "tiles" ? (
             /* ── TILES LAYOUT ── */
             <View style={styles.tilesGrid}>
-              {chunkArray(resolved, 3).map((row, ri) => (
+              {chunkArray(resolvedVisible, 3).map((row, ri) => (
                 <View key={ri} style={styles.tilesRow}>
                   {row.map((r) => {
                     const { num, unit } = formatBigNum(r.sensor);
                     const col = valueColor(r.sensor, accentColor);
                     return (
                       <View key={r.original} style={[styles.tile, { borderColor: accentColor + "30" }]}>
-                        <Feather
-                          name={sensorTypeIcon(r.sensor.type)}
-                          size={14}
-                          color={accentColor}
-                          style={styles.tileIcon}
-                        />
+                        <View style={styles.tileIcon}>
+                          {renderSensorIcon(getSensorIcon(r.original, r.sensor.type), 14, accentColor)}
+                        </View>
                         <Text style={styles.tileLabel} numberOfLines={2}>
                           {getDisplayLabel(r.original).toUpperCase()}
                         </Text>
@@ -690,7 +753,7 @@ export function SensorCard({
           ) : (
             /* ── PURE STAT ROWS ── */
             <View style={styles.pureRows}>
-              {resolved.map((r, i) => renderSensorRow(r, i))}
+              {resolvedVisible.map((r, i) => renderSensorRow(r, i))}
             </View>
           )}
 
@@ -915,53 +978,77 @@ const styles = StyleSheet.create({
 });
 
 const dragStyles = StyleSheet.create({
-  row: {
+  editPanelRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
-    paddingVertical: 5,
+    gap: 8,
+    paddingVertical: 3,
   },
-  handle: {
-    padding: 4,
+  editPanelDragHandle: {
+    paddingHorizontal: 3,
+    paddingVertical: 4,
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 2,
+  },
+  editPanelToggle: {
+    width: 24,
+    height: 24,
+    borderRadius: 6,
+    borderWidth: 1.5,
+    alignItems: "center",
+    justifyContent: "center",
     flexShrink: 0,
   },
-  typeIcon: {
+  editPanelIconBtn: {
+    width: 26,
+    height: 26,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: C.cardBorder,
+    alignItems: "center",
+    justifyContent: "center",
     flexShrink: 0,
-    opacity: 0.75,
   },
-  labelPress: {
+  editPanelLabelPress: {
     flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
   },
-  labelText: {
-    fontSize: 12,
-    color: C.textSecondary,
-    fontWeight: "500",
-  },
-  labelInput: {
-    flex: 1,
+  editPanelRowText: {
     fontSize: 12,
     color: C.text,
+    fontWeight: "500",
+    flex: 1,
+  },
+  editPanelLabelInput: {
     borderBottomWidth: 1.5,
     paddingVertical: 0,
     paddingHorizontal: 0,
   },
-  valueText: {
-    fontSize: 12,
-    fontWeight: "700",
-    flexShrink: 0,
-    fontVariant: ["tabular-nums"],
+  editPanelActionBtn: {
+    paddingLeft: 8,
+    justifyContent: "center",
+    alignItems: "center",
   },
-  notFound: {
-    fontSize: 10,
-    color: C.textMuted,
-    fontStyle: "italic",
-    flexShrink: 0,
+  iconPickerRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 4,
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
+    marginBottom: 2,
   },
-  actionBtn: {
-    width: 26,
-    height: 26,
+  iconPickerBtn: {
+    width: 34,
+    height: 34,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: C.cardBorder,
     alignItems: "center",
     justifyContent: "center",
-    flexShrink: 0,
   },
 });

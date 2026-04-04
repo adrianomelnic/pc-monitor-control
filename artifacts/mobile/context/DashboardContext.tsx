@@ -36,6 +36,8 @@ export interface CustomCardConfig {
   icon: string;
   sensorAliases?: Record<string, string>;
   layout?: CustomCardLayout;
+  hiddenSensors?: string[];
+  sensorIcons?: Record<string, string>;
 }
 
 export type CardConfig = BuiltinCardConfig | CustomCardConfig;

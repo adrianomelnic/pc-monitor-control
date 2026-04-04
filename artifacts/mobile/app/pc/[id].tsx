@@ -726,6 +726,8 @@ export default function PCDetailScreen() {
           sensors={allSensors}
           sensorAliases={c.sensorAliases}
           layout={c.layout}
+          hiddenSensors={c.hiddenSensors}
+          sensorIcons={c.sensorIcons}
           onEdit={() => {
             Haptics.selectionAsync();
             setEditingCard(c);
@@ -760,6 +762,18 @@ export default function PCDetailScreen() {
             const newAliases = { ...(c.sensorAliases ?? {}) };
             delete newAliases[label];
             updateCustomCard(pcId, c.id, { sensorLabels: newLabels, sensorAliases: newAliases });
+          }}
+          onToggleHidden={(label) => {
+            const hidden = c.hiddenSensors ?? [];
+            const next = hidden.includes(label)
+              ? hidden.filter((h) => h !== label)
+              : [...hidden, label];
+            updateCustomCard(pcId, c.id, { hiddenSensors: next });
+          }}
+          onUpdateSensorIcon={(label, iconName) => {
+            updateCustomCard(pcId, c.id, {
+              sensorIcons: { ...(c.sensorIcons ?? {}), [label]: iconName },
+            });
           }}
         />
       );
