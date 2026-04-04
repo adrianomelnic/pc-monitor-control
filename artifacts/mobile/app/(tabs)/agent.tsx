@@ -21,7 +21,7 @@ PC Monitor Agent v2 - Full hardware monitoring.
 Install: python -m pip install psutil flask flask-cors
 Run as Admin (Windows): python pc_agent.py
 """
-import os, platform, subprocess, time, socket
+import os, platform, subprocess, time, socket, re
 import psutil
 from flask import Flask, jsonify, request
 from flask_cors import CORS
@@ -297,11 +297,34 @@ def get_cpu_info(hwinfo_data=None):
             pass
         if temp is None:
             temp = get_cpu_temp_hwinfo(hwinfo_data)
+        # Try HWiNFO64 clock sensors for real-time current frequency
+        # psutil.cpu_freq().current is static on Windows (always shows rated base clock)
+        freq_current_mhz = None
+        if hwinfo_data:
+            # Collect per-core clock readings (e.g. "CPU Core #1 Clock")
+            core_clocks = [
+                s["value"] for s in hwinfo_data
+                if s.get("type") == "clock" and re.search(r"cpu.*core.*clock|core.*#\d+.*clock", s.get("label", ""), re.I)
+            ]
+            if core_clocks:
+                freq_current_mhz = round(sum(core_clocks) / len(core_clocks))
+            else:
+                # Fall back to any CPU-level clock sensor
+                cpu_clk = next((
+                    s["value"] for s in hwinfo_data
+                    if s.get("type") == "clock" and re.search(r"cpu.*clock|cpu.*freq(?!uency.*max)", s.get("label", ""), re.I)
+                ), None)
+                if cpu_clk is not None:
+                    freq_current_mhz = round(cpu_clk)
+        # Final fallback: psutil (will be the static base clock on Windows)
+        if freq_current_mhz is None:
+            freq_current_mhz = round(freq.current) if freq else 0
+
         return {
             "name": name,
             "coresPhysical": cores_physical,
             "coresLogical": cores_logical,
-            "freqCurrent": round(freq.current) if freq else 0,
+            "freqCurrent": freq_current_mhz,
             "freqMax": round(freq.max) if freq and freq.max else 0,
             "usageTotal": round(usage_total, 1),
             "usagePerCore": [round(u, 1) for u in per_core],
