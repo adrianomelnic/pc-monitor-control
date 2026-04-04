@@ -37,12 +37,12 @@ export interface CustomCardConfig {
 export type CardConfig = BuiltinCardConfig | CustomCardConfig;
 
 export const BUILTIN_DEFAULTS: BuiltinCardConfig[] = [
-  { id: "thermals", kind: "thermals", visible: true },
   { id: "cpu",      kind: "cpu",      visible: true },
   { id: "gpu",      kind: "gpu",      visible: true },
   { id: "ram",      kind: "ram",      visible: true },
   { id: "fans",     kind: "fans",     visible: false },
   { id: "disks",    kind: "disks",    visible: true },
+  { id: "thermals", kind: "thermals", visible: true },
   { id: "network",  kind: "network",  visible: true },
 ];
 
@@ -86,10 +86,10 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
         let saved = JSON.parse(raw) as CardConfig[];
         // Migration: fans card replaced by Thermals & Fans — hide it
         saved = saved.map((c) => c.id === "fans" ? { ...c, visible: false } : c);
-        // Migration: ensure thermals comes before disks (storage)
+        // Migration: ensure thermals comes after disks (storage)
         const thermalsIdx = saved.findIndex((c) => c.id === "thermals");
         const disksIdx = saved.findIndex((c) => c.id === "disks");
-        if (thermalsIdx !== -1 && disksIdx !== -1 && thermalsIdx > disksIdx) {
+        if (thermalsIdx !== -1 && disksIdx !== -1 && thermalsIdx < disksIdx) {
           const [thermalsCard] = saved.splice(thermalsIdx, 1);
           saved.splice(disksIdx, 0, thermalsCard);
         }
