@@ -23,7 +23,7 @@ import { FansCard } from "@/components/cards/FansCard";
 import { GPUCard } from "@/components/cards/GPUCard";
 import { NetworkCard } from "@/components/cards/NetworkCard";
 import { RAMCard } from "@/components/cards/RAMCard";
-import { ThermalsCard, SENSOR_ICON_OPTIONS, defaultSensorIcon } from "@/components/cards/ThermalsCard";
+import { ThermalsCard, SENSOR_ICON_OPTIONS, defaultSensorIcon, renderSensorIcon } from "@/components/cards/ThermalsCard";
 import Colors from "@/constants/colors";
 import { BuiltinCardConfig, BuiltinCardKind, CardConfig, CustomCardConfig, useDashboard } from "@/context/DashboardContext";
 import { BuiltinCardEdit, CardTitleEditConfig } from "@/components/cards/CardBase";
@@ -457,7 +457,7 @@ export default function PCDetailScreen() {
                     hitSlop={4}
                     style={[styles.editPanelIconBtn, isPickerOpen && { backgroundColor: accent + "22", borderColor: accent + "55" }]}
                   >
-                    <Feather name={currentIcon as any} size={13} color={isPickerOpen ? accent : C.textMuted} />
+                    {renderSensorIcon(currentIcon, 13, isPickerOpen ? accent : C.textMuted)}
                   </Pressable>
                 )}
                 {isEditingThisLabel ? (
@@ -535,7 +535,7 @@ export default function PCDetailScreen() {
                           isSelected && { backgroundColor: accent + "22", borderColor: accent + "66" },
                         ]}
                       >
-                        <Feather name={iconName as any} size={16} color={isSelected ? accent : C.textMuted} />
+                        {renderSensorIcon(iconName, 16, isSelected ? accent : C.textMuted)}
                       </Pressable>
                     );
                   })}

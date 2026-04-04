@@ -1,4 +1,4 @@
-import { Feather } from "@expo/vector-icons";
+import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import Colors from "@/constants/colors";
@@ -13,41 +13,50 @@ export function isImportantTemp(label: string): boolean {
   return IMPORTANT_PATTERNS.some(p => p.test(label));
 }
 
+// Icons prefixed with "mci:" use MaterialCommunityIcons; others use Feather
 export const SENSOR_ICON_OPTIONS: string[] = [
   // Fans & airflow
-  "wind", "rotate-cw", "refresh-cw", "sliders",
+  "mci:fan", "mci:fan-speed-1", "mci:fan-speed-2", "mci:fan-speed-3",
   // Water cooling
-  "droplet", "navigation", "repeat", "radio",
-  // CPU / GPU / components
-  "cpu", "monitor", "layers", "grid",
-  // Temperature & heat
-  "thermometer", "sun", "zap", "activity",
-  // Power & system
-  "power", "battery", "server", "hard-drive",
-  // Case & general
-  "package", "box", "settings", "disc",
+  "mci:water-pump", "mci:water", "mci:snowflake", "mci:coolant-temperature",
+  // CPU / GPU / Components
+  "mci:chip", "mci:memory", "mci:expansion-card", "mci:motherboard",
+  // Storage & system
+  "mci:harddisk", "mci:desktop-tower", "mci:server", "mci:nas",
+  // Temperature & power
+  "mci:thermometer", "mci:thermometer-high", "mci:lightning-bolt", "mci:power-plug",
+  // Extras
+  "mci:heating-coil", "mci:cpu-64-bit", "mci:resistor", "mci:integrated-circuit-chip",
 ];
 
 export function defaultSensorIcon(key: string): string {
   const label = key.slice(2).toLowerCase();
   if (key.startsWith("t:")) {
-    if (/cpu|processor/i.test(label)) return "cpu";
-    if (/gpu|vga|graphics|video/i.test(label)) return "monitor";
-    if (/water|liquid|coolant|loop|reservoir/i.test(label)) return "droplet";
-    if (/rad|radiator/i.test(label)) return "radio";
-    if (/vrm|mosfet|power/i.test(label)) return "zap";
-    if (/chipset|m\.2|nvme/i.test(label)) return "hard-drive";
-    if (/system|mb|motherboard/i.test(label)) return "layers";
-    return "thermometer";
+    if (/cpu|processor/i.test(label)) return "mci:chip";
+    if (/gpu|vga|graphics|video/i.test(label)) return "mci:expansion-card";
+    if (/water|liquid|coolant|loop|reservoir/i.test(label)) return "mci:water";
+    if (/rad|radiator/i.test(label)) return "mci:heating-coil";
+    if (/vrm|mosfet/i.test(label)) return "mci:resistor";
+    if (/chipset/i.test(label)) return "mci:integrated-circuit-chip";
+    if (/memory|ram|dram|vram/i.test(label)) return "mci:memory";
+    if (/nvme|m\.2|ssd|hdd/i.test(label)) return "mci:harddisk";
+    if (/system|mb|motherboard/i.test(label)) return "mci:motherboard";
+    return "mci:thermometer";
   }
-  // fans
-  if (/pump/i.test(label)) return "repeat";
-  if (/water|liquid|loop|coolant/i.test(label)) return "droplet";
-  if (/cpu/i.test(label)) return "cpu";
-  if (/rad|radiator/i.test(label)) return "radio";
-  if (/gpu|graphics/i.test(label)) return "monitor";
-  if (/chassis|case|system/i.test(label)) return "package";
-  return "wind";
+  // fans / pumps
+  if (/pump/i.test(label)) return "mci:water-pump";
+  if (/water|liquid|loop|coolant/i.test(label)) return "mci:water";
+  if (/cpu/i.test(label)) return "mci:fan";
+  if (/gpu|graphics/i.test(label)) return "mci:fan";
+  if (/chassis|case|system/i.test(label)) return "mci:fan-speed-1";
+  return "mci:fan";
+}
+
+export function renderSensorIcon(name: string, size: number, color: string): React.ReactElement {
+  if (name.startsWith("mci:")) {
+    return <MaterialCommunityIcons name={name.slice(4) as any} size={size} color={color} />;
+  }
+  return <Feather name={name as any} size={size} color={color} />;
 }
 
 function tempColor(c: number): string {
@@ -80,8 +89,7 @@ export function ThermalsCard({ temps, fans, titleEdit, cardEdit }: Props) {
   const aliases = cardEdit?.fieldAliases ?? {};
   const sensorIcons = cardEdit?.sensorIcons ?? {};
   const getLabel = (key: string, def: string) => aliases[key] ?? def;
-  const getIcon = (key: string) =>
-    ((sensorIcons[key] ?? defaultSensorIcon(key)) as keyof typeof Feather.glyphMap);
+  const getIcon = (key: string) => sensorIcons[key] ?? defaultSensorIcon(key);
 
   const tempMap = new Map<string, SensorReading>();
   for (const t of temps) {
@@ -157,7 +165,7 @@ export function ThermalsCard({ temps, fans, titleEdit, cardEdit }: Props) {
 
               return (
                 <View key={key} style={styles.tile}>
-                  <Feather name={icon} size={22} color={C.textMuted} style={styles.tileIcon} />
+                  <View style={styles.tileIcon}>{renderSensorIcon(icon, 22, C.textMuted)}</View>
                   <Text style={styles.tileLabel} numberOfLines={1}>
                     {label.toUpperCase()}
                   </Text>
