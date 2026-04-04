@@ -300,10 +300,11 @@ def get_cpu_info(hwinfo_data=None):
         # Try HWiNFO64 clock sensors for real-time current frequency
         # psutil.cpu_freq().current is static on Windows (always shows rated base clock)
         freq_current_mhz = None
-        if hwinfo_data:
+        hw_sensors = (hwinfo_data.get("sensors") or []) if hwinfo_data else []
+        if hw_sensors:
             # Collect per-core clock readings (e.g. "CPU Core #1 Clock")
             core_clocks = [
-                s["value"] for s in hwinfo_data
+                s["value"] for s in hw_sensors
                 if s.get("type") == "clock" and re.search(r"cpu.*core.*clock|core.*#\d+.*clock", s.get("label", ""), re.I)
             ]
             if core_clocks:
@@ -311,8 +312,8 @@ def get_cpu_info(hwinfo_data=None):
             else:
                 # Fall back to any CPU-level clock sensor
                 cpu_clk = next((
-                    s["value"] for s in hwinfo_data
-                    if s.get("type") == "clock" and re.search(r"cpu.*clock|cpu.*freq(?!uency.*max)", s.get("label", ""), re.I)
+                    s["value"] for s in hw_sensors
+                    if s.get("type") == "clock" and re.search(r"cpu.*clock|cpu.*frequency", s.get("label", ""), re.I)
                 ), None)
                 if cpu_clk is not None:
                     freq_current_mhz = round(cpu_clk)
