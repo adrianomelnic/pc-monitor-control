@@ -10,6 +10,27 @@ const ACCENT = "#60A5FA";
 const UP_COLOR = "#00D4FF";
 const DOWN_COLOR = "#A78BFA";
 
+function isVirtualIface(name: string): boolean {
+  const n = name.toLowerCase();
+  return (
+    n === "lo" ||
+    n.includes("loopback") ||
+    n.includes("pseudo") ||
+    n.includes("virtual") ||
+    n.includes("tailscale") ||
+    n.includes("tunnel") ||
+    n.includes("teredo") ||
+    n.includes("isatap") ||
+    n.includes("6to4") ||
+    n.includes("docker") ||
+    n.includes("vmware") ||
+    n.includes("vethernet") ||
+    n.startsWith("tun") ||
+    n.startsWith("tap") ||
+    n.startsWith("veth")
+  );
+}
+
 function fmtSpeed(kbs: number) {
   if (kbs >= 1024) return `${(kbs / 1024).toFixed(1)} MB/s`;
   if (kbs < 1) return "0 KB/s";
@@ -30,8 +51,9 @@ interface Props {
 export function NetworkCard({ interfaces, titleEdit, cardEdit }: Props) {
   const hidden = new Set(cardEdit?.hiddenFields ?? []);
   const allUp = interfaces.filter((i) => i.isUp);
-  const defaultKeys = allUp.map(i => i.name);
-  const order = cardEdit?.fieldOrder ?? defaultKeys;
+  // Default: show only physical interfaces. If the user has saved a custom order, respect it.
+  const physicalUp = allUp.filter((i) => !isVirtualIface(i.name));
+  const order = cardEdit?.fieldOrder ?? physicalUp.map((i) => i.name);
   const extraMap = cardEdit?.extraSensorMap ?? {};
   const aliases = cardEdit?.fieldAliases ?? {};
   const getLabel = (key: string, def: string) => aliases[key] ?? def;
