@@ -373,7 +373,7 @@ export default function PCDetailScreen() {
     // For thermals: hide temperature sensors that the user hasn't added yet (hidden t: keys).
     // Fans always appear; temp sensors appear only once made visible.
     const panelOrder = card.kind === "thermals"
-      ? effectiveOrder.filter(k => k.startsWith("f:") || !hidden.has(k))
+      ? effectiveOrder.filter(k => !hidden.has(k))
       : effectiveOrder;
 
     return (
