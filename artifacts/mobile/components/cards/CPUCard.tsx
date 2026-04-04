@@ -22,7 +22,9 @@ interface Props {
 export function CPUCard({ cpu, titleEdit, cardEdit }: Props) {
   const cores = cpu.usagePerCore ?? [];
   const cols = cores.length > 8 ? 4 : 2;
-  const hidden = new Set(cardEdit?.hiddenFields ?? []);
+  const hidden = cardEdit?.hiddenFields !== undefined
+    ? new Set(cardEdit.hiddenFields)
+    : new Set(["perCore", "cpuBar"]);
   const order = cardEdit?.fieldOrder ?? DEFAULT_ORDER;
   const extraMap = cardEdit?.extraSensorMap ?? {};
   const aliases = cardEdit?.fieldAliases ?? {};
