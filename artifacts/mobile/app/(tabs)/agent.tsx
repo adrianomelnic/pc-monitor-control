@@ -19,15 +19,32 @@ const PYTHON_AGENT = `#!/usr/bin/env python3
 """
 PC Monitor Agent v2 - Full hardware monitoring.
 Install: python -m pip install psutil flask flask-cors
-Run as Admin (Windows): python pc_agent.py
+Run: python pc_agent.py  (auto-elevates to admin on Windows via UAC)
 """
-import os, platform, subprocess, time, socket, re
+import os, platform, subprocess, time, socket, re, ctypes, sys
 import psutil
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 
 IS_WINDOWS = platform.system() == "Windows"
 IS_MAC = platform.system() == "Darwin"
+
+# ── Auto-elevate to admin on Windows ────────────────────────────────────────
+def _ensure_admin():
+    if not IS_WINDOWS:
+        return
+    try:
+        already_admin = ctypes.windll.shell32.IsUserAnAdmin()
+    except Exception:
+        already_admin = False
+    if not already_admin:
+        # Re-launch this script with UAC elevation and exit the current process
+        params = " ".join(f'"{a}"' for a in sys.argv)
+        ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, params, None, 1)
+        sys.exit(0)
+
+_ensure_admin()
+# ── End admin elevation ──────────────────────────────────────────────────────
 
 app = Flask(__name__)
 CORS(app)
