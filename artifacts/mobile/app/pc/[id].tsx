@@ -27,6 +27,7 @@ import { ThermalsCard, SENSOR_ICON_OPTIONS, defaultSensorIcon, renderSensorIcon 
 import Colors from "@/constants/colors";
 import { BuiltinCardConfig, BuiltinCardKind, CardConfig, CustomCardConfig, useDashboard } from "@/context/DashboardContext";
 import { BuiltinCardEdit, CardTitleEditConfig } from "@/components/cards/CardBase";
+import { DraggableFieldList } from "@/components/DraggableFieldList";
 import { usePcs, SensorReading } from "@/context/PcsContext";
 
 const C = Colors.light;
@@ -426,141 +427,146 @@ export default function PCDetailScreen() {
       ? effectiveOrder.filter(k => !hidden.has(k))
       : effectiveOrder;
 
+    const onReorderFields = (newKeys: string[]) => {
+      if (card.kind === "thermals") {
+        const currentEffective = getEffectiveFieldOrder(card.fieldOrder, getDefaultKeys("thermals"), []);
+        const hiddenItems = currentEffective.filter(k => hidden.has(k));
+        updateBuiltinCard(pcId, "thermals", { fieldOrder: [...newKeys, ...hiddenItems] });
+      } else {
+        updateBuiltinCard(pcId, card.kind, { fieldOrder: newKeys });
+      }
+    };
+
+    const renderDragRow = (key: string, drag: () => void, isActive: boolean) => {
+      const isHidden = hidden.has(key);
+      const isExtra = extrasSet.has(key);
+      const defaultLabel = defaultLabelMap[key] ?? key;
+      const displayLabel = fieldAliases[key] ?? defaultLabel;
+      const isEditingThisLabel = editingFieldLabel?.kind === card.kind && editingFieldLabel?.key === key;
+      const currentIcon = sensorIcons[key] ?? defaultSensorIcon(key);
+      const isPickerOpen = iconPickerKey === key;
+
+      return (
+        <View key={key}>
+          <View style={[styles.editPanelRow, isActive && { opacity: 0.85 }]}>
+            <Pressable
+              onLongPress={drag}
+              delayLongPress={150}
+              hitSlop={6}
+              style={styles.editPanelDragHandle}
+            >
+              <Feather name="menu" size={15} color={isActive ? accent : C.textMuted + "99"} />
+            </Pressable>
+            <Pressable onPress={() => toggleBuiltinField(card.kind, key)} hitSlop={4}>
+              <View style={[styles.editPanelToggle, {
+                borderColor: isHidden ? C.textMuted : accent,
+                backgroundColor: isHidden ? "transparent" : accent + "22",
+              }]}>
+                <Feather name={isHidden ? "eye-off" : "eye"} size={11} color={isHidden ? C.textMuted : accent} />
+              </View>
+            </Pressable>
+            {card.kind === "thermals" && (
+              <Pressable
+                onPress={() => setIconPickerKey(isPickerOpen ? null : key)}
+                hitSlop={4}
+                style={[styles.editPanelIconBtn, isPickerOpen && { backgroundColor: accent + "22", borderColor: accent + "55" }]}
+              >
+                {renderSensorIcon(currentIcon, 13, isPickerOpen ? accent : C.textMuted)}
+              </Pressable>
+            )}
+            {isEditingThisLabel ? (
+              <TextInput
+                style={[styles.editPanelRowText, styles.editPanelLabelInput, { borderBottomColor: accent }]}
+                value={fieldLabelDraft}
+                onChangeText={setFieldLabelDraft}
+                onSubmitEditing={() => commitFieldAlias(card.kind, key, fieldLabelDraft)}
+                onBlur={() => commitFieldAlias(card.kind, key, fieldLabelDraft)}
+                autoFocus
+                autoCorrect={false}
+                returnKeyType="done"
+                selectTextOnFocus
+              />
+            ) : (
+              <Pressable
+                style={styles.editPanelLabelPress}
+                onPress={() => {
+                  setEditingFieldLabel({ kind: card.kind, key });
+                  setFieldLabelDraft(displayLabel);
+                }}
+                hitSlop={4}
+              >
+                <Text style={[styles.editPanelRowText, isHidden && { color: C.textMuted }]} numberOfLines={1}>
+                  {displayLabel}
+                </Text>
+              </Pressable>
+            )}
+            <Pressable
+              onPress={() => {
+                if (card.kind === "thermals") {
+                  setReplacingThermalKey(key);
+                  setThermalsSensorPickerOpen(true);
+                } else if (isExtra) {
+                  setReplacingExtraFor({ kind: card.kind, key });
+                  setExtraSensorPickerFor(card.kind);
+                } else {
+                  setReplacingBuiltinField({ kind: card.kind, key });
+                  setExtraSensorPickerFor(card.kind);
+                }
+              }}
+              hitSlop={8}
+              style={styles.editPanelActionBtn}
+            >
+              <Feather name="refresh-cw" size={13} color={accent} style={{ opacity: 0.7 }} />
+            </Pressable>
+            <Pressable
+              onPress={() => {
+                if (card.kind === "thermals") {
+                  toggleBuiltinField(card.kind, key);
+                } else if (isExtra) {
+                  removeExtraSensor(card.kind, key);
+                } else {
+                  toggleBuiltinField(card.kind, key);
+                }
+              }}
+              hitSlop={8}
+              style={styles.editPanelActionBtn}
+            >
+              <Feather name="x" size={14} color={C.danger} />
+            </Pressable>
+          </View>
+          {card.kind === "thermals" && isPickerOpen && (
+            <View style={[styles.iconPickerRow, { borderColor: accent + "33" }]}>
+              {SENSOR_ICON_OPTIONS.map(iconName => {
+                const isSelected = currentIcon === iconName;
+                return (
+                  <Pressable
+                    key={iconName}
+                    onPress={() => { updateSensorIcon(card.kind, key, iconName); setIconPickerKey(null); }}
+                    hitSlop={4}
+                    style={[
+                      styles.iconPickerBtn,
+                      isSelected && { backgroundColor: accent + "22", borderColor: accent + "66" },
+                    ]}
+                  >
+                    {renderSensorIcon(iconName, 16, isSelected ? accent : C.textMuted)}
+                  </Pressable>
+                );
+              })}
+            </View>
+          )}
+        </View>
+      );
+    };
+
     return (
       <View style={styles.editPanel}>
         <View style={styles.editPanelDivider} />
-        {panelOrder.map((key, idx) => {
-          const isHidden = hidden.has(key);
-          const isExtra = extrasSet.has(key);
-          const defaultLabel = defaultLabelMap[key] ?? key;
-          const displayLabel = fieldAliases[key] ?? defaultLabel;
-          const isFirst = idx === 0;
-          const isLast = idx === panelOrder.length - 1;
-          const isEditingThisLabel = editingFieldLabel?.kind === card.kind && editingFieldLabel?.key === key;
-          const currentIcon = sensorIcons[key] ?? defaultSensorIcon(key);
-          const isPickerOpen = iconPickerKey === key;
-
-          return (
-            <View key={key}>
-              <View style={styles.editPanelRow}>
-                <View style={styles.editPanelArrows}>
-                  <Pressable
-                    onPress={() => !isFirst && moveBuiltinField(card.kind, key, "up")}
-                    hitSlop={4}
-                    disabled={isFirst}
-                  >
-                    <Feather name="chevron-up" size={16} color={isFirst ? C.textMuted + "33" : accent} />
-                  </Pressable>
-                  <Pressable
-                    onPress={() => !isLast && moveBuiltinField(card.kind, key, "down")}
-                    hitSlop={4}
-                    disabled={isLast}
-                  >
-                    <Feather name="chevron-down" size={16} color={isLast ? C.textMuted + "33" : accent} />
-                  </Pressable>
-                </View>
-                <Pressable onPress={() => toggleBuiltinField(card.kind, key)} hitSlop={4}>
-                  <View style={[styles.editPanelToggle, {
-                    borderColor: isHidden ? C.textMuted : accent,
-                    backgroundColor: isHidden ? "transparent" : accent + "22",
-                  }]}>
-                    <Feather name={isHidden ? "eye-off" : "eye"} size={11} color={isHidden ? C.textMuted : accent} />
-                  </View>
-                </Pressable>
-                {card.kind === "thermals" && (
-                  <Pressable
-                    onPress={() => setIconPickerKey(isPickerOpen ? null : key)}
-                    hitSlop={4}
-                    style={[styles.editPanelIconBtn, isPickerOpen && { backgroundColor: accent + "22", borderColor: accent + "55" }]}
-                  >
-                    {renderSensorIcon(currentIcon, 13, isPickerOpen ? accent : C.textMuted)}
-                  </Pressable>
-                )}
-                {isEditingThisLabel ? (
-                  <TextInput
-                    style={[styles.editPanelRowText, styles.editPanelLabelInput, { borderBottomColor: accent }]}
-                    value={fieldLabelDraft}
-                    onChangeText={setFieldLabelDraft}
-                    onSubmitEditing={() => commitFieldAlias(card.kind, key, fieldLabelDraft)}
-                    onBlur={() => commitFieldAlias(card.kind, key, fieldLabelDraft)}
-                    autoFocus
-                    autoCorrect={false}
-                    returnKeyType="done"
-                    selectTextOnFocus
-                  />
-                ) : (
-                  <Pressable
-                    style={styles.editPanelLabelPress}
-                    onPress={() => {
-                      setEditingFieldLabel({ kind: card.kind, key });
-                      setFieldLabelDraft(displayLabel);
-                    }}
-                    hitSlop={4}
-                  >
-                    <Text style={[styles.editPanelRowText, isHidden && { color: C.textMuted }]} numberOfLines={1}>
-                      {displayLabel}
-                    </Text>
-                  </Pressable>
-                )}
-                {/* Replace button — all sensors in all cards */}
-                <Pressable
-                  onPress={() => {
-                    if (card.kind === "thermals") {
-                      setReplacingThermalKey(key);
-                      setThermalsSensorPickerOpen(true);
-                    } else if (isExtra) {
-                      setReplacingExtraFor({ kind: card.kind, key });
-                      setExtraSensorPickerFor(card.kind);
-                    } else {
-                      setReplacingBuiltinField({ kind: card.kind, key });
-                      setExtraSensorPickerFor(card.kind);
-                    }
-                  }}
-                  hitSlop={8}
-                  style={styles.editPanelActionBtn}
-                >
-                  <Feather name="refresh-cw" size={13} color={accent} style={{ opacity: 0.7 }} />
-                </Pressable>
-                {/* Remove button */}
-                <Pressable
-                  onPress={() => {
-                    if (card.kind === "thermals") {
-                      toggleBuiltinField(card.kind, key);
-                    } else if (isExtra) {
-                      removeExtraSensor(card.kind, key);
-                    } else {
-                      toggleBuiltinField(card.kind, key);
-                    }
-                  }}
-                  hitSlop={8}
-                  style={styles.editPanelActionBtn}
-                >
-                  <Feather name="x" size={14} color={C.danger} />
-                </Pressable>
-              </View>
-              {card.kind === "thermals" && isPickerOpen && (
-                <View style={[styles.iconPickerRow, { borderColor: accent + "33" }]}>
-                  {SENSOR_ICON_OPTIONS.map(iconName => {
-                    const isSelected = currentIcon === iconName;
-                    return (
-                      <Pressable
-                        key={iconName}
-                        onPress={() => { updateSensorIcon(card.kind, key, iconName); setIconPickerKey(null); }}
-                        hitSlop={4}
-                        style={[
-                          styles.iconPickerBtn,
-                          isSelected && { backgroundColor: accent + "22", borderColor: accent + "66" },
-                        ]}
-                      >
-                        {renderSensorIcon(iconName, 16, isSelected ? accent : C.textMuted)}
-                      </Pressable>
-                    );
-                  })}
-                </View>
-              )}
-            </View>
-          );
-        })}
+        <DraggableFieldList
+          keys={panelOrder}
+          onReorder={onReorderFields}
+          onDragBegin={() => { setIconPickerKey(null); setEditingFieldLabel(null); }}
+          renderRow={renderDragRow}
+        />
 
         <Pressable
           onPress={() => card.kind === "thermals" ? setThermalsSensorPickerOpen(true) : setExtraSensorPickerFor(card.kind)}
@@ -1557,10 +1563,11 @@ const styles = StyleSheet.create({
     gap: 8,
     paddingVertical: 3,
   },
-  editPanelArrows: {
-    flexDirection: "column",
+  editPanelDragHandle: {
+    paddingHorizontal: 3,
+    paddingVertical: 4,
+    justifyContent: "center",
     alignItems: "center",
-    gap: -2,
     marginRight: 2,
   },
   editPanelToggle: {
