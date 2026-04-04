@@ -156,9 +156,7 @@ export function ThermalsCard({ temps, fans, titleEdit, cardEdit }: Props) {
 
               const valueText = isTemp
                 ? `${Math.round(sensor!.value)}°C`
-                : fan!.rpm >= 1000
-                  ? `${(fan!.rpm / 1000).toFixed(1)}k`
-                  : `${fan!.rpm}`;
+                : `${fan!.rpm}`;
 
               const color = isTemp ? tempColor(sensor!.value) : rpmColor(fan!.rpm);
               const icon = getIcon(key);
