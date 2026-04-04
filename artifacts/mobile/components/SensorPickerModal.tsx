@@ -90,16 +90,29 @@ export function SensorPickerModal({
 }: Props) {
   const insets = useSafeAreaInsets();
   const [title, setTitle] = useState(initialTitle);
-  const [selected, setSelected] = useState<Set<string>>(new Set(initialSensors));
+  const [selected, setSelected] = useState<Set<string>>(new Set());
   const [accentColor, setAccentColor] = useState(initialColor ?? ACCENT_COLORS[0]);
   const [icon, setIcon] = useState(initialIcon ?? ICON_OPTIONS[0].name);
   const [search, setSearch] = useState("");
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
+  // Build a compound key so sensors with the same label in different components don't collide
+  const compKey = (comp: string, label: string) => `${comp}\x00${label}`;
+
+  // Map saved labels back to compound keys using the current sensors list
+  const labelsToKeys = (labels: string[]): Set<string> => {
+    const result = new Set<string>();
+    for (const label of labels) {
+      const s = sensors.find(r => r.label === label);
+      result.add(compKey(s?.component || "Unknown", label));
+    }
+    return result;
+  };
+
   useEffect(() => {
     if (visible) {
       setTitle(initialTitle);
-      setSelected(new Set(initialSensors));
+      setSelected(labelsToKeys(initialSensors ?? []));
       setAccentColor(initialColor ?? ACCENT_COLORS[0]);
       setIcon(initialIcon ?? ICON_OPTIONS[0].name);
       setSearch("");
@@ -141,32 +154,38 @@ export function SensorPickerModal({
       .map((comp) => ({ comp, items: map[comp] }));
   }, [sensors, search]);
 
-  const toggle = (label: string) => {
+  const toggle = (comp: string, label: string) => {
+    const key = compKey(comp, label);
     setSelected((prev) => {
       const next = new Set(prev);
-      if (next.has(label)) next.delete(label);
-      else next.add(label);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
       return next;
     });
   };
 
   // Select / deselect all sensors for a component group
-  const toggleGroup = (items: SensorReading[]) => {
-    const labels = items.map((s) => s.label);
-    const allSelected = labels.every((l) => selected.has(l));
+  const toggleGroup = (comp: string, items: SensorReading[]) => {
+    const keys = items.map(s => compKey(comp, s.label));
+    const allSelected = keys.every(k => selected.has(k));
     setSelected((prev) => {
       const next = new Set(prev);
       if (allSelected) {
-        labels.forEach((l) => next.delete(l));
+        keys.forEach(k => next.delete(k));
       } else {
-        labels.forEach((l) => next.add(l));
+        keys.forEach(k => next.add(k));
       }
       return next;
     });
   };
 
   const handleSave = () => {
-    onSave(title.trim() || "Custom Card", Array.from(selected), accentColor, icon);
+    // Strip the component prefix — save only the label portion
+    const labels = Array.from(selected).map(key => {
+      const sep = key.indexOf("\x00");
+      return sep >= 0 ? key.slice(sep + 1) : key;
+    });
+    onSave(title.trim() || "Custom Card", labels, accentColor, icon);
     onClose();
   };
 
@@ -272,8 +291,8 @@ export function SensorPickerModal({
               <Text style={styles.emptyDesc}>No sensors match "{search}"</Text>
             ) : (
               grouped.map(({ comp, items }) => {
-                const allSelected = items.every((s) => selected.has(s.label));
-                const someSelected = !allSelected && items.some((s) => selected.has(s.label));
+                const allSelected = items.every(s => selected.has(compKey(comp, s.label)));
+                const someSelected = !allSelected && items.some(s => selected.has(compKey(comp, s.label)));
                 const isCollapsed = search.trim() ? false : !expanded.has(comp);
                 return (
                   <View key={comp} style={styles.group}>
@@ -284,7 +303,7 @@ export function SensorPickerModal({
                           styles.groupCheck,
                           (allSelected || someSelected) && { backgroundColor: accentColor, borderColor: accentColor }
                         ]}
-                        onPress={() => toggleGroup(items)}
+                        onPress={() => toggleGroup(comp, items)}
                         hitSlop={6}
                       >
                         {allSelected && <Feather name="check" size={11} color="#fff" />}
@@ -295,7 +314,7 @@ export function SensorPickerModal({
                         <Text style={styles.groupName} numberOfLines={2}>{comp}</Text>
                         <Text style={styles.groupCount}>
                           {someSelected || allSelected
-                            ? `${items.filter((s) => selected.has(s.label)).length}/`
+                            ? `${items.filter(s => selected.has(compKey(comp, s.label))).length}/`
                             : ""}
                           {items.length}
                         </Text>
@@ -309,13 +328,13 @@ export function SensorPickerModal({
 
                     {/* Individual sensor rows — hidden when collapsed */}
                     {!isCollapsed && items.map((s, si) => {
-                      const isSelected = selected.has(s.label);
+                      const isSelected = selected.has(compKey(comp, s.label));
                       const badge = TYPE_BADGE[s.type] ?? TYPE_BADGE.other;
                       return (
                         <TouchableOpacity
                           key={`${comp}_${si}_${s.label}`}
                           style={[styles.sensorRow, isSelected && { borderColor: accentColor + "60", backgroundColor: accentColor + "10" }]}
-                          onPress={() => toggle(s.label)}
+                          onPress={() => toggle(comp, s.label)}
                           activeOpacity={0.7}
                         >
                           <View style={[styles.checkbox, isSelected && { backgroundColor: accentColor, borderColor: accentColor }]}>
