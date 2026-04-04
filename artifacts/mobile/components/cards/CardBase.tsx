@@ -113,7 +113,6 @@ export function CardBase({
               autoCorrect={false}
               returnKeyType="done"
               selectTextOnFocus
-              autoFocus
             />
           ) : onTitlePress ? (
             <Pressable onPress={onTitlePress} hitSlop={6}>

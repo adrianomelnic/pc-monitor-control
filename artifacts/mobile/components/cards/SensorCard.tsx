@@ -512,6 +512,7 @@ export function SensorCard({
     const sensorReading = sensorMap.get(key);
     const isEditingThisLabel = editingOriginal === key;
     const notFound = !sensorReading;
+    const typeIcon = sensorReading ? sensorTypeIcon(sensorReading.type) : "sliders";
     return (
       <View key={key} style={[dragStyles.row, isActive && { opacity: 0.85 }]}>
         <Pressable
@@ -522,6 +523,12 @@ export function SensorCard({
         >
           <Feather name="menu" size={15} color={isActive ? accentColor : C.textMuted + "99"} />
         </Pressable>
+        <Feather
+          name={typeIcon}
+          size={13}
+          color={notFound ? C.textMuted : accentColor}
+          style={dragStyles.typeIcon}
+        />
         {isEditingThisLabel ? (
           <TextInput
             style={[dragStyles.labelInput, { borderBottomColor: accentColor }]}
@@ -917,6 +924,10 @@ const dragStyles = StyleSheet.create({
   handle: {
     padding: 4,
     flexShrink: 0,
+  },
+  typeIcon: {
+    flexShrink: 0,
+    opacity: 0.75,
   },
   labelPress: {
     flex: 1,
