@@ -929,24 +929,12 @@ export default function PCDetailScreen() {
 
       {/* ── OFFLINE STATE ── */}
       {pc.status !== "online" && (
-        <View style={styles.offlineCard}>
-          <Feather
-            name={pc.status === "connecting" ? "loader" : "wifi-off"}
-            size={32}
-            color={statusColor}
-          />
-          <Text style={[styles.offlineTitle, { color: statusColor }]}>
-            {pc.status === "connecting" ? "Connecting..." : "PC Offline"}
+        <Pressable style={[styles.offlinePill, { borderColor: statusColor + "55", backgroundColor: statusColor + "11" }]} onPress={onRefresh}>
+          <Feather name={pc.status === "connecting" ? "loader" : "wifi-off"} size={14} color={statusColor} />
+          <Text style={[styles.offlinePillText, { color: statusColor }]}>
+            {pc.status === "connecting" ? "Connecting… tap to retry" : "Offline — tap to retry"}
           </Text>
-          <Text style={styles.offlineDesc}>
-            {pc.status === "connecting"
-              ? "Trying to reach the PC agent..."
-              : "Make sure the PC agent is running on this computer."}
-          </Text>
-          <Pressable style={styles.retryBtn} onPress={onRefresh}>
-            <Text style={styles.retryBtnText}>Retry</Text>
-          </Pressable>
-        </View>
+        </Pressable>
       )}
 
       {/* ── COMPONENT CARDS ── */}
@@ -1002,8 +990,8 @@ export default function PCDetailScreen() {
         </>
       )}
 
-      {/* ── CONTROLS ── */}
-      <View style={styles.card}>
+      {/* ── CONTROLS (online only) ── */}
+      {pc.status === "online" ? <View style={styles.card}>
         <Text style={styles.sectionTitle}>Controls</Text>
         <View style={styles.controlGrid}>
           <CommandButton
@@ -1077,10 +1065,10 @@ export default function PCDetailScreen() {
             }}
           />
         </View>
-      </View>
+      </View> : null}
 
-      {/* ── TERMINAL ── */}
-      <View style={styles.card}>
+      {/* ── TERMINAL (online only) ── */}
+      {pc.status === "online" ? <View style={styles.card}>
         <Text style={styles.sectionTitle}>Run Command</Text>
         <View style={styles.terminalInput}>
           <Feather name="terminal" size={14} color={C.textMuted} style={{ marginTop: 1 }} />
@@ -1119,7 +1107,7 @@ export default function PCDetailScreen() {
             </ScrollView>
           </ScrollView>
         ) : null}
-      </View>
+      </View> : null}
 
       {/* ── Extra Sensor Picker for built-in cards ── */}
       <CompactSensorPicker
@@ -1397,6 +1385,21 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 10,
+  },
+  offlinePill: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    alignSelf: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 20,
+    borderWidth: 1,
+    marginTop: 4,
+  },
+  offlinePillText: {
+    fontSize: 14,
+    fontWeight: "600",
   },
   offlineCard: {
     backgroundColor: C.card,
