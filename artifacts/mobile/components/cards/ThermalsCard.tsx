@@ -73,12 +73,16 @@ export function ThermalsCard({ temps, fans, titleEdit, cardEdit }: Props) {
 
   const defaultOrder = [...tempMap.keys(), ...fanMap.keys()];
 
+  const THERMALS_IMPORTANT_RE = /cpu|gpu|ram|memory|vram|dram/i;
+
   const hidden: Set<string> = (() => {
     if (cardEdit?.hiddenFields !== undefined) return new Set(cardEdit.hiddenFields);
-    // Default: hide every sensor — user adds what they want via "Add sensor"
+    // Default: show CPU/GPU/RAM temps and all fans; hide everything else
     const d = new Set<string>();
-    for (const k of tempMap.keys()) d.add(k);
-    for (const k of fanMap.keys()) d.add(k);
+    for (const k of tempMap.keys()) {
+      if (!THERMALS_IMPORTANT_RE.test(k.slice(2))) d.add(k); // hide non-important temps
+    }
+    // fans are visible by default — not added to hidden set
     return d;
   })();
 

@@ -218,23 +218,27 @@ export default function PCDetailScreen() {
     updateBuiltinCard(pcId, kind, { sensorIcons: newIcons });
   };
 
+  const THERMALS_IMPORTANT_RE = [/cpu/i, /gpu/i, /ram/i, /memory/i, /vram/i, /dram/i];
+
+  const getThermalsSmartDefault = (): string[] =>
+    (m?.sensors ?? [])
+      .filter(s => s.type === "temperature" && !THERMALS_IMPORTANT_RE.some(p => p.test(s.label)))
+      .map(s => "t:" + s.label)
+      .filter((k, i, arr) => arr.indexOf(k) === i);
+
   const showThermalSensor = (label: string, isTemp: boolean) => {
     const card = cards.find((c) => c.id === "thermals") as BuiltinCardConfig | undefined;
     if (!card) return;
     const key = (isTemp ? "t:" : "f:") + label;
-    if (card.hiddenFields !== undefined) {
-      updateBuiltinCard(pcId, "thermals", { hiddenFields: card.hiddenFields.filter(k => k !== key) });
-    } else {
-      const allKeys = getDefaultKeys("thermals");
-      updateBuiltinCard(pcId, "thermals", { hiddenFields: allKeys.filter(k => k !== key) });
-    }
+    const base = card.hiddenFields ?? getThermalsSmartDefault();
+    updateBuiltinCard(pcId, "thermals", { hiddenFields: base.filter(k => k !== key) });
   };
 
   const replaceThermalSensor = (oldKey: string, newLabel: string, isTemp: boolean) => {
     const card = cards.find((c) => c.id === "thermals") as BuiltinCardConfig | undefined;
     if (!card) return;
     const newKey = (isTemp ? "t:" : "f:") + newLabel;
-    const base = card.hiddenFields ?? getDefaultKeys("thermals");
+    const base = card.hiddenFields ?? getThermalsSmartDefault();
     const updated = base.filter(k => k !== newKey);
     if (!updated.includes(oldKey)) updated.push(oldKey);
     updateBuiltinCard(pcId, "thermals", { hiddenFields: updated });
@@ -258,8 +262,6 @@ export default function PCDetailScreen() {
     setTitleInputActive(null);
     setEditingFieldLabel(null);
   };
-
-  const THERMALS_IMPORTANT_RE = [/cpu/i, /gpu/i, /ram/i, /memory/i, /vram/i, /dram/i];
 
   const toggleBuiltinField = (kind: BuiltinCardKind, fieldKey: string) => {
     const card = cards.find((c) => c.id === kind) as BuiltinCardConfig | undefined;
@@ -355,12 +357,10 @@ export default function PCDetailScreen() {
     const hidden: Set<string> = (() => {
       if (card.hiddenFields !== undefined) return new Set(card.hiddenFields);
       if (card.kind === "thermals") {
+        // Default: hide non-important temps; fans are visible by default
         const d = new Set<string>();
         for (const s of (m?.sensors ?? []).filter(s => s.type === "temperature")) {
-          d.add("t:" + s.label);
-        }
-        for (const f of (m?.fans ?? [])) {
-          d.add("f:" + f.label);
+          if (!THERMALS_IMPORTANT_RE.some(p => p.test(s.label))) d.add("t:" + s.label);
         }
         return d;
       }
