@@ -41,7 +41,7 @@ export const BUILTIN_DEFAULTS: BuiltinCardConfig[] = [
   { id: "cpu",      kind: "cpu",      visible: true },
   { id: "gpu",      kind: "gpu",      visible: true },
   { id: "ram",      kind: "ram",      visible: true },
-  { id: "fans",     kind: "fans",     visible: true },
+  { id: "fans",     kind: "fans",     visible: false },
   { id: "disks",    kind: "disks",    visible: true },
   { id: "network",  kind: "network",  visible: true },
 ];
@@ -83,7 +83,9 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
     try {
       const raw = await AsyncStorage.getItem(storageKey(pcId));
       if (raw) {
-        const saved = JSON.parse(raw) as CardConfig[];
+        let saved = JSON.parse(raw) as CardConfig[];
+        // Migration: fans card replaced by Thermals & Fans — hide it
+        saved = saved.map((c) => c.id === "fans" ? { ...c, visible: false } : c);
         // Merge: ensure all builtins exist (user may have added cards to the agent)
         const builtinIds = BUILTIN_DEFAULTS.map((b) => b.id);
         const savedBuiltinIds = saved.filter((c) => c.kind !== "custom").map((c) => c.id);
