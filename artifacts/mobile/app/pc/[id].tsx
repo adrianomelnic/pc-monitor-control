@@ -218,11 +218,9 @@ export default function PCDetailScreen() {
     updateBuiltinCard(pcId, kind, { sensorIcons: newIcons });
   };
 
-  const THERMALS_IMPORTANT_RE = [/cpu/i, /gpu/i, /ram/i, /memory/i, /vram/i, /dram/i];
-
   const getThermalsSmartDefault = (): string[] =>
     (m?.sensors ?? [])
-      .filter(s => s.type === "temperature" && !THERMALS_IMPORTANT_RE.some(p => p.test(s.label)))
+      .filter(s => s.type === "temperature")
       .map(s => "t:" + s.label)
       .filter((k, i, arr) => arr.indexOf(k) === i);
 
@@ -270,10 +268,7 @@ export default function PCDetailScreen() {
     if (card.hiddenFields !== undefined) {
       startingHidden = [...card.hiddenFields];
     } else if (kind === "thermals") {
-      startingHidden = (m?.sensors ?? [])
-        .filter(s => s.type === "temperature" && !THERMALS_IMPORTANT_RE.some(p => p.test(s.label)))
-        .map(s => "t:" + s.label)
-        .filter((k, i, arr) => arr.indexOf(k) === i);
+      startingHidden = getThermalsSmartDefault();
     } else {
       startingHidden = [];
     }
@@ -357,10 +352,10 @@ export default function PCDetailScreen() {
     const hidden: Set<string> = (() => {
       if (card.hiddenFields !== undefined) return new Set(card.hiddenFields);
       if (card.kind === "thermals") {
-        // Default: hide non-important temps; fans are visible by default
+        // Default: hide all temps; fans are visible by default
         const d = new Set<string>();
         for (const s of (m?.sensors ?? []).filter(s => s.type === "temperature")) {
-          if (!THERMALS_IMPORTANT_RE.some(p => p.test(s.label))) d.add("t:" + s.label);
+          d.add("t:" + s.label);
         }
         return d;
       }
