@@ -17,6 +17,7 @@ import { SensorReading } from "@/context/PcsContext";
 import { CustomCardLayout } from "@/context/DashboardContext";
 import Colors from "@/constants/colors";
 import { CardBase, MiniBar, StatRow } from "./CardBase";
+import { DraggableFieldList } from "@/components/DraggableFieldList";
 
 const C = Colors.light;
 
@@ -351,158 +352,7 @@ const pickerStyles = StyleSheet.create({
   },
 });
 
-// ─── Editable label ───────────────────────────────────────────────────────────
 
-interface EditableLabelProps {
-  originalLabel: string;
-  displayLabel: string;
-  isEditing: boolean;
-  accentColor: string;
-  textStyle?: object;
-  onPress: () => void;
-  onChangeText: (t: string) => void;
-  onSubmit: () => void;
-  onBlur: () => void;
-}
-
-function EditableLabel({
-  originalLabel,
-  displayLabel,
-  isEditing,
-  accentColor,
-  textStyle,
-  onPress,
-  onChangeText,
-  onSubmit,
-  onBlur,
-}: EditableLabelProps) {
-  const ref = useRef<TextInput>(null);
-  useEffect(() => {
-    if (isEditing) setTimeout(() => ref.current?.focus(), 50);
-  }, [isEditing]);
-
-  if (isEditing) {
-    return (
-      <TextInput
-        ref={ref}
-        style={[elStyles.input, textStyle, { borderBottomColor: accentColor }]}
-        defaultValue={displayLabel}
-        onChangeText={onChangeText}
-        onSubmitEditing={onSubmit}
-        onBlur={onBlur}
-        autoCorrect={false}
-        autoCapitalize="none"
-        returnKeyType="done"
-        selectTextOnFocus
-      />
-    );
-  }
-
-  return (
-    <Pressable onPress={onPress} style={elStyles.wrap} hitSlop={4}>
-      <Text style={[elStyles.text, textStyle]} numberOfLines={2}>
-        {displayLabel}
-      </Text>
-      <Feather name="edit-2" size={9} color={accentColor} style={{ marginLeft: 3, opacity: 0.6 }} />
-    </Pressable>
-  );
-}
-
-const elStyles = StyleSheet.create({
-  wrap: { flexDirection: "row", alignItems: "center", flexShrink: 1 },
-  text: { flexShrink: 1 },
-  input: {
-    borderBottomWidth: 1.5,
-    fontSize: 12,
-    color: C.text,
-    paddingVertical: 0,
-    paddingHorizontal: 0,
-    minWidth: 50,
-    flex: 1,
-  },
-});
-
-// ─── Inline edit stat row (label editable + swap + remove) ────────────────────
-
-interface InlineStatRowProps {
-  originalLabel: string;
-  displayLabel: string;
-  value: string;
-  color?: string;
-  accentColor: string;
-  isEditingLabel: boolean;
-  onPressLabel: () => void;
-  onLabelChange: (t: string) => void;
-  onLabelSubmit: () => void;
-  onLabelBlur: () => void;
-  onSwap: () => void;
-  onRemove: () => void;
-}
-
-function InlineStatRow({
-  originalLabel,
-  displayLabel,
-  value,
-  color,
-  accentColor,
-  isEditingLabel,
-  onPressLabel,
-  onLabelChange,
-  onLabelSubmit,
-  onLabelBlur,
-  onSwap,
-  onRemove,
-}: InlineStatRowProps) {
-  return (
-    <View style={irStyles.row}>
-      <EditableLabel
-        originalLabel={originalLabel}
-        displayLabel={displayLabel}
-        isEditing={isEditingLabel}
-        accentColor={accentColor}
-        textStyle={irStyles.label}
-        onPress={onPressLabel}
-        onChangeText={onLabelChange}
-        onSubmit={onLabelSubmit}
-        onBlur={onLabelBlur}
-      />
-      <Text style={[irStyles.value, color ? { color } : null]}>{value}</Text>
-      <Pressable onPress={onSwap} hitSlop={6} style={irStyles.actionBtn}>
-        <Feather name="repeat" size={12} color={C.textMuted} />
-      </Pressable>
-      <Pressable onPress={onRemove} hitSlop={6} style={irStyles.actionBtn}>
-        <Feather name="x" size={12} color="#FF6B6B" />
-      </Pressable>
-    </View>
-  );
-}
-
-const irStyles = StyleSheet.create({
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  label: {
-    fontSize: 12,
-    color: C.textSecondary,
-    fontWeight: "500",
-    flex: 1,
-  },
-  value: {
-    fontSize: 12,
-    color: C.text,
-    fontWeight: "700",
-    flexShrink: 0,
-  },
-  actionBtn: {
-    width: 22,
-    height: 22,
-    alignItems: "center",
-    justifyContent: "center",
-    flexShrink: 0,
-  },
-});
 
 // ─── Main SensorCard component ────────────────────────────────────────────────
 
@@ -517,6 +367,7 @@ interface Props {
   onEdit?: () => void;
   onUpdateTitle?: (newTitle: string) => void;
   onUpdateAlias?: (originalLabel: string, newAlias: string) => void;
+  onReorder?: (newLabels: string[]) => void;
   onSwapSensor?: (oldLabel: string, newLabel: string) => void;
   onAddSensor?: (newLabel: string) => void;
   onRemoveSensor?: (label: string) => void;
@@ -533,6 +384,7 @@ export function SensorCard({
   onEdit,
   onUpdateTitle,
   onUpdateAlias,
+  onReorder,
   onSwapSensor,
   onAddSensor,
   onRemoveSensor,
@@ -645,88 +497,80 @@ export function SensorCard({
     </Pressable>
   ) : undefined;
 
-  // ── Sensor rows renderer ───────────────────────────────────────────────────
-  const renderSensorRow = (r: { original: string; sensor: SensorReading }, i: number) => {
-    if (inlineEdit) {
-      return (
-        <InlineStatRow
-          key={i}
-          originalLabel={r.original}
-          displayLabel={getDisplayLabel(r.original)}
-          value={formatValue(r.sensor)}
-          color={valueColor(r.sensor, accentColor)}
-          accentColor={accentColor}
-          isEditingLabel={editingOriginal === r.original}
-          onPressLabel={() => startLabelEdit(r.original)}
-          onLabelChange={setEditText}
-          onLabelSubmit={commitLabel}
-          onLabelBlur={commitLabel}
-          onSwap={() => {
-            commitLabel();
-            setSwappingOriginal(r.original);
-            setPickerMode("swap");
-          }}
-          onRemove={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            onRemoveSensor?.(r.original);
-          }}
-        />
-      );
-    }
+  // ── View-mode sensor row ───────────────────────────────────────────────────
+  const renderSensorRow = (r: { original: string; sensor: SensorReading }, i: number) => (
+    <StatRow
+      key={i}
+      label={getDisplayLabel(r.original)}
+      value={formatValue(r.sensor)}
+      color={valueColor(r.sensor, accentColor)}
+    />
+  );
+
+  // ── Edit-mode draggable row ────────────────────────────────────────────────
+  const renderEditRow = (key: string, drag: () => void, isActive: boolean) => {
+    const sensorReading = sensorMap.get(key);
+    const isEditingThisLabel = editingOriginal === key;
+    const notFound = !sensorReading;
     return (
-      <StatRow
-        key={i}
-        label={getDisplayLabel(r.original)}
-        value={formatValue(r.sensor)}
-        color={valueColor(r.sensor, accentColor)}
-      />
+      <View key={key} style={[dragStyles.row, isActive && { opacity: 0.85 }]}>
+        <Pressable
+          onLongPress={drag}
+          delayLongPress={150}
+          hitSlop={6}
+          style={dragStyles.handle}
+        >
+          <Feather name="menu" size={15} color={isActive ? accentColor : C.textMuted + "99"} />
+        </Pressable>
+        {isEditingThisLabel ? (
+          <TextInput
+            style={[dragStyles.labelInput, { borderBottomColor: accentColor }]}
+            value={editText}
+            onChangeText={setEditText}
+            onSubmitEditing={commitLabel}
+            onBlur={commitLabel}
+            autoFocus
+            autoCorrect={false}
+            returnKeyType="done"
+            selectTextOnFocus
+          />
+        ) : (
+          <Pressable style={dragStyles.labelPress} onPress={() => startLabelEdit(key)} hitSlop={4}>
+            <Text style={[dragStyles.labelText, notFound && { color: C.textMuted, fontStyle: "italic" }]} numberOfLines={1}>
+              {getDisplayLabel(key)}
+            </Text>
+          </Pressable>
+        )}
+        {sensorReading ? (
+          <Text style={[dragStyles.valueText, { color: valueColor(sensorReading, accentColor) }]}>
+            {formatValue(sensorReading)}
+          </Text>
+        ) : (
+          <Text style={dragStyles.notFound}>not found</Text>
+        )}
+        <Pressable
+          onPress={() => { commitLabel(); setSwappingOriginal(key); setPickerMode("swap"); }}
+          hitSlop={8}
+          style={dragStyles.actionBtn}
+        >
+          <Feather name="refresh-cw" size={13} color={accentColor} style={{ opacity: 0.7 }} />
+        </Pressable>
+        <Pressable
+          onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onRemoveSensor?.(key); }}
+          hitSlop={8}
+          style={dragStyles.actionBtn}
+        >
+          <Feather name="x" size={14} color="#FF6B6B" />
+        </Pressable>
+      </View>
     );
   };
 
-  const renderBigLabel = (original: string) => {
-    if (inlineEdit) {
-      return (
-        <View style={styles.bigLabelEditWrap}>
-          <EditableLabel
-            originalLabel={original}
-            displayLabel={getDisplayLabel(original)}
-            isEditing={editingOriginal === original}
-            accentColor={accentColor}
-            textStyle={styles.bigLabelText}
-            onPress={() => startLabelEdit(original)}
-            onChangeText={setEditText}
-            onSubmit={commitLabel}
-            onBlur={commitLabel}
-          />
-          <View style={styles.bigLabelActions}>
-            <Pressable
-              onPress={() => {
-                commitLabel();
-                setSwappingOriginal(original);
-                setPickerMode("swap");
-              }}
-              hitSlop={6}
-              style={styles.smallActionBtn}
-            >
-              <Feather name="repeat" size={11} color={C.textMuted} />
-            </Pressable>
-            <Pressable
-              onPress={() => onRemoveSensor?.(original)}
-              hitSlop={6}
-              style={styles.smallActionBtn}
-            >
-              <Feather name="x" size={11} color="#FF6B6B" />
-            </Pressable>
-          </View>
-        </View>
-      );
-    }
-    return (
-      <Text style={styles.bigLabelText} numberOfLines={2}>
-        {getDisplayLabel(original)}
-      </Text>
-    );
-  };
+  const renderBigLabel = (original: string) => (
+    <Text style={styles.bigLabelText} numberOfLines={2}>
+      {getDisplayLabel(original)}
+    </Text>
+  );
 
   return (
     <>
@@ -734,7 +578,7 @@ export function SensorCard({
         <CardBase
           icon={(icon as keyof typeof Feather.glyphMap) || "layers"}
           title={title}
-          subtitle={inlineEdit ? "Hold label to rename · ⇄ swap · × remove" : `${sensorLabels.length} sensor${sensorLabels.length !== 1 ? "s" : ""}`}
+          subtitle={inlineEdit ? "≡ drag to reorder · tap label to rename · ⇄ swap · × remove" : `${sensorLabels.length} sensor${sensorLabels.length !== 1 ? "s" : ""}`}
           accentColor={accentColor}
           temperature={headerTemp}
           rightAction={rightAction}
@@ -749,6 +593,14 @@ export function SensorCard({
               No sensors selected.
               {onEdit ? " Long-press to edit." : ""}
             </Text>
+          ) : inlineEdit ? (
+            /* ── EDIT MODE: unified draggable list (all layouts) ── */
+            <DraggableFieldList
+              keys={sensorLabels}
+              onReorder={(newOrder) => onReorder?.(newOrder)}
+              onDragBegin={() => setEditingOriginal(null)}
+              renderRow={renderEditRow}
+            />
           ) : resolved.length === 0 ? (
             <Text style={styles.empty}>
               Sensor data unavailable — make sure HWiNFO64 is running.
@@ -798,7 +650,7 @@ export function SensorCard({
                 </View>
               )}
             </View>
-          ) : effectiveLayout === "tiles" && !inlineEdit ? (
+          ) : effectiveLayout === "tiles" ? (
             /* ── TILES LAYOUT ── */
             <View style={styles.tilesGrid}>
               {chunkArray(resolved, 3).map((row, ri) => (
@@ -939,25 +791,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     lineHeight: 14,
   },
-  bigLabelEditWrap: {
-    alignItems: "center",
-    marginTop: 4,
-  },
-  bigLabelActions: {
-    flexDirection: "row",
-    gap: 6,
-    marginTop: 4,
-  },
-  smallActionBtn: {
-    width: 22,
-    height: 22,
-    borderRadius: 6,
-    backgroundColor: C.backgroundSecondary,
-    borderWidth: 1,
-    borderColor: C.cardBorder,
-    alignItems: "center",
-    justifyContent: "center",
-  },
   detailGrid: {
     flex: 1,
     gap: 6,
@@ -1071,5 +904,53 @@ const styles = StyleSheet.create({
     letterSpacing: 0.6,
     marginTop: 1,
     opacity: 0.75,
+  },
+});
+
+const dragStyles = StyleSheet.create({
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingVertical: 5,
+  },
+  handle: {
+    padding: 4,
+    flexShrink: 0,
+  },
+  labelPress: {
+    flex: 1,
+  },
+  labelText: {
+    fontSize: 12,
+    color: C.textSecondary,
+    fontWeight: "500",
+  },
+  labelInput: {
+    flex: 1,
+    fontSize: 12,
+    color: C.text,
+    borderBottomWidth: 1.5,
+    paddingVertical: 0,
+    paddingHorizontal: 0,
+  },
+  valueText: {
+    fontSize: 12,
+    fontWeight: "700",
+    flexShrink: 0,
+    fontVariant: ["tabular-nums"],
+  },
+  notFound: {
+    fontSize: 10,
+    color: C.textMuted,
+    fontStyle: "italic",
+    flexShrink: 0,
+  },
+  actionBtn: {
+    width: 26,
+    height: 26,
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
   },
 });

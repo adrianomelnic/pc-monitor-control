@@ -734,6 +734,9 @@ export default function PCDetailScreen() {
           onUpdateTitle={(newTitle) => {
             updateCustomCard(pcId, c.id, { title: newTitle });
           }}
+          onReorder={(newLabels) => {
+            updateCustomCard(pcId, c.id, { sensorLabels: newLabels });
+          }}
           onUpdateAlias={(originalLabel, newAlias) => {
             const current = { ...(c.sensorAliases ?? {}) };
             if (newAlias && newAlias !== originalLabel) {
