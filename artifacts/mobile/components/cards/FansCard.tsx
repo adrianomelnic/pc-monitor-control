@@ -8,11 +8,6 @@ import { BuiltinCardEdit, CardBase, CardTitleEditConfig, StatRow } from "./CardB
 const C = Colors.light;
 const ACCENT = "#FB923C";
 
-function fmtRpm(rpm: number): string {
-  if (rpm >= 1000) return `${(rpm / 1000).toFixed(1)}k`;
-  return String(rpm);
-}
-
 function rpmColor(rpm: number) {
   if (rpm > 2500) return "#FF4444";
   if (rpm > 1500) return "#FFB800";
@@ -185,7 +180,7 @@ export function FansCard({ fans, baseUrl, apiKey, titleEdit, cardEdit }: Props) 
             <View style={styles.fanBarTrack}>
               <View style={[styles.fanBarFill, { width: `${pct}%` as any, backgroundColor: color }]} />
             </View>
-            <Text style={[styles.fanRpm, { color }]}>{fmtRpm(fan.rpm)} RPM</Text>
+            <Text style={[styles.fanRpm, { color }]}>{fan.rpm} RPM</Text>
           </View>
         </View>
       );
