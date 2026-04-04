@@ -14,16 +14,39 @@ export function isImportantTemp(label: string): boolean {
 }
 
 export const SENSOR_ICON_OPTIONS: string[] = [
-  "thermometer", "wind", "droplet", "activity",
-  "cpu", "refresh-cw", "zap", "server",
-  "box", "sun", "settings", "disc",
+  // Fans & airflow
+  "wind", "rotate-cw", "refresh-cw", "sliders",
+  // Water cooling
+  "droplet", "navigation", "repeat", "radio",
+  // CPU / GPU / components
+  "cpu", "monitor", "layers", "grid",
+  // Temperature & heat
+  "thermometer", "sun", "zap", "activity",
+  // Power & system
+  "power", "battery", "server", "hard-drive",
+  // Case & general
+  "package", "box", "settings", "disc",
 ];
 
 export function defaultSensorIcon(key: string): string {
-  if (key.startsWith("t:")) return "thermometer";
   const label = key.slice(2).toLowerCase();
-  if (/pump/i.test(label)) return "activity";
+  if (key.startsWith("t:")) {
+    if (/cpu|processor/i.test(label)) return "cpu";
+    if (/gpu|vga|graphics|video/i.test(label)) return "monitor";
+    if (/water|liquid|coolant|loop|reservoir/i.test(label)) return "droplet";
+    if (/rad|radiator/i.test(label)) return "radio";
+    if (/vrm|mosfet|power/i.test(label)) return "zap";
+    if (/chipset|m\.2|nvme/i.test(label)) return "hard-drive";
+    if (/system|mb|motherboard/i.test(label)) return "layers";
+    return "thermometer";
+  }
+  // fans
+  if (/pump/i.test(label)) return "repeat";
   if (/water|liquid|loop|coolant/i.test(label)) return "droplet";
+  if (/cpu/i.test(label)) return "cpu";
+  if (/rad|radiator/i.test(label)) return "radio";
+  if (/gpu|graphics/i.test(label)) return "monitor";
+  if (/chassis|case|system/i.test(label)) return "package";
   return "wind";
 }
 
