@@ -11,7 +11,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { ACCENT_COLORS } from "@/context/DashboardContext";
+import { ACCENT_COLORS, CustomCardLayout } from "@/context/DashboardContext";
 import { SensorReading } from "@/context/PcsContext";
 import Colors from "@/constants/colors";
 
@@ -65,15 +65,22 @@ function formatPreview(s: SensorReading): string {
   return s.unit ? `${s.value} ${s.unit}` : String(s.value);
 }
 
+const LAYOUT_OPTIONS: { value: CustomCardLayout; label: string; icon: string; desc: string }[] = [
+  { value: "auto",  label: "Auto",  icon: "zap",        desc: "Smart featured sensor" },
+  { value: "list",  label: "List",  icon: "list",       desc: "Rows of label + value" },
+  { value: "tiles", label: "Tiles", icon: "grid",       desc: "3-column tile grid" },
+];
+
 interface Props {
   visible: boolean;
   onClose: () => void;
-  onSave: (title: string, sensorLabels: string[], accentColor: string, icon: string) => void;
+  onSave: (title: string, sensorLabels: string[], accentColor: string, icon: string, layout: CustomCardLayout) => void;
   sensors: SensorReading[];
   initialTitle?: string;
   initialSensors?: string[];
   initialColor?: string;
   initialIcon?: string;
+  initialLayout?: CustomCardLayout;
   isEdit?: boolean;
 }
 
@@ -86,6 +93,7 @@ export function SensorPickerModal({
   initialSensors = [],
   initialColor,
   initialIcon,
+  initialLayout,
   isEdit = false,
 }: Props) {
   const insets = useSafeAreaInsets();
@@ -93,6 +101,7 @@ export function SensorPickerModal({
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [accentColor, setAccentColor] = useState(initialColor ?? ACCENT_COLORS[0]);
   const [icon, setIcon] = useState(initialIcon ?? ICON_OPTIONS[0].name);
+  const [layout, setLayout] = useState<CustomCardLayout>(initialLayout ?? "auto");
   const [search, setSearch] = useState("");
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
@@ -115,6 +124,7 @@ export function SensorPickerModal({
       setSelected(labelsToKeys(initialSensors ?? []));
       setAccentColor(initialColor ?? ACCENT_COLORS[0]);
       setIcon(initialIcon ?? ICON_OPTIONS[0].name);
+      setLayout(initialLayout ?? "auto");
       setSearch("");
       setExpanded(new Set());
     }
@@ -185,7 +195,7 @@ export function SensorPickerModal({
       const sep = key.indexOf("\x00");
       return sep >= 0 ? key.slice(sep + 1) : key;
     });
-    onSave(title.trim() || "Custom Card", labels, accentColor, icon);
+    onSave(title.trim() || "Custom Card", labels, accentColor, icon, layout);
     onClose();
   };
 
@@ -257,6 +267,31 @@ export function SensorPickerModal({
                   onPress={() => setAccentColor(col)}
                 />
               ))}
+            </View>
+          </View>
+
+          {/* ── Layout ── */}
+          <View style={styles.section}>
+            <Text style={styles.sectionLabel}>LAYOUT</Text>
+            <View style={styles.layoutRow}>
+              {LAYOUT_OPTIONS.map((opt) => {
+                const active = layout === opt.value;
+                return (
+                  <Pressable
+                    key={opt.value}
+                    style={[styles.layoutCell, active && { backgroundColor: accentColor + "22", borderColor: accentColor }]}
+                    onPress={() => setLayout(opt.value)}
+                  >
+                    <Feather
+                      name={opt.icon as any}
+                      size={18}
+                      color={active ? accentColor : C.textMuted}
+                    />
+                    <Text style={[styles.layoutLabel, active && { color: accentColor }]}>{opt.label}</Text>
+                    <Text style={[styles.layoutDesc, active && { color: accentColor + "BB" }]}>{opt.desc}</Text>
+                  </Pressable>
+                );
+              })}
             </View>
           </View>
 
@@ -584,5 +619,33 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: C.textMuted,
     letterSpacing: 0.2,
+  },
+  layoutRow: {
+    flexDirection: "row",
+    gap: 8,
+    marginTop: 4,
+  },
+  layoutCell: {
+    flex: 1,
+    alignItems: "center",
+    gap: 5,
+    paddingVertical: 12,
+    paddingHorizontal: 6,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: C.cardBorder,
+    backgroundColor: C.card,
+  },
+  layoutLabel: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: C.textMuted,
+  },
+  layoutDesc: {
+    fontSize: 9,
+    fontWeight: "500",
+    color: C.textMuted,
+    textAlign: "center",
+    lineHeight: 13,
   },
 });

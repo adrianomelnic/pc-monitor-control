@@ -14,6 +14,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SensorReading } from "@/context/PcsContext";
+import { CustomCardLayout } from "@/context/DashboardContext";
 import Colors from "@/constants/colors";
 import { CardBase, MiniBar, StatRow } from "./CardBase";
 
@@ -57,6 +58,25 @@ function valueColor(s: SensorReading, accent: string): string {
     if (s.value > 70) return "#FFB800";
   }
   return accent;
+}
+
+function sensorTypeIcon(type: string): keyof typeof Feather.glyphMap {
+  switch (type) {
+    case "temperature": return "thermometer";
+    case "fan":         return "wind";
+    case "clock":       return "zap";
+    case "voltage":     return "battery";
+    case "power":       return "zap";
+    case "current":     return "activity";
+    case "usage":       return "percent";
+    default:            return "sliders";
+  }
+}
+
+function chunkArray<T>(arr: T[], size: number): T[][] {
+  const result: T[][] = [];
+  for (let i = 0; i < arr.length; i += size) result.push(arr.slice(i, i + size));
+  return result;
 }
 
 const FEATURE_PRIORITY = ["usage", "temperature", "power", "fan", "clock", "voltage", "current", "other"];
@@ -493,6 +513,7 @@ interface Props {
   accentColor: string;
   sensors?: SensorReading[];
   sensorAliases?: Record<string, string>;
+  layout?: CustomCardLayout;
   onEdit?: () => void;
   onUpdateTitle?: (newTitle: string) => void;
   onUpdateAlias?: (originalLabel: string, newAlias: string) => void;
@@ -508,6 +529,7 @@ export function SensorCard({
   accentColor,
   sensors,
   sensorAliases,
+  layout = "auto",
   onEdit,
   onUpdateTitle,
   onUpdateAlias,
@@ -591,7 +613,10 @@ export function SensorCard({
   const missing = sensorLabels.filter((lbl) => !sensorMap.has(lbl));
 
   // ── Layout decision ────────────────────────────────────────────────────────
-  const useSplitLayout = resolved.length >= 2 && resolved.length <= 8;
+  const effectiveLayout = layout === "auto"
+    ? (resolved.length >= 2 && resolved.length <= 8 ? "split" : "list")
+    : layout;
+  const useSplitLayout = effectiveLayout === "split";
   const featured = useSplitLayout ? pickFeatured(resolved.map((r) => r.sensor)) : null;
   const featuredItem = featured ? resolved.find((r) => r.sensor === featured) ?? null : null;
   const rest = featuredItem ? resolved.filter((r) => r !== featuredItem) : resolved;
@@ -772,6 +797,36 @@ export function SensorCard({
                   <MiniBar value={resolved[0].sensor.value} color={accentColor} height={5} />
                 </View>
               )}
+            </View>
+          ) : effectiveLayout === "tiles" && !inlineEdit ? (
+            /* ── TILES LAYOUT ── */
+            <View style={styles.tilesGrid}>
+              {chunkArray(resolved, 3).map((row, ri) => (
+                <View key={ri} style={styles.tilesRow}>
+                  {row.map((r) => {
+                    const { num, unit } = formatBigNum(r.sensor);
+                    const col = valueColor(r.sensor, accentColor);
+                    return (
+                      <View key={r.original} style={[styles.tile, { borderColor: accentColor + "30" }]}>
+                        <Feather
+                          name={sensorTypeIcon(r.sensor.type)}
+                          size={14}
+                          color={accentColor}
+                          style={styles.tileIcon}
+                        />
+                        <Text style={styles.tileLabel} numberOfLines={2}>
+                          {getDisplayLabel(r.original).toUpperCase()}
+                        </Text>
+                        <Text style={[styles.tileValue, { color: col }]}>{num}</Text>
+                        <Text style={[styles.tileUnit, { color: accentColor }]}>{unit}</Text>
+                      </View>
+                    );
+                  })}
+                  {row.length < 3 && [...Array(3 - row.length)].map((_, i) => (
+                    <View key={`ph_${i}`} style={styles.tilePlaceholder} />
+                  ))}
+                </View>
+              ))}
             </View>
           ) : (
             /* ── PURE STAT ROWS ── */
@@ -970,5 +1025,51 @@ const styles = StyleSheet.create({
     color: C.textMuted,
     fontStyle: "italic",
     textAlign: "right",
+  },
+  tilesGrid: {
+    gap: 8,
+  },
+  tilesRow: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  tile: {
+    flex: 1,
+    backgroundColor: C.backgroundSecondary,
+    borderRadius: 12,
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 14,
+    paddingHorizontal: 4,
+    minWidth: 0,
+  },
+  tilePlaceholder: {
+    flex: 1,
+  },
+  tileIcon: {
+    marginBottom: 5,
+    opacity: 0.6,
+  },
+  tileLabel: {
+    fontSize: 8,
+    fontWeight: "700",
+    color: C.textMuted,
+    letterSpacing: 0.8,
+    marginBottom: 3,
+    textAlign: "center",
+  },
+  tileValue: {
+    fontSize: 20,
+    fontWeight: "700",
+    textAlign: "center",
+    lineHeight: 24,
+  },
+  tileUnit: {
+    fontSize: 9,
+    fontWeight: "700",
+    letterSpacing: 0.6,
+    marginTop: 1,
+    opacity: 0.75,
   },
 });

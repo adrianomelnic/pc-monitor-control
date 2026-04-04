@@ -24,6 +24,8 @@ export interface BuiltinCardConfig {
   sensorSource?: Record<string, string>; // fieldKey → sensor label override
 }
 
+export type CustomCardLayout = "auto" | "list" | "tiles";
+
 export interface CustomCardConfig {
   id: string;
   kind: "custom";
@@ -33,6 +35,7 @@ export interface CustomCardConfig {
   accentColor: string;
   icon: string;
   sensorAliases?: Record<string, string>;
+  layout?: CustomCardLayout;
 }
 
 export type CardConfig = BuiltinCardConfig | CustomCardConfig;
@@ -58,12 +61,12 @@ interface DashboardContextType {
   getCards: (pcId: string) => CardConfig[];
   toggleCard: (pcId: string, cardId: string) => void;
   moveCard: (pcId: string, cardId: string, direction: "up" | "down") => void;
-  addCustomCard: (pcId: string, title: string, sensorLabels: string[], accentColor: string, icon: string) => void;
+  addCustomCard: (pcId: string, title: string, sensorLabels: string[], accentColor: string, icon: string, layout?: CustomCardLayout) => void;
   removeCard: (pcId: string, cardId: string) => void;
   updateCustomCard: (
     pcId: string,
     cardId: string,
-    updates: Partial<Pick<CustomCardConfig, "title" | "sensorLabels" | "accentColor" | "icon" | "sensorAliases">>
+    updates: Partial<Pick<CustomCardConfig, "title" | "sensorLabels" | "accentColor" | "icon" | "sensorAliases" | "layout">>
   ) => void;
   updateBuiltinCard: (pcId: string, cardId: BuiltinCardKind, updates: { customTitle?: string; extraSensors?: string[]; hiddenFields?: string[]; fieldOrder?: string[]; fieldAliases?: Record<string, string>; sensorIcons?: Record<string, string>; sensorSource?: Record<string, string> }) => void;
 }
@@ -146,7 +149,7 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
-  const addCustomCard = useCallback((pcId: string, title: string, sensorLabels: string[], accentColor: string, icon: string) => {
+  const addCustomCard = useCallback((pcId: string, title: string, sensorLabels: string[], accentColor: string, icon: string, layout?: CustomCardLayout) => {
     setLayouts((prev) => {
       const cards = [...(prev[pcId] ?? [...BUILTIN_DEFAULTS])];
       const newCard: CustomCardConfig = {
@@ -157,6 +160,7 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
         sensorLabels,
         accentColor,
         icon,
+        layout,
       };
       const updated = [...cards, newCard];
       AsyncStorage.setItem(storageKey(pcId), JSON.stringify(updated));

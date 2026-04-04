@@ -725,6 +725,7 @@ export default function PCDetailScreen() {
           accentColor={c.accentColor}
           sensors={allSensors}
           sensorAliases={c.sensorAliases}
+          layout={c.layout}
           onEdit={() => {
             Haptics.selectionAsync();
             setEditingCard(c);
@@ -1244,11 +1245,11 @@ export default function PCDetailScreen() {
           setPickerVisible(false);
           setEditingCard(null);
         }}
-        onSave={(title, sensorLabels, accentColor, icon) => {
+        onSave={(title, sensorLabels, accentColor, icon, layout) => {
           if (editingCard) {
-            updateCustomCard(pcId, editingCard.id, { title, sensorLabels, accentColor, icon });
+            updateCustomCard(pcId, editingCard.id, { title, sensorLabels, accentColor, icon, layout });
           } else {
-            addCustomCard(pcId, title, sensorLabels, accentColor, icon);
+            addCustomCard(pcId, title, sensorLabels, accentColor, icon, layout);
           }
         }}
         sensors={allSensors}
@@ -1256,6 +1257,7 @@ export default function PCDetailScreen() {
         initialSensors={editingCard?.sensorLabels ?? []}
         initialColor={editingCard?.accentColor}
         initialIcon={editingCard?.icon}
+        initialLayout={editingCard?.layout}
         isEdit={!!editingCard}
       />
     </ScrollView>
