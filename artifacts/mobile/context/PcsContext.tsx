@@ -28,6 +28,8 @@ export interface CPUInfo {
   usageTotal: number;
   usagePerCore: number[];
   temperature?: number;
+  voltage?: number | null;
+  power?: number | null;
 }
 
 export interface GPUInfo {

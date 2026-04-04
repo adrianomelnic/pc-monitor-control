@@ -55,6 +55,8 @@ const CARD_ACCENTS: Record<string, string> = {
 const BUILTIN_CARD_FIELDS: Record<string, { key: string; label: string }[]> = {
   cpu: [
     { key: "usage", label: "Usage" },
+    { key: "voltage", label: "CPU voltage" },
+    { key: "wattage", label: "CPU power" },
     { key: "physicalCores", label: "Physical cores" },
     { key: "logicalCores", label: "Logical cores" },
     { key: "freqCurrent", label: "Current frequency" },
@@ -82,7 +84,7 @@ const BUILTIN_CARD_FIELDS: Record<string, { key: string; label: string }[]> = {
 
 const DEFAULT_FIELD_ORDER: Record<string, string[]> = {
   gpu: ["usage", "vramRow", "clockGpu", "clockMem", "vram"],
-  cpu: ["usage", "physicalCores", "logicalCores", "freqCurrent", "freqMax", "perCore", "perCoreVertical", "cpuBar"],
+  cpu: ["usage", "voltage", "wattage", "physicalCores", "logicalCores", "freqCurrent", "freqMax", "perCore", "perCoreVertical", "cpuBar"],
   ram: ["usage", "used", "available", "total", "bar", "swap"],
 };
 
@@ -825,9 +827,22 @@ export default function PCDetailScreen() {
         );
         break;
       }
-      case "cpu":
-        content = m.cpu ? <CPUCard cpu={m.cpu} titleEdit={titleEdit} cardEdit={cardEdit} /> : null;
+      case "cpu": {
+        if (!m.cpu) { content = null; break; }
+        const cpuVoltageSensor = allSensors.find(
+          s => s.type === "voltage" && /cpu.*core|vcore|cpu.*volt/i.test(s.label)
+        );
+        const cpuPowerSensor = allSensors.find(
+          s => s.type === "power" && /cpu.*package|package.*power|cpu.*power|cpu.*tdp/i.test(s.label)
+        );
+        const augCpu = {
+          ...m.cpu,
+          voltage: cpuVoltageSensor?.value ?? null,
+          power: cpuPowerSensor?.value ?? null,
+        };
+        content = <CPUCard cpu={augCpu} titleEdit={titleEdit} cardEdit={cardEdit} />;
         break;
+      }
       case "gpu":
         content = m.gpu ? <GPUCard gpus={m.gpu} titleEdit={titleEdit} cardEdit={cardEdit} /> : null;
         break;

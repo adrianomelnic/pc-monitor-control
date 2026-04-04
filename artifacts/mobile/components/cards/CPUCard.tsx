@@ -11,7 +11,7 @@ function fmt(mhz: number) {
   return mhz >= 1000 ? `${(mhz / 1000).toFixed(2)} GHz` : `${mhz} MHz`;
 }
 
-const DEFAULT_ORDER = ["usage", "physicalCores", "logicalCores", "freqCurrent", "freqMax", "perCore", "perCoreVertical", "cpuBar"];
+const DEFAULT_ORDER = ["usage", "voltage", "wattage", "physicalCores", "logicalCores", "freqCurrent", "freqMax", "perCore", "perCoreVertical", "cpuBar"];
 
 interface Props {
   cpu: CPUInfo;
@@ -24,7 +24,7 @@ export function CPUCard({ cpu, titleEdit, cardEdit }: Props) {
   const cols = cores.length > 8 ? 4 : 2;
   const hidden = cardEdit?.hiddenFields !== undefined
     ? new Set(cardEdit.hiddenFields)
-    : new Set(["perCore", "cpuBar"]);
+    : new Set(["perCore", "cpuBar", "physicalCores", "logicalCores"]);
   const order = cardEdit?.fieldOrder ?? DEFAULT_ORDER;
   const extraMap = cardEdit?.extraSensorMap ?? {};
   const aliases = cardEdit?.fieldAliases ?? {};
@@ -40,6 +40,10 @@ export function CPUCard({ cpu, titleEdit, cardEdit }: Props) {
 
   function renderRightField(key: string): React.ReactNode {
     switch (key) {
+      case "voltage":
+        return <StatRow key={key} label={getLabel("voltage", "CPU voltage")} value={cpu.voltage != null ? `${cpu.voltage.toFixed(3)} V` : "—"} color={ACCENT} />;
+      case "wattage":
+        return <StatRow key={key} label={getLabel("wattage", "CPU power")} value={cpu.power != null ? `${Math.round(cpu.power)} W` : "—"} />;
       case "physicalCores":
         return <StatRow key={key} label={getLabel("physicalCores", "Physical cores")} value={String(cpu.coresPhysical ?? "—")} />;
       case "logicalCores":
