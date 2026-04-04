@@ -75,10 +75,10 @@ export function ThermalsCard({ temps, fans, titleEdit, cardEdit }: Props) {
 
   const hidden: Set<string> = (() => {
     if (cardEdit?.hiddenFields !== undefined) return new Set(cardEdit.hiddenFields);
+    // Default: hide every sensor — user adds what they want via "Add sensor"
     const d = new Set<string>();
-    for (const k of tempMap.keys()) {
-      if (!isImportantTemp(k.slice(2))) d.add(k);
-    }
+    for (const k of tempMap.keys()) d.add(k);
+    for (const k of fanMap.keys()) d.add(k);
     return d;
   })();
 

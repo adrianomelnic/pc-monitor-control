@@ -27,7 +27,7 @@ import { ThermalsCard, SENSOR_ICON_OPTIONS, defaultSensorIcon } from "@/componen
 import Colors from "@/constants/colors";
 import { BuiltinCardConfig, BuiltinCardKind, CardConfig, CustomCardConfig, useDashboard } from "@/context/DashboardContext";
 import { BuiltinCardEdit, CardTitleEditConfig } from "@/components/cards/CardBase";
-import { usePcs } from "@/context/PcsContext";
+import { usePcs, SensorReading } from "@/context/PcsContext";
 
 const C = Colors.light;
 
@@ -119,6 +119,8 @@ export default function PCDetailScreen() {
   const [builtinTitleDraft, setBuiltinTitleDraft] = useState("");
   const [titleInputActive, setTitleInputActive] = useState<BuiltinCardKind | null>(null);
   const [extraSensorPickerFor, setExtraSensorPickerFor] = useState<BuiltinCardKind | null>(null);
+  const [thermalsSensorPickerOpen, setThermalsSensorPickerOpen] = useState(false);
+  const [iconPickerKey, setIconPickerKey] = useState<string | null>(null);
   const [editingFieldLabel, setEditingFieldLabel] = useState<{ kind: BuiltinCardKind; key: string } | null>(null);
   const [fieldLabelDraft, setFieldLabelDraft] = useState("");
 
@@ -191,6 +193,19 @@ export default function PCDetailScreen() {
     if (!card) return;
     const newIcons = { ...(card.sensorIcons ?? {}), [key]: icon };
     updateBuiltinCard(pcId, kind, { sensorIcons: newIcons });
+  };
+
+  const showThermalSensor = (label: string) => {
+    const card = cards.find((c) => c.id === "thermals") as BuiltinCardConfig | undefined;
+    if (!card) return;
+    const isTemp = (m?.sensors ?? []).some(s => s.label === label && s.type === "temperature");
+    const key = (isTemp ? "t:" : "f:") + label;
+    if (card.hiddenFields !== undefined) {
+      updateBuiltinCard(pcId, "thermals", { hiddenFields: card.hiddenFields.filter(k => k !== key) });
+    } else {
+      const allKeys = getDefaultKeys("thermals");
+      updateBuiltinCard(pcId, "thermals", { hiddenFields: allKeys.filter(k => k !== key) });
+    }
   };
 
   const closeBuiltinEditMode = (kind: BuiltinCardKind) => {
@@ -298,16 +313,15 @@ export default function PCDetailScreen() {
   }
 
   function BuiltinCardEditPanel({ card, accent }: { card: BuiltinCardConfig; accent: string }) {
-    const [iconPickerKey, setIconPickerKey] = useState<string | null>(null);
-
-    const IMPORTANT_TEMP_RE = [/cpu/i, /gpu/i, /ram/i, /memory/i, /vram/i, /dram/i];
     const hidden: Set<string> = (() => {
       if (card.hiddenFields !== undefined) return new Set(card.hiddenFields);
       if (card.kind === "thermals") {
         const d = new Set<string>();
         for (const s of (m?.sensors ?? []).filter(s => s.type === "temperature")) {
-          const k = "t:" + s.label;
-          if (!IMPORTANT_TEMP_RE.some(p => p.test(s.label))) d.add(k);
+          d.add("t:" + s.label);
+        }
+        for (const f of (m?.fans ?? [])) {
+          d.add("f:" + f.label);
         }
         return d;
       }
@@ -463,15 +477,13 @@ export default function PCDetailScreen() {
           );
         })}
 
-        {card.kind !== "thermals" && (
-          <Pressable
-            onPress={() => setExtraSensorPickerFor(card.kind)}
-            style={[styles.editPanelAddBtn, { borderColor: accent + "55", backgroundColor: accent + "11" }]}
-          >
-            <Feather name="plus" size={13} color={accent} />
-            <Text style={[styles.editPanelAddBtnText, { color: accent }]}>Add HWiNFO64 sensor</Text>
-          </Pressable>
-        )}
+        <Pressable
+          onPress={() => card.kind === "thermals" ? setThermalsSensorPickerOpen(true) : setExtraSensorPickerFor(card.kind)}
+          style={[styles.editPanelAddBtn, { borderColor: accent + "55", backgroundColor: accent + "11" }]}
+        >
+          <Feather name="plus" size={13} color={accent} />
+          <Text style={[styles.editPanelAddBtnText, { color: accent }]}>Add sensor</Text>
+        </Pressable>
       </View>
     );
   }
@@ -1073,6 +1085,36 @@ export default function PCDetailScreen() {
         }}
         onClose={() => setExtraSensorPickerFor(null)}
       />
+
+      {/* ── Thermals Sensor Picker ── */}
+      {(() => {
+        const thermalsCard = cards.find((c) => c.id === "thermals") as BuiltinCardConfig | undefined;
+        const thermalsSensors: SensorReading[] = [
+          ...(m?.sensors ?? []).filter(s => s.type === "temperature"),
+          ...(m?.fans ?? []).map(f => ({ label: f.label, value: f.rpm, type: "fan" as const, unit: "RPM", component: "Fans" })),
+        ];
+        const thermalsExcludeLabels: string[] = (() => {
+          const hf = thermalsCard?.hiddenFields;
+          if (hf === undefined) return [];
+          return thermalsSensors
+            .filter(s => {
+              const key = (s.type === "temperature" ? "t:" : "f:") + s.label;
+              return !hf.includes(key);
+            })
+            .map(s => s.label);
+        })();
+        return (
+          <CompactSensorPicker
+            visible={thermalsSensorPickerOpen}
+            title="Add Thermal Sensor"
+            accentColor="#F97316"
+            sensors={thermalsSensors}
+            excludeLabels={thermalsExcludeLabels}
+            onSelect={(label) => showThermalSensor(label)}
+            onClose={() => setThermalsSensorPickerOpen(false)}
+          />
+        );
+      })()}
 
       {/* ── Sensor Picker Modal ── */}
       <SensorPickerModal
