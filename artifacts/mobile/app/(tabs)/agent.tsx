@@ -339,12 +339,17 @@ def get_cpu_info(hwinfo_data=None):
             freq_current_mhz = round(freq.current) if freq else 0
 
         # freqMax: highest single-core clock from HWiNFO64 (real boost), fallback to psutil
-        p_core_clocks = [
+        max_core_clocks = [
             s["value"] for s in clock_sensors
-            if re.search(r"[pe]-core \d+ clock$|cpu core #?\d+ clock$", s.get("label", ""), re.I)
-            and not re.search(r"effective", s.get("label", ""), re.I)
+            if re.search(r"[pe]-core.*clock|cpu.*core.*clock", s.get("label", ""), re.I)
+            and not re.search(r"effective|bus|ring|llc", s.get("label", ""), re.I)
+            and s.get("value", 0) > 500
         ]
-        freq_max_mhz = round(max(p_core_clocks)) if p_core_clocks else (round(freq.max) if freq and freq.max else 0)
+        if max_core_clocks:
+            freq_max_mhz = round(max(max_core_clocks))
+        else:
+            eff_vals = [s["value"] for s in clock_sensors if re.search(r"effective\s+clock", s.get("label", ""), re.I)]
+            freq_max_mhz = round(max(eff_vals)) if eff_vals else (round(freq.max) if freq and freq.max else 0)
 
         return {
             "name": name,
