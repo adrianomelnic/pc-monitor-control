@@ -223,7 +223,7 @@ export function PcsProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (pcs.length === 0) return;
     pollAll();
-    pollingRef.current = setInterval(pollAll, 12000);
+    pollingRef.current = setInterval(pollAll, 2000);
     return () => {
       if (pollingRef.current) clearInterval(pollingRef.current);
     };

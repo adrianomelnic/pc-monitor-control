@@ -284,7 +284,7 @@ def get_cpu_info(hwinfo_data=None):
         cores_logical = psutil.cpu_count(logical=True) or 1
         cores_physical = psutil.cpu_count(logical=False) or 1
         per_core = psutil.cpu_percent(percpu=True)
-        usage_total = psutil.cpu_percent(interval=None)
+        usage_total = round(sum(per_core) / len(per_core), 1) if per_core else 0
         # Try psutil temps first, then HWiNFO64 (Windows needs HWiNFO64)
         temp = None
         try:
@@ -301,22 +301,26 @@ def get_cpu_info(hwinfo_data=None):
         # psutil.cpu_freq().current is static on Windows (always shows rated base clock)
         freq_current_mhz = None
         hw_sensors = (hwinfo_data.get("sensors") or []) if hwinfo_data else []
-        if hw_sensors:
-            # Collect per-core clock readings (e.g. "CPU Core #1 Clock")
-            core_clocks = [
-                s["value"] for s in hw_sensors
-                if s.get("type") == "clock" and re.search(r"cpu.*core.*clock|core.*#\d+.*clock", s.get("label", ""), re.I)
-            ]
-            if core_clocks:
-                freq_current_mhz = round(sum(core_clocks) / len(core_clocks))
-            else:
-                # Fall back to any CPU-level clock sensor
-                cpu_clk = next((
-                    s["value"] for s in hw_sensors
-                    if s.get("type") == "clock" and re.search(r"cpu.*clock|cpu.*frequency", s.get("label", ""), re.I)
-                ), None)
-                if cpu_clk is not None:
-                    freq_current_mhz = round(cpu_clk)
+        clock_sensors = [s for s in hw_sensors if s.get("type") == "clock"]
+        # Debug: print available clock sensor names on first few calls
+        if clock_sensors:
+            print(f"[CPU freq] {len(clock_sensors)} clock sensors: {[s['label'] for s in clock_sensors[:8]]}")
+        # Match per-core clocks: "CPU Core #1 Clock", "Core #1 Clock", "Core #1 T0 Clock", etc.
+        core_clocks = [
+            s["value"] for s in clock_sensors
+            if re.search(r"\bcore\b", s.get("label", ""), re.I)
+        ]
+        if core_clocks:
+            freq_current_mhz = round(sum(core_clocks) / len(core_clocks))
+        else:
+            # Fall back to any CPU-level clock sensor
+            cpu_clk = next((
+                s["value"] for s in clock_sensors
+                if re.search(r"\bcpu\b", s.get("label", ""), re.I)
+            ), None)
+            if cpu_clk is not None:
+                freq_current_mhz = round(cpu_clk)
+        print(f"[CPU freq] current={freq_current_mhz} MHz (core_clocks={len(core_clocks)}, total_clock_sensors={len(clock_sensors)})")
         # Final fallback: psutil (will be the static base clock on Windows)
         if freq_current_mhz is None:
             freq_current_mhz = round(freq.current) if freq else 0
