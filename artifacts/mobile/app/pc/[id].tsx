@@ -120,6 +120,8 @@ export default function PCDetailScreen() {
   const [titleInputActive, setTitleInputActive] = useState<BuiltinCardKind | null>(null);
   const [extraSensorPickerFor, setExtraSensorPickerFor] = useState<BuiltinCardKind | null>(null);
   const [thermalsSensorPickerOpen, setThermalsSensorPickerOpen] = useState(false);
+  const [replacingThermalKey, setReplacingThermalKey] = useState<string | null>(null);
+  const [replacingExtraFor, setReplacingExtraFor] = useState<{ kind: BuiltinCardKind; key: string } | null>(null);
   const [iconPickerKey, setIconPickerKey] = useState<string | null>(null);
   const [editingFieldLabel, setEditingFieldLabel] = useState<{ kind: BuiltinCardKind; key: string } | null>(null);
   const [fieldLabelDraft, setFieldLabelDraft] = useState("");
@@ -206,6 +208,24 @@ export default function PCDetailScreen() {
       const allKeys = getDefaultKeys("thermals");
       updateBuiltinCard(pcId, "thermals", { hiddenFields: allKeys.filter(k => k !== key) });
     }
+  };
+
+  const replaceThermalSensor = (oldKey: string, newLabel: string) => {
+    const card = cards.find((c) => c.id === "thermals") as BuiltinCardConfig | undefined;
+    if (!card) return;
+    const isTemp = (m?.sensors ?? []).some(s => s.label === newLabel && s.type === "temperature");
+    const newKey = (isTemp ? "t:" : "f:") + newLabel;
+    const base = card.hiddenFields ?? getDefaultKeys("thermals");
+    const updated = base.filter(k => k !== newKey);
+    if (!updated.includes(oldKey)) updated.push(oldKey);
+    updateBuiltinCard(pcId, "thermals", { hiddenFields: updated });
+  };
+
+  const replaceExtraSensor = (kind: BuiltinCardKind, oldLabel: string, newLabel: string) => {
+    const card = cards.find((c) => c.id === kind) as BuiltinCardConfig | undefined;
+    if (!card) return;
+    const extras = (card.extraSensors ?? []).map(l => l === oldLabel ? newLabel : l);
+    updateBuiltinCard(pcId, kind, { extraSensors: extras });
   };
 
   const closeBuiltinEditMode = (kind: BuiltinCardKind) => {
@@ -450,14 +470,42 @@ export default function PCDetailScreen() {
                     <Text style={[styles.editPanelRowText, isHidden && { color: C.textMuted }]} numberOfLines={1}>
                       {displayLabel}
                     </Text>
-                    <Feather name="edit-2" size={9} color={accent} style={{ opacity: 0.5 }} />
                   </Pressable>
                 )}
-                {isExtra && (
-                  <Pressable onPress={() => removeExtraSensor(card.kind, key)} hitSlop={8} style={styles.editPanelRemove}>
-                    <Feather name="x" size={14} color={C.danger} />
+                {/* Replace button — thermals or extra sensors */}
+                {(card.kind === "thermals" || isExtra) && (
+                  <Pressable
+                    onPress={() => {
+                      if (card.kind === "thermals") {
+                        setReplacingThermalKey(key);
+                        setThermalsSensorPickerOpen(true);
+                      } else {
+                        setReplacingExtraFor({ kind: card.kind, key });
+                        setExtraSensorPickerFor(card.kind);
+                      }
+                    }}
+                    hitSlop={8}
+                    style={styles.editPanelActionBtn}
+                  >
+                    <Feather name="refresh-cw" size={13} color={accent} style={{ opacity: 0.7 }} />
                   </Pressable>
                 )}
+                {/* Remove button */}
+                <Pressable
+                  onPress={() => {
+                    if (card.kind === "thermals") {
+                      toggleBuiltinField(card.kind, key);
+                    } else if (isExtra) {
+                      removeExtraSensor(card.kind, key);
+                    } else {
+                      toggleBuiltinField(card.kind, key);
+                    }
+                  }}
+                  hitSlop={8}
+                  style={styles.editPanelActionBtn}
+                >
+                  <Feather name="x" size={14} color={C.danger} />
+                </Pressable>
               </View>
               {card.kind === "thermals" && isPickerOpen && (
                 <View style={[styles.iconPickerRow, { borderColor: accent + "33" }]}>
@@ -1078,7 +1126,7 @@ export default function PCDetailScreen() {
       {/* ── Extra Sensor Picker for built-in cards ── */}
       <CompactSensorPicker
         visible={extraSensorPickerFor != null}
-        title="Add HWiNFO64 Sensor"
+        title={replacingExtraFor ? "Replace Sensor" : "Add HWiNFO64 Sensor"}
         accentColor={extraSensorPickerFor ? (CARD_ACCENTS[extraSensorPickerFor] ?? C.tint) : C.tint}
         sensors={allSensors}
         excludeLabels={
@@ -1087,9 +1135,14 @@ export default function PCDetailScreen() {
             : []
         }
         onSelect={(label) => {
-          if (extraSensorPickerFor) addExtraSensor(extraSensorPickerFor, label);
+          if (replacingExtraFor) {
+            replaceExtraSensor(replacingExtraFor.kind, replacingExtraFor.key, label);
+            setReplacingExtraFor(null);
+          } else if (extraSensorPickerFor) {
+            addExtraSensor(extraSensorPickerFor, label);
+          }
         }}
-        onClose={() => setExtraSensorPickerFor(null)}
+        onClose={() => { setExtraSensorPickerFor(null); setReplacingExtraFor(null); }}
       />
 
       {/* ── Thermals Sensor Picker ── */}
@@ -1112,12 +1165,20 @@ export default function PCDetailScreen() {
         return (
           <CompactSensorPicker
             visible={thermalsSensorPickerOpen}
-            title="Add Thermal Sensor"
+            title={replacingThermalKey ? "Replace Sensor" : "Add Sensor"}
             accentColor="#F97316"
             sensors={thermalsSensors}
             excludeLabels={thermalsExcludeLabels}
-            onSelect={(label) => showThermalSensor(label)}
-            onClose={() => setThermalsSensorPickerOpen(false)}
+            onSelect={(label) => {
+              if (replacingThermalKey) {
+                replaceThermalSensor(replacingThermalKey, label);
+                setReplacingThermalKey(null);
+              } else {
+                showThermalSensor(label);
+              }
+              setThermalsSensorPickerOpen(false);
+            }}
+            onClose={() => { setThermalsSensorPickerOpen(false); setReplacingThermalKey(null); }}
           />
         );
       })()}
@@ -1467,6 +1528,11 @@ const styles = StyleSheet.create({
   },
   editPanelRemove: {
     paddingLeft: 8,
+  },
+  editPanelActionBtn: {
+    paddingLeft: 8,
+    justifyContent: "center",
+    alignItems: "center",
   },
   editPanelAddBtn: {
     flexDirection: "row",
