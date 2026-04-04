@@ -231,6 +231,7 @@ def read_hwinfo64():
         # Reading layout: [type:4][sensorIndex:4][readingID:4][labelOrig:LBL][labelUser:LBL][unit:*][value:8]...
         TEMP, FAN = 1, 3
         temps, fans, sensors = [], [], []
+        fan_counter = [0]
         for i in range(num_readings):
             base = off_readings + i * size_reading
             if base + size_reading > len(data):
@@ -243,9 +244,16 @@ def read_hwinfo64():
             user = _label(data[base+12+LBL_BYTES : base+12+LBL_BYTES+LBL_BYTES])
             label = user if user else orig
             val_off = base + VAL_OFF_BASE
-            if val_off + 8 > len(data) or not label:
+            if val_off + 8 > len(data):
                 continue
             value = struct.unpack_from('<d', data, val_off)[0]
+            # Generate fallback label for fan readings with empty labels
+            if not label:
+                if r_type == FAN:
+                    fan_counter[0] += 1
+                    label = f"Fan #{fan_counter[0]}"
+                else:
+                    continue
             component = component_names.get(sensor_idx, "Unknown")
             sensors.append({
                 "label": label,
@@ -256,7 +264,7 @@ def read_hwinfo64():
             })
             if r_type == TEMP:
                 temps.append({"label": label, "value": round(value, 1)})
-            elif r_type == FAN and value > 0:
+            elif r_type == FAN:
                 fans.append({"label": label, "rpm": round(value)})
         print(f"HWiNFO64: {num_readings} readings, {len(sensors)} sensors "
               f"({len(temps)} temps, {len(fans)} fans)")
