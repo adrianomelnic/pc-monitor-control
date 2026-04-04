@@ -927,18 +927,8 @@ export default function PCDetailScreen() {
         </View>
       )}
 
-      {/* ── OFFLINE STATE ── */}
-      {pc.status !== "online" && (
-        <Pressable style={[styles.offlinePill, { borderColor: statusColor + "55", backgroundColor: statusColor + "11" }]} onPress={onRefresh}>
-          <Feather name={pc.status === "connecting" ? "loader" : "wifi-off"} size={14} color={statusColor} />
-          <Text style={[styles.offlinePillText, { color: statusColor }]}>
-            {pc.status === "connecting" ? "Connecting… tap to retry" : "Offline — tap to retry"}
-          </Text>
-        </Pressable>
-      )}
-
       {/* ── COMPONENT CARDS ── */}
-      {m && pc.status === "online" && (
+      {m && (
         <>
           {cards.map((card, idx) => {
             const content = renderCardContent(card);
