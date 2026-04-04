@@ -87,11 +87,15 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
         // Migration: fans card replaced by Thermals & Fans — hide it
         saved = saved.map((c) => c.id === "fans" ? { ...c, visible: false } : c);
         // Migration: ensure thermals comes after disks (storage)
-        const thermalsIdx = saved.findIndex((c) => c.id === "thermals");
-        const disksIdx = saved.findIndex((c) => c.id === "disks");
-        if (thermalsIdx !== -1 && disksIdx !== -1 && thermalsIdx < disksIdx) {
-          const [thermalsCard] = saved.splice(thermalsIdx, 1);
-          saved.splice(disksIdx, 0, thermalsCard);
+        {
+          const thermalsIdx = saved.findIndex((c) => c.id === "thermals");
+          const disksIdx = saved.findIndex((c) => c.id === "disks");
+          if (thermalsIdx !== -1 && disksIdx !== -1 && thermalsIdx < disksIdx) {
+            const [thermalsCard] = saved.splice(thermalsIdx, 1);
+            // disksIdx shifted left by 1 after removing thermals; insert immediately after
+            saved.splice(disksIdx, 0, thermalsCard);
+            await AsyncStorage.setItem(storageKey(pcId), JSON.stringify(saved));
+          }
         }
         // Merge: ensure all builtins exist (user may have added cards to the agent)
         const builtinIds = BUILTIN_DEFAULTS.map((b) => b.id);
