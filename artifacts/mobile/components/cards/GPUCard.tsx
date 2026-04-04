@@ -12,7 +12,7 @@ function fmtMB(mb: number | null) {
   return mb >= 1024 ? `${(mb / 1024).toFixed(1)} GB` : `${mb} MB`;
 }
 
-const DEFAULT_ORDER = ["usage", "vramRow", "clockGpu", "clockMem", "vram"];
+const DEFAULT_ORDER = ["usage", "voltage", "wattage", "vramRow", "clockGpu", "clockMem", "vram"];
 
 interface Props {
   gpus: GPUInfo[];
@@ -22,7 +22,9 @@ interface Props {
 
 export function GPUCard({ gpus, titleEdit, cardEdit }: Props) {
   const base = titleEdit?.customTitle ?? "GPU";
-  const hidden = new Set(cardEdit?.hiddenFields ?? []);
+  const hidden = cardEdit?.hiddenFields !== undefined
+    ? new Set(cardEdit.hiddenFields)
+    : new Set(["vramRow"]);
   const order = cardEdit?.fieldOrder ?? DEFAULT_ORDER;
   const extraMap = cardEdit?.extraSensorMap ?? {};
   const aliases = cardEdit?.fieldAliases ?? {};
@@ -65,6 +67,10 @@ export function GPUCard({ gpus, titleEdit, cardEdit }: Props) {
 
         function renderRightField(key: string): React.ReactNode {
           switch (key) {
+            case "voltage":
+              return <StatRow key={key} label={getLabel("voltage", "GPU voltage")} value={gpu.voltage != null ? `${gpu.voltage.toFixed(3)} V` : "—"} color={ACCENT} />;
+            case "wattage":
+              return <StatRow key={key} label={getLabel("wattage", "GPU power")} value={gpu.power != null ? `${Math.round(gpu.power)} W` : "—"} />;
             case "vramRow":
               return (
                 <StatRow key={key} label={getLabel("vramRow", "VRAM used")} value={`${fmtMB(gpu.vramUsed)} / ${fmtMB(gpu.vramTotal)}`} color={ACCENT} />

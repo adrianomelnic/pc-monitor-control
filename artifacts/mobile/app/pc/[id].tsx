@@ -67,6 +67,8 @@ const BUILTIN_CARD_FIELDS: Record<string, { key: string; label: string }[]> = {
   ],
   gpu: [
     { key: "usage", label: "GPU load" },
+    { key: "voltage", label: "GPU voltage" },
+    { key: "wattage", label: "GPU power" },
     { key: "vramRow", label: "VRAM used" },
     { key: "clockGpu", label: "GPU clock" },
     { key: "clockMem", label: "Mem clock" },
@@ -83,7 +85,7 @@ const BUILTIN_CARD_FIELDS: Record<string, { key: string; label: string }[]> = {
 };
 
 const DEFAULT_FIELD_ORDER: Record<string, string[]> = {
-  gpu: ["usage", "vramRow", "clockGpu", "clockMem", "vram"],
+  gpu: ["usage", "voltage", "wattage", "vramRow", "clockGpu", "clockMem", "vram"],
   cpu: ["usage", "voltage", "wattage", "physicalCores", "logicalCores", "freqCurrent", "freqMax", "perCore", "perCoreVertical", "cpuBar"],
   ram: ["usage", "used", "available", "total", "bar", "swap"],
 };
@@ -843,9 +845,22 @@ export default function PCDetailScreen() {
         content = <CPUCard cpu={augCpu} titleEdit={titleEdit} cardEdit={cardEdit} />;
         break;
       }
-      case "gpu":
-        content = m.gpu ? <GPUCard gpus={m.gpu} titleEdit={titleEdit} cardEdit={cardEdit} /> : null;
+      case "gpu": {
+        if (!m.gpu) { content = null; break; }
+        const gpuVoltageSensors = allSensors.filter(
+          s => s.type === "voltage" && /gpu.*core.*volt|gpu.*volt|gpu.*vdd/i.test(s.label)
+        );
+        const gpuPowerSensors = allSensors.filter(
+          s => s.type === "power" && /gpu.*power|gpu.*wattage|gpu.*tdp/i.test(s.label)
+        );
+        const augGpus = m.gpu.map((g, i) => ({
+          ...g,
+          voltage: gpuVoltageSensors[i]?.value ?? null,
+          power: gpuPowerSensors[i]?.value ?? null,
+        }));
+        content = <GPUCard gpus={augGpus} titleEdit={titleEdit} cardEdit={cardEdit} />;
         break;
+      }
       case "ram":
         content = m.ram ? <RAMCard ram={m.ram} titleEdit={titleEdit} cardEdit={cardEdit} /> : null;
         break;

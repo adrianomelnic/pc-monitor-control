@@ -40,6 +40,8 @@ export interface GPUInfo {
   temperature?: number | null;
   clockGpu?: number | null;
   clockMem?: number | null;
+  voltage?: number | null;
+  power?: number | null;
 }
 
 export interface RAMInfo {
