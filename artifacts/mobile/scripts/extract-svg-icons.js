@@ -333,7 +333,11 @@ for (const [filename, groupId] of Object.entries(ICONS)) {
   const H = bbox.h.toFixed(2);
   const tx = (-bbox.x).toFixed(2);
   const ty = (-bbox.y).toFixed(2);
-  const svgOut = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}">\n<g transform="translate(${tx},${ty})">\n${inlined}\n</g>\n</svg>`;
+  // stroke-width: target ~1.5px visual at any render size.
+  // User units = 1/viewBoxSize fraction of render size, so:
+  //   stroke-width = 1.5 × max(W,H) / 26 ≈ max(W,H) / 17
+  const SW = (Math.max(bbox.w, bbox.h) / 17).toFixed(2);
+  const svgOut = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}">\n<g transform="translate(${tx},${ty})" stroke-width="${SW}">\n${inlined}\n</g>\n</svg>`;
   fs.writeFileSync(path.join(OUT_DIR, `${filename}.svg`), svgOut, 'utf8');
   console.log(`✓  ${filename}.svg  [${Math.round(bbox.w)}×${Math.round(bbox.h)}]`);
   written++;
