@@ -1776,11 +1776,6 @@ const styles = StyleSheet.create({
   },
   inlinePanel: {
     overflow: "hidden",
-    backgroundColor: C.card,
-    borderBottomWidth: 1,
-    borderColor: C.cardBorder,
-    marginHorizontal: -16,
-    paddingHorizontal: 16,
   },
   terminalPanel: {
     paddingVertical: 14,
