@@ -48,3 +48,9 @@ id = "ng_g_XgGHbkK6zHDLHBLy"
 uri = "file://attached_assets/icon_new_4.png"
 type = "image"
 title = "icon new 4 monitor wifi"
+
+[[generated]]
+id = "5BqZ1_g-Bz7R8ZskKYY3-"
+uri = "file://attached_assets/icon_combined.png"
+type = "image"
+title = "icon combined monitor gauges"
