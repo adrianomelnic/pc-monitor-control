@@ -973,61 +973,67 @@ export default function PCDetailScreen() {
         />
       }
     >
-      {/* ── Header (minimal: back + name + status) ── */}
+      {/* ── Header: two rows ── */}
       <View style={styles.header}>
-        <Pressable onPress={() => router.back()} style={styles.backBtn} hitSlop={8}>
-          <Feather name="arrow-left" size={22} color={C.text} />
-        </Pressable>
-        <Text style={styles.pcName} numberOfLines={1}>{pc.name}</Text>
-        <View style={styles.headerStatus}>
-          <View style={[styles.statusDot, { backgroundColor: isDemo ? "#F97316" : statusColor }]} />
-          <Text style={[styles.statusText, { color: isDemo ? "#F97316" : statusColor }]}>
-            {isDemo
-              ? "Demo"
-              : pc.status === "online"
-              ? "Online"
-              : pc.status === "connecting"
-              ? "Connecting..."
-              : "Offline"}
-          </Text>
+        {/* Row 1: back arrow + PC name */}
+        <View style={styles.headerRow1}>
+          <Pressable onPress={() => router.back()} style={styles.backBtn} hitSlop={8}>
+            <Feather name="arrow-left" size={22} color={C.text} />
+          </Pressable>
+          <Text style={styles.pcName} numberOfLines={1}>{pc.name}</Text>
         </View>
-        {pc.status === "online" ? (
-          <View style={styles.headerActions}>
-            <Pressable
-              onPress={() => { Haptics.selectionAsync(); setEditMode((e) => !e); }}
-              style={({ pressed }) => [
-                styles.headerIconBtn,
-                editMode && styles.headerIconBtnActive,
-                pressed && { opacity: 0.7 },
-              ]}
-              hitSlop={6}
-            >
-              <Feather name="sliders" size={16} color={editMode ? "#fff" : C.tint} />
-            </Pressable>
-            <Pressable
-              onPress={() => togglePanel("terminal")}
-              style={({ pressed }) => [
-                styles.headerIconBtn,
-                activePanel === "terminal" && styles.headerIconBtnActive,
-                pressed && { opacity: 0.7 },
-              ]}
-              hitSlop={6}
-            >
-              <Feather name="terminal" size={16} color={activePanel === "terminal" ? "#fff" : C.tint} />
-            </Pressable>
-            <Pressable
-              onPress={() => togglePanel("controls")}
-              style={({ pressed }) => [
-                styles.headerIconBtn,
-                activePanel === "controls" && styles.headerIconBtnActive,
-                pressed && { opacity: 0.7 },
-              ]}
-              hitSlop={6}
-            >
-              <Feather name="power" size={16} color={activePanel === "controls" ? "#fff" : C.tint} />
-            </Pressable>
+        {/* Row 2: status left, actions right */}
+        <View style={styles.headerRow2}>
+          <View style={styles.headerStatus}>
+            <View style={[styles.statusDot, { backgroundColor: isDemo ? "#F97316" : statusColor }]} />
+            <Text style={[styles.statusText, { color: isDemo ? "#F97316" : statusColor }]}>
+              {isDemo
+                ? "Demo"
+                : pc.status === "online"
+                ? "Online"
+                : pc.status === "connecting"
+                ? "Connecting..."
+                : "Offline"}
+            </Text>
           </View>
-        ) : null}
+          {pc.status === "online" ? (
+            <View style={styles.headerActions}>
+              <Pressable
+                onPress={() => { Haptics.selectionAsync(); setEditMode((e) => !e); }}
+                style={({ pressed }) => [
+                  styles.headerIconBtn,
+                  editMode && styles.headerIconBtnActive,
+                  pressed && { opacity: 0.7 },
+                ]}
+                hitSlop={6}
+              >
+                <Feather name="sliders" size={16} color={editMode ? "#fff" : C.tint} />
+              </Pressable>
+              <Pressable
+                onPress={() => togglePanel("terminal")}
+                style={({ pressed }) => [
+                  styles.headerIconBtn,
+                  activePanel === "terminal" && styles.headerIconBtnActive,
+                  pressed && { opacity: 0.7 },
+                ]}
+                hitSlop={6}
+              >
+                <Feather name="terminal" size={16} color={activePanel === "terminal" ? "#fff" : C.tint} />
+              </Pressable>
+              <Pressable
+                onPress={() => togglePanel("controls")}
+                style={({ pressed }) => [
+                  styles.headerIconBtn,
+                  activePanel === "controls" && styles.headerIconBtnActive,
+                  pressed && { opacity: 0.7 },
+                ]}
+                hitSlop={6}
+              >
+                <Feather name="power" size={16} color={activePanel === "controls" ? "#fff" : C.tint} />
+              </Pressable>
+            </View>
+          ) : null}
+        </View>
       </View>
 
       {/* ── Inline expandable header panel ── */}
@@ -1335,11 +1341,21 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   header: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: "column",
     paddingTop: 4,
     paddingBottom: 10,
-    gap: 10,
+    gap: 6,
+  },
+  headerRow1: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  headerRow2: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingLeft: 44,
   },
   backBtn: {
     width: 36,
@@ -1358,7 +1374,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    flexShrink: 0,
   },
   statusDot: {
     width: 8,
