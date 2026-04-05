@@ -17,16 +17,43 @@ export function isImportantTemp(label: string): boolean {
 export const SENSOR_ICON_OPTIONS: string[] = [
   // Fans & airflow
   "mci:fan", "mci:fan-speed-1", "mci:fan-speed-2", "mci:fan-speed-3",
+  "mci:fan-alert", "mci:fan-auto", "mci:fan-plus", "mci:fan-minus",
   // Water cooling
   "mci:water-pump", "mci:water", "mci:snowflake", "mci:coolant-temperature",
-  // CPU / GPU / Components
-  "mci:chip", "mci:memory", "mci:expansion-card", "mci:motherboard",
-  // Storage & system
-  "mci:harddisk", "mci:desktop-tower", "mci:server", "mci:nas",
-  // Temperature & power
-  "mci:thermometer", "mci:thermometer-high", "mci:lightning-bolt", "mci:power-plug",
-  // Extras
-  "mci:heating-coil", "mci:cpu-64-bit", "mci:resistor", "mci:integrated-circuit-chip",
+  // CPU / Processor
+  "mci:chip", "mci:cpu-64-bit", "mci:cpu-32-bit", "mci:integrated-circuit-chip",
+  // GPU / Graphics
+  "mci:expansion-card", "mci:pci-card", "mci:pci-card-outline", "mci:resistor",
+  // Motherboard / Chipset
+  "mci:motherboard", "mci:motherboard-outline", "mci:memory", "mci:heating-coil",
+  // Storage
+  "mci:harddisk", "mci:solid-state-drive", "mci:solid-state-drive-outline",
+  "mci:sd-card", "mci:usb-flash-drive", "mci:disc",
+  // Case / System
+  "mci:desktop-tower", "mci:server", "mci:nas", "mci:desktop-classic",
+  // Power supply
+  "mci:power-plug", "mci:power-socket", "mci:lightning-bolt", "mci:battery-charging-100",
+  "mci:transmission-tower",
+  // Temperature & sensors
+  "mci:thermometer", "mci:thermometer-high", "mci:thermometer-low",
+  "mci:thermometer-alert", "mci:thermometer-lines",
+  // Networking
+  "mci:ethernet", "mci:wifi", "mci:router-wireless", "mci:network",
+  "mci:lan", "mci:lan-connect",
+  // Peripherals — display
+  "mci:monitor", "mci:monitor-multiple", "mci:television", "mci:projector",
+  // Peripherals — input
+  "mci:keyboard", "mci:keyboard-outline", "mci:mouse", "mci:mouse-outline",
+  // Peripherals — audio
+  "mci:headphones", "mci:headset", "mci:microphone", "mci:microphone-outline",
+  "mci:speaker", "mci:speaker-multiple", "mci:surround-sound",
+  // Peripherals — camera & misc
+  "mci:webcam", "mci:webcam-outline", "mci:printer", "mci:printer-outline",
+  // Gaming
+  "mci:gamepad-variant", "mci:gamepad-variant-outline", "mci:controller-classic",
+  "mci:joystick",
+  // USB / IO
+  "mci:usb", "mci:usb-port", "mci:usb-c-port",
 ];
 
 export function defaultSensorIcon(key: string): string {
