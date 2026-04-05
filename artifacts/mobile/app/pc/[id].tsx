@@ -1015,19 +1015,18 @@ export default function PCDetailScreen() {
         animationType="none"
         onRequestClose={() => closeSheet(controlsAnim, setControlsVisible)}
       >
-        <Pressable style={styles.sheetBackdrop} onPress={() => closeSheet(controlsAnim, setControlsVisible)}>
+        <Pressable style={[styles.sheetBackdrop, { paddingTop: topPad + 56 }]} onPress={() => closeSheet(controlsAnim, setControlsVisible)}>
           <Pressable onPress={() => {}} style={{ width: "100%" }}>
             <Animated.View
               style={[
                 styles.sheetPanel,
                 {
                   transform: [{
-                    translateY: controlsAnim.interpolate({ inputRange: [0, 1], outputRange: [400, 0] }),
+                    translateY: controlsAnim.interpolate({ inputRange: [0, 1], outputRange: [-300, 0] }),
                   }],
                 },
               ]}
             >
-              <View style={styles.sheetHandle} />
               <Text style={styles.sheetTitle}>Controls</Text>
               <View style={styles.controlGrid}>
                 <CommandButton
@@ -1113,19 +1112,18 @@ export default function PCDetailScreen() {
         animationType="none"
         onRequestClose={() => closeSheet(terminalAnim, setTerminalVisible)}
       >
-        <Pressable style={styles.sheetBackdrop} onPress={() => closeSheet(terminalAnim, setTerminalVisible)}>
+        <Pressable style={[styles.sheetBackdrop, { paddingTop: topPad + 56 }]} onPress={() => closeSheet(terminalAnim, setTerminalVisible)}>
           <Pressable onPress={() => {}} style={{ width: "100%" }}>
             <Animated.View
               style={[
                 styles.sheetPanel,
                 {
                   transform: [{
-                    translateY: terminalAnim.interpolate({ inputRange: [0, 1], outputRange: [400, 0] }),
+                    translateY: terminalAnim.interpolate({ inputRange: [0, 1], outputRange: [-300, 0] }),
                   }],
                 },
               ]}
             >
-              <View style={styles.sheetHandle} />
               <Text style={styles.sheetTitle}>Run Command</Text>
               <View style={styles.terminalInput}>
                 <Feather name="terminal" size={14} color={C.textMuted} style={{ marginTop: 1 }} />
@@ -1798,31 +1796,25 @@ const styles = StyleSheet.create({
   sheetBackdrop: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.45)",
-    justifyContent: "flex-end",
+    justifyContent: "flex-start",
     alignItems: "center",
   },
   sheetPanel: {
     width: "100%",
     backgroundColor: C.card,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
     paddingHorizontal: 20,
-    paddingBottom: 34,
-    paddingTop: 10,
+    paddingTop: 16,
+    paddingBottom: 20,
     gap: 16,
-    borderTopWidth: 1,
+    borderBottomWidth: 1,
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
     borderColor: C.cardBorder,
   },
-  sheetHandle: {
-    width: 36,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: C.cardBorder,
-    alignSelf: "center",
-    marginBottom: 6,
-  },
   sheetTitle: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: "700",
     color: C.text,
     letterSpacing: -0.2,
