@@ -1,6 +1,7 @@
 import { Feather } from "@expo/vector-icons";
 import React, { useState } from "react";
 import {
+  ActivityIndicator,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -22,12 +23,58 @@ interface AddPcSheetProps {
 
 const C = Colors.light;
 
+type TestState =
+  | { kind: "idle" }
+  | { kind: "testing" }
+  | { kind: "ok"; pcName: string; os: string }
+  | { kind: "err"; message: string; detail: string };
+
+function friendlyError(e: unknown): { message: string; detail: string } {
+  const msg = e instanceof Error ? e.message : String(e);
+  if (msg.includes("aborted") || msg.includes("timeout") || msg.includes("Timeout")) {
+    return {
+      message: "Connection timed out",
+      detail:
+        "The PC did not respond in 8 seconds. Check that:\n• The PC Agent is running (python pc_agent.py)\n• The IP address is correct\n• Port 8765 is allowed through Windows Firewall\n• Phone and PC are on the same Wi-Fi",
+    };
+  }
+  if (msg.includes("Network request failed") || msg.includes("ECONNREFUSED") || msg.includes("refused")) {
+    return {
+      message: "Connection refused",
+      detail:
+        "The PC is reachable but nothing is listening on that port. Make sure the PC Agent is running:\npython pc_agent.py",
+    };
+  }
+  if (msg.includes("Network") || msg.includes("network")) {
+    return {
+      message: "Network error",
+      detail:
+        "Could not reach the PC. Check that the phone and PC are on the same Wi-Fi network and the IP address is correct.",
+    };
+  }
+  return { message: "Connection failed", detail: msg };
+}
+
 export function AddPcSheet({ visible, onClose }: AddPcSheetProps) {
   const { addPc } = usePcs();
   const [name, setName] = useState("");
   const [host, setHost] = useState("");
   const [port, setPort] = useState("8765");
   const [apiKey, setApiKey] = useState("");
+  const [testState, setTestState] = useState<TestState>({ kind: "idle" });
+
+  const reset = () => {
+    setName("");
+    setHost("");
+    setPort("8765");
+    setApiKey("");
+    setTestState({ kind: "idle" });
+  };
+
+  const handleClose = () => {
+    reset();
+    onClose();
+  };
 
   const handleAdd = () => {
     if (!name.trim() || !host.trim()) return;
@@ -37,16 +84,52 @@ export function AddPcSheet({ visible, onClose }: AddPcSheetProps) {
       port: parseInt(port) || 8765,
       apiKey: apiKey.trim() || undefined,
     });
-    setName("");
-    setHost("");
-    setPort("8765");
-    setApiKey("");
+    reset();
     onClose();
   };
 
+  const handleTest = async () => {
+    const h = host.trim();
+    const p = parseInt(port) || 8765;
+    if (!h) return;
+    setTestState({ kind: "testing" });
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 8000);
+    try {
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (apiKey.trim()) headers["X-API-Key"] = apiKey.trim();
+      const res = await fetch(`http://${h}:${p}/metrics`, {
+        headers,
+        signal: controller.signal,
+      });
+      clearTimeout(timer);
+      if (!res.ok) {
+        setTestState({
+          kind: "err",
+          message: `Server returned HTTP ${res.status}`,
+          detail:
+            res.status === 401 || res.status === 403
+              ? "Invalid API key — check the key configured in pc_agent.py."
+              : `Unexpected response from the agent (HTTP ${res.status}).`,
+        });
+        return;
+      }
+      const data = await res.json();
+      const pcName: string = data?.metrics?.cpu?.name ?? "Unknown PC";
+      const os: string = data?.os ?? "Windows";
+      setTestState({ kind: "ok", pcName, os });
+    } catch (e: unknown) {
+      clearTimeout(timer);
+      setTestState({ kind: "err", ...friendlyError(e) });
+    }
+  };
+
+  const canTest = host.trim().length > 0;
+  const canAdd = name.trim().length > 0 && host.trim().length > 0;
+
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <TouchableWithoutFeedback onPress={onClose}>
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={handleClose}>
+      <TouchableWithoutFeedback onPress={handleClose}>
         <View style={styles.overlay} />
       </TouchableWithoutFeedback>
       <KeyboardAvoidingView
@@ -57,7 +140,7 @@ export function AddPcSheet({ visible, onClose }: AddPcSheetProps) {
           <View style={styles.handle} />
           <View style={styles.sheetHeader}>
             <Text style={styles.sheetTitle}>Add PC</Text>
-            <Pressable onPress={onClose} hitSlop={12}>
+            <Pressable onPress={handleClose} hitSlop={12}>
               <Feather name="x" size={20} color={C.textSecondary} />
             </Pressable>
           </View>
@@ -88,7 +171,10 @@ export function AddPcSheet({ visible, onClose }: AddPcSheetProps) {
               <TextInput
                 style={styles.input}
                 value={host}
-                onChangeText={setHost}
+                onChangeText={(t) => {
+                  setHost(t);
+                  setTestState({ kind: "idle" });
+                }}
                 placeholder="192.168.1.100"
                 placeholderTextColor={C.textMuted}
                 autoCorrect={false}
@@ -97,17 +183,70 @@ export function AddPcSheet({ visible, onClose }: AddPcSheetProps) {
               />
             </View>
 
-            <View style={styles.fieldGroup}>
-              <Text style={styles.fieldLabel}>PORT</Text>
-              <TextInput
-                style={styles.input}
-                value={port}
-                onChangeText={setPort}
-                placeholder="8765"
-                placeholderTextColor={C.textMuted}
-                keyboardType="numeric"
-              />
+            <View style={styles.fieldRow}>
+              <View style={[styles.fieldGroup, { flex: 1 }]}>
+                <Text style={styles.fieldLabel}>PORT</Text>
+                <TextInput
+                  style={styles.input}
+                  value={port}
+                  onChangeText={(t) => {
+                    setPort(t);
+                    setTestState({ kind: "idle" });
+                  }}
+                  placeholder="8765"
+                  placeholderTextColor={C.textMuted}
+                  keyboardType="numeric"
+                />
+              </View>
+
+              <View style={styles.testBtnWrapper}>
+                <Pressable
+                  style={[styles.testBtn, !canTest && styles.testBtnDisabled]}
+                  onPress={handleTest}
+                  disabled={!canTest || testState.kind === "testing"}
+                >
+                  {testState.kind === "testing" ? (
+                    <ActivityIndicator size="small" color={C.tint} />
+                  ) : (
+                    <Feather
+                      name="wifi"
+                      size={15}
+                      color={canTest ? C.tint : C.textMuted}
+                    />
+                  )}
+                  <Text
+                    style={[
+                      styles.testBtnText,
+                      !canTest && styles.testBtnTextDisabled,
+                    ]}
+                  >
+                    {testState.kind === "testing" ? "Testing…" : "Test"}
+                  </Text>
+                </Pressable>
+              </View>
             </View>
+
+            {/* Test result */}
+            {testState.kind === "ok" && (
+              <View style={[styles.resultBox, styles.resultOk]}>
+                <Feather name="check-circle" size={15} color="#34D399" />
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.resultOkText}>Connected successfully</Text>
+                  <Text style={styles.resultOkSub}>
+                    {testState.pcName} · {testState.os}
+                  </Text>
+                </View>
+              </View>
+            )}
+            {testState.kind === "err" && (
+              <View style={[styles.resultBox, styles.resultErr]}>
+                <Feather name="alert-circle" size={15} color="#F87171" style={{ marginTop: 2 }} />
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.resultErrTitle}>{testState.message}</Text>
+                  <Text style={styles.resultErrDetail}>{testState.detail}</Text>
+                </View>
+              </View>
+            )}
 
             <View style={styles.fieldGroup}>
               <Text style={styles.fieldLabel}>API KEY (OPTIONAL)</Text>
@@ -133,12 +272,9 @@ export function AddPcSheet({ visible, onClose }: AddPcSheetProps) {
           </ScrollView>
 
           <Pressable
-            style={[
-              styles.addBtn,
-              (!name.trim() || !host.trim()) && styles.addBtnDisabled,
-            ]}
+            style={[styles.addBtn, !canAdd && styles.addBtnDisabled]}
             onPress={handleAdd}
-            disabled={!name.trim() || !host.trim()}
+            disabled={!canAdd}
           >
             <Text style={styles.addBtnText}>Add PC</Text>
           </Pressable>
@@ -196,6 +332,12 @@ const styles = StyleSheet.create({
   fieldGroup: {
     marginBottom: 16,
   },
+  fieldRow: {
+    flexDirection: "row",
+    gap: 10,
+    alignItems: "flex-end",
+    marginBottom: 16,
+  },
   fieldLabel: {
     fontSize: 10,
     fontWeight: "700",
@@ -212,6 +354,69 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     color: C.text,
     fontSize: 15,
+  },
+  testBtnWrapper: {
+    paddingBottom: 1,
+  },
+  testBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    backgroundColor: C.card,
+    borderWidth: 1,
+    borderColor: C.tint + "50",
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+  },
+  testBtnDisabled: {
+    borderColor: C.cardBorder,
+  },
+  testBtnText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: C.tint,
+  },
+  testBtnTextDisabled: {
+    color: C.textMuted,
+  },
+  resultBox: {
+    flexDirection: "row",
+    gap: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+    padding: 12,
+    marginBottom: 16,
+    alignItems: "flex-start",
+  },
+  resultOk: {
+    backgroundColor: "rgba(52,211,153,0.08)",
+    borderColor: "rgba(52,211,153,0.3)",
+  },
+  resultOkText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#34D399",
+  },
+  resultOkSub: {
+    fontSize: 12,
+    color: C.textSecondary,
+    marginTop: 2,
+  },
+  resultErr: {
+    backgroundColor: "rgba(248,113,113,0.08)",
+    borderColor: "rgba(248,113,113,0.3)",
+  },
+  resultErrTitle: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#F87171",
+    marginBottom: 4,
+  },
+  resultErrDetail: {
+    fontSize: 12,
+    color: C.textSecondary,
+    lineHeight: 18,
   },
   setupBox: {
     flexDirection: "row",
