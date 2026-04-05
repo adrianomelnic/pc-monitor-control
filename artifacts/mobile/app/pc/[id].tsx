@@ -940,9 +940,10 @@ export default function PCDetailScreen() {
   }
 
   return (
+    <View style={styles.pageContainer}>
     <ScrollView
       style={[styles.root, { paddingTop: topPad }]}
-      contentContainerStyle={[styles.content, { paddingBottom: 80 + bottomPad }]}
+      contentContainerStyle={[styles.content, { paddingBottom: 130 + bottomPad }]}
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
       refreshControl={
@@ -954,14 +955,14 @@ export default function PCDetailScreen() {
         />
       }
     >
-      {/* ── Header ── */}
+      {/* ── Header (minimal: back + name + status) ── */}
       <View style={styles.header}>
         <Pressable onPress={() => router.back()} style={styles.backBtn} hitSlop={8}>
           <Feather name="arrow-left" size={22} color={C.text} />
         </Pressable>
         <View style={styles.headerInfo}>
-          <Text style={styles.pcName}>{pc.name}</Text>
-          <View style={styles.statusRow}>
+          <View style={styles.headerNameRow}>
+            <Text style={styles.pcName} numberOfLines={1}>{pc.name}</Text>
             <View style={[styles.statusDot, { backgroundColor: statusColor }]} />
             <Text style={[styles.statusText, { color: statusColor }]}>
               {pc.status === "online"
@@ -970,45 +971,40 @@ export default function PCDetailScreen() {
                 ? "Connecting..."
                 : "Offline"}
             </Text>
-            {pc.os ? <Text style={styles.osText}> · {pc.os}</Text> : null}
           </View>
         </View>
-        {/* Edit toggle */}
-        {pc.status === "online" && (
-          <Pressable
-            onPress={() => {
-              Haptics.selectionAsync();
-              setEditMode((e) => !e);
-            }}
-            style={[styles.editToggle, editMode && styles.editToggleActive]}
-            hitSlop={8}
-          >
-            <Feather
-              name={editMode ? "check" : "sliders"}
-              size={16}
-              color={editMode ? C.tint : C.textSecondary}
-            />
-            <Text style={[styles.editToggleText, editMode && { color: C.tint }]}>
-              {editMode ? "Done" : "Edit"}
-            </Text>
-          </Pressable>
-        )}
-        <Pressable onPress={handleRemove} hitSlop={8}>
-          <Feather name="trash-2" size={18} color={C.danger} />
-        </Pressable>
       </View>
 
-      {/* Host + last updated */}
-      <View style={styles.hostRow}>
-        <Feather name="wifi" size={12} color={C.textMuted} />
-        <Text style={styles.hostText}>
-          {isDemo ? "Demo Mode — no PC required" : `${pc.host}:${pc.port}`}
-        </Text>
-        {!isDemo && pc.lastSeen ? (
-          <Text style={styles.lastSeen}>
-            · Updated {new Date(pc.lastSeen).toLocaleTimeString()}
-          </Text>
+      {/* ── PC Info card ── */}
+      <View style={styles.infoCard}>
+        {pc.os ? (
+          <View style={styles.infoRow}>
+            <Feather name="monitor" size={13} color={C.textMuted} />
+            <Text style={styles.infoRowText}>{pc.os}</Text>
+          </View>
         ) : null}
+        <View style={styles.infoRow}>
+          <Feather name="wifi" size={13} color={C.textMuted} />
+          <Text style={styles.infoRowText}>
+            {isDemo ? "Demo Mode — no PC required" : `${pc.host}:${pc.port}`}
+          </Text>
+        </View>
+        {!isDemo && pc.lastSeen ? (
+          <View style={styles.infoRow}>
+            <Feather name="clock" size={13} color={C.textMuted} />
+            <Text style={styles.infoRowText}>
+              Updated {new Date(pc.lastSeen).toLocaleTimeString()}
+            </Text>
+          </View>
+        ) : null}
+        <View style={styles.infoSeparator} />
+        <Pressable
+          style={({ pressed }) => [styles.deleteRow, pressed && { opacity: 0.7 }]}
+          onPress={handleRemove}
+        >
+          <Feather name="trash-2" size={13} color={C.danger} />
+          <Text style={styles.deleteRowText}>Remove PC</Text>
+        </Pressable>
       </View>
 
       {/* ── Demo notice ── */}
@@ -1291,10 +1287,37 @@ export default function PCDetailScreen() {
         isEdit={!!editingCard}
       />
     </ScrollView>
+
+    {/* ── Floating Edit Dashboard button (online only) ── */}
+    {pc.status === "online" && (
+      <View style={[styles.floatingEditBar, { paddingBottom: Math.max(bottomPad, 16) }]}>
+        <Pressable
+          onPress={() => {
+            Haptics.selectionAsync();
+            setEditMode((e) => !e);
+          }}
+          style={[styles.floatingEditBtn, editMode && styles.floatingEditBtnActive]}
+        >
+          <Feather
+            name={editMode ? "check" : "sliders"}
+            size={16}
+            color={editMode ? "#fff" : C.textSecondary}
+          />
+          <Text style={[styles.floatingEditBtnText, editMode && styles.floatingEditBtnTextActive]}>
+            {editMode ? "Done" : "Edit Dashboard"}
+          </Text>
+        </Pressable>
+      </View>
+    )}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  pageContainer: {
+    flex: 1,
+    backgroundColor: C.background,
+  },
   root: {
     flex: 1,
     backgroundColor: C.background,
@@ -1314,7 +1337,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingTop: 4,
-    paddingBottom: 2,
+    paddingBottom: 10,
     gap: 10,
   },
   backBtn: {
@@ -1326,65 +1349,102 @@ const styles = StyleSheet.create({
   headerInfo: {
     flex: 1,
   },
+  headerNameRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    flexShrink: 1,
+  },
   pcName: {
     fontSize: 22,
     fontWeight: "800",
     color: C.text,
     letterSpacing: -0.3,
-  },
-  statusRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    marginTop: 2,
+    flexShrink: 1,
   },
   statusDot: {
-    width: 7,
-    height: 7,
+    width: 8,
+    height: 8,
     borderRadius: 4,
+    flexShrink: 0,
   },
   statusText: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: "600",
+    flexShrink: 0,
   },
-  osText: {
-    fontSize: 12,
-    color: C.textSecondary,
-  },
-  editToggle: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 5,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 10,
+  infoCard: {
+    backgroundColor: C.card,
+    borderRadius: 14,
     borderWidth: 1,
     borderColor: C.cardBorder,
-    backgroundColor: C.card,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    gap: 8,
   },
-  editToggleActive: {
-    borderColor: C.tint + "60",
-    backgroundColor: C.tint + "15",
-  },
-  editToggleText: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: C.textSecondary,
-  },
-  hostRow: {
+  infoRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
-    marginTop: -4,
+    gap: 8,
   },
-  hostText: {
-    fontSize: 12,
-    color: C.textMuted,
-    fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace",
+  infoRowText: {
+    fontSize: 13,
+    color: C.textSecondary,
+    flex: 1,
   },
-  lastSeen: {
-    fontSize: 12,
-    color: C.textMuted,
+  infoSeparator: {
+    height: 1,
+    backgroundColor: C.cardBorder,
+    marginHorizontal: -2,
+  },
+  deleteRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingTop: 2,
+  },
+  deleteRowText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: C.danger,
+  },
+  floatingEditBar: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    alignItems: "center",
+    paddingTop: 12,
+    paddingHorizontal: 16,
+    backgroundColor: "transparent",
+  },
+  floatingEditBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingHorizontal: 28,
+    paddingVertical: 13,
+    borderRadius: 14,
+    backgroundColor: C.card,
+    borderWidth: 1,
+    borderColor: C.cardBorder,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.18,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  floatingEditBtnActive: {
+    backgroundColor: C.tint,
+    borderColor: C.tint,
+  },
+  floatingEditBtnText: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: C.textSecondary,
+  },
+  floatingEditBtnTextActive: {
+    color: "#fff",
   },
   demoNotice: {
     flexDirection: "row",
