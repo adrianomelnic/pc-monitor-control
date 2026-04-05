@@ -8,7 +8,7 @@ import {
   View,
 } from "react-native";
 import Colors from "@/constants/colors";
-import { PC } from "@/context/PcsContext";
+import { DEMO_PC_HOST, PC } from "@/context/PcsContext";
 import { MetricRing } from "./MetricRing";
 
 interface PCCardProps {
@@ -31,6 +31,7 @@ function formatUptime(seconds: number) {
 
 export function PCCard({ pc }: PCCardProps) {
   const C = Colors.light;
+  const isDemo = pc.host === DEMO_PC_HOST;
   const statusColor =
     pc.status === "online"
       ? C.online
@@ -54,8 +55,15 @@ export function PCCard({ pc }: PCCardProps) {
         <View style={styles.titleRow}>
           <View style={[styles.statusDot, { backgroundColor: statusColor }]} />
           <View>
-            <Text style={styles.name}>{pc.name}</Text>
-            <Text style={styles.host}>{pc.host}:{pc.port}</Text>
+            <View style={styles.nameRow}>
+              <Text style={styles.name}>{pc.name}</Text>
+              {isDemo && (
+                <View style={styles.demoBadge}>
+                  <Text style={styles.demoBadgeText}>DEMO</Text>
+                </View>
+              )}
+            </View>
+            <Text style={styles.host}>{isDemo ? "Demo Mode — no PC required" : `${pc.host}:${pc.port}`}</Text>
           </View>
         </View>
         <View style={styles.headerRight}>
@@ -161,6 +169,23 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
+  },
+  nameRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  demoBadge: {
+    backgroundColor: "#F97316",
+    borderRadius: 4,
+    paddingHorizontal: 5,
+    paddingVertical: 1,
+  },
+  demoBadgeText: {
+    fontSize: 9,
+    fontWeight: "800",
+    color: "#fff",
+    letterSpacing: 0.8,
   },
   statusDot: {
     width: 8,

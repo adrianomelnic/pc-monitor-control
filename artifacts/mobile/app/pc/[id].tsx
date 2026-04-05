@@ -28,7 +28,7 @@ import Colors from "@/constants/colors";
 import { BuiltinCardConfig, BuiltinCardKind, CardConfig, CustomCardConfig, useDashboard } from "@/context/DashboardContext";
 import { BuiltinCardEdit, CardTitleEditConfig } from "@/components/cards/CardBase";
 import { DraggableFieldList } from "@/components/DraggableFieldList";
-import { usePcs, SensorReading } from "@/context/PcsContext";
+import { usePcs, DEMO_PC_HOST, SensorReading } from "@/context/PcsContext";
 
 const C = Colors.light;
 
@@ -132,6 +132,7 @@ export default function PCDetailScreen() {
   const { pcs, removePc, refreshPc, sendCommand } = usePcs();
   const { getCards, toggleCard, moveCard, addCustomCard, removeCard, updateCustomCard, updateBuiltinCard } = useDashboard();
   const pc = pcs.find((p) => p.id === id);
+  const isDemo = pc?.host === DEMO_PC_HOST;
   const insets = useSafeAreaInsets();
 
   const [refreshing, setRefreshing] = useState(false);
@@ -1000,13 +1001,25 @@ export default function PCDetailScreen() {
       {/* Host + last updated */}
       <View style={styles.hostRow}>
         <Feather name="wifi" size={12} color={C.textMuted} />
-        <Text style={styles.hostText}>{pc.host}:{pc.port}</Text>
-        {pc.lastSeen ? (
+        <Text style={styles.hostText}>
+          {isDemo ? "Demo Mode — no PC required" : `${pc.host}:${pc.port}`}
+        </Text>
+        {!isDemo && pc.lastSeen ? (
           <Text style={styles.lastSeen}>
             · Updated {new Date(pc.lastSeen).toLocaleTimeString()}
           </Text>
         ) : null}
       </View>
+
+      {/* ── Demo notice ── */}
+      {isDemo && (
+        <View style={styles.demoNotice}>
+          <Feather name="play-circle" size={13} color="#F97316" />
+          <Text style={styles.demoNoticeText}>
+            This is simulated data — install the agent on a real PC to connect
+          </Text>
+        </View>
+      )}
 
       {/* ── Edit mode banner ── */}
       {editMode && (
@@ -1372,6 +1385,24 @@ const styles = StyleSheet.create({
   lastSeen: {
     fontSize: 12,
     color: C.textMuted,
+  },
+  demoNotice: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 7,
+    backgroundColor: "rgba(249, 115, 22, 0.08)",
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "rgba(249, 115, 22, 0.25)",
+    paddingHorizontal: 12,
+    paddingVertical: 9,
+    marginBottom: 4,
+  },
+  demoNoticeText: {
+    flex: 1,
+    fontSize: 12,
+    color: C.textSecondary,
+    lineHeight: 17,
   },
   editBanner: {
     flexDirection: "row",

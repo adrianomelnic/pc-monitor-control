@@ -7,6 +7,7 @@ import React, {
   useRef,
   useState,
 } from "react";
+import { DEMO_PC_HOST, DEMO_PC_ID, DEMO_PC_META, generateDemoMetrics } from "@/lib/demoData";
 
 // ─── Sensor reading from HWiNFO64 (all types) ─────────────────────────────────
 export interface SensorReading {
@@ -117,6 +118,8 @@ export interface PC {
   lastSeen?: Date;
 }
 
+export { DEMO_PC_HOST, DEMO_PC_ID };
+
 interface PcsContextType {
   pcs: PC[];
   addPc: (pc: Omit<PC, "id" | "status">) => void;
@@ -124,6 +127,7 @@ interface PcsContextType {
   updatePc: (id: string, updates: Partial<PC>) => void;
   refreshPc: (id: string) => Promise<void>;
   refreshAll: () => Promise<void>;
+  addDemoMode: () => void;
   sendCommand: (
     id: string,
     command: string,
@@ -170,6 +174,15 @@ export function PcsProvider({ children }: { children: React.ReactNode }) {
     `http://${pc.host}:${pc.port}${path}`;
 
   const fetchMetrics = useCallback(async (pc: PC): Promise<Partial<PC>> => {
+    // Demo mode: generate data locally, no network call
+    if (pc.host === DEMO_PC_HOST) {
+      return {
+        status: "online",
+        metrics: generateDemoMetrics(),
+        os: "Windows 11 Pro",
+        lastSeen: new Date(),
+      };
+    }
     try {
       const headers: Record<string, string> = {
         "Content-Type": "application/json",
@@ -274,6 +287,23 @@ export function PcsProvider({ children }: { children: React.ReactNode }) {
     [savePcs]
   );
 
+  const addDemoMode = useCallback(() => {
+    setPcs((prev) => {
+      if (prev.some((p) => p.host === DEMO_PC_HOST)) return prev; // already added
+      const demoPc: PC = {
+        ...DEMO_PC_META,
+        id: DEMO_PC_ID,
+        status: "connecting",
+      };
+      const updated = [...prev, demoPc];
+      savePcs(updated);
+      fetchMetrics(demoPc).then((upd) => {
+        setPcs((cur) => cur.map((p) => (p.id === DEMO_PC_ID ? { ...p, ...upd } : p)));
+      });
+      return updated;
+    });
+  }, [savePcs, fetchMetrics]);
+
   const sendCommand = useCallback(
     async (
       id: string,
@@ -282,6 +312,15 @@ export function PcsProvider({ children }: { children: React.ReactNode }) {
     ): Promise<{ success: boolean; output?: string; error?: string }> => {
       const pc = pcs.find((p) => p.id === id);
       if (!pc) return { success: false, error: "PC not found" };
+      // Demo mode: simulate command responses
+      if (pc.host === DEMO_PC_HOST) {
+        await new Promise((r) => setTimeout(r, 600));
+        if (command === "lock") return { success: true, output: "[Demo] Screen locked" };
+        if (command === "sleep") return { success: true, output: "[Demo] PC going to sleep" };
+        if (command === "shutdown") return { success: true, output: "[Demo] Shutdown initiated" };
+        if (command === "restart") return { success: true, output: "[Demo] Restarting..." };
+        return { success: true, output: `[Demo] Command '${command}' executed` };
+      }
       try {
         const headers: Record<string, string> = {
           "Content-Type": "application/json",
@@ -311,7 +350,7 @@ export function PcsProvider({ children }: { children: React.ReactNode }) {
           });
           return prev.map((p) => p.id === id ? { ...p, status: "connecting" } : p);
         });
-      }, refreshAll, sendCommand }}
+      }, refreshAll, addDemoMode, sendCommand }}
     >
       {children}
     </PcsContext.Provider>

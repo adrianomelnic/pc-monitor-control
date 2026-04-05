@@ -1,6 +1,7 @@
 import { Feather } from "@expo/vector-icons";
 import * as Clipboard from "expo-clipboard";
 import * as Haptics from "expo-haptics";
+import { router } from "expo-router";
 import React, { useState } from "react";
 import {
   Platform,
@@ -12,6 +13,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
+import { DEMO_PC_HOST, DEMO_PC_ID, usePcs } from "@/context/PcsContext";
 
 const C = Colors.light;
 
@@ -825,15 +827,24 @@ const STEPS = [
 export default function AgentScreen() {
   const insets = useSafeAreaInsets();
   const [copied, setCopied] = useState(false);
+  const { pcs, addDemoMode } = usePcs();
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 : 0;
+
+  const isDemoAdded = pcs.some((p) => p.host === DEMO_PC_HOST);
 
   const copyAgent = async () => {
     await Clipboard.setStringAsync(PYTHON_AGENT);
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     setCopied(true);
     setTimeout(() => setCopied(false), 2500);
+  };
+
+  const handleDemo = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    if (!isDemoAdded) addDemoMode();
+    router.push(`/pc/${DEMO_PC_ID}`);
   };
 
   return (
@@ -848,6 +859,25 @@ export default function AgentScreen() {
           Run the agent on any PC you want to control
         </Text>
       </View>
+
+      {/* Demo Mode Banner */}
+      <Pressable
+        style={({ pressed }) => [styles.demoBanner, pressed && { opacity: 0.85 }]}
+        onPress={handleDemo}
+      >
+        <View style={styles.demoBannerLeft}>
+          <View style={styles.demoBannerIcon}>
+            <Feather name="play-circle" size={22} color="#F97316" />
+          </View>
+          <View style={styles.demoBannerText}>
+            <Text style={styles.demoBannerTitle}>Try Demo Mode</Text>
+            <Text style={styles.demoBannerSub}>
+              Explore the full app with simulated data — no PC needed
+            </Text>
+          </View>
+        </View>
+        <Feather name="chevron-right" size={18} color="#F97316" />
+      </Pressable>
 
       {STEPS.map((s) => (
         <View key={s.step} style={styles.step}>
@@ -921,7 +951,47 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingTop: 12,
-    paddingBottom: 20,
+    paddingBottom: 16,
+  },
+  demoBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "rgba(249, 115, 22, 0.1)",
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: "rgba(249, 115, 22, 0.35)",
+    padding: 14,
+    marginBottom: 20,
+    gap: 8,
+  },
+  demoBannerLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    flex: 1,
+  },
+  demoBannerIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    backgroundColor: "rgba(249, 115, 22, 0.15)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  demoBannerText: {
+    flex: 1,
+    gap: 2,
+  },
+  demoBannerTitle: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#F97316",
+  },
+  demoBannerSub: {
+    fontSize: 12,
+    color: C.textSecondary,
+    lineHeight: 17,
   },
   title: {
     fontSize: 28,
