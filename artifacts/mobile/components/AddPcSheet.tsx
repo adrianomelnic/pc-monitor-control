@@ -31,21 +31,22 @@ type TestState =
 
 function friendlyError(e: unknown): { message: string; detail: string } {
   const msg = e instanceof Error ? e.message : String(e);
-  if (msg.includes("aborted") || msg.includes("timeout") || msg.includes("Timeout")) {
+  const low = msg.toLowerCase();
+  if (low.includes("aborted") || low.includes("timeout") || (e instanceof Error && e.name === "AbortError")) {
     return {
       message: "Connection timed out",
       detail:
         "The PC did not respond in 8 seconds. Check that:\n• The PC Agent is running (python pc_agent.py)\n• The IP address is correct\n• Port 8765 is allowed through Windows Firewall\n• Phone and PC are on the same Wi-Fi",
     };
   }
-  if (msg.includes("Network request failed") || msg.includes("ECONNREFUSED") || msg.includes("refused")) {
+  if (low.includes("network request failed") || low.includes("econnrefused") || low.includes("refused")) {
     return {
       message: "Connection refused",
       detail:
         "The PC is reachable but nothing is listening on that port. Make sure the PC Agent is running:\npython pc_agent.py",
     };
   }
-  if (msg.includes("Network") || msg.includes("network")) {
+  if (low.includes("network")) {
     return {
       message: "Network error",
       detail:
