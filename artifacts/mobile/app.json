@@ -18,7 +18,11 @@
       "bundleIdentifier": "com.adrianomelnic.pcmonitorcontrol"
     },
     "android": {
-      "package": "com.adrianomelnic.pcmonitorcontrol"
+      "package": "com.adrianomelnic.pcmonitorcontrol",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/icon.png",
+        "backgroundColor": "#000000"
+      }
     },
     "web": {
       "favicon": "./assets/images/icon.png"
