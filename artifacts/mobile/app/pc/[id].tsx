@@ -961,7 +961,7 @@ export default function PCDetailScreen() {
     <View style={styles.pageContainer}>
     <ScrollView
       style={[styles.root, { paddingTop: topPad }]}
-      contentContainerStyle={[styles.content, { paddingBottom: 130 + bottomPad }]}
+      contentContainerStyle={[styles.content, { paddingBottom: 32 + bottomPad }]}
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
       refreshControl={
@@ -1310,27 +1310,6 @@ export default function PCDetailScreen() {
       />
     </ScrollView>
 
-    {/* ── Floating Edit Dashboard button (online only) ── */}
-    {pc.status === "online" && (
-      <View style={[styles.floatingEditBar, { paddingBottom: Math.max(bottomPad, 16) }]}>
-        <Pressable
-          onPress={() => {
-            Haptics.selectionAsync();
-            setEditMode((e) => !e);
-          }}
-          style={[styles.floatingEditBtn, editMode && styles.floatingEditBtnActive]}
-        >
-          <Feather
-            name={editMode ? "check" : "sliders"}
-            size={16}
-            color={editMode ? "#fff" : C.textSecondary}
-          />
-          <Text style={[styles.floatingEditBtnText, editMode && styles.floatingEditBtnTextActive]}>
-            {editMode ? "Done" : "Edit Dashboard"}
-          </Text>
-        </Pressable>
-      </View>
-    )}
     </View>
   );
 }
@@ -1424,44 +1403,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "600",
     color: C.danger,
-  },
-  floatingEditBar: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    alignItems: "center",
-    paddingTop: 12,
-    paddingHorizontal: 16,
-    backgroundColor: "transparent",
-  },
-  floatingEditBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    paddingHorizontal: 28,
-    paddingVertical: 13,
-    borderRadius: 14,
-    backgroundColor: C.card,
-    borderWidth: 1,
-    borderColor: C.cardBorder,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.18,
-    shadowRadius: 8,
-    elevation: 6,
-  },
-  floatingEditBtnActive: {
-    backgroundColor: C.tint,
-    borderColor: C.tint,
-  },
-  floatingEditBtnText: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: C.textSecondary,
-  },
-  floatingEditBtnTextActive: {
-    color: "#fff",
   },
   demoNotice: {
     flexDirection: "row",
