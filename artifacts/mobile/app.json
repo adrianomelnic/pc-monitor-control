@@ -1,11 +1,11 @@
 {
   "expo": {
     "name": "PC Monitor & Control",
-    "slug": "mobile",
+    "slug": "pc-monitor-control",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "mobile",
+    "scheme": "pcmonitorcontrol",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
@@ -14,9 +14,12 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": false
+      "supportsTablet": false,
+      "bundleIdentifier": "com.adrianomelnic.pcmonitorcontrol"
     },
-    "android": {},
+    "android": {
+      "package": "com.adrianomelnic.pcmonitorcontrol"
+    },
     "web": {
       "favicon": "./assets/images/icon.png"
     },
