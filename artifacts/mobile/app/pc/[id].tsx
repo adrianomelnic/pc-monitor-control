@@ -1451,7 +1451,8 @@ const styles = StyleSheet.create({
   cardGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 12,
+    alignItems: "flex-start",
+    gap: 8,
   },
   cardGridItem: {
     flex: 1,
