@@ -1,14 +1,16 @@
 import { Feather } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import React from "react";
 import {
+  Alert,
   Pressable,
   StyleSheet,
   Text,
   View,
 } from "react-native";
 import Colors from "@/constants/colors";
-import { DEMO_PC_HOST, PC } from "@/context/PcsContext";
+import { DEMO_PC_HOST, PC, usePcs } from "@/context/PcsContext";
 import { MetricRing } from "./MetricRing";
 
 interface PCCardProps {
@@ -31,6 +33,7 @@ function formatUptime(seconds: number) {
 
 export function PCCard({ pc }: PCCardProps) {
   const C = Colors.light;
+  const { removePc } = usePcs();
   const isDemo = pc.host === DEMO_PC_HOST;
   const statusColor =
     pc.status === "online"
@@ -45,6 +48,22 @@ export function PCCard({ pc }: PCCardProps) {
       : pc.status === "connecting"
       ? "Connecting..."
       : "Offline";
+
+  const handleRemove = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    Alert.alert(
+      "Remove PC",
+      `Remove "${pc.name}" from your list?`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Remove",
+          style: "destructive",
+          onPress: () => removePc(pc.id),
+        },
+      ]
+    );
+  };
 
   return (
     <Pressable
@@ -67,22 +86,12 @@ export function PCCard({ pc }: PCCardProps) {
           </View>
         </View>
         <View style={styles.headerRight}>
-          {pc.os ? (
-            <Feather
-              name={
-                pc.os.toLowerCase().includes("win")
-                  ? "monitor"
-                  : pc.os.toLowerCase().includes("mac")
-                  ? "cpu"
-                  : "terminal"
-              }
-              size={16}
-              color={C.textSecondary}
-            />
-          ) : null}
           <Text style={[styles.statusLabel, { color: statusColor }]}>
             {statusLabel}
           </Text>
+          {pc.os ? (
+            <Text style={styles.osText} numberOfLines={1}>{pc.os}</Text>
+          ) : null}
         </View>
       </View>
 
@@ -145,6 +154,17 @@ export function PCCard({ pc }: PCCardProps) {
           </Text>
         </View>
       )}
+
+      <View style={styles.cardSeparator} />
+
+      <Pressable
+        style={({ pressed }) => [styles.deleteRow, pressed && { opacity: 0.65 }]}
+        onPress={handleRemove}
+        hitSlop={8}
+      >
+        <Feather name="trash-2" size={13} color={C.danger} />
+        <Text style={styles.deleteRowText}>Remove PC</Text>
+      </Pressable>
     </Pressable>
   );
 }
@@ -205,11 +225,31 @@ const styles = StyleSheet.create({
   },
   headerRight: {
     alignItems: "flex-end",
-    gap: 4,
+    gap: 3,
   },
   statusLabel: {
     fontSize: 11,
     fontWeight: "600",
+  },
+  osText: {
+    fontSize: 10,
+    color: C.textMuted,
+    maxWidth: 100,
+  },
+  cardSeparator: {
+    height: 1,
+    backgroundColor: C.cardBorder,
+    marginHorizontal: -2,
+  },
+  deleteRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  deleteRowText: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: C.danger,
   },
   metrics: {
     flexDirection: "row",

@@ -985,38 +985,6 @@ export default function PCDetailScreen() {
         </View>
       )}
 
-      {/* ── PC Info card ── */}
-      <View style={styles.infoCard}>
-        {pc.os ? (
-          <View style={styles.infoRow}>
-            <Feather name="monitor" size={13} color={C.textMuted} />
-            <Text style={styles.infoRowText}>{pc.os}</Text>
-          </View>
-        ) : null}
-        <View style={styles.infoRow}>
-          <Feather name="wifi" size={13} color={C.textMuted} />
-          <Text style={styles.infoRowText}>
-            {isDemo ? "Demo Mode — no PC required" : `${pc.host}:${pc.port}`}
-          </Text>
-        </View>
-        {!isDemo && pc.lastSeen ? (
-          <View style={styles.infoRow}>
-            <Feather name="clock" size={13} color={C.textMuted} />
-            <Text style={styles.infoRowText}>
-              Updated {new Date(pc.lastSeen).toLocaleTimeString()}
-            </Text>
-          </View>
-        ) : null}
-        <View style={styles.infoSeparator} />
-        <Pressable
-          style={({ pressed }) => [styles.deleteRow, pressed && { opacity: 0.7 }]}
-          onPress={handleRemove}
-        >
-          <Feather name="trash-2" size={13} color={C.danger} />
-          <Text style={styles.deleteRowText}>Remove PC</Text>
-        </Pressable>
-      </View>
-
       {/* ── Edit mode banner ── */}
       {editMode && (
         <View style={styles.editBanner}>
