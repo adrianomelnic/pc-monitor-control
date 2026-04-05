@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="2865.6 2272.2 166.4 165.8">
+<g id="WiFi-USB-Extender-icon-v1">
+			<g id="antenna 00000146478564062498613500000002224786631093035431 ">
+				<path id="connection 00000101788962142318341630000008959305698635576507 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m2989.83 2407.29h6.05c0.56 0 1 0.44 1 1v1.6h7.85v5.08h-7.85v1.6c0 0.55-0.44 1-1 1h-6.05"/>
+				<path id="connection 00000037690731743070766340000015454776237958117266 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m3010.53 2415.97h-3.25v0.6c0 0.55-0.44 1-1 1h-7.05"/>
+				<path id="connection 00000179617324314690872240000000741507738239933853 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m2999.23 2407.29h7.05c0.56 0 1 0.44 1 1v0.6h3.25"/>
+				<path id="ariel 00000136393088090666322440000008551397447596439692 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m3015.33 2287.22l-2.59 2.8c-0.78 0.85-1.24 1.94-1.31 3.1l-4.77 104.93c-0.08 1.35 0.39 2.68 1.31 3.68l2.56 2.8v15.04h6.53v-131.67c0-0.91-1.12-1.35-1.73-0.68z"/>
+			</g>
+			<g id="antenna 00000096049014140590341260000013842763282553494407 ">
+				<path id="connection 00000107575598276766267670000004253328004106764440 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m2907.83 2407.29h-6.05c-0.55 0-1 0.44-1 1v1.6h-7.84v5.08h7.84v1.6c0 0.55 0.45 1 1 1h6.05"/>
+				<path id="connection 00000024715907887131769260000013825687344622415521 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m2887.13 2415.97h3.25v0.6c0 0.55 0.45 1 1 1h7.05"/>
+				<path id="connection 00000028285699328546704450000016579270279926080168 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m2898.43 2407.29h-7.05c-0.55 0-1 0.44-1 1v0.6h-3.25"/>
+				<path id="ariel 00000089560187038243618630000010854350287964491940 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m2882.34 2287.22l2.58 2.8c0.79 0.85 1.25 1.94 1.32 3.1l4.77 104.93c0.08 1.35-0.39 2.68-1.31 3.68l-2.57 2.8v15.04h-6.52v-131.67c0-0.91 1.11-1.35 1.73-0.68z"/>
+			</g>
+			<path id="case 00000016037788920912466020000008703708266126348463 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m2978.24 2399.6h-58.81c-1.04 0-2.05 0.32-2.9 0.93l-4.59 3.26c-1.32 0.94-2.11 2.46-2.11 4.08v15.15h78v-15.15c0-1.62-0.78-3.14-2.1-4.08l-4.6-3.26c-0.84-0.61-1.85-0.93-2.89-0.93z"/>
+			<path id="usb 00000044878461668492417020000006245628592329141120 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m2951.42 2416.03h-5c-0.55 0-1-0.45-1-1v-0.4c0-0.56 0.45-1 1-1h5c0.55 0 1 0.44 1 1v0.4c0 0.55-0.45 1-1 1z"/>
+			<g id="connector 00000153692458784545007890000003561891504403730579 ">
+				<g id="usb 00000117653198789917673570000014292086916555364252 ">
+					<path id="&lt;Path&gt;" fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2970.67 2316.02h6.45v-10.18h-6.45"/>
+					<path id="&lt;Path&gt;" fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2950.01 2314.16l5.67 3.22h13.62v-12.9h-13.62l-5.67 3.23z"/>
+					<path id="&lt;Path&gt;" fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2948.61 2308.11h-4.69v5.65h4.69"/>
+					<path id="&lt;Path&gt;" fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2942.12 2308.43v5"/>
+					<path id="&lt;Path&gt;" fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2940.32 2308.43v5"/>
+					<path id="&lt;Path&gt;" fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2938.52 2308.43v5"/>
+					<path id="&lt;Path&gt;" fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2936.72 2308.93v4"/>
+				</g>
+				<path id="cable 00000080202556158217980370000010178581861516928136 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2936.72 2310.93h-17.02c-22.09 0-23.24 25.12 0 25.12 23.24 0-11.94 0 6.42 0 21.23 0 22.8 5.47 22.8 22.8 0 12.02 0 14.82 0 14.82"/>
+				<g id="micro 00000069388479029703428720000004955715489622039214 ">
+					<path id="&lt;Path&gt;" fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2952.65 2392.12h-7.46v-6.46q0.01-1.13 0.41-2.18l0.99-2.54h4.66l0.99 2.54q0.41 1.05 0.41 2.18z"/>
+					<path id="&lt;Path&gt;" fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2951.05 2379.07h-4.26"/>
+					<path id="&lt;Path&gt;" fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2951.05 2377.27h-4.26"/>
+					<path id="&lt;Path&gt;" fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2951.05 2375.47h-4.26"/>
+					<path id="&lt;Path&gt;" fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2950.42 2373.67h-3"/>
+					<path id="&lt;Path&gt;" fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2946.89 2393.32v2.25h4.06v-2.25"/>
+				</g>
+			</g>
+		</g>
+</svg>

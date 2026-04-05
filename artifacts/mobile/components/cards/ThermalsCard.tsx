@@ -4,6 +4,7 @@ import { StyleSheet, Text, View } from "react-native";
 import Colors from "@/constants/colors";
 import { FanInfo, SensorReading } from "@/context/PcsContext";
 import { BuiltinCardEdit, CardBase, CardTitleEditConfig } from "./CardBase";
+import { CUSTOM_ICON_GROUPS, CustomIconName, renderCustomIcon } from "../icons/CustomIcons";
 
 const C = Colors.light;
 export const THERMALS_ACCENT = "#F97316";
@@ -111,6 +112,9 @@ export const SENSOR_ICON_OPTIONS: string[] = [
   "mci:gamepad-variant", "mci:gamepad-variant-outline",
   "mci:controller-classic", "mci:controller-classic-outline",
   "mci:joystick",
+
+  // ── Custom PC hardware icons (from SVG sprite) ──
+  ...CUSTOM_ICON_GROUPS.flatMap(g => g.icons),
 ];
 
 export function defaultSensorIcon(key: string): string {
@@ -137,6 +141,9 @@ export function defaultSensorIcon(key: string): string {
 }
 
 export function renderSensorIcon(name: string, size: number, color: string): React.ReactElement {
+  if (name.startsWith("si:")) {
+    return renderCustomIcon(name as CustomIconName, size, color) ?? <Feather name="layers" size={size} color={color} />;
+  }
   if (name.startsWith("mci:")) {
     return <MaterialCommunityIcons name={name.slice(4) as any} size={size} color={color} />;
   }

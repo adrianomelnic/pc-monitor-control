@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="1704.6 2282.1 261.8 165.0">
+<g id="AIO-Cooler-icon-v3 00000137815604462770089430000018116080495045669801 ">
+			<g id="fan 00000110465605749159887990000013954496726146714760 ">
+				<path id="cutout 00000137091081602084458500000010859524218321763205 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1770.77 2328.37c0-14.36 11.64-26 26-26 14.36 0 26 11.64 26 26 0 14.36-11.64 26-26 26-14.36 0-26-11.64-26-26z"/>
+				<path id="centre 00000121958713198648443700000009688966531224471709 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1791.77 2328.37c0-2.78 2.24-5.03 5-5.03 2.76 0 5 2.25 5 5.03 0 2.78-2.24 5.04-5 5.04-2.76 0-5-2.26-5-5.04z"/>
+				<g id="fan-blades 00000057848531870032804670000003921210096513022114 ">
+					<path id="blade 00000145016877765065447950000006687614227396562618 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1790.92 2322.48l-6.07-6.12c-0.64-0.64-0.95-1.53-0.86-2.42l0.17-1.55c0.19-1.81 1.35-3.38 3.03-4.08l4.9-2.06"/>
+					<path id="blade 00000153688641606382973470000005839091202164449969 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1801.43 2350.5l4.92-2.06c1.68-0.71 2.85-2.27 3.04-4.09l0.16-1.54c0.09-0.89-0.22-1.79-0.85-2.43l-6.08-6.12"/>
+					<path id="blade 00000037655666985046200940000007896857905394714813 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1790.92 2334.27l-6.06 6.1c-0.64 0.65-1.54 0.97-2.45 0.87l-1.47-0.16c-1.82-0.19-3.39-1.36-4.09-3.05l-2.05-4.95"/>
+					<path id="blade 00000001640914143458934080000016871594578191539614 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1818.74 2323.66l-2.05-4.94c-0.7-1.69-2.27-2.86-4.09-3.06l-1.47-0.15c-0.9-0.1-1.8 0.22-2.45 0.87l-6.06 6.1"/>
+				</g>
+			</g>
+			<g id="fan 00000018208840626783387430000012403066777116151936 ">
+				<path id="cutout 00000160879418099887037510000000495416844324906679 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1832.58 2328.37c0-14.36 11.64-26 26-26 14.36 0 26 11.64 26 26 0 14.36-11.64 26-26 26-14.36 0-26-11.64-26-26z"/>
+				<path id="centre 00000175313021255025426850000015819409678785814698 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1853.61 2328.37c0-2.76 2.23-5 4.97-5 2.74 0 4.96 2.24 4.96 5 0 2.77-2.22 5-4.96 5-2.74 0-4.97-2.23-4.97-5z"/>
+				<g id="fan-blades 00000054984128345414637690000003375951659159231385 ">
+					<path id="blade 00000065783945890259761200000009440678677854374070 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1852.73 2322.48l-6.07-6.12c-0.64-0.64-0.95-1.53-0.86-2.42l0.16-1.55c0.19-1.81 1.36-3.38 3.04-4.08l4.9-2.06"/>
+					<path id="blade 00000163055185937703378280000004011160909589217696 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1863.24 2350.5l4.92-2.06c1.68-0.71 2.84-2.27 3.03-4.09l0.17-1.54c0.09-0.89-0.22-1.79-0.86-2.43l-6.07-6.12"/>
+					<path id="blade 00000174600361248015002350000013464927002802340788 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1852.73 2334.27l-6.06 6.1c-0.65 0.65-1.55 0.97-2.45 0.87l-1.47-0.16c-1.82-0.19-3.39-1.36-4.09-3.05l-2.05-4.95"/>
+					<path id="blade 00000039099190254397602540000007366741570581269404 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1880.55 2323.66l-2.05-4.94c-0.7-1.69-2.27-2.86-4.09-3.06l-1.47-0.15c-0.91-0.1-1.81 0.22-2.45 0.87l-6.06 6.1"/>
+				</g>
+			</g>
+			<g id="fan 00000127019628913887348790000010713901994041576870 ">
+				<path id="cutout 00000049926931577447225360000006697040900888863652 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1894.39 2328.37c0-14.36 11.64-26 26-26 14.36 0 26 11.64 26 26 0 14.36-11.64 26-26 26-14.36 0-26-11.64-26-26z"/>
+				<path id="centre 00000055664759501626027730000018364540894289299122 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1915.39 2328.37c0-2.78 2.24-5.03 5-5.03 2.76 0 5 2.25 5 5.03 0 2.78-2.24 5.04-5 5.04-2.76 0-5-2.26-5-5.04z"/>
+				<g id="fan-blades 00000029034613286719757560000014807720648615612811 ">
+					<path id="blade 00000008859927473254938850000005523736862719182527 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1914.54 2322.48l-6.08-6.12c-0.63-0.64-0.95-1.53-0.85-2.42l0.16-1.55c0.19-1.81 1.36-3.38 3.04-4.08l4.9-2.06"/>
+					<path id="blade 00000130630393199241465610000015046218322030593709 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1925.05 2350.5l4.91-2.06c1.69-0.71 2.85-2.27 3.04-4.09l0.16-1.54c0.1-0.89-0.21-1.79-0.85-2.43l-6.07-6.12"/>
+					<path id="blade 00000170997184137585513130000006091441108364253117 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1914.54 2334.27l-6.07 6.1c-0.64 0.65-1.54 0.97-2.44 0.87l-1.48-0.16c-1.82-0.19-3.38-1.36-4.08-3.05l-2.05-4.95"/>
+					<path id="blade 00000075870841851399609680000015361695024111908257 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1942.35 2323.66l-2.04-4.94c-0.7-1.69-2.27-2.86-4.09-3.06l-1.47-0.15c-0.91-0.1-1.81 0.22-2.45 0.87l-6.06 6.1"/>
+				</g>
+			</g>
+			<g id="case 00000059989471314261240250000008362460841528489868 ">
+				<path id="left-side 00000052824584890963686750000007785748623085751942 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1825.68 2297.1h-59.91v62.54h57.91c1.56-1.56 2.43-2.44 4-4v-54.54c1.56-1.56 2.43-2.43 4-4h55.8"/>
+				<path id="right-side 00000136411234902997821200000016659703703108019347 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1829.68 2359.64h55.8c1.56-1.56 2.44-2.44 4-4v-54.54c1.56-1.56 2.44-2.43 4-4h52.91c2.76 0 5 2.24 5 5v52.54c0 2.76-2.24 5-5 5h-54.91"/>
+			</g>
+			<g id="inlet-outlet 00000006670514536873960430000002487651930807864509 ">
+				<g id="inlet 00000017488343652516897800000000501306424786279301 ">
+					<path id="inlet 00000015328986735905158050000005803139160570476716 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1753.11 2313.84c1.96-1.95 5.12-1.95 7.08 0 1.95 1.95 1.95 5.12 0 7.07-1.96 1.95-5.12 1.95-7.08 0"/>
+					<g id="top-pipe 00000076578017743642899760000002359910162587133853 ">
+						<path id="bottom-piece 00000123412165674722940760000001422315427458963598 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1731.61 2345.37v38.68c0 6.63 5.38 12 12 12h81.16v1h10.62c1.1 0 2-0.89 2-2v-4c0-1.1-0.9-2-2-2h-10.62v1h-80.16c-3.86 0-7-3.13-7-7v-37.68"/>
+						<path id="top-piece 00000075146497902867499480000011102892619453556632 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1731.61 2333.37v-7c0-6.62 5.38-12 12-12h13.04m0 6h-12.04c-3.86 0-7 3.14-7 7v6"/>
+					</g>
+					<g id="connection 00000046326133743357788830000003820228022703742388 ">
+						<path id="top 00000011730183521228677070000014273192139658664334 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1837.39 2391.45h3.13"/>
+						<path id="bottom 00000096036405850039976920000010989857965093193608 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1837.39 2394.65h3.13"/>
+					</g>
+				</g>
+				<g id="outlet 00000082365310938600368100000012846309842715394963 ">
+					<path id="outlet 00000094603419136040062720000009558313948339003312 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1753.11 2335.84c1.96-1.95 5.12-1.95 7.08 0 1.95 1.95 1.95 5.12 0 7.07-1.96 1.95-5.12 1.95-7.08 0"/>
+					<path id="bottom-pipe 00000044169912289814739470000012556210312719483551 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1756.65 2342.37h-23.04c-4.41 0-8 3.59-8 8v35.68c0 9.94 8.06 18 18 18h81.16v-1h10.62c1.1 0 2 0.9 2 2v4c0 1.11-0.9 2-2 2h-10.62v-1h-82.16c-12.7 0-23-10.29-23-23v-38.68c0-6.62 5.38-12 12-12h25.04"/>
+					<g id="connection 00000172414120958864345820000010399858107637342106 ">
+						<path id="top 00000168814456389802566870000008397690938864691112 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1837.39 2405.45h3.13"/>
+						<path id="bottom 00000052063891547533535110000017096516053089062580 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1837.39 2408.65h3.13"/>
+					</g>
+				</g>
+				<g id="IO-case 00000106127487411472422810000008033574718833782145 ">
+					<path id="bottom 00000096040193665753077830000014178183080857344673 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1747.53 2344.37v11.27c0 2.21 1.79 4 4 4h10.24"/>
+					<path id="middle 00000133526127112566536550000007342555821029460402 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1747.53 2322.37v12"/>
+					<path id="top 00000024708655502217055550000010390248236406342842 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1761.77 2297.1h-10.24c-2.21 0-4 1.8-4 4v11.27"/>
+				</g>
+			</g>
+			<g id="CPU-block 00000119811318261306831110000009052307544890221209 ">
+				<path id="L 00000029757985648161364820000003907786467267704464 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1875.82 2399.42h-16"/>
+				<path id="L 00000160170807149592556310000011892142486259748541 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1863.94 2403.53h16"/>
+				<path id="L 00000134956911806250767720000013787111205419570616 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1884.34 2407.93h-16"/>
+				<path id="L 00000133520814088118535940000006720427419140037515 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1872.45 2412.04h16"/>
+				<path id="L 00000169538354109949255420000012514596007599905964 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1892.85 2416.44h-16"/>
+				<path id="L 00000138537970884459340910000001040952076576439986 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1880.96 2420.56h16"/>
+				<path id="L 00000116954642932805313050000004626119583652734115 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1885.36 2424.96h16l7.12 7.11h-65.16v-59.16"/>
+				<path id="L 00000116210432244999716200000013629771695829163933 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1855.42 2395.02h16l-26.1-26.11h65.16v59.16"/>
+				<g id="temperature 00000173864807026553368280000006508190445731323283 ">
+					<path id="2 00000027571595036791611600000009066101372529500302 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1890.44 2381.48h6.04c0.56 0 1 0.45 1 1v4.17c0 0.55-0.44 1-1 1h-5.04c-0.55 0-1 0.45-1 1v4.17c0 0.55 0.45 1 1 1h6.04"/>
+					<path id="3 00000134235832722876568740000014241042595669361338 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1880.44 2381.48h6.04c0.56 0 1 0.45 1 1v10.34c0 0.55-0.44 1-1 1h-6.04m2-6.17h3.08"/>
+					<path id="degrees 00000098201920251608046460000018113461096413352603 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1903.3 2380.48c0 1.09-0.87 1.96-1.96 1.96-1.08 0-1.96-0.87-1.96-1.96 0-1.08 0.88-1.96 1.96-1.96 1.09 0 1.96 0.88 1.96 1.96z"/>
+				</g>
+			</g>
+		</g>
+</svg>

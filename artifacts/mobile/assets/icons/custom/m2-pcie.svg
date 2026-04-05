@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="1167.2 885.0 250.0 80.0">
+<g id="PCIe-M.2-icon-v2">
+			<path id="connector 4 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1393.17 946.9h7.15c1.02 0 1.85-0.91 1.85-2.04v-5.69h-5.13c-0.81 0-1.48-0.64-1.51-1.45l-0.03-0.81c-0.03-0.85 0.65-1.56 1.5-1.56h5.17v-30.13c0-1.12-0.83-2.03-1.85-2.03h-7.15"/>
+			<path id="gold-plating 1 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1182.17 914.04c6.07 0 10.99 4.93 10.99 11 0 6.08-4.92 11-10.99 11v14h211v-50h-211z"/>
+			<path id="chip 1 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1239.11 946.9h-35.7v-43.71h35.7z"/>
+			<g id="sticker 3 ">
+				<path id="sticker 5 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1288.81 946.9h-39.71v-43.71h39.71z"/>
+				<path id="sticker 4 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1291.82 946.9h63.41v-43.71h-63.41"/>
+				<g id="text 15 ">
+					<path id="text 19 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1253.1 915.01h31.4"/>
+					<path id="text 18 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1300.2 910.02h11.08"/>
+					<path id="text 17 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1317.43 910.02h21.86"/>
+					<path id="text 16 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1300.2 918.02h29.85"/>
+				</g>
+			</g>
+			<path id="chip-small 1 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1385.1 935.07h-19.33v-31.88h19.33z"/>
+			<path id="&lt;Path&gt;" fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1182.17 932.57c4.15 0 7.52-3.37 7.52-7.53 0-4.15-3.37-7.52-7.52-7.52"/>
+		</g>
+</svg>

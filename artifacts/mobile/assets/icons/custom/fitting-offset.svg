@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="4218.1 698.3 153.2 78.6">
+<g id="Offset-Fittings-icon">
+				<g id="14mm">
+					<path id="grip 00000041274323940835036870000010604510319173054880 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m4321.25 753.69h-30.62v-11.04h30.62zm-4-2.8v-5.45m-3.77 5.45v-5.45m-3.77 5.45v-5.45m-3.77 5.45v-5.45m-3.77 5.45v-5.45m-3.77 5.45v-5.45m-3.77 5.45v-5.45"/>
+					<path id="thread 00000075876854506085734240000015953394546620342439 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m4296.08 754.85v3.52h19.72v-3.52m-1.63 2.64l-16.46-1.76"/>
+					<path id="top 00000018235413340908518950000000372484715208081849 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m4290.63 740.65v-22.34l5-5 58.66-0.01 2 2v20.34l-5 5-30.04 0.01m32.04-25.39h-39.81c-1.57 0-3.11 0.37-4.5 1.07l-1.81 0.91c-1.4 0.7-2.94 1.07-4.5 1.07h-9.04m0 20.38h17.81c1.57 0 3.11-0.37 4.5-1.07l1.81-0.91c1.39-0.71 2.94-1.07 4.5-1.07h31.04"/>
+				</g>
+				<g id="7mm">
+					<path id="grip 00000081633059621969032250000013084962163326716318 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m4250.14 742.65h30.62v11.04h-30.62zm4 2.8v5.44m3.77-5.44v5.44m3.77-5.44v5.44m3.77-5.44v5.44m3.77-5.44v5.44m3.77-5.44v5.44m3.77-5.44v5.44"/>
+					<path id="thread 00000049196635958676963210000001025682894339078791 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m4255.59 754.85v3.52h19.72v-3.52m-1.63 0.88l-16.46 1.76"/>
+					<path id="top 00000070833741423509067650000001476720479818112906 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m4250.14 740.65l-12.04-0.01-5-5v-20.34l2-2 40.66 0.01 5 5v22.34m-3-22.34h-9.04c-1.56 0-3.11-0.37-4.5-1.07l-1.81-0.91c-1.39-0.7-2.93-1.07-4.5-1.07h-21.81m0 20.38h13.04c1.56 0 3.11 0.36 4.5 1.07l1.81 0.91c1.39 0.7 2.93 1.07 4.5 1.07h17.81"/>
+				</g>
+			</g>
+</svg>

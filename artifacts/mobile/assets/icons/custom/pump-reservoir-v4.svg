@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="3176.3 1791.0 85.1 173.3">
+<g id="Pump-Reservoir-Combo-icon-v4 00000170972435201407178490000007731532976269501834 ">
+			<path id="body 00000183956312063194800700000015805610647790718120 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m3243.21 1818.36v84.46m-48.75 0v-84.46"/>
+			<path id="glass 00000031175652659612689080000012645969546060210074 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m3227.95 1896.24h-18.23c-3.32 0-6-2.68-6-6v-59.68c0-3.31 2.68-6 6-6h18.23c3.31 0 6 2.69 6 6v59.68c0 3.32-2.69 6-6 6z"/>
+			<path id="downpipe 00000060738697209800033560000004923294420612531344 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m3203.72 1835.57h30.23m-27.95 0v16.98h8.35v-16.98"/>
+			<path id="uppipe 00000091710820614134518000000008570116569824427660 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m3214.66 1896.24v-31.69h8.35v31.69"/>
+			<path id="top 00000067934538989931888930000015670861042598435741 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m3243.21 1805.96v9.4h-48.75v-9.4z"/>
+			<g id="inlet-outlet 00000147216364297747381710000002728657958218405018 ">
+				<path id="inlet 00000140728940720684580250000008138461943224631973 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m3246.4 1926.87h-55.14v-21.05h55.14z"/>
+				<path id="outlet 00000076579735721555126810000007219493498729807021 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m3214.91 1913.54c0 2.74-2.22 4.96-4.96 4.96-2.74 0-4.96-2.22-4.96-4.96 0-2.73 2.22-4.95 4.96-4.95 2.74 0 4.96 2.22 4.96 4.95zm-6.46 7.58l1.5 3.02 1.5-3.02"/>
+				<path id="inlet 00000075858741658316616340000012106436915632017545 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m3234.77 1913.54c0 2.74-2.22 4.96-4.96 4.96-2.73 0-4.95-2.22-4.95-4.96 0-2.73 2.22-4.95 4.95-4.95 2.74 0 4.96 2.22 4.96 4.95zm-3.46 10.6l-1.5-3.02-1.5 3.02"/>
+			</g>
+			<path id="base 00000088812907701956459940000004373953531802611612 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m3194.46 1929.41v19.8h48.75v-19.8"/>
+		</g>
+</svg>

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="3951.8 1835.6 227.4 130.0">
+<g id="Webcam-icon-v3">
+			<g id="camera">
+				<path id="thread 00000061458810294712739160000002961014363917275284 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m3966.81 1856.53v45.44m3.86-45.44v45.44m3.85-45.44v45.44m3.86-45.44v45.44m3.86-45.44v45.44m3.85-45.44v45.44"/>
+				<path id="case 00000008113910333929145150000004580015710907705472 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m3989.95 1850.56v57.37h50.76c4.17-3.62 10.68-5.96 18-5.96h36.73c7.31 0 13.82 2.34 17.99 5.96h50.76v-57.37z"/>
+				<g id="lens-unit">
+					<path id="lens 00000093157665485782635270000008982437496711591578 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4068.3 1873.4c-3.23 0-5.85 2.62-5.85 5.85 0 3.23 2.62 5.85 5.85 5.85 3.23 0 5.85-2.62 5.85-5.85 0-3.23-2.62-5.85-5.85-5.85zm2.92 5.85c0 1.61-1.31 2.92-2.92 2.92-1.62 0-2.93-1.31-2.93-2.92 0-1.62 1.31-2.93 2.93-2.93 1.61 0 2.92 1.31 2.92 2.93z"/>
+					<path id="unit 00000134225806694680846960000007577343751283940028 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4068.3 1863.89c8.46 0 15.35 6.89 15.35 15.36 0 8.47-6.89 15.35-15.35 15.35h-36.56c-8.47 0-15.36-6.88-15.36-15.35 0-8.47 6.89-15.36 15.36-15.36zm0 26.33c6.05 0 10.96-4.91 10.96-10.97 0-6.06-4.91-10.97-10.96-10.97h-36.56c-6.06 0-10.97 4.91-10.97 10.97 0 6.06 4.91 10.97 10.97 10.97zm-7.27 0c-3.55-2.36-5.9-6.39-5.9-10.97 0-4.58 2.35-8.61 5.9-10.97"/>
+					<path id="shutter" fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4082.77 1864.77c8 8 8 20.96 0 28.96"/>
+				</g>
+				<path id="branding 00000083091316748552468490000012035505558530334627 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4111.87 1882.17h39.84m-39.84-5.85h13.51"/>
+			</g>
+			<g id="stand 00000075845131757414004790000009655151192487810224 ">
+				<path id="mount" fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4087.92 1904.31v3.62h-39.24v-2.04"/>
+				<path id="base 00000026149714183656378350000014213558537435064705 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4101.24 1950.56h-65.91c-4.04 0-7.31-3.27-7.31-7.31v-11.61c0-4.04 3.27-7.32 7.31-7.32h65.91c4.04 0 7.31 3.28 7.31 7.32v11.61c0 4.04-3.27 7.31-7.31 7.31z"/>
+				<path id="ball-joint" fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4052.3 1923c0.05-4.65 2.11-8.81 5.32-11.7m26.65 11.7c-0.06-4.65-2.11-8.81-5.32-11.7"/>
+			</g>
+		</g>
+</svg>
