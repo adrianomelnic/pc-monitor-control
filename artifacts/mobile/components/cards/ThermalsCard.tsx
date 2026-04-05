@@ -15,45 +15,102 @@ export function isImportantTemp(label: string): boolean {
 
 // Icons prefixed with "mci:" use MaterialCommunityIcons; others use Feather
 export const SENSOR_ICON_OPTIONS: string[] = [
-  // Fans & airflow
+  // ── PC Case / Chassis ──
+  "mci:desktop-tower", "mci:desktop-classic", "mci:server", "mci:server-outline",
+  "mci:nas",
+
+  // ── Motherboard ──
+  "mci:motherboard", "mci:motherboard-outline",
+
+  // ── CPU / Processor ──
+  "mci:chip", "mci:cpu-64-bit", "mci:cpu-32-bit", "mci:integrated-circuit-chip",
+
+  // ── GPU / Graphics / Expansion Cards ──
+  "mci:expansion-card", "mci:pci-card", "mci:pci-card-outline",
+
+  // ── RAM / Memory ──
+  "mci:memory",
+
+  // ── Storage — HDD / SSD / M.2 ──
+  "mci:harddisk", "mci:solid-state-drive", "mci:solid-state-drive-outline", "mci:disc",
+
+  // ── Storage — Removable ──
+  "mci:sd-card", "mci:usb-flash-drive", "mci:usb-flash-drive-outline",
+
+  // ── Power Supply ──
+  "mci:power-plug", "mci:power-plug-outline",
+  "mci:power-socket", "mci:power-socket-eu",
+  "mci:lightning-bolt", "mci:lightning-bolt-outline",
+  "mci:battery-charging", "mci:battery-charging-100",
+  "mci:transmission-tower",
+
+  // ── Case Fans ──
   "mci:fan", "mci:fan-speed-1", "mci:fan-speed-2", "mci:fan-speed-3",
   "mci:fan-alert", "mci:fan-auto", "mci:fan-plus", "mci:fan-minus",
-  // Water cooling
-  "mci:water-pump", "mci:water", "mci:snowflake", "mci:coolant-temperature",
-  // CPU / Processor
-  "mci:chip", "mci:cpu-64-bit", "mci:cpu-32-bit", "mci:integrated-circuit-chip",
-  // GPU / Graphics
-  "mci:expansion-card", "mci:pci-card", "mci:pci-card-outline", "mci:resistor",
-  // Motherboard / Chipset
-  "mci:motherboard", "mci:motherboard-outline", "mci:memory", "mci:heating-coil",
-  // Storage
-  "mci:harddisk", "mci:solid-state-drive", "mci:solid-state-drive-outline",
-  "mci:sd-card", "mci:usb-flash-drive", "mci:disc",
-  // Case / System
-  "mci:desktop-tower", "mci:server", "mci:nas", "mci:desktop-classic",
-  // Power supply
-  "mci:power-plug", "mci:power-socket", "mci:lightning-bolt", "mci:battery-charging-100",
-  "mci:transmission-tower",
-  // Temperature & sensors
+
+  // ── Air Cooling (CPU cooler / heatsink) ──
+  "mci:heating-coil",
+
+  // ── Liquid Cooling — Pump / Reservoir ──
+  "mci:water-pump", "mci:water-pump-off",
+
+  // ── Liquid Cooling — Coolant / Tubes ──
+  "mci:water", "mci:water-outline",
+  "mci:pipe", "mci:pipe-disconnected",
+  "mci:snowflake", "mci:coolant-temperature",
+
+  // ── VRM / Electronics ──
+  "mci:resistor",
+
+  // ── Temperature / Thermals ──
   "mci:thermometer", "mci:thermometer-high", "mci:thermometer-low",
   "mci:thermometer-alert", "mci:thermometer-lines",
-  // Networking
-  "mci:ethernet", "mci:wifi", "mci:router-wireless", "mci:network",
-  "mci:lan", "mci:lan-connect",
-  // Peripherals — display
-  "mci:monitor", "mci:monitor-multiple", "mci:television", "mci:projector",
-  // Peripherals — input
-  "mci:keyboard", "mci:keyboard-outline", "mci:mouse", "mci:mouse-outline",
-  // Peripherals — audio
-  "mci:headphones", "mci:headset", "mci:microphone", "mci:microphone-outline",
-  "mci:speaker", "mci:speaker-multiple", "mci:surround-sound",
-  // Peripherals — camera & misc
-  "mci:webcam", "mci:webcam-outline", "mci:printer", "mci:printer-outline",
-  // Gaming
-  "mci:gamepad-variant", "mci:gamepad-variant-outline", "mci:controller-classic",
-  "mci:joystick",
-  // USB / IO
+
+  // ── Speed / Gauge (RPM, pressure) ──
+  "mci:gauge", "mci:gauge-full", "mci:gauge-low",
+  "mci:speedometer", "mci:speedometer-medium", "mci:speedometer-slow",
+
+  // ── Networking / Connectivity ──
+  "mci:ethernet", "mci:wifi",
+  "mci:router-wireless", "mci:router-network",
+  "mci:network", "mci:lan", "mci:lan-connect",
+  "mci:access-point", "mci:access-point-network",
+
+  // ── Bluetooth ──
+  "mci:bluetooth", "mci:bluetooth-audio",
+
+  // ── USB / IO Ports ──
   "mci:usb", "mci:usb-port", "mci:usb-c-port",
+
+  // ── Display / Monitor ──
+  "mci:monitor", "mci:monitor-multiple", "mci:television", "mci:projector",
+
+  // ── Keyboard ──
+  "mci:keyboard", "mci:keyboard-outline",
+
+  // ── Mouse ──
+  "mci:mouse", "mci:mouse-outline",
+
+  // ── Headphones / Headset ──
+  "mci:headphones", "mci:headset",
+
+  // ── Microphone ──
+  "mci:microphone", "mci:microphone-outline", "mci:microphone-variant",
+
+  // ── Speaker / Audio ──
+  "mci:speaker", "mci:speaker-multiple", "mci:surround-sound",
+  "mci:speaker-wireless", "mci:volume-high",
+
+  // ── Webcam ──
+  "mci:webcam", "mci:webcam-outline",
+
+  // ── Printer / Scanner ──
+  "mci:printer", "mci:printer-outline", "mci:scanner",
+
+  // ── Gaming / Controllers ──
+  "mci:gamepad-variant", "mci:gamepad-variant-outline",
+  "mci:controller-classic", "mci:controller-classic-outline",
+  "mci:joystick",
 ];
 
 export function defaultSensorIcon(key: string): string {
