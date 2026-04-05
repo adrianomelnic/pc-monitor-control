@@ -554,24 +554,30 @@ export default function PCDetailScreen() {
             </Pressable>
           </View>
           {card.kind === "thermals" && isPickerOpen && (
-            <View style={[styles.iconPickerRow, { borderColor: accent + "33" }]}>
-              {SENSOR_ICON_OPTIONS.map(iconName => {
-                const isSelected = currentIcon === iconName;
-                return (
-                  <Pressable
-                    key={iconName}
-                    onPress={() => { updateSensorIcon(card.kind, key, iconName); setIconPickerKey(null); }}
-                    hitSlop={4}
-                    style={[
-                      styles.iconPickerBtn,
-                      isSelected && { backgroundColor: accent + "22", borderColor: accent + "66" },
-                    ]}
-                  >
-                    {renderSensorIcon(iconName, 16, isSelected ? accent : C.textMuted)}
-                  </Pressable>
-                );
-              })}
-            </View>
+            <ScrollView
+              style={[styles.iconPickerScroll, { borderColor: accent + "33" }]}
+              nestedScrollEnabled
+              showsVerticalScrollIndicator={false}
+            >
+              <View style={styles.iconPickerRow}>
+                {SENSOR_ICON_OPTIONS.map(iconName => {
+                  const isSelected = currentIcon === iconName;
+                  return (
+                    <Pressable
+                      key={iconName}
+                      onPress={() => { updateSensorIcon(card.kind, key, iconName); setIconPickerKey(null); }}
+                      hitSlop={4}
+                      style={[
+                        styles.iconPickerBtn,
+                        isSelected && { backgroundColor: accent + "22", borderColor: accent + "66" },
+                      ]}
+                    >
+                      {renderSensorIcon(iconName, 16, isSelected ? accent : C.textMuted)}
+                    </Pressable>
+                  );
+                })}
+              </View>
+            </ScrollView>
           )}
         </View>
       );
@@ -1706,15 +1712,18 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     flexShrink: 0,
   },
+  iconPickerScroll: {
+    maxHeight: 240,
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
+    marginBottom: 2,
+  },
   iconPickerRow: {
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 6,
     paddingVertical: 8,
     paddingHorizontal: 4,
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    marginBottom: 2,
   },
   iconPickerBtn: {
     width: 34,

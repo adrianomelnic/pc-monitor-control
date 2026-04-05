@@ -616,24 +616,30 @@ export function SensorCard({
 
         {/* Icon picker (opens below row) */}
         {isPickerOpen && (
-          <View style={[dragStyles.iconPickerRow, { borderColor: accentColor + "33" }]}>
-            {SENSOR_ICON_OPTIONS.map((iconName) => {
-              const isSelected = currentIcon === iconName;
-              return (
-                <Pressable
-                  key={iconName}
-                  onPress={() => { onUpdateSensorIcon?.(key, iconName); setIconPickerKey(null); }}
-                  hitSlop={4}
-                  style={[
-                    dragStyles.iconPickerBtn,
-                    isSelected && { backgroundColor: accentColor + "22", borderColor: accentColor + "66" },
-                  ]}
-                >
-                  {renderSensorIcon(iconName, 16, isSelected ? accentColor : C.textMuted)}
-                </Pressable>
-              );
-            })}
-          </View>
+          <ScrollView
+            style={[dragStyles.iconPickerScroll, { borderColor: accentColor + "33" }]}
+            nestedScrollEnabled
+            showsVerticalScrollIndicator={false}
+          >
+            <View style={dragStyles.iconPickerRow}>
+              {SENSOR_ICON_OPTIONS.map((iconName) => {
+                const isSelected = currentIcon === iconName;
+                return (
+                  <Pressable
+                    key={iconName}
+                    onPress={() => { onUpdateSensorIcon?.(key, iconName); setIconPickerKey(null); }}
+                    hitSlop={4}
+                    style={[
+                      dragStyles.iconPickerBtn,
+                      isSelected && { backgroundColor: accentColor + "22", borderColor: accentColor + "66" },
+                    ]}
+                  >
+                    {renderSensorIcon(iconName, 16, isSelected ? accentColor : C.textMuted)}
+                  </Pressable>
+                );
+              })}
+            </View>
+          </ScrollView>
         )}
       </View>
     );
@@ -1032,15 +1038,18 @@ const dragStyles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  iconPickerScroll: {
+    maxHeight: 240,
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
+    marginBottom: 2,
+  },
   iconPickerRow: {
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 6,
     paddingVertical: 8,
     paddingHorizontal: 4,
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    marginBottom: 2,
   },
   iconPickerBtn: {
     width: 34,
