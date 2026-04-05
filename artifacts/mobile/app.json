@@ -19,6 +19,7 @@
     },
     "android": {
       "package": "com.adrianomelnic.pcmonitorcontrol",
+      "usesCleartextTraffic": true,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/icon.png",
         "backgroundColor": "#000000"
