@@ -1039,7 +1039,7 @@ const dragStyles = StyleSheet.create({
     alignItems: "center",
   },
   iconPickerScroll: {
-    maxHeight: 268,
+    height: 192,
     borderTopWidth: 1,
     borderBottomWidth: 1,
     marginBottom: 2,
