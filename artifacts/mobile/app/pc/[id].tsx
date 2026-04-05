@@ -963,9 +963,11 @@ export default function PCDetailScreen() {
         <View style={styles.headerInfo}>
           <View style={styles.headerNameRow}>
             <Text style={styles.pcName} numberOfLines={1}>{pc.name}</Text>
-            <View style={[styles.statusDot, { backgroundColor: statusColor }]} />
-            <Text style={[styles.statusText, { color: statusColor }]}>
-              {pc.status === "online"
+            <View style={[styles.statusDot, { backgroundColor: isDemo ? "#F97316" : statusColor }]} />
+            <Text style={[styles.statusText, { color: isDemo ? "#F97316" : statusColor }]}>
+              {isDemo
+                ? "Demo"
+                : pc.status === "online"
                 ? "Online"
                 : pc.status === "connecting"
                 ? "Connecting..."
@@ -974,16 +976,6 @@ export default function PCDetailScreen() {
           </View>
         </View>
       </View>
-
-      {/* ── Demo notice ── */}
-      {isDemo && (
-        <View style={styles.demoNotice}>
-          <Feather name="play-circle" size={13} color="#F97316" />
-          <Text style={styles.demoNoticeText}>
-            This is simulated data — install the agent on a real PC to connect
-          </Text>
-        </View>
-      )}
 
       {/* ── Edit mode banner ── */}
       {editMode && (
