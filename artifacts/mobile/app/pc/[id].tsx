@@ -975,15 +975,12 @@ export default function PCDetailScreen() {
     >
       {/* ── Header: two rows ── */}
       <View style={styles.header}>
-        {/* Row 1: back arrow + PC name */}
+        {/* Row 1: back arrow + PC name + status */}
         <View style={styles.headerRow1}>
           <Pressable onPress={() => router.back()} style={styles.backBtn} hitSlop={8}>
             <Feather name="arrow-left" size={22} color={C.text} />
           </Pressable>
           <Text style={styles.pcName} numberOfLines={1}>{pc.name}</Text>
-        </View>
-        {/* Row 2: status left, actions right */}
-        <View style={styles.headerRow2}>
           <View style={styles.headerStatus}>
             <View style={[styles.statusDot, { backgroundColor: isDemo ? "#F97316" : statusColor }]} />
             <Text style={[styles.statusText, { color: isDemo ? "#F97316" : statusColor }]}>
@@ -996,7 +993,10 @@ export default function PCDetailScreen() {
                 : "Offline"}
             </Text>
           </View>
-          {pc.status === "online" ? (
+        </View>
+        {/* Row 2: action buttons (right-aligned) */}
+        {pc.status === "online" ? (
+          <View style={styles.headerRow2}>
             <View style={styles.headerActions}>
               <Pressable
                 onPress={() => { Haptics.selectionAsync(); setEditMode((e) => !e); }}
@@ -1032,8 +1032,8 @@ export default function PCDetailScreen() {
                 <Feather name="power" size={16} color={activePanel === "controls" ? "#fff" : C.tint} />
               </Pressable>
             </View>
-          ) : null}
-        </View>
+          </View>
+        ) : null}
       </View>
 
       {/* ── Inline expandable header panel ── */}
@@ -1354,7 +1354,7 @@ const styles = StyleSheet.create({
   headerRow2: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
+    justifyContent: "flex-end",
     paddingLeft: 44,
   },
   backBtn: {
