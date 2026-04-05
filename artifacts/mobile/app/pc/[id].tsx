@@ -960,20 +960,18 @@ export default function PCDetailScreen() {
         <Pressable onPress={() => router.back()} style={styles.backBtn} hitSlop={8}>
           <Feather name="arrow-left" size={22} color={C.text} />
         </Pressable>
-        <View style={styles.headerInfo}>
-          <View style={styles.headerNameRow}>
-            <Text style={styles.pcName} numberOfLines={1}>{pc.name}</Text>
-            <View style={[styles.statusDot, { backgroundColor: isDemo ? "#F97316" : statusColor }]} />
-            <Text style={[styles.statusText, { color: isDemo ? "#F97316" : statusColor }]}>
-              {isDemo
-                ? "Demo"
-                : pc.status === "online"
-                ? "Online"
-                : pc.status === "connecting"
-                ? "Connecting..."
-                : "Offline"}
-            </Text>
-          </View>
+        <Text style={styles.pcName} numberOfLines={1}>{pc.name}</Text>
+        <View style={styles.headerStatus}>
+          <View style={[styles.statusDot, { backgroundColor: isDemo ? "#F97316" : statusColor }]} />
+          <Text style={[styles.statusText, { color: isDemo ? "#F97316" : statusColor }]}>
+            {isDemo
+              ? "Demo"
+              : pc.status === "online"
+              ? "Online"
+              : pc.status === "connecting"
+              ? "Connecting..."
+              : "Offline"}
+          </Text>
         </View>
       </View>
 
@@ -1306,32 +1304,27 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  headerInfo: {
-    flex: 1,
-  },
-  headerNameRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    flexShrink: 1,
-  },
   pcName: {
+    flex: 1,
     fontSize: 22,
     fontWeight: "800",
     color: C.text,
     letterSpacing: -0.3,
-    flexShrink: 1,
+  },
+  headerStatus: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    flexShrink: 0,
   },
   statusDot: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    flexShrink: 0,
   },
   statusText: {
     fontSize: 13,
     fontWeight: "600",
-    flexShrink: 0,
   },
   infoCard: {
     backgroundColor: C.card,
