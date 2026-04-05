@@ -975,6 +975,16 @@ export default function PCDetailScreen() {
         </View>
       </View>
 
+      {/* ── Demo notice ── */}
+      {isDemo && (
+        <View style={styles.demoNotice}>
+          <Feather name="play-circle" size={13} color="#F97316" />
+          <Text style={styles.demoNoticeText}>
+            This is simulated data — install the agent on a real PC to connect
+          </Text>
+        </View>
+      )}
+
       {/* ── PC Info card ── */}
       <View style={styles.infoCard}>
         {pc.os ? (
@@ -1006,16 +1016,6 @@ export default function PCDetailScreen() {
           <Text style={styles.deleteRowText}>Remove PC</Text>
         </Pressable>
       </View>
-
-      {/* ── Demo notice ── */}
-      {isDemo && (
-        <View style={styles.demoNotice}>
-          <Feather name="play-circle" size={13} color="#F97316" />
-          <Text style={styles.demoNoticeText}>
-            This is simulated data — install the agent on a real PC to connect
-          </Text>
-        </View>
-      )}
 
       {/* ── Edit mode banner ── */}
       {editMode && (
