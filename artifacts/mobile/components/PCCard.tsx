@@ -157,14 +157,24 @@ export function PCCard({ pc }: PCCardProps) {
 
       <View style={styles.cardSeparator} />
 
-      <Pressable
-        style={({ pressed }) => [styles.deleteRow, pressed && { opacity: 0.65 }]}
-        onPress={handleRemove}
-        hitSlop={8}
-      >
-        <Feather name="trash-2" size={13} color={C.danger} />
-        <Text style={styles.deleteRowText}>Remove PC</Text>
-      </Pressable>
+      <View style={styles.cardActions}>
+        <Pressable
+          style={({ pressed }) => [styles.actionBtn, pressed && { opacity: 0.65 }]}
+          onPress={() => router.push(`/pc/${pc.id}`)}
+          hitSlop={8}
+        >
+          <Feather name="edit-2" size={13} color={C.tint} />
+          <Text style={[styles.actionBtnText, { color: C.tint }]}>Edit</Text>
+        </Pressable>
+        <Pressable
+          style={({ pressed }) => [styles.actionBtn, pressed && { opacity: 0.65 }]}
+          onPress={handleRemove}
+          hitSlop={8}
+        >
+          <Feather name="trash-2" size={13} color={C.danger} />
+          <Text style={[styles.actionBtnText, { color: C.danger }]}>Remove PC</Text>
+        </Pressable>
+      </View>
     </Pressable>
   );
 }
@@ -241,15 +251,19 @@ const styles = StyleSheet.create({
     backgroundColor: C.cardBorder,
     marginHorizontal: -2,
   },
-  deleteRow: {
+  cardActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  actionBtn: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
   },
-  deleteRowText: {
+  actionBtnText: {
     fontSize: 12,
     fontWeight: "600",
-    color: C.danger,
   },
   metrics: {
     flexDirection: "row",
