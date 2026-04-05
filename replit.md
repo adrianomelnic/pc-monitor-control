@@ -14,6 +14,7 @@ iOS/Android Expo app that connects directly to PC agents over local WiFi (HTTP p
 - Custom sensor cards: pick any HWiNFO64 sensor (temp, voltage, power, clock, fan, usage…)
 - PC controls: Sleep, Lock, Restart, Shutdown, remote terminal
 - Per-PC layout persisted in AsyncStorage (survives app restarts)
+- **Portrait & landscape support**: `app.json` orientation set to `"default"`; dashboard uses `useWindowDimensions` to switch to 2-column `flexWrap` grid when width >= 600px (landscape on tablets/phones); home screen FlatList uses `numColumns={2}` on wide screens
 
 ## Architecture
 - Direct HTTP from phone to agent on port 8765 (no server middleman)

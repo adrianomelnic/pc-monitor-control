@@ -12,6 +12,7 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  useWindowDimensions,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -174,6 +175,8 @@ export default function PCDetailScreen() {
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 : insets.bottom;
+  const { width } = useWindowDimensions();
+  const isWide = width >= 600;
 
   if (!pc) {
     return (
@@ -1183,38 +1186,40 @@ export default function PCDetailScreen() {
       {/* ── COMPONENT CARDS ── */}
       {m && (
         <>
-          {cards.map((card, idx) => {
-            const content = renderCardContent(card);
-            // In normal mode: skip hidden cards and empty cards
-            if (!editMode && (!card.visible || !content)) return null;
+          <View style={isWide && !editMode ? styles.cardGrid : undefined}>
+            {cards.map((card, idx) => {
+              const content = renderCardContent(card);
+              // In normal mode: skip hidden cards and empty cards
+              if (!editMode && (!card.visible || !content)) return null;
 
-            const isFirst = idx === 0;
-            const isLast = idx === cards.length - 1;
+              const isFirst = idx === 0;
+              const isLast = idx === cards.length - 1;
 
-            return (
-              <View key={card.id}>
-                {editMode && (
-                  <EditBar card={card} isFirst={isFirst} isLast={isLast} />
-                )}
-                {card.visible ? (
-                  content
-                ) : (
-                  /* Hidden card placeholder — only shown in edit mode */
-                  editMode ? (
-                    <View style={styles.hiddenPlaceholder}>
-                      <Feather name="eye-off" size={13} color={C.textMuted} />
-                      <Text style={styles.hiddenPlaceholderText}>
-                        {card.kind === "custom"
-                          ? (card as CustomCardConfig).title
-                          : CARD_NAMES[card.kind] ?? card.kind}{" "}
-                        card is hidden
-                      </Text>
-                    </View>
-                  ) : null
-                )}
-              </View>
-            );
-          })}
+              return (
+                <View key={card.id} style={isWide && !editMode && card.visible ? styles.cardGridItem : undefined}>
+                  {editMode && (
+                    <EditBar card={card} isFirst={isFirst} isLast={isLast} />
+                  )}
+                  {card.visible ? (
+                    content
+                  ) : (
+                    /* Hidden card placeholder — only shown in edit mode */
+                    editMode ? (
+                      <View style={styles.hiddenPlaceholder}>
+                        <Feather name="eye-off" size={13} color={C.textMuted} />
+                        <Text style={styles.hiddenPlaceholderText}>
+                          {card.kind === "custom"
+                            ? (card as CustomCardConfig).title
+                            : CARD_NAMES[card.kind] ?? card.kind}{" "}
+                          card is hidden
+                        </Text>
+                      </View>
+                    ) : null
+                  )}
+                </View>
+              );
+            })}
+          </View>
 
           {/* Add Sensor Card button (edit mode only) */}
           {editMode && (
@@ -1442,6 +1447,15 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: C.textSecondary,
     lineHeight: 17,
+  },
+  cardGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 12,
+  },
+  cardGridItem: {
+    flex: 1,
+    minWidth: "45%",
   },
   editBanner: {
     flexDirection: "row",

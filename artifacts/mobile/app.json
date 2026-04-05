@@ -3,7 +3,7 @@
     "name": "PC Monitor & Control",
     "slug": "pc-monitor-control",
     "version": "1.0.0",
-    "orientation": "portrait",
+    "orientation": "default",
     "icon": "./assets/images/icon.png",
     "scheme": "pcmonitorcontrol",
     "userInterfaceStyle": "automatic",

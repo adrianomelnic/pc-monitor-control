@@ -9,6 +9,7 @@ import {
   RefreshControl,
   StyleSheet,
   Text,
+  useWindowDimensions,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -24,6 +25,9 @@ export default function HomeScreen() {
   const [addVisible, setAddVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
+  const isWide = width >= 600;
+  const numCols = isWide ? 2 : 1;
 
   const isDemoAdded = pcs.some((p) => p.host === DEMO_PC_HOST);
 
@@ -68,8 +72,11 @@ export default function HomeScreen() {
       </View>
 
       <FlatList
+        key={numCols}
         data={pcs}
         keyExtractor={(item) => item.id}
+        numColumns={numCols}
+        columnWrapperStyle={isWide ? styles.columnWrapper : undefined}
         contentContainerStyle={[
           styles.list,
           { paddingBottom: 100 + bottomPad },
@@ -83,7 +90,11 @@ export default function HomeScreen() {
             colors={[C.tint]}
           />
         }
-        renderItem={({ item }) => <PCCard pc={item} />}
+        renderItem={({ item }) => (
+          <View style={isWide ? styles.pcCardWrapper : undefined}>
+            <PCCard pc={item} />
+          </View>
+        )}
         ListEmptyComponent={
           <View style={styles.empty}>
             <Feather name="monitor" size={48} color={C.textMuted} />
@@ -159,6 +170,12 @@ const styles = StyleSheet.create({
   list: {
     paddingHorizontal: 16,
     paddingTop: 8,
+  },
+  columnWrapper: {
+    gap: 12,
+  },
+  pcCardWrapper: {
+    flex: 1,
   },
   empty: {
     alignItems: "center",
