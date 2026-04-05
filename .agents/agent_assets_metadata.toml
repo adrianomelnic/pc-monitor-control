@@ -1,0 +1,26 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "Rf8fumieEe8LzrofU0Sko"
+uri = "file://attached_assets/icon_option_1.png"
+type = "image"
+title = "icon option 1 monitor"
+
+[[generated]]
+id = "6lRkV4v4ndsn5OVA7zV6Q"
+uri = "file://attached_assets/icon_option_2.png"
+type = "image"
+title = "icon option 2 cpu wifi"
+
+[[generated]]
+id = "VKjDeUd9Y604LEpawlRxq"
+uri = "file://attached_assets/icon_option_3.png"
+type = "image"
+title = "icon option 3 speedometer"
+
+[[generated]]
+id = "lWvaTVhodR2RogqJ9oqIS"
+uri = "file://attached_assets/icon_option_4.png"
+type = "image"
+title = "icon option 4 pc tower"
