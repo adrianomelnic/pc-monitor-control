@@ -24,3 +24,27 @@ id = "lWvaTVhodR2RogqJ9oqIS"
 uri = "file://attached_assets/icon_option_4.png"
 type = "image"
 title = "icon option 4 pc tower"
+
+[[generated]]
+id = "9dSuVhXveJpng_EostSBF"
+uri = "file://attached_assets/icon_new_1.png"
+type = "image"
+title = "icon new 1 pulse"
+
+[[generated]]
+id = "y4n89t0FhUXiFiPQ9l0cZ"
+uri = "file://attached_assets/icon_new_2.png"
+type = "image"
+title = "icon new 2 eye monitor"
+
+[[generated]]
+id = "i7zd02Apg7Npl_BV3PPY6"
+uri = "file://attached_assets/icon_new_3.png"
+type = "image"
+title = "icon new 3 dashboard grid"
+
+[[generated]]
+id = "ng_g_XgGHbkK6zHDLHBLy"
+uri = "file://attached_assets/icon_new_4.png"
+type = "image"
+title = "icon new 4 monitor wifi"
