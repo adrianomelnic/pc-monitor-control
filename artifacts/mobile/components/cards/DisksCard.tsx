@@ -66,19 +66,17 @@ export function DisksCard({ disks, titleEdit, cardEdit }: Props) {
             <Text style={styles.spaceSep}>·</Text>
             <Text style={styles.spaceTotal}>{fmtMB(disk.total)} total</Text>
           </View>
-          {(disk.readSpeed > 0 || disk.writeSpeed > 0) && (
-            <View style={styles.ioRow}>
-              <View style={styles.ioItem}>
-                <Text style={styles.ioLabel}>Read</Text>
-                <Text style={[styles.ioVal, { color: "#2DD4BF" }]}>{fmtSpeed(disk.readSpeed)}</Text>
-              </View>
-              <View style={styles.ioSep} />
-              <View style={styles.ioItem}>
-                <Text style={styles.ioLabel}>Write</Text>
-                <Text style={[styles.ioVal, { color: "#F472B6" }]}>{fmtSpeed(disk.writeSpeed)}</Text>
-              </View>
+          <View style={styles.ioRow}>
+            <View style={styles.ioItem}>
+              <Text style={styles.ioLabel}>Read</Text>
+              <Text style={[styles.ioVal, { color: "#2DD4BF" }]}>{fmtSpeed(disk.readSpeed ?? 0)}</Text>
             </View>
-          )}
+            <View style={styles.ioSep} />
+            <View style={styles.ioItem}>
+              <Text style={styles.ioLabel}>Write</Text>
+              <Text style={[styles.ioVal, { color: "#F472B6" }]}>{fmtSpeed(disk.writeSpeed ?? 0)}</Text>
+            </View>
+          </View>
         </View>
       );
     }
