@@ -118,24 +118,23 @@ export function CPUCard({ cpu, titleEdit, cardEdit }: Props) {
 
       {showPerCoreVertical && (
         <View style={styles.belowSection}>
-          <Text style={styles.sectionLabel}>{getLabel("perCoreVertical", "PER CORE")}</Text>
+          <Text style={styles.sectionLabel}>
+            {getLabel("perCoreVertical", "PER CORE")}{cores.length > 8 ? `  (${cores.length})` : ""}
+          </Text>
           <View style={styles.verticalChartRow}>
-            {(() => {
-              const labelStep = cores.length > 16 ? 4 : cores.length > 8 ? 2 : 1;
-              return cores.map((val, i) => {
+            {cores.map((val, i) => {
               const barColor = val > 85 ? "#FF4444" : val > 65 ? "#FFB800" : ACCENT;
               const fillH = Math.max((val / 100) * 52, 2);
-              const showLabel = i % labelStep === 0;
+              const showLabel = cores.length <= 8;
               return (
                 <View key={i} style={styles.verticalBarCol}>
                   <View style={styles.verticalBarTrack}>
                     <View style={[styles.verticalBarFill, { height: fillH, backgroundColor: barColor }]} />
                   </View>
-                  <Text style={styles.verticalBarNum}>{showLabel ? i : ""}</Text>
+                  {showLabel && <Text style={styles.verticalBarNum}>{i}</Text>}
                 </View>
               );
-            });
-            })()}
+            })}
           </View>
         </View>
       )}
