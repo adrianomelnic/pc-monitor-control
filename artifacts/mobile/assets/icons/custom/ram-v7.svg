@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="1727.2 405.6 210.0 90.0">
+<g id="RAM-icon-v7">
+			<path id="connector 00000147898345243748739540000003514450303173936036 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1744.45 438.99h-2.28v15.83c0 0.41 0.34 0.73 0.76 0.73h0.38c0.42 0 0.76 0.33 0.76 0.73v2.46c0 0.4-0.34 0.73-0.76 0.73h-0.38c-0.42 0-0.76 0.32-0.76 0.73v2.45c0 0.4 0.34 0.73 0.76 0.73h0.38c0.42 0 0.76 0.33 0.76 0.73v2.45c0 0.41-0.34 0.73-0.76 0.73h-0.38c-0.42 0-0.76 0.33-0.76 0.73v10.67c0 1.08 0.91 1.95 2.03 1.95h99.74v-6.44c0-0.83 0.65-1.51 1.48-1.55l0.7-0.03c0.87-0.03 1.6 0.67 1.6 1.55v6.47h72.41c1.13 0 2.04-0.87 2.04-1.95v-10.67c0-0.4-0.34-0.73-0.77-0.73h-0.37c-0.43 0-0.77-0.32-0.77-0.73v-2.45c0-0.4 0.34-0.73 0.77-0.73h0.37c0.43 0 0.77-0.33 0.77-0.73v-2.45c0-0.41-0.34-0.73-0.77-0.73h-0.37c-0.43 0-0.77-0.33-0.77-0.73v-2.46c0-0.4 0.34-0.73 0.77-0.73h0.37c0.43 0 0.77-0.32 0.77-0.73v-15.83h-2.28"/>
+			<g id="text 00000100379433607126230500000015583097100113802171 ">
+				<path id="text 00000018231869901861277080000015431839206053098125 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1857.77 445.5h47.42"/>
+				<path id="text 00000144296870649738012020000002791821419446435505 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1892.55 449.39h12.64"/>
+			</g>
+			<g id="body 00000155829137375393075740000009608135341554619526 ">
+				<path id="RGB 00000148661087623511269260000013980363202846598050 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1833.23 434.09h-86.73v-9.31h91.68"/>
+				<path id="left 00000019654367911632730680000015431715436506430910 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1814.63 469.05h-68.13v-34.96"/>
+				<path id="right 00000031208769212978323880000012045864105328827327 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1893.54 420.64h-20.71l-6.36 11.81c-0.55 1.04-1.61 1.64-2.71 1.64"/>
+				<path id="right 00000026853050539037357690000000470771932224561326 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1866.84 420.64h-22.27l-25.83 48.41h99.09v-48.41h-18.3l-6.36 11.81c-0.55 1.04-1.62 1.64-2.71 1.64"/>
+			</g>
+		</g>
+</svg>

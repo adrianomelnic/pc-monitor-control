@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="3118.7 1349.5 200.4 105.0">
+<g id="240mm-Radiator-icon-v4 00000116237035301386361290000010385544297829236403 ">
+			<path id="end 00000011006626183787199460000017655494927499536017 " fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m3296.91 1439.54h7.11v-75h-7.11z"/>
+			<path id="top 00000060711024225803557880000010593848054881970352 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m3284.42 1368.06v7.03h9.23v-10.55h-140.26v10.55h9.53v-7.03h51.35v7.03h18.69v-7.03z"/>
+			<path id="bottom 00000026137790654402160960000006357574227091489678 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m3284.42 1428.99h9.23v10.55h-140.26v-10.55h9.53v7.03h51.35v-7.03h18.69v7.03h51.46z"/>
+			<g id="fixing-holes 00000018197691495868730860000005932561632440951433 ">
+				<path id="hole 00000156575343859727196730000001581693581546539421 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m3160.07 1370.4c0 1.1-0.89 1.99-1.99 1.99-1.1 0-1.99-0.89-1.99-1.99 0-1.1 0.89-1.99 1.99-1.99 1.1 0 1.99 0.89 1.99 1.99z"/>
+				<path id="hole 00000007387367982553031070000011142622291821859993 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m3221.01 1370.4c0 1.1-0.89 1.99-1.99 1.99-1.1 0-2-0.89-2-1.99 0-1.1 0.9-1.99 2-1.99 1.1 0 1.99 0.89 1.99 1.99z"/>
+				<path id="hole 00000106143115205481937070000003075243513830767545 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m3230.38 1370.4c0 1.1-0.89 1.99-1.99 1.99-1.1 0-1.99-0.89-1.99-1.99 0-1.1 0.89-1.99 1.99-1.99 1.1 0 1.99 0.89 1.99 1.99z"/>
+				<path id="hole 00000065753466052739518770000011705382727184192402 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m3290.96 1370.4c0 1.1-0.9 1.99-2 1.99-1.1 0-1.99-0.89-1.99-1.99 0-1.1 0.89-1.99 1.99-1.99 1.1 0 2 0.89 2 1.99z"/>
+				<path id="hole 00000005971862609541264620000002321883435411438763 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m3160.07 1433.68c0 1.1-0.89 1.99-1.99 1.99-1.1 0-1.99-0.89-1.99-1.99 0-1.1 0.89-1.99 1.99-1.99 1.1 0 1.99 0.89 1.99 1.99z"/>
+				<path id="hole 00000142139250002913842780000015762609332293295244 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m3221.01 1433.68c0 1.1-0.89 1.99-1.99 1.99-1.1 0-2-0.89-2-1.99 0-1.1 0.9-1.99 2-1.99 1.1 0 1.99 0.89 1.99 1.99z"/>
+				<path id="hole 00000016066121775792145700000012744637898729661620 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m3230.38 1433.68c0 1.1-0.89 1.99-1.99 1.99-1.1 0-1.99-0.89-1.99-1.99 0-1.1 0.89-1.99 1.99-1.99 1.1 0 1.99 0.89 1.99 1.99z"/>
+				<path id="hole 00000101077196190393549550000005269610631549645959 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m3290.96 1433.68c0 1.1-0.9 1.99-2 1.99-1.1 0-1.99-0.89-1.99-1.99 0-1.1 0.89-1.99 1.99-1.99 1.1 0 2 0.89 2 1.99z"/>
+			</g>
+			<g id="fins 00000015339252559407280320000000070018000901828782 ">
+				<path id="fins 00000159445680763492441250000010705736536563643062 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m3155.38 1424.93h136.28v-5.72h-136.28v-5.72h136.28v-5.73h-136.28v-5.72h136.28v-5.72h-136.28v-5.73h136.28v-5.72h-136.28v-5.72h136.28"/>
+				<g id="top-fins 00000123401517898680721060000013399805088919386791 ">
+					<path id="fin 00000124120400861932927390000013315978039128359816 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m3240.13 1373.42h37.63"/>
+					<path id="fin 00000115513196206995668950000005374747552242163339 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m3169.74 1373.42h37.62"/>
+				</g>
+				<g id="bottom-fins 00000144316265300045751500000011982341126792395961 ">
+					<path id="fin 00000130619769910709306610000018027472356990928317 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m3240.13 1430.66h37.63"/>
+					<path id="fin 00000073702093173891526460000000809410488857277586 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m3169.74 1430.66h37.62"/>
+				</g>
+			</g>
+			<g id="inlet-outlet 00000052097333623465579500000014738701711922563472 ">
+				<path id="outlet 00000004529180154204186990000016259642492950812550 " fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m3146.24 1419.66c0 2.43-1.96 4.39-4.39 4.39-2.43 0-4.4-1.96-4.4-4.39 0-2.43 1.97-4.39 4.4-4.39 2.43 0 4.39 1.96 4.39 4.39z"/>
+				<path id="inlet 00000054238090552155033670000011645414140116471692 " fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m3146.24 1384.42c0 2.43-1.96 4.39-4.39 4.39-2.43 0-4.4-1.96-4.4-4.39 0-2.43 1.97-4.39 4.4-4.39 2.43 0 4.39 1.96 4.39 4.39z"/>
+				<path id="block 00000036970554946328193640000013247157650370820798 " fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m3133.65 1413.5v26.04h16.4v-36.01-2.98-36.01h-16.4v26.05z"/>
+			</g>
+		</g>
+</svg>

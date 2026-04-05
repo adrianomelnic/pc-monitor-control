@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="1490.0 869.7 144.4 110.0">
+<g id="SSD-icon-v2 00000138551466423112047610000017256528103686382480 ">
+			<path id="profile 00000077323987673021327100000006660142467158281890 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m1611.1 939.84v-39.13h8.27v-11.99c0-2.21-1.79-4-4-4h-106.4c-2.21 0-4 1.79-4 4v72c0 2.21 1.79 4 4 4h106.4c2.21 0 4-1.79 4-4v-20.88z"/>
+			<g id="connectors 00000092421006220246449540000004512741588590702473 ">
+				<path id="&lt;Path&gt;" fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m1612.9 903.63h4.07v20.63h-4.07"/>
+				<path id="&lt;Path&gt;" fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m1612.9 926.97h4.07v9.95h-4.07"/>
+			</g>
+			<g id="fixings 00000072247340556617366230000017321957636439513482 ">
+				<path id="screwhole 00000109007852478100882070000012192026828450998707 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m1518.77 891.72c0 1.1-0.9 2-2 2-1.11 0-2-0.9-2-2 0-1.11 0.89-2 2-2 1.1 0 2 0.89 2 2z"/>
+				<path id="screwhole 00000013877422649055219010000013595274293563584918 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m1607.17 891.72c0 1.1-0.9 2-2 2-1.11 0-2-0.9-2-2 0-1.11 0.89-2 2-2 1.1 0 2 0.89 2 2z"/>
+				<path id="screwhole 00000168822517311160151290000017044465931360066447 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m1607.17 957.72c0 1.1-0.9 2-2 2-1.11 0-2-0.9-2-2 0-1.11 0.89-2 2-2 1.1 0 2 0.89 2 2z"/>
+				<path id="screwhole 00000110434564125779250440000017643457776189544616 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m1518.77 957.72c0 1.1-0.9 2-2 2-1.11 0-2-0.9-2-2 0-1.11 0.89-2 2-2 1.1 0 2 0.89 2 2z"/>
+			</g>
+			<g id="label 00000126310482132974078140000004091111646323891113 ">
+				<path id="label 00000010293653575679492990000007666235504288555435 " fill="currentColor" stroke="currentColor" stroke-linecap="square" stroke-miterlimit="10" d="m1599.97 949.72h-78c-0.56 0-1-0.45-1-1v-48c0-0.55 0.44-1 1-1h78c0.55 0 1 0.45 1 1v48c0 0.55-0.45 1-1 1z"/>
+				<path id="markings 00000146475148256532568560000018250548415878965914 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m1528.2 913.95h65.53m-29.93 28h10.96m-21.3 0h8.01m-33.27 0h22.94m-22.94-34h10"/>
+				<path id="barcode" fill="currentColor" stroke="currentColor" stroke-linecap="square" stroke-miterlimit="10" d="m1530.2 934.92v-9.23m3.08 0v9.23m3.07 0v-9.23m3.08 0v9.23m3.07-9.23v9.23m3.07 0v-9.23m3.08 0v9.23m3.07 0v-9.23m3.08 9.23v-9.23m3.07 0v9.23"/>
+			</g>
+		</g>
+</svg>

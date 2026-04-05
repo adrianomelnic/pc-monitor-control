@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="2276.9 2243.1 263.8 223.8">
+<g id="WiFi-Card-icon-v1 00000031205660721310494020000017162815200232560049 ">
+			<path id="IO 00000005987254345525115280000000274748471605289662 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m2417.43 2430.42v-123.03h-6.14"/>
+			<path id="card-profile 00000044168704790740207760000009293547782247702947 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m2525.72 2340.48v62.54h-87.25v7.61h-14.8v-70.15z"/>
+			<path id="connector 00000010305301494760117180000003742972476535359880 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m2467.01 2405.1v9.42h17.95v-3.89c0-1.11 0.9-2 2-2h0.6c1.11 0 2 0.89 2 2v3.89h6.83v-9.42"/>
+			<g id="connection 00000003088067793191593520000007026907801953336218 ">
+				<path id="connection 00000077322202828428872910000014885776500649247880 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m2404.36 2354.42h-7.05c-0.56 0-1 0.45-1 1v8.29c0 0.55 0.44 1 1 1h7.05"/>
+				<path id="connection 00000050645107480203720840000015681863322942960314 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m2404.36 2376.42h-7.05c-0.56 0-1 0.45-1 1v8.29c0 0.55 0.44 1 1 1h7.05"/>
+				<path id="cables 00000125568168792511335640000002938396168741829048 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m2396.53 2359.57c0 0-12.4 0-23.66 0-11.26 0-22.16 12.62 14.17 48.94 36.32 36.33 6.66 37.47 0 33.06-23.7-15.71-30.76-65.35-50.21-62.64 0 0 11.17-0.57 15.17 14.47 3.99 15.03-6.55 58.52 30.5 58.52 37.05 0-40.87-70.35-21.62-70.35 17.8 0 35.43 0 35.43 0"/>
+				<path id="connection 00000100344348243041009380000004818652037172618423 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m2398.86 2362.11h8.45v1.6c0 0.55 0.44 1 1 1h6.05"/>
+				<path id="connection 00000114033218635464473490000009418663945742067861 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m2414.36 2354.42h-6.05c-0.56 0-1 0.45-1 1v1.6h-8.45"/>
+				<path id="connection 00000070807358596641671920000017141376823576129704 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m2398.86 2384.11h8.45v1.6c0 0.55 0.44 1 1 1h6.05"/>
+				<path id="connection 00000034052262848468344400000000273510605925074088 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m2414.36 2376.42h-6.05c-0.56 0-1 0.45-1 1v1.6h-8.45"/>
+			</g>
+			<g id="antenna 00000132083698568650620370000003136802118837576122 ">
+				<path id="base 00000132078404697137559200000015905894898484770708 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m2297.94 2373.11h35.89l6 11.65h-45.89l-2-3.19z"/>
+				<g id="ariel 00000180331449770564459540000017128840547732832131 ">
+					<path id="&lt;Path&gt;" fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m2301.21 2371.57l8-38.36 41.57-75.1c0.8-1.73 3.33-1.47 3.76 0.37l-19.39 45.22-16.15 67.87"/>
+					<path id="&lt;Path&gt;" fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m2329.93 2311.08l-14.93 60.49"/>
+				</g>
+			</g>
+			<path id="circuits 00000131364069976703318950000005425004033943715510 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m2496.39 2391.65h-54.87v-37.07h54.87z"/>
+		</g>
+</svg>

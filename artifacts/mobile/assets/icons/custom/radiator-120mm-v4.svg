@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="3153.7 1587.5 130.2 105.0">
+<g id="120mm-Radiator-icon-v4 00000082338875057620823690000010898260981896814258 ">
+			<path id="end 00000168812034143454640660000005523202910058510011 " fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m3261.84 1677.54h7.11v-75h-7.11z"/>
+			<path id="top 00000117675946543512006880000001204036616919476617 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m3249.34 1606.06v7.03h9.24v-10.55h-70.12v10.55h9.53v-7.03z"/>
+			<path id="bottom 00000052821509108932566630000001465610001569732749 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m3249.34 1666.99h9.24v10.55h-70.12v-10.55h9.53v7.03h51.35z"/>
+			<g id="fixing-holes 00000021096144274107486030000016274247878989300891 ">
+				<path id="hole 00000019669629927094190300000014058029353719354539 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m3195.14 1608.4c0 1.1-0.89 1.99-1.99 1.99-1.1 0-1.99-0.89-1.99-1.99 0-1.1 0.89-1.99 1.99-1.99 1.1 0 1.99 0.89 1.99 1.99z"/>
+				<path id="hole 00000002364094472967731530000016065244121163825585 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m3255.88 1608.4c0 1.1-0.89 1.99-1.99 1.99-1.1 0-1.99-0.89-1.99-1.99 0-1.1 0.89-1.99 1.99-1.99 1.1 0 1.99 0.89 1.99 1.99z"/>
+				<path id="hole 00000026845858446002718260000008351503898634188699 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m3195.14 1671.68c0 1.1-0.89 1.99-1.99 1.99-1.1 0-1.99-0.89-1.99-1.99 0-1.1 0.89-1.99 1.99-1.99 1.1 0 1.99 0.89 1.99 1.99z"/>
+				<path id="hole 00000134230404439132179860000002982642240010476952 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m3255.88 1671.68c0 1.1-0.89 1.99-1.99 1.99-1.1 0-1.99-0.89-1.99-1.99 0-1.1 0.89-1.99 1.99-1.99 1.1 0 1.99 0.89 1.99 1.99z"/>
+			</g>
+			<g id="fins 00000114067247945004696590000000936784216372858261 ">
+				<path id="fins 00000080913494822522725990000007863487873520556160 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m3190.46 1662.93h66.12v-5.72h-66.12v-5.72h66.12v-5.73h-66.12v-5.72h66.12v-5.72h-66.12v-5.73h66.12v-5.72h-66.12v-5.72h66.12"/>
+				<g id="top-fins 00000016036712333655565720000003341314759202255764 ">
+					<path id="fin 00000045596448920073202550000011221117947203541177 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m3204.81 1611.42h37.62"/>
+				</g>
+				<g id="bottom-fins 00000081621777423422356900000013230290418301977738 ">
+					<path id="fin 00000157299488958281793260000017193934402477057925 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m3204.81 1668.66h37.62"/>
+				</g>
+			</g>
+			<g id="inlet-outlet 00000044153205188178271690000012401016134025127553 ">
+				<path id="outlet 00000099659311172331528480000012679199883484364981 " fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m3181.32 1657.66c0 2.43-1.97 4.39-4.4 4.39-2.43 0-4.39-1.96-4.39-4.39 0-2.43 1.96-4.39 4.39-4.39 2.43 0 4.4 1.96 4.4 4.39z"/>
+				<path id="inlet 00000156588951459678581500000004096687845290418347 " fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m3181.32 1622.42c0 2.43-1.97 4.39-4.4 4.39-2.43 0-4.39-1.96-4.39-4.39 0-2.43 1.96-4.39 4.39-4.39 2.43 0 4.4 1.96 4.4 4.39z"/>
+				<path id="block 00000042723352388812457380000001685564919323117192 " fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m3168.72 1651.5v26.04h16.4v-36.01-2.98-36.01h-16.4v26.05z"/>
+			</g>
+		</g>
+</svg>

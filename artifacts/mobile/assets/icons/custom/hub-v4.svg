@@ -1,0 +1,150 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="4256.5 162.6 158.0 95.8">
+<g id="Hub-icon-v4 00000052095261486393988270000001355746402418790077 ">
+			<path id="profile 00000123433475007554416420000014820555531640007082 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4274.52 243.37c-1.65 0-3-1.34-3-3v-59.8c0-1.66 1.35-3 3-3h121.96c1.65 0 3 1.34 3 3v59.8c0 1.66-1.35 3-3 3z"/>
+			<g id="screws 00000047767812142884189200000012505802818146497419 ">
+				<g id="screw 00000003085807098754790660000017847386424730018473 ">
+					<path id="&lt;Path&gt;" fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4278.52 182.07c0 1.38-1.12 2.5-2.5 2.5-1.38 0-2.5-1.12-2.5-2.5 0-1.38 1.12-2.5 2.5-2.5 1.38 0 2.5 1.12 2.5 2.5z"/>
+					<path id="&lt;Path&gt;" fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4276.02 181.26v1.61"/>
+					<path id="&lt;Path&gt;" fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4276.83 182.07h-1.61"/>
+				</g>
+				<g id="screw 00000060011066227321813100000011086147583390017162 ">
+					<path id="&lt;Path&gt;" fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4397.48 182.07c0 1.38-1.12 2.5-2.5 2.5-1.38 0-2.5-1.12-2.5-2.5 0-1.38 1.12-2.5 2.5-2.5 1.38 0 2.5 1.12 2.5 2.5z"/>
+					<path id="&lt;Path&gt;" fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4394.98 181.26v1.61"/>
+					<path id="&lt;Path&gt;" fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4395.78 182.07h-1.61"/>
+				</g>
+				<g id="screw 00000063634864328491525900000000350109859065035923 ">
+					<path id="&lt;Path&gt;" fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4278.52 238.87c0 1.38-1.12 2.5-2.5 2.5-1.38 0-2.5-1.12-2.5-2.5 0-1.38 1.12-2.5 2.5-2.5 1.38 0 2.5 1.12 2.5 2.5z"/>
+					<path id="&lt;Path&gt;" fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4276.02 238.07v1.61"/>
+					<path id="&lt;Path&gt;" fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4276.83 238.87h-1.61"/>
+				</g>
+				<g id="screw 00000136402761804167464960000005497826757733070526 ">
+					<path id="&lt;Path&gt;" fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4397.48 238.87c0 1.38-1.12 2.5-2.5 2.5-1.38 0-2.5-1.12-2.5-2.5 0-1.38 1.12-2.5 2.5-2.5 1.38 0 2.5 1.12 2.5 2.5z"/>
+					<path id="&lt;Path&gt;" fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4394.98 238.07v1.61"/>
+					<path id="&lt;Path&gt;" fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4395.78 238.87h-1.61"/>
+				</g>
+			</g>
+			<g id="connections 00000010286228153630417230000017275668784026707073 ">
+				<g id="top 00000183935545732814563570000009535810224857234085 ">
+					<g id="connection 00000180342915446362507930000011506173598162791817 ">
+						<path id="housing 00000095308509933293464970000000477611737904756381 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4290.08 184.34h16v4.68h-16z"/>
+						<g id="pins 00000121261631144268266380000000284835198998524821 ">
+							<path id="pin 00000109012297450351043250000014571824345659084706 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4292.08 179.57v4.77"/>
+							<path id="pin 00000065053913287455381210000016594654478487684225 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4296.08 179.57v4.77"/>
+							<path id="pin 00000039100009196686583040000004745087820024499344 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4304.08 179.57v4.77"/>
+							<path id="pin 00000088108650886183741100000013133062273214038451 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4292.08 189.02v4.77"/>
+							<path id="pin 00000067219545296993775500000002618380990657210790 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4296.08 189.02v4.77"/>
+							<path id="pin 00000038379189734098763170000003737748432353335434 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4304.08 189.02v4.77"/>
+						</g>
+					</g>
+					<g id="connection 00000153684709189965104430000008302042275298935711 ">
+						<path id="housing 00000048483663967333556990000018342200673246217351 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4312.08 184.34h16v4.68h-16z"/>
+						<g id="pins 00000091704175607823013710000007844750102890261384 ">
+							<path id="pin 00000043426112252432665530000014989968813387339952 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4314.08 179.57v4.77"/>
+							<path id="pin 00000155122905810717415870000000757081594459227582 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4318.08 179.57v4.77"/>
+							<path id="pin 00000026851267097350300850000015627932078606237108 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4326.08 179.57v4.77"/>
+							<path id="pin 00000025438208271218578370000000301303421894657209 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4314.08 189.02v4.77"/>
+							<path id="pin 00000062877989281170089830000007697728279007801006 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4318.08 189.02v4.77"/>
+							<path id="pin 00000183956547212220300370000011256905980026960311 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4326.08 189.02v4.77"/>
+						</g>
+					</g>
+					<g id="connection 00000158719918369701686010000017550201309183383735 ">
+						<path id="housing 00000127032664097516185240000013128050305657421976 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4334.08 184.34h16v4.68h-16z"/>
+						<g id="pins 00000018917245810872082450000012195863576591759489 ">
+							<path id="pin 00000174601809719345252770000012930817677851368850 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4336.08 179.57v4.77"/>
+							<path id="pin 00000060010666065357977830000016268308190844784028 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4340.08 179.57v4.77"/>
+							<path id="pin 00000047741984816010271050000000579024315835017886 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4348.08 179.57v4.77"/>
+							<path id="pin 00000096741853315058192020000000523926714321451184 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4336.08 189.02v4.77"/>
+							<path id="pin 00000101818974916039305860000016304280949904715684 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4340.08 189.02v4.77"/>
+							<path id="pin 00000023283009925585793400000005276274084743875998 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4348.08 189.02v4.77"/>
+						</g>
+					</g>
+					<g id="connection 00000129919301833139746760000011969868520679343535 ">
+						<path id="housing 00000053528650535557218170000009468500157999599760 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4356.08 184.34h16v4.68h-16z"/>
+						<g id="pins 00000127005542249610107600000003201425650086969764 ">
+							<path id="pin 00000155837486764552078320000016471147110402396087 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4358.08 179.57v4.77"/>
+							<path id="pin 00000085222381577003977470000008833227813689732006 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4362.08 179.57v4.77"/>
+							<path id="pin 00000151519524427136916710000013164890549155757958 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4370.08 179.57v4.77"/>
+							<path id="pin 00000114794579251005750630000010687141757833148068 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4358.08 189.02v4.77"/>
+							<path id="pin 00000085243102277591336310000015878202289074665114 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4362.08 189.02v4.77"/>
+							<path id="pin 00000098942533568178462120000000732911491930667195 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4370.08 189.02v4.77"/>
+						</g>
+					</g>
+				</g>
+				<g id="bottom 00000016763681336691117870000014709848566262532533 ">
+					<g id="connection 00000006703538609009942510000011525741642373226651 ">
+						<path id="housing 00000147898538247764419050000011102592444858401948 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4372.08 236.6h-16v-4.67h16z"/>
+						<g id="pins 00000103982611260797595520000004386195378345722511 ">
+							<path id="pin 00000063608768174227701970000007952642359413400484 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4370.08 241.37v-4.77"/>
+							<path id="pin 00000039855763893959781870000004972637792437408937 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4366.08 241.37v-4.77"/>
+							<path id="pin 00000152970827377573882550000006104353252939948952 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4358.08 241.37v-4.77"/>
+							<path id="pin 00000094600988754629632720000017705034391014999694 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4370.08 231.93v-4.78"/>
+							<path id="pin 00000093874470853132470570000004803284482687586715 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4366.08 231.93v-4.78"/>
+							<path id="pin 00000013192578537066602210000011460911017125893766 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4358.08 231.93v-4.78"/>
+						</g>
+					</g>
+					<g id="connection 00000145768686127702108790000006617015497608499610 ">
+						<path id="housing 00000067954109953417867490000006594258788336032401 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4350.08 236.6h-16v-4.67h16z"/>
+						<g id="pins 00000144332021437796520730000012833844828361690771 ">
+							<path id="pin 00000137848666336798077650000004084623382344890532 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4348.08 241.37v-4.77"/>
+							<path id="pin 00000173140742218816558640000010694085502006806147 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4344.08 241.37v-4.77"/>
+							<path id="pin 00000122678956740131231420000011749706885997918374 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4336.08 241.37v-4.77"/>
+							<path id="pin 00000156559530256926470100000006813655038514684819 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4348.08 231.93v-4.78"/>
+							<path id="pin 00000055697244756936603130000014353277013000408208 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4344.08 231.93v-4.78"/>
+							<path id="pin 00000095332561118561805100000000186368598492737717 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4336.08 231.93v-4.78"/>
+						</g>
+					</g>
+					<g id="connection 00000111162703208758591810000016632805892425776795 ">
+						<path id="housing 00000126282196663338293460000012480488188588175523 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4328.08 236.6h-16v-4.67h16z"/>
+						<g id="pins 00000028283989438988770420000010550141114931211143 ">
+							<path id="pin 00000117658977842781768760000010634103108605480078 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4326.08 241.37v-4.77"/>
+							<path id="pin 00000047029225460259443440000007829015589424916911 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4322.08 241.37v-4.77"/>
+							<path id="pin 00000131352585057220971250000018401099647119179658 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4314.08 241.37v-4.77"/>
+							<path id="pin 00000140722685364291389970000008076166037360813706 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4326.08 231.93v-4.78"/>
+							<path id="pin 00000142154569654450101490000009551062757257245115 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4322.08 231.93v-4.78"/>
+							<path id="pin 00000012466466458164845810000011580805438173621181 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4314.08 231.93v-4.78"/>
+						</g>
+					</g>
+					<g id="connection 00000023959894860800246860000005982552463415813308 ">
+						<path id="housing 00000156579401487948135100000016482872959607860911 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4306.08 236.6h-16v-4.67h16z"/>
+						<g id="pins 00000012473458096468308770000016577675715756614067 ">
+							<path id="pin 00000121257503863705074990000014995761769296766100 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4304.08 241.37v-4.77"/>
+							<path id="pin 00000052075077325841303540000005096858166950783131 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4300.08 241.37v-4.77"/>
+							<path id="pin 00000150812587484936032220000014599669702944126122 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4292.08 241.37v-4.77"/>
+							<path id="pin 00000179611825859647839010000014799162467911511688 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4304.08 231.93v-4.78"/>
+							<path id="pin 00000063599686298914781020000009849482111050728853 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4300.08 231.93v-4.78"/>
+							<path id="pin 00000059268286835373350050000001317353794657965993 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4292.08 231.93v-4.78"/>
+						</g>
+					</g>
+				</g>
+				<g id="side 00000177451753968471689350000009839560077182091401 ">
+					<g id="connection 00000039111643777600729110000010488547206353528250 ">
+						<path id="housing 00000105428564759063635260000006325152478177885325 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4278.3 229.47v-16h4.67v16z"/>
+						<g id="pins 00000012467060019248028810000005934810208443741619 ">
+							<path id="pin 00000068663213483222892360000005190667268259892156 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4273.52 227.47h4.78"/>
+							<path id="pin 00000012464481827160489480000012025965886181232025 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4273.52 223.47h4.78"/>
+							<path id="pin 00000121998871433361007810000000897165296882418825 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4273.52 215.47h4.78"/>
+							<path id="pin 00000055689960145191093610000001082891667781082502 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4282.97 227.47h4.77"/>
+							<path id="pin 00000008850286680916579350000011732090125666090402 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4282.97 223.47h4.77"/>
+							<path id="pin 00000008832763114400300340000002751544957176861119 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4282.97 215.47h4.77"/>
+						</g>
+					</g>
+					<g id="connection 00000135683474810672629170000004112808588160635285 ">
+						<path id="housing 00000099631901702495657270000004114335519403814550 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4278.3 207.47v-16h4.67v16z"/>
+						<g id="pins 00000055691016102001964650000010690273349674192054 ">
+							<path id="pin 00000181066510806116728670000017206110618983974793 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4273.52 205.47h4.78"/>
+							<path id="pin 00000057856320260387666410000016107904639699143592 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4273.52 201.47h4.78"/>
+							<path id="pin 00000043417415821051062760000014019578687543161987 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4273.52 193.47h4.78"/>
+							<path id="pin 00000114756796339551264140000007927414412559400069 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4282.97 205.47h4.77"/>
+							<path id="pin 00000033366324431840585130000008296640558831404196 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4282.97 201.47h4.77"/>
+							<path id="pin 00000072963811425942971200000006790663650065410193 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4282.97 193.47h4.77"/>
+						</g>
+					</g>
+				</g>
+			</g>
+			<path id="&lt;Path&gt;" fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d=""/>
+			<g id="connector 00000056408077068270274450000015609896396702822533 ">
+				<path id="connector-pads 00000149348183107781537240000016528997753507477663 " fill="currentColor" stroke="currentColor" stroke-linecap="square" stroke-miterlimit="10" d="m4392.9 194.68h-3.69m3.69 2.25h-3.69m3.69 2.26h-3.69m5.69 2.26h-5.69m5.69 2.25h-5.69m5.69 2.26h-5.69m3.69 2.25h-3.69m3.69 2.26h-3.69m3.69 2.26h-3.69m5.69 2.25h-5.69m5.69 2.26h-5.69m5.69 2.25h-5.69m3.69 2.26h-3.69m3.69 2.26h-3.69m3.69 2.25h-3.69"/>
+				<path id="connector-housing 00000062177098401393718590000016954304067996131749 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m4397.18 232.47h-12v-44h12m0 4h-8v36h8"/>
+			</g>
+		</g>
+</svg>

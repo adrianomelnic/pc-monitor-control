@@ -1,0 +1,263 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="2314.1 388.3 189.4 130.0">
+<g id="Power-Supply-icon-v1 00000176035903580600603260000017403947867013167503 ">
+			<path id="case 00000128487365644309112560000000867826077187289521 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2481.05 496.66h-144.43l-7.5-11.2v-70.93l7.5-11.2h144.43l7.5 11.2v70.93z"/>
+			<g id="screws 00000022557327348170469800000005412729509917637556 ">
+				<g id="screw 00000036212976425254002400000011456943462795371405 ">
+					<g id="crosshair 00000044874734662447738630000018021466075015259021 ">
+						<path id="V 00000031897517720396614890000016548611377856116150 " fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m2340.01 466.38v4.56"/>
+						<path id="H 00000049943489077617004470000008486976205014794415 " fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m2342.28 468.66h-4.55"/>
+					</g>
+					<path id="head 00000016766123876550740050000000228170250492469406 " fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m2344.51 468.66c0 2.49-2.02 4.5-4.5 4.5-2.49 0-4.5-2.01-4.5-4.5 0-2.48 2.01-4.5 4.5-4.5 2.48 0 4.5 2.02 4.5 4.5z"/>
+				</g>
+				<g id="screw 00000137101796718992782800000007905221115438944662 ">
+					<g id="crosshair 00000022530000679787131800000001767746779804613307 ">
+						<path id="V 00000108267526341755547750000016698112706222213779 " fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m2477.66 466.38v4.56"/>
+						<path id="H 00000011727048974435338180000016290596502931659674 " fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m2479.94 468.66h-4.56"/>
+					</g>
+					<path id="head 00000125591362615487382020000009284642585834720947 " fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m2482.16 468.66c0 2.49-2.01 4.5-4.5 4.5-2.48 0-4.5-2.01-4.5-4.5 0-2.48 2.02-4.5 4.5-4.5 2.49 0 4.5 2.02 4.5 4.5z"/>
+				</g>
+			</g>
+			<g id="feet 00000080166873261005011910000007831876403767636642 ">
+				<path id="foot 00000081613461626351705560000001873483284329316520 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2347.78 498.53v4.8h21.78v-4.8"/>
+				<path id="foot 00000166646137105807352210000013411073019121963179 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2448.11 498.53v4.8h21.77v-4.8"/>
+			</g>
+			<g id="connections 00000045585835468474668760000014300907488733570706 ">
+				<path id="profile 00000083056462266595151860000018393312895061447568 " fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m2391.72 421.41v10.88h-51.33v-10.88h3.69 1.76v-3.74h4.66v3.74h10.89v-3.74h4.67v3.74h13.22v-3.74h4.67v3.74z"/>
+				<path id="separator 00000031896749936330219550000000618415295703368856 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m2355.95 422.96v7.89"/>
+				<path id="separator 00000065794635743715701330000008618676091093543564 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m2371.65 422.85v8"/>
+				<g id="connector 00000013910253045233608990000018391924200276007077 ">
+					<g id="pair 00000054226927082385777780000002690803197585285783 ">
+						<path id="&lt;Path&gt;" fill="currentColor" d="m2344.5 425.52h-2v-2h2z"/>
+						<path id="&lt;Path&gt;" fill="currentColor" d="m2344.5 430.18h-2v-2h2z"/>
+					</g>
+					<g id="pair 00000090273392768848116520000012412653000677996442 ">
+						<path id="&lt;Path&gt;" fill="currentColor" d="m2349.17 425.52h-2v-2h2z"/>
+						<path id="&lt;Path&gt;" fill="currentColor" d="m2349.17 430.18h-2v-2h2z"/>
+					</g>
+					<g id="pair 00000022526345126436441790000001036964727397226146 ">
+						<path id="&lt;Path&gt;" fill="currentColor" d="m2353.84 425.52h-2v-2h2z"/>
+						<path id="&lt;Path&gt;" fill="currentColor" d="m2353.84 430.18h-2v-2h2z"/>
+					</g>
+					<path id="clip 00000018219794553028960670000018242815326020625853 " fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m2347 421.56h2.34"/>
+				</g>
+				<g id="connector 00000108280097334675168240000016387846835682061956 ">
+					<path id="clip 00000008151100261657984500000007232639755718391698 " fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m2362.56 421.56h2.33"/>
+					<g id="pair 00000038400133553533764800000017564080363585259147 ">
+						<path id="&lt;Path&gt;" fill="currentColor" d="m2360.06 425.52h-2v-2h2z"/>
+						<path id="&lt;Path&gt;" fill="currentColor" d="m2360.06 430.18h-2v-2h2z"/>
+					</g>
+					<g id="pair 00000066504682025261367180000004483629422768686728 ">
+						<path id="&lt;Path&gt;" fill="currentColor" d="m2364.73 425.52h-2v-2h2z"/>
+						<path id="&lt;Path&gt;" fill="currentColor" d="m2364.73 430.18h-2v-2h2z"/>
+					</g>
+					<g id="pair 00000098927558603042155520000017213771880130872223 ">
+						<path id="&lt;Path&gt;" fill="currentColor" d="m2369.39 425.52h-2v-2h2z"/>
+						<path id="&lt;Path&gt;" fill="currentColor" d="m2369.39 430.18h-2v-2h2z"/>
+					</g>
+				</g>
+				<g id="connector 00000121253146047158132060000010950960488609089947 ">
+					<path id="clip 00000149357297092739844310000010351452884460866457 " fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m2380.45 421.56h2.33"/>
+					<g id="pair 00000004542471991925658830000002052590486680563082 ">
+						<path id="&lt;Path&gt;" fill="currentColor" d="m2375.61 425.52h-2v-2h2z"/>
+						<path id="&lt;Path&gt;" fill="currentColor" d="m2375.61 430.18h-2v-2h2z"/>
+					</g>
+					<g id="pair 00000077287128122182690450000010505962740260425638 ">
+						<path id="&lt;Path&gt;" fill="currentColor" d="m2380.28 425.52h-2v-2h2z"/>
+						<path id="&lt;Path&gt;" fill="currentColor" d="m2380.28 430.18h-2v-2h2z"/>
+					</g>
+					<g id="pair 00000007395887172369961810000008091249785405972415 ">
+						<path id="&lt;Path&gt;" fill="currentColor" d="m2384.95 425.52h-2v-2h2z"/>
+						<path id="&lt;Path&gt;" fill="currentColor" d="m2384.95 430.18h-2v-2h2z"/>
+					</g>
+					<g id="pair 00000139295688994273513260000009595746874095397299 ">
+						<path id="&lt;Path&gt;" fill="currentColor" d="m2389.61 425.52h-2v-2h2z"/>
+						<path id="&lt;Path&gt;" fill="currentColor" d="m2389.61 430.18h-2v-2h2z"/>
+					</g>
+				</g>
+			</g>
+			<g id="connection 00000128484039227754049370000009443982961431229847 ">
+				<path id="clip 00000107573531164589839460000011094048895557008044 " fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m2413.89 421.56h2.33"/>
+				<path id="profile 00000179639627644145094000000012902521886037032352 " fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m2402.61 421.41v10.88h24.89v-10.88h-10.11v-3.74h-4.67v3.74z"/>
+				<g id="pair 00000150060240706360741960000014480851609264210060 ">
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2406.72 425.52h-2v-2h2z"/>
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2406.72 430.18h-2v-2h2z"/>
+				</g>
+				<g id="pair 00000031193908949568857650000014283275756785650056 ">
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2411.39 425.52h-2v-2h2z"/>
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2411.39 430.18h-2v-2h2z"/>
+				</g>
+				<g id="pair 00000147901347115969175540000002803177513440031116 ">
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2416.06 425.52h-2v-2h2z"/>
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2416.06 430.18h-2v-2h2z"/>
+				</g>
+				<g id="pair 00000117664124448853898930000012992921353160685711 ">
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2420.72 425.52h-2v-2h2z"/>
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2420.72 430.18h-2v-2h2z"/>
+				</g>
+				<g id="pair 00000101823543139049074700000011150563642507645615 ">
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2425.39 425.52h-2v-2h2z"/>
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2425.39 430.18h-2v-2h2z"/>
+				</g>
+			</g>
+			<g id="connection 00000137094103431648607690000003297668604172368816 ">
+				<g id="clip 00000152254585148343817020000012693906232059465399 ">
+					<path id="&lt;Path&gt;" fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m2454.33 421.56h2.33"/>
+				</g>
+				<path id="profile 00000127723430733397243000000006903414134044279198 " fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m2433.72 421.41v10.88h43.55v-10.88h-19.44v-3.74h-4.67v3.74z"/>
+				<g id="pair 00000080927667538914410280000011846295115749253007 ">
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2437.83 425.52h-2v-2h2z"/>
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2437.83 430.18h-2v-2h2z"/>
+				</g>
+				<g id="pair 00000026883472250837250950000007601802449475509417 ">
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2442.5 425.52h-2v-2h2z"/>
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2442.5 430.18h-2v-2h2z"/>
+				</g>
+				<g id="pair 00000159454863448695057790000005491013902358188952 ">
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2447.16 425.52h-2v-2h2z"/>
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2447.16 430.18h-2v-2h2z"/>
+				</g>
+				<g id="pair 00000070817872119241455960000003512952155331402173 ">
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2451.83 425.52h-2v-2h2z"/>
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2451.83 430.18h-2v-2h2z"/>
+				</g>
+				<g id="pair 00000115472692001207116340000002704903544030373013 ">
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2456.5 425.52h-2v-2h2z"/>
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2456.5 430.18h-2v-2h2z"/>
+				</g>
+				<g id="pair 00000144298317069505052810000009244898770197513356 ">
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2461.16 425.52h-2v-2h2z"/>
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2461.16 430.18h-2v-2h2z"/>
+				</g>
+				<g id="pair 00000100353427883583756150000000820061962451869088 ">
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2465.83 425.52h-2v-2h2z"/>
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2465.83 430.18h-2v-2h2z"/>
+				</g>
+				<g id="pair 00000079483370455791739860000002417426061712226213 ">
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2470.5 425.52h-2v-2h2z"/>
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2470.5 430.18h-2v-2h2z"/>
+				</g>
+				<g id="pair 00000179632970339693289030000001571788569541725104 ">
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2475.16 425.52h-2v-2h2z"/>
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2475.16 430.18h-2v-2h2z"/>
+				</g>
+			</g>
+			<g id="connections 00000002355188753625947390000000418515035816077961 ">
+				<path id="clip 00000161602490159633701270000005282982697695829379 " fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m2468.33 450.8h-2.33"/>
+				<path id="clip 00000132781823199235635800000000437387599570594490 " fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m2448.11 450.8h-2.34"/>
+				<path id="profile 00000143592858049856581210000009862497592187240336 " fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m2477.27 450.96v-10.89h-40.44v10.89h7.78v3.73h4.66v-3.73h15.56v3.73h4.67v-3.73z"/>
+				<path id="separator 00000017488389192493382690000014031769330311155631 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m2457.05 441.57v7.89"/>
+				<g id="pair 00000080898500035243265280000006150021907598637957 ">
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2475.16 444.18h-2v-2h2z"/>
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2475.16 448.85h-2v-2h2z"/>
+				</g>
+				<g id="pair 00000145762684299470859010000002827876617121262733 ">
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2470.5 444.18h-2v-2h2z"/>
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2470.5 448.85h-2v-2h2z"/>
+				</g>
+				<g id="pair 00000077310480536946268500000011768506526071722116 ">
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2465.83 444.18h-2v-2h2z"/>
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2465.83 448.85h-2v-2h2z"/>
+				</g>
+				<g id="pair 00000136402596186954313010000017808980968707129254 ">
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2461.16 444.18h-2v-2h2z"/>
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2461.16 448.85h-2v-2h2z"/>
+				</g>
+				<g id="pair 00000016032817537503652110000016726818871721057951 ">
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2454.94 444.18h-2v-2h2z"/>
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2454.94 448.85h-2v-2h2z"/>
+				</g>
+				<g id="pair 00000080200172120459564260000012751686152142667137 ">
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2450.27 444.18h-2v-2h2z"/>
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2450.27 448.85h-2v-2h2z"/>
+				</g>
+				<g id="pair 00000048463225534248279560000017632442815596191888 ">
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2445.61 444.18h-2v-2h2z"/>
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2445.61 448.85h-2v-2h2z"/>
+				</g>
+				<g id="pair 00000170255320232601175670000016814796896262963852 ">
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2440.94 444.18h-2v-2h2z"/>
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2440.94 448.85h-2v-2h2z"/>
+				</g>
+			</g>
+			<g id="connections 00000018232781302369965060000016532010543323348642 ">
+				<path id="clip 00000011030201303432203310000017292451750345597568 " fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m2418.55 450.8h-2.33"/>
+				<path id="clip 00000149348597648844665290000011452031531535305363 " fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m2398.33 450.8h-2.33"/>
+				<path id="clip 00000060728816091035804920000011440489351546937010 " fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m2380.45 450.8h-2.34"/>
+				<path id="clip 00000135670187387056965470000014841291859194081167 " fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m2364.89 450.8h-2.33"/>
+				<path id="clip 00000165933177767414303190000017395501854637698486 " fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m2349.34 450.8h-2.34"/>
+				<path id="profile 00000063596035527827335410000012117857495976414872 " fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m2340.39 450.96v-10.89h87.11v10.89h-7.78v3.73h-4.66v-3.73h-15.56v3.73h-4.67v-3.73h-13.22v3.73h-4.66v-3.73h-10.89v3.73h-4.67v-3.73h-10.89v3.73h-4.66v-3.73z"/>
+				<path id="separator 00000018943358661472229410000003796402544561886139 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m2407.28 441.52v8"/>
+				<path id="separator 00000090260356717736186270000007204050529363178143 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m2387.06 441.52v8"/>
+				<path id="separator 00000173119549837493145570000010336490140812200364 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m2371.5 441.52v8"/>
+				<path id="separator 00000032613456677291399540000009693942832295386526 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m2355.95 441.52v8"/>
+				<g id="pair 00000095306639576104743950000006452299215270953151 ">
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2425.39 444.18h-2v-2h2z"/>
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2425.39 448.85h-2v-2h2z"/>
+				</g>
+				<g id="pair 00000168810686175696952920000009057065968617563541 ">
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2420.72 444.18h-2v-2h2z"/>
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2420.72 448.85h-2v-2h2z"/>
+				</g>
+				<g id="pair 00000061449012575526497910000017920653263056525228 ">
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2416.06 444.18h-2v-2h2z"/>
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2416.06 448.85h-2v-2h2z"/>
+				</g>
+				<g id="pair 00000045581343696000674690000011861070430435944634 ">
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2411.39 444.18h-2v-2h2z"/>
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2411.39 448.85h-2v-2h2z"/>
+				</g>
+				<g id="pair 00000116948295502540640850000015102337908718778023 ">
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2405.17 444.18h-2v-2h2z"/>
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2405.17 448.85h-2v-2h2z"/>
+				</g>
+				<g id="pair 00000035505936445557835270000015353406898347196329 ">
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2400.5 444.18h-2v-2h2z"/>
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2400.5 448.85h-2v-2h2z"/>
+				</g>
+				<g id="pair 00000171702261112726859890000018173221929463924900 ">
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2395.83 444.18h-2v-2h2z"/>
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2395.83 448.85h-2v-2h2z"/>
+				</g>
+				<g id="pair 00000044894669857475428300000001119126586315407030 ">
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2391.17 444.18h-2v-2h2z"/>
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2391.17 448.85h-2v-2h2z"/>
+				</g>
+				<g id="pair 00000145758129055506167650000018156484403860349587 ">
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2384.95 444.18h-2v-2h2z"/>
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2384.95 448.85h-2v-2h2z"/>
+				</g>
+				<g id="pair 00000139252622185422874950000017369733023021078949 ">
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2380.28 444.18h-2v-2h2z"/>
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2380.28 448.85h-2v-2h2z"/>
+				</g>
+				<g id="pair 00000107547148559417716150000005748004367670158999 ">
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2375.61 444.18h-2v-2h2z"/>
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2375.61 448.85h-2v-2h2z"/>
+				</g>
+				<g id="pair 00000090294793370518890920000005363439982223702951 ">
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2369.39 444.18h-2v-2h2z"/>
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2369.39 448.85h-2v-2h2z"/>
+				</g>
+				<g id="pair 00000127008311658555245010000004829195588127158421 ">
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2364.73 444.18h-2v-2h2z"/>
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2364.73 448.85h-2v-2h2z"/>
+				</g>
+				<g id="pair 00000104669718553973538900000002223045552567831429 ">
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2360.06 444.18h-2v-2h2z"/>
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2360.06 448.85h-2v-2h2z"/>
+				</g>
+				<g id="pair 00000172406776474328591320000002488894490888815536 ">
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2353.84 444.18h-2v-2h2z"/>
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2353.84 448.85h-2v-2h2z"/>
+				</g>
+				<g id="pair 00000093140950099028920690000001316829422638523548 ">
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2349.17 444.18h-2v-2h2z"/>
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2349.17 448.85h-2v-2h2z"/>
+				</g>
+				<g id="pair 00000011014347842602367440000006986548039994358413 ">
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2344.5 444.18h-2v-2h2z"/>
+					<path id="&lt;Path&gt;" fill="currentColor" d="m2344.5 448.85h-2v-2h2z"/>
+				</g>
+			</g>
+		</g>
+</svg>

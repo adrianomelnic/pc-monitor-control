@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="2584.1 388.3 189.4 130.0">
+<g id="Power-Supply-icon-v2 00000026869716720731187430000004881741696401637045 ">
+			<g id="case 00000078746435645568383050000017938863994600809366 ">
+				<path id="profile 00000142136125729590719540000002297882896847950766 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2751.05 496.66h-144.43l-7.5-11.2v-70.93l7.5-11.2h144.43l7.5 11.2v70.93z"/>
+				<path id="horizontal-line 00000135657562165904366530000000952461569062691004 " fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m2608.83 432.29h140"/>
+				<g id="feet 00000034077637239072838380000009401088710599909516 ">
+					<path id="foot 00000046316747452810319840000014807499152238191284 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2617.78 498.53v4.8h21.78v-4.8"/>
+					<path id="foot 00000103226145894830804890000000554732471252461697 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2718.11 498.53v4.8h21.77v-4.8"/>
+				</g>
+			</g>
+			<g id="power-plug 00000062172885146442584310000006674903970399882905 ">
+				<g id="screws 00000157290809808471158870000010226426456726560656 ">
+					<g id="right 00000044136093125870608490000006188931997833653651 ">
+						<g id="crosshair 00000061444659822699243350000015147214351498382232 ">
+							<path id="V 00000091712057526633682300000001861671521110206371 " fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m2728.33 462.43v3.13"/>
+							<path id="H 00000169520139297322987150000003855456755914007486 " fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m2729.9 464h-3.13"/>
+						</g>
+						<path id="head 00000047060106492675904140000008604293917725408664 " fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m2731.83 464c0 1.93-1.56 3.5-3.5 3.5-1.93 0-3.5-1.57-3.5-3.5 0-1.94 1.57-3.5 3.5-3.5 1.94 0 3.5 1.56 3.5 3.5z"/>
+					</g>
+					<g id="left 00000059306512583702151850000000263874153303146919 ">
+						<g id="crosshair 00000073001471111784833680000013881782559349101187 ">
+							<path id="V 00000013914001032538588160000009255473301941001404 " fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m2677.33 462.43v3.13"/>
+							<path id="H 00000165933771551306982430000005911356052376297859 " fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m2678.9 464h-3.13"/>
+						</g>
+						<path id="head 00000161602678225661856580000009726084569213978762 " fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m2680.83 464c0 1.93-1.56 3.5-3.5 3.5-1.93 0-3.5-1.57-3.5-3.5 0-1.94 1.57-3.5 3.5-3.5 1.94 0 3.5 1.56 3.5 3.5z"/>
+					</g>
+				</g>
+				<path id="left 00000029032754583350030380000010551777847682383274 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2681.23 475l-7.5-6.45c-2.79-2.4-2.79-6.71 0-9.1l7.5-6.45"/>
+				<path id="outer 00000108304738956978324020000015961487990864074143 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2682.83 474v-20c0-2.77 2.24-5 5-5h30c2.76 0 5 2.23 5 5v20c0 2.76-2.24 5-5 5h-30c-2.76 0-5-2.24-5-5z"/>
+				<path id="inner 00000110453924273613927060000004406362009424272304 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2686.95 471.71v-14.29c1.95-1.95 3.04-3.04 5-5h21.77c1.95 1.96 3.05 3.05 5 5v14.29c0 2.13-1.73 3.86-3.86 3.86h-24.06c-2.13 0-3.85-1.73-3.85-3.86z"/>
+				<path id="right 00000038407275469382696220000008228955332718699928 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2724.43 453l7.51 6.45c2.78 2.39 2.78 6.7 0 9.1l-7.51 6.45"/>
+				<g id="pins 00000157988128098426401400000002107103272101683364 ">
+					<path id="pin 00000035514266713363289710000014986780893981440416 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2693.32 463.24v8.47"/>
+					<path id="pin 00000052088623205823861230000000927959194549824409 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2712.35 463.24v8.47"/>
+					<path id="pin 00000072987320206916579430000018131934659684656548 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2702.83 456.28v8.47"/>
+				</g>
+			</g>
+			<g id="switch 00000092432514535698310330000005285884442111746739 ">
+				<path id="fixture 00000149342110083166558200000011070603291603331201 " fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m2628.9 450.03h21.78v27.93h-21.78z"/>
+				<path id="profile 00000122711486536619370580000012731284899056183979 " fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m2632.9 454.03h13.78v19.93h-13.78z"/>
+				<path id="curve 00000014597124063559133570000008832700692362667192 " fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m2632.9 467.79h13.78"/>
+				<g id="on-off 00000072278735409408023190000018107713934427777464 ">
+					<path id="on 00000083077881623698725020000013742598299202938559 " fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m2639.79 462.36v3.21"/>
+					<path id="off 00000122704407441890756890000005406604713284381882 " fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m2641.88 458.34c0 1.16-0.93 2.1-2.09 2.1-1.16 0-2.1-0.94-2.1-2.1 0-1.15 0.94-2.09 2.1-2.09 1.16 0 2.09 0.94 2.09 2.09z"/>
+				</g>
+			</g>
+			<g id="screws 00000132082679211498861410000015253151922159054484 ">
+				<g id="TL 00000122715307944423318070000004974313541907696529 ">
+					<g id="crosshair 00000036238201741700094560000012347955525711472550 ">
+						<path id="V 00000146485119032854302740000012817230641230835379 " fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m2610.01 415.27v3.13"/>
+						<path id="H 00000015347946811314348330000000520606667081228418 " fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m2611.57 416.83h-3.13"/>
+					</g>
+					<path id="head 00000124143746171620792560000012312419957154721197 " fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m2613.51 416.83c0 1.94-1.57 3.5-3.5 3.5-1.94 0-3.5-1.56-3.5-3.5 0-1.93 1.56-3.5 3.5-3.5 1.93 0 3.5 1.57 3.5 3.5z"/>
+				</g>
+				<g id="TR 00000032611449179186574390000008487727895005453477 ">
+					<g id="crosshair 00000057843799141602141320000014317510132767576731 ">
+						<path id="V 00000174573156940733882060000004018858335581077438 " fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m2747.66 415.27v3.13"/>
+						<path id="H 00000017517047450549622080000006737123441315684233 " fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m2749.22 416.83h-3.12"/>
+					</g>
+					<path id="head 00000081642441340179049490000003901655348071367305 " fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m2751.16 416.83c0 1.94-1.57 3.5-3.5 3.5-1.93 0-3.5-1.56-3.5-3.5 0-1.93 1.57-3.5 3.5-3.5 1.93 0 3.5 1.57 3.5 3.5z"/>
+				</g>
+				<g id="BL 00000016073821456958169350000002720294133832250022 ">
+					<g id="crosshair 00000117652167072809908500000015525492362208596927 ">
+						<path id="V 00000070116868487499832150000016570051550494320560 " fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m2610.01 481.6v3.12"/>
+						<path id="H 00000081639004814912468690000005471767868749466249 " fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m2611.57 483.16h-3.13"/>
+					</g>
+					<path id="head 00000025434582046397169890000016930553848204818095 " fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m2613.51 483.16c0 1.93-1.57 3.5-3.5 3.5-1.94 0-3.5-1.57-3.5-3.5 0-1.93 1.56-3.5 3.5-3.5 1.93 0 3.5 1.57 3.5 3.5z"/>
+				</g>
+				<g id="BR 00000147920006276305312060000013491949305626472360 ">
+					<g id="crosshair 00000092438289576913349450000000927256743872936355 ">
+						<path id="V 00000034783108426355234520000012423134975819388039 " fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m2747.66 481.6v3.12"/>
+						<path id="H 00000110460873808705818550000011892263823988264321 " fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m2749.22 483.16h-3.12"/>
+					</g>
+					<path id="head 00000134223609146324897390000009896535251536591249 " fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m2751.16 483.16c0 1.93-1.57 3.5-3.5 3.5-1.93 0-3.5-1.57-3.5-3.5 0-1.93 1.57-3.5 3.5-3.5 1.93 0 3.5 1.57 3.5 3.5z"/>
+				</g>
+			</g>
+		</g>
+</svg>

@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="1188.0 1098.5 208.4 130.0">
+<g id="CPU-threadripper-icon-v1 00000035493474734739530330000003854583534835856817 ">
+			<path id="frame 00000138536999123408567790000008937228075625479089 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m1243.41 1213.5h123.36l14.59-7.3v-85.4l-14.59-7.3h-123.36c-3.22 0-5.83 2.61-5.83 5.84v88.32c0 3.23 2.61 5.84 5.83 5.84z"/>
+			<g id="cpu 00000155127094679541774030000006063425924527052206 ">
+				<g id="cpu 00000071539996046400216360000000813312634831031718 ">
+					<path id="&lt;Compound Path&gt;" fill="currentColor" d="m1361.26 1127.95h-103.58c-3.12 0-5.65 2.53-5.65 5.65v59.8c0 3.12 2.53 5.65 5.65 5.65h103.58c3.12 0 5.65-2.53 5.65-5.65v-59.8c0-3.12-2.53-5.65-5.65-5.65zm0 1c2.56 0 4.65 2.09 4.65 4.65v59.8c0 2.56-2.09 4.65-4.65 4.65h-103.58c-2.56 0-4.65-2.09-4.65-4.65v-59.8c0-2.56 2.09-4.65 4.65-4.65z"/>
+				</g>
+			</g>
+			<g id="handle 00000049211225406921727490000001324596126230430124 ">
+				<path id="end 00000085232817659316321580000006228125441432715962 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m1210.89 1147.91v-7.3h-7.92v45.78h7.92v-7.3"/>
+				<path id="bottom-edge 00000013910922503965637350000008469252466893816448 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m1231.74 1190.77h-5.32c-1.6 0-3.08-0.88-3.85-2.29l-5.02-9.25c-1.02-1.89-2.99-3.06-5.13-3.06h-5.91"/>
+				<path id="top-edge 00000140722279030459578800000012240920533264468911 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m1206.35 1150.83h5.9c2.14 0 4.11-1.17 5.13-3.06l5.03-9.25c0.76-1.41 2.24-2.29 3.84-2.29h5.32"/>
+				<path id="cutout 00000062169358491781030950000002621467054778980518 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m1228.65 1167.76h-11.42c-1.61 0-2.91-1.31-2.91-2.92v-2.68c0-1.61 1.3-2.92 2.91-2.92h11.42c1.61 0 2.92 1.31 2.92 2.92v2.68c0 1.61-1.31 2.92-2.92 2.92z"/>
+			</g>
+			<g id="text 00000011736277194445854560000007032375606307261581 ">
+				<path id="&lt;Path&gt;" fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m1274.19 1151h17.64"/>
+				<path id="&lt;Path&gt;" fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m1274.19 1163.5h70.56"/>
+				<path id="&lt;Path&gt;" fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m1344.75 1176h-35.19"/>
+			</g>
+		</g>
+</svg>
