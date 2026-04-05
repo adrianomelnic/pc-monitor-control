@@ -1186,40 +1186,51 @@ export default function PCDetailScreen() {
       {/* ── COMPONENT CARDS ── */}
       {m && (
         <>
-          <View style={isWide && !editMode ? styles.cardGrid : undefined}>
-            {cards.map((card, idx) => {
+          {isWide && !editMode ? (
+            /* Wide mode: two independent vertical columns — no row-height coupling */
+            <View style={styles.cardGrid}>
+              {[0, 1].map((col) => {
+                const colCards = cards
+                  .filter((card) => card.visible && renderCardContent(card) !== null)
+                  .filter((_, i) => i % 2 === col);
+                return (
+                  <View key={col} style={styles.cardGridCol}>
+                    {colCards.map((card) => (
+                      <View key={card.id}>{renderCardContent(card)}</View>
+                    ))}
+                  </View>
+                );
+              })}
+            </View>
+          ) : (
+            /* Portrait / edit mode: single column */
+            cards.map((card, idx) => {
               const content = renderCardContent(card);
-              // In normal mode: skip hidden cards and empty cards
               if (!editMode && (!card.visible || !content)) return null;
-
               const isFirst = idx === 0;
               const isLast = idx === cards.length - 1;
-
               return (
-                <View key={card.id} style={isWide && !editMode && card.visible ? styles.cardGridItem : undefined}>
+                <View key={card.id}>
                   {editMode && (
                     <EditBar card={card} isFirst={isFirst} isLast={isLast} />
                   )}
                   {card.visible ? (
                     content
-                  ) : (
-                    /* Hidden card placeholder — only shown in edit mode */
-                    editMode ? (
-                      <View style={styles.hiddenPlaceholder}>
-                        <Feather name="eye-off" size={13} color={C.textMuted} />
-                        <Text style={styles.hiddenPlaceholderText}>
-                          {card.kind === "custom"
-                            ? (card as CustomCardConfig).title
-                            : CARD_NAMES[card.kind] ?? card.kind}{" "}
-                          card is hidden
-                        </Text>
-                      </View>
-                    ) : null
-                  )}
+                  ) : editMode ? (
+                    <View style={styles.hiddenPlaceholder}>
+                      <Feather name="eye-off" size={13} color={C.textMuted} />
+                      <Text style={styles.hiddenPlaceholderText}>
+                        {card.kind === "custom"
+                          ? (card as CustomCardConfig).title
+                          : CARD_NAMES[card.kind] ?? card.kind}{" "}
+                        card is hidden
+                      </Text>
+                    </View>
+                  ) : null}
                 </View>
               );
-            })}
-          </View>
+            })
+          )}
 
           {/* Add Sensor Card button (edit mode only) */}
           {editMode && (
@@ -1450,13 +1461,11 @@ const styles = StyleSheet.create({
   },
   cardGrid: {
     flexDirection: "row",
-    flexWrap: "wrap",
-    alignItems: "flex-start",
     gap: 8,
   },
-  cardGridItem: {
+  cardGridCol: {
     flex: 1,
-    minWidth: "45%",
+    gap: 8,
   },
   editBanner: {
     flexDirection: "row",
