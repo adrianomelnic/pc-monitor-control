@@ -634,7 +634,7 @@ export function SensorCard({
                       isSelected && { backgroundColor: accentColor + "22", borderColor: accentColor + "66" },
                     ]}
                   >
-                    {renderSensorIcon(iconName, 22, isSelected ? accentColor : C.textMuted)}
+                    {renderSensorIcon(iconName, 28, isSelected ? accentColor : C.textMuted)}
                   </Pressable>
                 );
               })}
@@ -1039,7 +1039,7 @@ const dragStyles = StyleSheet.create({
     alignItems: "center",
   },
   iconPickerScroll: {
-    height: 192,
+    maxHeight: 268,
     borderTopWidth: 1,
     borderBottomWidth: 1,
     marginBottom: 2,
@@ -1052,9 +1052,9 @@ const dragStyles = StyleSheet.create({
     paddingHorizontal: 4,
   },
   iconPickerBtn: {
-    width: 44,
-    height: 44,
-    borderRadius: 10,
+    width: 60,
+    height: 60,
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: C.cardBorder,
     alignItems: "center",

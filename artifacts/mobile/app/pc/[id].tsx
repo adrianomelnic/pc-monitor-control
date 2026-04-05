@@ -572,7 +572,7 @@ export default function PCDetailScreen() {
                         isSelected && { backgroundColor: accent + "22", borderColor: accent + "66" },
                       ]}
                     >
-                      {renderSensorIcon(iconName, 22, isSelected ? accent : C.textMuted)}
+                      {renderSensorIcon(iconName, 28, isSelected ? accent : C.textMuted)}
                     </Pressable>
                   );
                 })}
@@ -1713,7 +1713,7 @@ const styles = StyleSheet.create({
     flexShrink: 0,
   },
   iconPickerScroll: {
-    height: 192,
+    maxHeight: 268,
     borderTopWidth: 1,
     borderBottomWidth: 1,
     marginBottom: 2,
@@ -1726,9 +1726,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
   iconPickerBtn: {
-    width: 44,
-    height: 44,
-    borderRadius: 10,
+    width: 60,
+    height: 60,
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: C.cardBorder,
     alignItems: "center",
