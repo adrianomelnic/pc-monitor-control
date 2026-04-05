@@ -994,15 +994,15 @@ export default function PCDetailScreen() {
         {pc.status === "online" ? (
           <View style={styles.headerActions}>
             <Pressable
-              onPress={() => togglePanel("controls")}
+              onPress={() => { Haptics.selectionAsync(); setEditMode((e) => !e); }}
               style={({ pressed }) => [
                 styles.headerIconBtn,
-                activePanel === "controls" && styles.headerIconBtnActive,
+                editMode && styles.headerIconBtnActive,
                 pressed && { opacity: 0.7 },
               ]}
               hitSlop={6}
             >
-              <Feather name="power" size={16} color={activePanel === "controls" ? "#fff" : C.tint} />
+              <Feather name="sliders" size={16} color={editMode ? "#fff" : C.tint} />
             </Pressable>
             <Pressable
               onPress={() => togglePanel("terminal")}
@@ -1014,6 +1014,17 @@ export default function PCDetailScreen() {
               hitSlop={6}
             >
               <Feather name="terminal" size={16} color={activePanel === "terminal" ? "#fff" : C.tint} />
+            </Pressable>
+            <Pressable
+              onPress={() => togglePanel("controls")}
+              style={({ pressed }) => [
+                styles.headerIconBtn,
+                activePanel === "controls" && styles.headerIconBtnActive,
+                pressed && { opacity: 0.7 },
+              ]}
+              hitSlop={6}
+            >
+              <Feather name="power" size={16} color={activePanel === "controls" ? "#fff" : C.tint} />
             </Pressable>
           </View>
         ) : null}
