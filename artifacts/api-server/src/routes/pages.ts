@@ -1,4 +1,6 @@
 import { Router } from "express";
+import { readFileSync } from "fs";
+import { join } from "path";
 
 const router = Router();
 
@@ -178,6 +180,17 @@ router.get("/feedback", (_req, res) => {
     `
     )
   );
+});
+
+router.get("/app", (_req, res) => {
+  try {
+    const filePath = join(process.cwd(), "../../artifacts/github-page/index.html");
+    const content = readFileSync(filePath, "utf-8");
+    res.setHeader("Content-Type", "text/html; charset=utf-8");
+    res.send(content);
+  } catch {
+    res.status(404).send("Page not found");
+  }
 });
 
 export default router;

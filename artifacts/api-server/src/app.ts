@@ -32,5 +32,6 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use("/api", router);
 app.use(pagesRouter);
+app.use("/api", pagesRouter);
 
 export default app;
