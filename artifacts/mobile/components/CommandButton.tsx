@@ -1,7 +1,7 @@
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import React, { useState } from "react";
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, Text } from "react-native";
 import Colors from "@/constants/colors";
 
 interface CommandButtonProps {
@@ -44,60 +44,49 @@ export function CommandButton({
     }
   };
 
-  const borderColor =
-    result === "success"
-      ? C.success
-      : result === "error"
-      ? C.danger
-      : color;
+  const activeColor =
+    result === "success" ? C.success : result === "error" ? C.danger : color;
 
   return (
     <Pressable
       onPress={handle}
-      style={({ pressed }) => [styles.btn, { borderColor }, pressed && styles.pressed]}
+      style={({ pressed }) => [
+        styles.btn,
+        { borderColor: activeColor + "60", backgroundColor: activeColor + "12" },
+        pressed && styles.pressed,
+      ]}
     >
-      <View style={[styles.iconWrap, { backgroundColor: color + "22" }]}>
-        {loading ? (
-          <ActivityIndicator size="small" color={color} />
-        ) : result === "success" ? (
-          <Feather name="check" size={20} color={C.success} />
-        ) : result === "error" ? (
-          <Feather name="x" size={20} color={C.danger} />
-        ) : (
-          <Feather name={icon} size={20} color={color} />
-        )}
-      </View>
-      <Text style={styles.label}>{label}</Text>
+      {loading ? (
+        <ActivityIndicator size="small" color={activeColor} />
+      ) : result === "success" ? (
+        <Feather name="check" size={15} color={C.success} />
+      ) : result === "error" ? (
+        <Feather name="x" size={15} color={C.danger} />
+      ) : (
+        <Feather name={icon} size={15} color={activeColor} />
+      )}
+      <Text style={[styles.label, { color: activeColor }]}>{label}</Text>
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   btn: {
+    flexDirection: "row",
     alignItems: "center",
-    gap: 8,
-    backgroundColor: C.card,
-    borderRadius: 14,
+    gap: 7,
+    borderRadius: 10,
     borderWidth: 1,
-    padding: 14,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
     flex: 1,
-    minWidth: 80,
   },
   pressed: {
-    opacity: 0.75,
+    opacity: 0.7,
     transform: [{ scale: 0.97 }],
   },
-  iconWrap: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
-  },
   label: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: "600",
-    color: C.textSecondary,
-    textAlign: "center",
   },
 });

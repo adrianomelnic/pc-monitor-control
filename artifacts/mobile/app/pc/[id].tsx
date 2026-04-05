@@ -1559,8 +1559,8 @@ const styles = StyleSheet.create({
   controlGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 10,
-    paddingVertical: 14,
+    gap: 8,
+    paddingVertical: 12,
   },
   offlinePill: {
     flexDirection: "row",
