@@ -41,8 +41,7 @@
         }
       ],
       "expo-font",
-      "expo-web-browser",
-      "./plugins/android-network-security"
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,

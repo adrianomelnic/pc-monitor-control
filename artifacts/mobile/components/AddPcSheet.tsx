@@ -46,6 +46,13 @@ function friendlyError(e: unknown): { message: string; detail: string } {
         "The PC is reachable but nothing is listening on that port. Make sure the PC Agent is running:\npython pc_agent.py",
     };
   }
+  if (low.includes("instant")) {
+    return {
+      message: "Blocked instantly",
+      detail:
+        "The request was blocked before it left the device. This is usually Android blocking plain HTTP (cleartext) traffic. A fresh APK build with HTTP allowed should fix this.",
+    };
+  }
   if (low.includes("network")) {
     return {
       message: "Network error",
@@ -113,7 +120,7 @@ export function AddPcSheet({ visible, onClose }: AddPcSheetProps) {
         };
         xhr.onerror = () => {
           clearTimeout(timer);
-          reject(new Error(`XHR network error`));
+          reject(new Error(`XHR network error (instant)`));
         };
         xhr.onabort = () => {
           clearTimeout(timer);
