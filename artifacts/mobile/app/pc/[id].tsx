@@ -1,9 +1,11 @@
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { router, useLocalSearchParams } from "expo-router";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   Alert,
+  Animated,
+  Modal,
   Platform,
   Pressable,
   RefreshControl,
@@ -139,6 +141,19 @@ export default function PCDetailScreen() {
   const [cmdInput, setCmdInput] = useState("");
   const [cmdOutput, setCmdOutput] = useState("");
   const [cmdRunning, setCmdRunning] = useState(false);
+  const [controlsVisible, setControlsVisible] = useState(false);
+  const [terminalVisible, setTerminalVisible] = useState(false);
+  const controlsAnim = useRef(new Animated.Value(0)).current;
+  const terminalAnim = useRef(new Animated.Value(0)).current;
+
+  const openSheet = (anim: Animated.Value, setter: (v: boolean) => void) => {
+    setter(true);
+    anim.setValue(0);
+    Animated.spring(anim, { toValue: 1, useNativeDriver: true, friction: 20, tension: 180 }).start();
+  };
+  const closeSheet = (anim: Animated.Value, setter: (v: boolean) => void) => {
+    Animated.timing(anim, { toValue: 0, duration: 200, useNativeDriver: true }).start(() => setter(false));
+  };
   const [editMode, setEditMode] = useState(false);
   const [pickerVisible, setPickerVisible] = useState(false);
   const [editingCard, setEditingCard] = useState<CustomCardConfig | null>(null);
@@ -973,7 +988,186 @@ export default function PCDetailScreen() {
               : "Offline"}
           </Text>
         </View>
+        {pc.status === "online" ? (
+          <View style={styles.headerActions}>
+            <Pressable
+              onPress={() => openSheet(controlsAnim, setControlsVisible)}
+              style={({ pressed }) => [styles.headerIconBtn, pressed && { opacity: 0.6 }]}
+              hitSlop={6}
+            >
+              <Feather name="power" size={16} color={C.tint} />
+            </Pressable>
+            <Pressable
+              onPress={() => openSheet(terminalAnim, setTerminalVisible)}
+              style={({ pressed }) => [styles.headerIconBtn, pressed && { opacity: 0.6 }]}
+              hitSlop={6}
+            >
+              <Feather name="terminal" size={16} color={C.tint} />
+            </Pressable>
+          </View>
+        ) : null}
       </View>
+
+      {/* ── Controls Bottom Sheet ── */}
+      <Modal
+        transparent
+        visible={controlsVisible}
+        animationType="none"
+        onRequestClose={() => closeSheet(controlsAnim, setControlsVisible)}
+      >
+        <Pressable style={styles.sheetBackdrop} onPress={() => closeSheet(controlsAnim, setControlsVisible)}>
+          <Pressable onPress={() => {}} style={{ width: "100%" }}>
+            <Animated.View
+              style={[
+                styles.sheetPanel,
+                {
+                  transform: [{
+                    translateY: controlsAnim.interpolate({ inputRange: [0, 1], outputRange: [400, 0] }),
+                  }],
+                },
+              ]}
+            >
+              <View style={styles.sheetHandle} />
+              <Text style={styles.sheetTitle}>Controls</Text>
+              <View style={styles.controlGrid}>
+                <CommandButton
+                  icon="moon"
+                  label="Sleep"
+                  color={C.tint}
+                  onPress={async () => {
+                    const r = await sendCommand(pc.id, "sleep");
+                    if (!r.success) throw new Error(r.error);
+                  }}
+                />
+                <CommandButton
+                  icon="lock"
+                  label="Lock"
+                  color="#A78BFA"
+                  onPress={async () => {
+                    const r = await sendCommand(pc.id, "lock");
+                    if (!r.success) throw new Error(r.error);
+                  }}
+                />
+                <CommandButton
+                  icon="refresh-cw"
+                  label="Restart"
+                  color={C.warning}
+                  destructive
+                  onPress={async () => {
+                    await new Promise<void>((resolve, reject) => {
+                      Alert.alert(
+                        "Restart PC",
+                        `Restart "${pc.name}"? All unsaved work will be lost.`,
+                        [
+                          { text: "Cancel", style: "cancel", onPress: () => reject() },
+                          {
+                            text: "Restart",
+                            style: "destructive",
+                            onPress: async () => {
+                              const r = await sendCommand(pc.id, "restart");
+                              if (!r.success) reject(new Error(r.error));
+                              else resolve();
+                            },
+                          },
+                        ]
+                      );
+                    });
+                  }}
+                />
+                <CommandButton
+                  icon="power"
+                  label="Shutdown"
+                  color={C.danger}
+                  destructive
+                  onPress={async () => {
+                    await new Promise<void>((resolve, reject) => {
+                      Alert.alert(
+                        "Shutdown PC",
+                        `Shut down "${pc.name}"? All unsaved work will be lost.`,
+                        [
+                          { text: "Cancel", style: "cancel", onPress: () => reject() },
+                          {
+                            text: "Shutdown",
+                            style: "destructive",
+                            onPress: async () => {
+                              const r = await sendCommand(pc.id, "shutdown");
+                              if (!r.success) reject(new Error(r.error));
+                              else resolve();
+                            },
+                          },
+                        ]
+                      );
+                    });
+                  }}
+                />
+              </View>
+            </Animated.View>
+          </Pressable>
+        </Pressable>
+      </Modal>
+
+      {/* ── Terminal Bottom Sheet ── */}
+      <Modal
+        transparent
+        visible={terminalVisible}
+        animationType="none"
+        onRequestClose={() => closeSheet(terminalAnim, setTerminalVisible)}
+      >
+        <Pressable style={styles.sheetBackdrop} onPress={() => closeSheet(terminalAnim, setTerminalVisible)}>
+          <Pressable onPress={() => {}} style={{ width: "100%" }}>
+            <Animated.View
+              style={[
+                styles.sheetPanel,
+                {
+                  transform: [{
+                    translateY: terminalAnim.interpolate({ inputRange: [0, 1], outputRange: [400, 0] }),
+                  }],
+                },
+              ]}
+            >
+              <View style={styles.sheetHandle} />
+              <Text style={styles.sheetTitle}>Run Command</Text>
+              <View style={styles.terminalInput}>
+                <Feather name="terminal" size={14} color={C.textMuted} style={{ marginTop: 1 }} />
+                <TextInput
+                  style={styles.cmdInput}
+                  value={cmdInput}
+                  onChangeText={setCmdInput}
+                  placeholder="e.g. tasklist, ls -la, ipconfig"
+                  placeholderTextColor={C.textMuted}
+                  autoCorrect={false}
+                  autoCapitalize="none"
+                  returnKeyType="send"
+                  onSubmitEditing={runCommand}
+                  editable={!cmdRunning}
+                />
+                <Pressable
+                  onPress={runCommand}
+                  disabled={!cmdInput.trim() || cmdRunning}
+                  hitSlop={8}
+                >
+                  <Feather
+                    name="send"
+                    size={18}
+                    color={!cmdInput.trim() ? C.textMuted : C.tint}
+                  />
+                </Pressable>
+              </View>
+              {cmdOutput ? (
+                <ScrollView
+                  style={styles.outputBox}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                >
+                  <ScrollView style={{ maxHeight: 200 }} showsVerticalScrollIndicator={false}>
+                    <Text style={styles.outputText}>{cmdOutput}</Text>
+                  </ScrollView>
+                </ScrollView>
+              ) : null}
+            </Animated.View>
+          </Pressable>
+        </Pressable>
+      </Modal>
 
       {/* ── Edit mode banner ── */}
       {editMode && (
@@ -1037,125 +1231,6 @@ export default function PCDetailScreen() {
           )}
         </>
       )}
-
-      {/* ── CONTROLS (online only) ── */}
-      {pc.status === "online" ? <View style={styles.card}>
-        <Text style={styles.sectionTitle}>Controls</Text>
-        <View style={styles.controlGrid}>
-          <CommandButton
-            icon="moon"
-            label="Sleep"
-            color={C.tint}
-            onPress={async () => {
-              const r = await sendCommand(pc.id, "sleep");
-              if (!r.success) throw new Error(r.error);
-            }}
-          />
-          <CommandButton
-            icon="lock"
-            label="Lock"
-            color="#A78BFA"
-            onPress={async () => {
-              const r = await sendCommand(pc.id, "lock");
-              if (!r.success) throw new Error(r.error);
-            }}
-          />
-          <CommandButton
-            icon="refresh-cw"
-            label="Restart"
-            color={C.warning}
-            destructive
-            onPress={async () => {
-              await new Promise<void>((resolve, reject) => {
-                Alert.alert(
-                  "Restart PC",
-                  `Restart "${pc.name}"? All unsaved work will be lost.`,
-                  [
-                    { text: "Cancel", style: "cancel", onPress: () => reject() },
-                    {
-                      text: "Restart",
-                      style: "destructive",
-                      onPress: async () => {
-                        const r = await sendCommand(pc.id, "restart");
-                        if (!r.success) reject(new Error(r.error));
-                        else resolve();
-                      },
-                    },
-                  ]
-                );
-              });
-            }}
-          />
-          <CommandButton
-            icon="power"
-            label="Shutdown"
-            color={C.danger}
-            destructive
-            onPress={async () => {
-              await new Promise<void>((resolve, reject) => {
-                Alert.alert(
-                  "Shutdown PC",
-                  `Shut down "${pc.name}"? All unsaved work will be lost.`,
-                  [
-                    { text: "Cancel", style: "cancel", onPress: () => reject() },
-                    {
-                      text: "Shutdown",
-                      style: "destructive",
-                      onPress: async () => {
-                        const r = await sendCommand(pc.id, "shutdown");
-                        if (!r.success) reject(new Error(r.error));
-                        else resolve();
-                      },
-                    },
-                  ]
-                );
-              });
-            }}
-          />
-        </View>
-      </View> : null}
-
-      {/* ── TERMINAL (online only) ── */}
-      {pc.status === "online" ? <View style={styles.card}>
-        <Text style={styles.sectionTitle}>Run Command</Text>
-        <View style={styles.terminalInput}>
-          <Feather name="terminal" size={14} color={C.textMuted} style={{ marginTop: 1 }} />
-          <TextInput
-            style={styles.cmdInput}
-            value={cmdInput}
-            onChangeText={setCmdInput}
-            placeholder="e.g. tasklist, ls -la, ipconfig"
-            placeholderTextColor={C.textMuted}
-            autoCorrect={false}
-            autoCapitalize="none"
-            returnKeyType="send"
-            onSubmitEditing={runCommand}
-            editable={!cmdRunning}
-          />
-          <Pressable
-            onPress={runCommand}
-            disabled={!cmdInput.trim() || cmdRunning}
-            hitSlop={8}
-          >
-            <Feather
-              name="send"
-              size={18}
-              color={!cmdInput.trim() ? C.textMuted : C.tint}
-            />
-          </Pressable>
-        </View>
-        {cmdOutput ? (
-          <ScrollView
-            style={styles.outputBox}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-          >
-            <ScrollView style={{ maxHeight: 200 }} showsVerticalScrollIndicator={false}>
-              <Text style={styles.outputText}>{cmdOutput}</Text>
-            </ScrollView>
-          </ScrollView>
-        ) : null}
-      </View> : null}
 
       {/* ── Extra Sensor Picker for built-in cards ── */}
       <CompactSensorPicker
@@ -1503,13 +1578,6 @@ const styles = StyleSheet.create({
     padding: 16,
     gap: 12,
   },
-  sectionTitle: {
-    fontSize: 11,
-    fontWeight: "700",
-    color: C.textMuted,
-    letterSpacing: 1,
-    textTransform: "uppercase",
-  },
   controlGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -1710,5 +1778,53 @@ const styles = StyleSheet.create({
     borderColor: C.cardBorder,
     alignItems: "center",
     justifyContent: "center",
+  },
+  headerActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    flexShrink: 0,
+  },
+  headerIconBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: C.tint + "18",
+    borderWidth: 1,
+    borderColor: C.tint + "40",
+  },
+  sheetBackdrop: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.45)",
+    justifyContent: "flex-end",
+    alignItems: "center",
+  },
+  sheetPanel: {
+    width: "100%",
+    backgroundColor: C.card,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingHorizontal: 20,
+    paddingBottom: 34,
+    paddingTop: 10,
+    gap: 16,
+    borderTopWidth: 1,
+    borderColor: C.cardBorder,
+  },
+  sheetHandle: {
+    width: 36,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: C.cardBorder,
+    alignSelf: "center",
+    marginBottom: 6,
+  },
+  sheetTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: C.text,
+    letterSpacing: -0.2,
   },
 });
