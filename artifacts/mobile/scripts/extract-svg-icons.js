@@ -327,8 +327,13 @@ for (const [filename, groupId] of Object.entries(ICONS)) {
     failed++;
     continue;
   }
-  const vb = `${bbox.x.toFixed(1)} ${bbox.y.toFixed(1)} ${bbox.w.toFixed(1)} ${bbox.h.toFixed(1)}`;
-  const svgOut = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${vb}">\n${inlined}\n</svg>`;
+  // Use a 0-origin viewBox and shift all content via translate.
+  // This avoids iOS/Android rendering bugs with large absolute coordinates (2000-4500 range).
+  const W = bbox.w.toFixed(2);
+  const H = bbox.h.toFixed(2);
+  const tx = (-bbox.x).toFixed(2);
+  const ty = (-bbox.y).toFixed(2);
+  const svgOut = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}">\n<g transform="translate(${tx},${ty})">\n${inlined}\n</g>\n</svg>`;
   fs.writeFileSync(path.join(OUT_DIR, `${filename}.svg`), svgOut, 'utf8');
   console.log(`✓  ${filename}.svg  [${Math.round(bbox.w)}×${Math.round(bbox.h)}]`);
   written++;

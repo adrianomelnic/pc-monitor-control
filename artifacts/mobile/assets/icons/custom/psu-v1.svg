@@ -1,4 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="2314.1 388.3 189.4 130.0">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 189.43 130.00">
+<g transform="translate(-2314.12,-388.33)">
 <g id="Power-Supply-icon-v1 00000176035903580600603260000017403947867013167503 ">
 			<path id="case 00000128487365644309112560000000867826077187289521 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2481.05 496.66h-144.43l-7.5-11.2v-70.93l7.5-11.2h144.43l7.5 11.2v70.93z"/>
 			<g id="screws 00000022557327348170469800000005412729509917637556 ">
@@ -260,4 +261,5 @@
 				</g>
 			</g>
 		</g>
+</g>
 </svg>

@@ -1,4 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="1459.9 2020.3 204.5 195.0">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 204.54 195.00">
+<g transform="translate(-1459.90,-2020.29)">
 <g id="CPU-Cooler-icon-v2">
 			<g id="fans 00000017502565808962725450000018008970588311643040 ">
 				<path id="fan" fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1566.67 2175.06v-139.77h5.25v139.77zm25.37 0v-139.77h-5.25v139.77zm-20.12-137.15h14.87m-14.87 134.53h14.87m-14.87-65.52h14.87m-14.87-3.5h14.87m-20.12-19.24h5.25m-5.25 41.99h5.25m14.87-41.99h5.25m-5.25 41.99h5.25"/>
@@ -20,4 +21,5 @@
 			<path id="cooling-block" fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1553.83 2182.73v-1.24h49.48v1.24m-49.48 9.6v1.24h49.48v-1.24m-40.99 1.24v6.72h32.5v-6.72"/>
 			<path id="screws 00000170279195160190660310000006522474142093861507 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1601.15 2195.81v2.15c0 0.24-0.19 0.43-0.44 0.43h-2.12c-0.24 0-0.43-0.19-0.43-0.43v-2.15m-42.17 0v2.15c0 0.24 0.19 0.43 0.44 0.43h2.12c0.24 0 0.44-0.19 0.44-0.43v-2.15"/>
 		</g>
+</g>
 </svg>

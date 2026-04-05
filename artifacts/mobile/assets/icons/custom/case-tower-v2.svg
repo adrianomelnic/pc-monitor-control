@@ -1,4 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="2559.6 95.5 238.4 235.5">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 238.45 235.52">
+<g transform="translate(-2559.61,-95.47)">
 <g id="Case-icon-v2">
 			<g id="main-parts">
 				<path id="bottom" fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m2783.06 296.61h-208.45v6h208.45z"/>
@@ -19,4 +20,5 @@
 			<path id="slots" fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m2667.87 148.53v-9m3.2 0v9m15.6 0v-9m3.2 0v9m-3.2 43v-9m3.2 0v9m-22 43v-9m3.2 0v9m15.6 0v-9m3.2 0v9m-22 43v-9m3.2 0v9m15.6 0v-9m3.2 0v9"/>
 			<path id="cutouts" fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m2668.7 294.61l2.15-6.43c0.27-0.82 1.04-1.37 1.9-1.37h12.25c0.86 0 1.62 0.55 1.9 1.37l2.15 6.43m-62 0l-2.15-6.43c-0.28-0.82-1.04-1.37-1.9-1.37h-12.25c-0.86 0-1.63 0.55-1.9 1.37l-2.15 6.43"/>
 		</g>
+</g>
 </svg>

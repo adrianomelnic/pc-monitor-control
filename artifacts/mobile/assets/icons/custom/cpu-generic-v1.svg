@@ -1,4 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="2042.2 1103.5 120.0 120.0">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120.00 120.00">
+<g transform="translate(-2042.17,-1103.50)">
 <g id="CPU-generic-icon-v1">
 			<path id="board 00000134209226813043407800000010190856435237025707 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m2057.17 1208.5h90v-90h-90z"/>
 			<path id="fiducial 00000170243752826014159500000018376527692796784288 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m2075.53 1125.47h-11.39v11.39"/>
@@ -74,4 +75,5 @@
 				</g>
 			</g>
 		</g>
+</g>
 </svg>

@@ -1,4 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="3131.6 384.0 174.6 130.0">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 174.58 130.00">
+<g transform="translate(-3131.60,-384.04)">
 <g id="Power-Supply-icon-v4">
 			<path id="profile 00000142161385191506745140000007474427481183834798 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m3281.11 492.37h-124.17v-93.33h124.17l10.07 11.2v70.93z"/>
 			<path id="horizontal-line 00000080928204508819089910000018196654846471187343 " fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m3159.94 420.71h128.24"/>
@@ -8,4 +9,5 @@
 			<path id="power-switch" fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m3155.94 473.67h-2v-27.93h2m-2 1.47l-2.03 0.19c-0.54 0.06-0.94 0.54-0.9 1.08l0.6 7.22c0.21 2.62-0.32 5.24-1.52 7.57l-3.49 6.75c-0.32 0.62 0.08 1.37 0.78 1.45l6.56 0.74"/>
 			<path id="markings 00000098936307899381663270000003640413149825018003 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m3173.38 470.71l29.3-50m-7.14 0l-29.3 50m28.14 0l29.3-50m-7.14 0l-29.3 50m28.14 0l29.3-50m-7.14 0l-29.3 50"/>
 		</g>
+</g>
 </svg>

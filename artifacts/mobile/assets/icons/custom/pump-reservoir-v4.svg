@@ -1,4 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="3176.3 1791.0 85.1 173.3">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 85.14 173.25">
+<g transform="translate(-3176.26,-1790.96)">
 <g id="Pump-Reservoir-Combo-icon-v4 00000170972435201407178490000007731532976269501834 ">
 			<path id="body 00000183956312063194800700000015805610647790718120 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m3243.21 1818.36v84.46m-48.75 0v-84.46"/>
 			<path id="glass 00000031175652659612689080000012645969546060210074 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m3227.95 1896.24h-18.23c-3.32 0-6-2.68-6-6v-59.68c0-3.31 2.68-6 6-6h18.23c3.31 0 6 2.69 6 6v59.68c0 3.32-2.69 6-6 6z"/>
@@ -12,4 +13,5 @@
 			</g>
 			<path id="base 00000088812907701956459940000004373953531802611612 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m3194.46 1929.41v19.8h48.75v-19.8"/>
 		</g>
+</g>
 </svg>

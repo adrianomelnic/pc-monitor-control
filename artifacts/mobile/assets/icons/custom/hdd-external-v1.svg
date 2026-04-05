@@ -1,4 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="2037.5 574.0 162.2 199.8">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 162.25 199.85">
+<g transform="translate(-2037.55,-573.96)">
 <g id="External-Hard-Drive-icon-v1">
 			<path id="&lt;Path&gt;" fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m2082.23 653.17z"/>
 			<path id="&lt;Path&gt;" fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m2133.35 637.61z"/>
@@ -10,4 +11,5 @@
 				<path id="usb-connector" fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m2166.53 720.54v-10.98q0-0.37 0.12-0.72l1.06-2.95c0.31-0.85 1.12-1.41 2.02-1.41h3.46c0.91 0 1.71 0.56 2.02 1.41l1.06 2.95q0.13 0.35 0.13 0.72v10.98zm6.99-4.79v-3.7c0-0.6-0.48-1.07-1.07-1.07h-1.97c-0.6 0-1.08 0.47-1.08 1.07v3.7c0 0.59 0.48 1.07 1.08 1.07h1.97c0.59 0 1.07-0.48 1.07-1.07zm-0.33-11.27v-2.31c0-0.29-0.24-0.53-0.53-0.53h-2.4c-0.29 0-0.53 0.24-0.53 0.53v2.31m5.2 16.06v5.91h-6.93v-5.91m2.18 2.04v2.11m2.57-2.11v2.11"/>
 			</g>
 		</g>
+</g>
 </svg>

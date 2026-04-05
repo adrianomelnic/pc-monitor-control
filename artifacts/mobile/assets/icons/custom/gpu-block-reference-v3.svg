@@ -1,4 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="866.2 1565.5 238.6 132.5">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 238.62 132.50">
+<g transform="translate(-866.19,-1565.47)">
 <g id="Graphics-Block-reference-icon-v3">
 			<g id="in-out">
 				<g id="inlet-outlet 00000031915541849817122110000009954372053204394390 ">
@@ -27,4 +28,5 @@
 			<path id="profile 00000011727742496504142330000009448415138903376042 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m926.23 1602.1l-2.12-2.11h-42.92v82.98l208.62-0.09v-82.89h-80.2l-2.11 2.11"/>
 			<path id="ridges" fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m885.42 1670.29h200.16m-72.32-5.76h72.32m-200.16 0h35.04m98.48-5.76h66.64m-200.16 0h29.37m105.39-5.76h65.4m-200.16 0h28.13m106.63-5.77h65.4m-200.16 0h28.13m106.63-5.76h65.4m-200.16 0h28.13m106.63-5.76h65.4m-200.16 0h28.13m106.63-5.76h65.4m-200.16 0h28.13m106.63-5.77h65.4m-200.16 0h28.13m105.39-5.76h66.64m-200.16 0h30.82m96.72-5.76h72.62m-200.16 0h36.2"/>
 		</g>
+</g>
 </svg>

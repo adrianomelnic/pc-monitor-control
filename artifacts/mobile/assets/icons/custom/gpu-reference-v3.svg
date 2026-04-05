@@ -1,4 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="585.5 1099.1 259.9 135.0">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 259.94 135.00">
+<g transform="translate(-585.53,-1099.13)">
 <g id="Graphics-Card-reference-icon-v3">
 			<path id="IO 00000060010796969215084800000015461775057256764328 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m607.59 1219.13v-84.08h-7.06"/>
 			<path id="connector 00000080195663242443338120000006251259698079527856 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m634.14 1196.8v10.83h13.23v-7.18c0-0.63 0.51-1.15 1.14-1.15h0.42c0.64-0.01 1.16 0.51 1.16 1.15v7.18h63.39v-7.18c0-0.63 0.52-1.15 1.15-1.15h0.42c0.64-0.01 1.16 0.51 1.16 1.15v3.73h6.78c0.64 0 1.15-0.51 1.15-1.15v-2.98h-3.39v-3.25"/>
@@ -32,4 +33,5 @@
 			<path id="case 00000172433537127098280880000006636277497997584541 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m713.36 1122.5h-6.16l-4.76 4.96m10.55-0.14l4.62-4.82h5.87m-0.37 4.82l4.62-4.82h5.63m-0.37 4.82l4.62-4.82h86.35l6.51 6.9v58.11l-6.51 6.89h-54.46l-19.31-20.46m-70.42-51.44h23.04m-0.69 71.9h5.63l4.63-4.81m-20.37 4.81h5.63l4.62-4.81m-40.47 0l-4.62 4.81h-35.89l-6.51-6.89v-58.11l6.51-6.9h54.46l19.31 20.47m-23.28 51.43h5.63l4.62-4.81m-20.37 4.81h5.64l4.62-4.81m9.98 4.81h5.63l4.62-4.81m73.33 4.81h-53.23"/>
 			<path id="fin 00000174566833105184829220000017945326307263946653 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m817.36 1120.66l-6.17-6.53h-51.05l-6.17 6.53"/>
 		</g>
+</g>
 </svg>

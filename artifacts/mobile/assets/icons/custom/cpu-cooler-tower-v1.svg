@@ -1,4 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="1206.6 2020.3 171.0 195.0">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 171.03 195.00">
+<g transform="translate(-1206.65,-2020.29)">
 <g id="CPU-Cooler-icon-v1">
 			<g id="blade 00000047782138416797557800000012322084200210707085 ">
 				<path id="centre 00000085947501323410032170000013255177177001527222 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m1310.02 2098.17c0 9.85-7.99 17.85-17.85 17.85-9.86 0-17.85-8-17.85-17.85 0-9.86 7.99-17.85 17.85-17.85 9.86 0 17.85 7.99 17.85 17.85z"/>
@@ -17,4 +18,5 @@
 				<path id="vertical-bars" fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m1330.74 2056.51v39.72m-5.96 6.04v-50.58m-71.19 4.82v13.14m5.96-1.03v-16.92m71.19 88.13v-13.14m-5.96 1.03v16.92m-65.23 0v-50.57m-5.96 6.04v39.72"/>
 			</g>
 		</g>
+</g>
 </svg>

@@ -1,4 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="1704.6 2282.1 261.8 165.0">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 261.78 164.97">
+<g transform="translate(-1704.61,-2282.10)">
 <g id="AIO-Cooler-icon-v3 00000137815604462770089430000018116080495045669801 ">
 			<g id="fan 00000110465605749159887990000013954496726146714760 ">
 				<path id="cutout 00000137091081602084458500000010859524218321763205 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1770.77 2328.37c0-14.36 11.64-26 26-26 14.36 0 26 11.64 26 26 0 14.36-11.64 26-26 26-14.36 0-26-11.64-26-26z"/>
@@ -76,4 +77,5 @@
 				</g>
 			</g>
 		</g>
+</g>
 </svg>

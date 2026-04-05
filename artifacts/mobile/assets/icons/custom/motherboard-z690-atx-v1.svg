@@ -1,4 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="53.0 156.2 219.7 396.4">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 219.68 396.42">
+<g transform="translate(-53.04,-156.22)">
 <g id="Z690-ATX-Motherboard-icon-v1">
 			<path id="board 00000132056405230053861860000016042239392162475189 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m257.72 502.5v-129.73h-48.81"/>
 			<path id="board 00000158714780269244699210000006943692036089121970 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m93.28 458.21v79.43h164.44v-20.6"/>
@@ -22,4 +23,5 @@
 			</g>
 			<path id="other-bits" fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m255.24 399.66h-4.27v-23.89h4.27zm0 8.35h-4.27v13.1h4.27zm-30.43 113.91c-3.66 0-6.63 2.97-6.63 6.63 0 3.65 2.97 6.62 6.63 6.62 3.66 0 6.62-2.97 6.62-6.62 0-3.66-2.96-6.63-6.62-6.63z"/>
 		</g>
+</g>
 </svg>

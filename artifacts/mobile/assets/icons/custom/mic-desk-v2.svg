@@ -1,4 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="3725.7 1529.7 213.1 221.9">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 213.06 221.94">
+<g transform="translate(-3725.69,-1529.74)">
 <g id="Mic-icon-v2 00000005945414079900381870000016517469265455887794 ">
 			<g id="sections 00000088814657272470146670000008540559918514280872 ">
 				<path id="section 00000054981940605669128840000004905715360142008754 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m3770.03 1549.06v-2.32c0-1.11 0.89-2 2-2h45.16c1.1 0 2 0.89 2 2v2.32z"/>
@@ -22,4 +23,5 @@
 			</g>
 			<path id="stand" fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m3830.31 1647.06v-2h14v83.62h-14v-69.62m-11.12-2h12.12c1.23-0.91 2.03-2.36 2.03-4 0-1.64-0.8-3.09-2.03-4h-12.12m-78.5 79.62v8h34.18v-1.4c0-1.66 1.34-3 3-3h35.26c1.66 0 3 1.34 3 3v1.4h34.18v-8zm36.18 8h37.26"/>
 		</g>
+</g>
 </svg>

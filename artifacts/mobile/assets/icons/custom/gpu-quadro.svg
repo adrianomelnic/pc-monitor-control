@@ -1,4 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="862.8 862.6 245.5 125.0">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 245.50 125.00">
+<g transform="translate(-862.75,-862.59)">
 <g id="Graphics-Card-quadro-icon-v1 00000084500171390005758120000007210477971515661729 ">
 			<path id="IO 00000079467058367003450880000011231938520200412348 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m884.7 972.59v-82.67h-6.95"/>
 			<path id="connector 00000158715879704875822560000003544011054987927470 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m909.67 950.64v10.64h13v-7.06c0-0.62 0.5-1.12 1.13-1.13h0.41c0.63 0 1.14 0.5 1.14 1.13v7.06h62.33v-7.06c0-0.62 0.5-1.12 1.12-1.13h0.42c0.63 0 1.14 0.5 1.14 1.13v3.67h6.67c0.62 0 1.13-0.5 1.13-1.13v-2.93h-3.33v-3.19"/>
@@ -10,4 +11,5 @@
 			<path id="case 00000065054649482431472130000016692702145973225902 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1093.25 940.91v-61.06c0-1.25-1.02-2.26-2.27-2.26h-199.23v24h69.41l58.22 41.58h73.87v2.85c0 1.25-1.02 2.26-2.27 2.26h-199.23v-44.43"/>
 			<path id="branding 00000118392931665854490970000010921457000646134439 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m901.93 907.93h50.08m0 6.39h-50.08"/>
 		</g>
+</g>
 </svg>

@@ -1,4 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="315.5 1107.5 260.0 126.7">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260.00 126.65">
+<g transform="translate(-315.50,-1107.48)">
 <g id="Graphics-Card-reference-icon-v2 00000077303646994644706080000013003664284054694803 ">
 			<path id="IO 00000152967021158024780160000012326066317834621334 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m337.56 1219.13v-84.1h-7.06"/>
 			<path id="connector 00000086682601441348315710000004085742291550226354 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m364.12 1196.79v10.84h13.23v-7.19c0-0.63 0.51-1.14 1.14-1.15h0.42c0.64 0 1.16 0.51 1.16 1.15v7.19h63.41v-7.19c0-0.63 0.51-1.14 1.15-1.15h0.42c0.64 0 1.16 0.51 1.16 1.15v3.74h6.78c0.64 0 1.15-0.52 1.15-1.15v-2.98h-3.38v-3.26"/>
@@ -48,4 +49,5 @@
 				<path id="&lt;Path&gt;" fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m417.39 1181.97l-8.48 8.47"/>
 			</g>
 		</g>
+</g>
 </svg>

@@ -1,4 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="923.3 147.4 124.4 124.1">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 124.36 124.06">
+<g transform="translate(-923.32,-147.44)">
 <g id="Motherboard-Mini-ITX-icon-v1">
 			<g id="cpu 4 ">
 				<g id="silicon 3 ">
@@ -45,4 +46,5 @@
 				<path id="bottom 7 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m950.49 254.25v-15.2h53.28v-7.76h-53.28v5.47"/>
 			</g>
 		</g>
+</g>
 </svg>

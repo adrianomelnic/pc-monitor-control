@@ -1,4 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="1490.0 632.2 144.4 110.0">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 144.40 110.00">
+<g transform="translate(-1489.97,-632.18)">
 <g id="SSD-icon-v1">
 			<path id="profile 15 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m1611.1 702.3v-39.14h8.27v-11.98c0-2.21-1.79-4-4-4h-106.4c-2.21 0-4 1.79-4 4v72c0 2.2 1.79 4 4 4h106.4c2.21 0 4-1.8 4-4v-20.88z"/>
 			<g id="connectors 1 ">
@@ -18,4 +19,5 @@
 				<path id="&lt;Path&gt;" fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m1565.93 692.9v-11.45h4.68c1.84 0 3.32 1.49 3.32 3.32v4.81c0 1.83-1.48 3.32-3.32 3.32z"/>
 			</g>
 		</g>
+</g>
 </svg>

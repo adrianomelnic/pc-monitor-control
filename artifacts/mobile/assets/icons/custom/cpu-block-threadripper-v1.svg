@@ -1,4 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="1224.3 1549.3 135.7 181.4">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 135.67 181.36">
+<g transform="translate(-1224.33,-1549.28)">
 <g id="CPU-Block-Threadripper-icon-v1">
 			<path id="profile 00000088100423091435131350000001824238663856247684 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m1340 1715.64h-95.67c-2.76 0-5-2.24-5-5v-141.36c0-2.76 2.24-5 5-5h95.67c2.76 0 5 2.24 5 5v141.36c0 2.76-2.24 5-5 5z"/>
 			<g id="branding 00000054259814170969793250000011254678983964240273 ">
@@ -22,4 +23,5 @@
 			</g>
 			<path id="bevel 00000079487740986934860160000016516614092807932053 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m1335 1687.44h-85.67m85.67-100.13h-85.67m95.67-18.03l-10 18.03v100.13l5.69 13.2m-97.05 0l5.69-13.2v-100.13l-10-18.03"/>
 		</g>
+</g>
 </svg>

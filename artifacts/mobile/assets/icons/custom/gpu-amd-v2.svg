@@ -1,4 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="329.9 862.6 231.2 125.0">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 231.20 125.00">
+<g transform="translate(-329.90,-862.59)">
 <g id="Graphics-Card-AMD-icon-v2">
 			<path id="IO 00000143610194213168502010000011574160536411681452 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m351.84 972.59v-82.67h-6.94"/>
 			<path id="connector 00000108307661427770558890000010711329250419981235 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m377.94 950.64v10.64h13.01v-7.06c0-0.62 0.5-1.12 1.12-1.13h0.42c0.62 0 1.13 0.5 1.13 1.13v7.06h62.33v-7.06c0-0.62 0.5-1.12 1.13-1.13h0.41c0.63 0 1.14 0.5 1.14 1.13v3.67h6.67c0.62 0 1.13-0.5 1.13-1.13v-2.93h-3.33v-6.45"/>
@@ -15,4 +16,5 @@
 				<path id="center 00000047052730965044423230000004230318954140437933 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m390.44 923.84c-1.74-1.04-3.2-2.48-4.27-4.19m-1.21-10.92c-0.46 1.32-0.72 2.73-0.72 4.2q0.01 0.9 0.13 1.76m8.37-13.74c-1.94 0.68-3.66 1.82-5.04 3.28m16-2.06c-1.69-1.06-3.64-1.74-5.75-1.9m11.64 11.27c-0.23-2.1-0.96-4.05-2.09-5.72m-1.61 16.16c1.44-1.43 2.55-3.2 3.18-5.18m-13.63 8.75q0.75 0.1 1.52 0.1c1.57 0 3.08-0.3 4.47-0.83"/>
 			</g>
 		</g>
+</g>
 </svg>
