@@ -1,5 +1,6 @@
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
+import { router } from "expo-router";
 import React, { useState } from "react";
 import {
   FlatList,
@@ -14,21 +15,29 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AddPcSheet } from "@/components/AddPcSheet";
 import { PCCard } from "@/components/PCCard";
 import Colors from "@/constants/colors";
-import { usePcs } from "@/context/PcsContext";
+import { DEMO_PC_HOST, DEMO_PC_ID, usePcs } from "@/context/PcsContext";
 
 const C = Colors.light;
 
 export default function HomeScreen() {
-  const { pcs, refreshAll } = usePcs();
+  const { pcs, refreshAll, addDemoMode } = usePcs();
   const [addVisible, setAddVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const insets = useSafeAreaInsets();
+
+  const isDemoAdded = pcs.some((p) => p.host === DEMO_PC_HOST);
 
   const onRefresh = async () => {
     setRefreshing(true);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     await refreshAll();
     setRefreshing(false);
+  };
+
+  const handleDemo = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    if (!isDemoAdded) addDemoMode();
+    router.push(`/pc/${DEMO_PC_ID}`);
   };
 
   const onlineCount = pcs.filter((p) => p.status === "online").length;
@@ -88,6 +97,20 @@ export default function HomeScreen() {
               onPress={() => setAddVisible(true)}
             >
               <Text style={styles.emptyBtnText}>Add your first PC</Text>
+            </Pressable>
+
+            <Pressable
+              style={({ pressed }) => [styles.demoBtn, pressed && { opacity: 0.82 }]}
+              onPress={handleDemo}
+            >
+              <View style={styles.demoBtnIcon}>
+                <Feather name="play-circle" size={20} color="#F97316" />
+              </View>
+              <View style={styles.demoBtnText}>
+                <Text style={styles.demoBtnTitle}>Try Demo Mode</Text>
+                <Text style={styles.demoBtnSub}>Explore with simulated data — no PC needed</Text>
+              </View>
+              <Feather name="chevron-right" size={16} color="#F97316" />
             </Pressable>
           </View>
         }
@@ -165,5 +188,40 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "700",
     color: "#000",
+  },
+  demoBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    backgroundColor: "rgba(249, 115, 22, 0.08)",
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: "rgba(249, 115, 22, 0.3)",
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    marginTop: 4,
+    width: "100%",
+  },
+  demoBtnIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 9,
+    backgroundColor: "rgba(249, 115, 22, 0.13)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  demoBtnText: {
+    flex: 1,
+    gap: 2,
+  },
+  demoBtnTitle: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#F97316",
+  },
+  demoBtnSub: {
+    fontSize: 12,
+    color: C.textSecondary,
+    lineHeight: 16,
   },
 });
