@@ -138,16 +138,46 @@ interface PcsContextType {
 const PcsContext = createContext<PcsContextType>({} as PcsContextType);
 const STORAGE_KEY = "pcs_v1";
 
-function fetchWithTimeout(
-  url: string,
-  options: RequestInit,
-  timeoutMs: number
-): Promise<Response> {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
-  return fetch(url, { ...options, signal: controller.signal }).finally(() =>
-    clearTimeout(timer)
-  );
+function xhrGet(url: string, headers: Record<string, string>, timeoutMs: number): Promise<any> {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    const timer = setTimeout(() => { xhr.abort(); reject(new Error("Timeout")); }, timeoutMs);
+    xhr.onload = () => {
+      clearTimeout(timer);
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try { resolve(JSON.parse(xhr.responseText)); }
+        catch { reject(new Error(`Parse error`)); }
+      } else {
+        reject(new Error(`HTTP ${xhr.status}`));
+      }
+    };
+    xhr.onerror = () => { clearTimeout(timer); reject(new Error("Network error")); };
+    xhr.onabort = () => { clearTimeout(timer); reject(new Error("Timeout")); };
+    xhr.open("GET", url);
+    Object.entries(headers).forEach(([k, v]) => xhr.setRequestHeader(k, v));
+    xhr.send();
+  });
+}
+
+function xhrPost(url: string, headers: Record<string, string>, body: string, timeoutMs: number): Promise<any> {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    const timer = setTimeout(() => { xhr.abort(); reject(new Error("Timeout")); }, timeoutMs);
+    xhr.onload = () => {
+      clearTimeout(timer);
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try { resolve(JSON.parse(xhr.responseText)); }
+        catch { reject(new Error(`Parse error`)); }
+      } else {
+        reject(new Error(`HTTP ${xhr.status}`));
+      }
+    };
+    xhr.onerror = () => { clearTimeout(timer); reject(new Error("Network error")); };
+    xhr.onabort = () => { clearTimeout(timer); reject(new Error("Timeout")); };
+    xhr.open("POST", url);
+    Object.entries(headers).forEach(([k, v]) => xhr.setRequestHeader(k, v));
+    xhr.send(body);
+  });
 }
 
 export function PcsProvider({ children }: { children: React.ReactNode }) {
@@ -184,18 +214,9 @@ export function PcsProvider({ children }: { children: React.ReactNode }) {
       };
     }
     try {
-      const headers: Record<string, string> = {
-        "Content-Type": "application/json",
-      };
+      const headers: Record<string, string> = {};
       if (pc.apiKey) headers["X-API-Key"] = pc.apiKey;
-
-      const res = await fetchWithTimeout(
-        buildUrl(pc, "/metrics"),
-        { headers },
-        12000
-      );
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
+      const data = await xhrGet(buildUrl(pc, "/metrics"), headers, 12000);
       return {
         status: "online",
         metrics: data.metrics,
@@ -322,16 +343,15 @@ export function PcsProvider({ children }: { children: React.ReactNode }) {
         return { success: true, output: `[Demo] Command '${command}' executed` };
       }
       try {
-        const headers: Record<string, string> = {
-          "Content-Type": "application/json",
-        };
+        const headers: Record<string, string> = { "Content-Type": "application/json" };
         if (pc.apiKey) headers["X-API-Key"] = pc.apiKey;
-        const res = await fetchWithTimeout(
+        const data = await xhrPost(
           buildUrl(pc, "/command"),
-          { method: "POST", headers, body: JSON.stringify({ command, args }) },
+          headers,
+          JSON.stringify({ command, args }),
           20000
         );
-        return await res.json();
+        return data;
       } catch (e: any) {
         return { success: false, error: e?.message || "Connection failed" };
       }

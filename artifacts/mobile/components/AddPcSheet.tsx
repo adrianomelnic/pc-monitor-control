@@ -53,7 +53,7 @@ function friendlyError(e: unknown): { message: string; detail: string } {
         "Could not reach the PC. Check that the phone and PC are on the same Wi-Fi network and the IP address is correct.",
     };
   }
-  return { message: "Connection failed", detail: msg };
+  return { message: "Connection failed", detail: `Raw error: "${msg}" (name: ${e instanceof Error ? e.name : "n/a"})` };
 }
 
 export function AddPcSheet({ visible, onClose }: AddPcSheetProps) {
@@ -94,33 +94,39 @@ export function AddPcSheet({ visible, onClose }: AddPcSheetProps) {
     const p = parseInt(port) || 8765;
     if (!h) return;
     setTestState({ kind: "testing" });
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 8000);
+    const url = `http://${h}:${p}/metrics`;
     try {
-      const headers: Record<string, string> = { "Content-Type": "application/json" };
-      if (apiKey.trim()) headers["X-API-Key"] = apiKey.trim();
-      const res = await fetch(`http://${h}:${p}/metrics`, {
-        headers,
-        signal: controller.signal,
+      const data = await new Promise<any>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        const timer = setTimeout(() => {
+          xhr.abort();
+          reject(new Error("Timeout"));
+        }, 8000);
+        xhr.onload = () => {
+          clearTimeout(timer);
+          if (xhr.status >= 200 && xhr.status < 300) {
+            try { resolve(JSON.parse(xhr.responseText)); }
+            catch { reject(new Error(`Parse error (HTTP ${xhr.status})`)); }
+          } else {
+            reject(new Error(`HTTP ${xhr.status}`));
+          }
+        };
+        xhr.onerror = () => {
+          clearTimeout(timer);
+          reject(new Error(`XHR network error`));
+        };
+        xhr.onabort = () => {
+          clearTimeout(timer);
+          reject(new Error("Timeout"));
+        };
+        xhr.open("GET", url);
+        if (apiKey.trim()) xhr.setRequestHeader("X-API-Key", apiKey.trim());
+        xhr.send();
       });
-      clearTimeout(timer);
-      if (!res.ok) {
-        setTestState({
-          kind: "err",
-          message: `Server returned HTTP ${res.status}`,
-          detail:
-            res.status === 401 || res.status === 403
-              ? "Invalid API key — check the key configured in pc_agent.py."
-              : `Unexpected response from the agent (HTTP ${res.status}).`,
-        });
-        return;
-      }
-      const data = await res.json();
       const pcName: string = data?.metrics?.cpu?.name ?? "Unknown PC";
       const os: string = data?.os ?? "Windows";
       setTestState({ kind: "ok", pcName, os });
     } catch (e: unknown) {
-      clearTimeout(timer);
       setTestState({ kind: "err", ...friendlyError(e) });
     }
   };
