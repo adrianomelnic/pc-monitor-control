@@ -1,6 +1,11 @@
 ---
 name: svg-icons
-description: Add custom SVG icon files to the Expo mobile app's icon picker. Use when the user uploads SVG files and wants them available as selectable icons in the sensor/custom card icon picker. Covers installing SVG support, converting SVG files to React Native components, and registering them in the icon picker.
+description: >-
+  Add custom SVG icon files to the Expo mobile app's icon picker. Use when the
+  user uploads SVG files and wants them available as selectable icons in the
+  sensor/custom card icon picker. Covers installing SVG support, converting SVG
+  files to React Native components, and registering them in the icon picker.
+enabled: true
 ---
 
 # Custom SVG Icons in Expo
