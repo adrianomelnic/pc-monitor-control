@@ -4,49 +4,49 @@
 			<g id="cpu 1 ">
 				<g id="silicon">
 					<g id="silicon 00000033354811331638013530000005133154915248861874 ">
-						<path id="&lt;Compound Path&gt;" fill="currentColor" d="m719.4 184.76h-20.57v20.57h20.57zm-1 1v18.56h-18.57v-18.56z"/>
+						<path id="&lt;Compound Path&gt;" fill="none" d="m719.4 184.76h-20.57v20.57h20.57zm-1 1v18.56h-18.57v-18.56z"/>
 					</g>
 				</g>
 				<g id="tracks">
-					<path id="track 26 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m709.11 207.02v6.34"/>
-					<path id="track 25 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m704.36 207.02v6.34"/>
-					<path id="track 24 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m713.87 207.02v6.34"/>
+					<path id="track 26 " fill="none" stroke="currentColor" stroke-miterlimit="10" d="m709.11 207.02v6.34"/>
+					<path id="track 25 " fill="none" stroke="currentColor" stroke-miterlimit="10" d="m704.36 207.02v6.34"/>
+					<path id="track 24 " fill="none" stroke="currentColor" stroke-miterlimit="10" d="m713.87 207.02v6.34"/>
 				</g>
 				<g id="tracks 1 ">
-					<path id="track 29 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m709.11 183.07v-6.34"/>
-					<path id="track 28 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m713.87 183.07v-6.34"/>
-					<path id="track 27 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m704.36 183.07v-6.34"/>
+					<path id="track 29 " fill="none" stroke="currentColor" stroke-miterlimit="10" d="m709.11 183.07v-6.34"/>
+					<path id="track 28 " fill="none" stroke="currentColor" stroke-miterlimit="10" d="m713.87 183.07v-6.34"/>
+					<path id="track 27 " fill="none" stroke="currentColor" stroke-miterlimit="10" d="m704.36 183.07v-6.34"/>
 				</g>
 				<g id="tracks 3 ">
-					<path id="track 35 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m697.14 195.05h-6.34"/>
-					<path id="track 34 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m697.14 190.29h-6.34"/>
-					<path id="track 33 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m697.14 199.8h-6.34"/>
+					<path id="track 35 " fill="none" stroke="currentColor" stroke-miterlimit="10" d="m697.14 195.05h-6.34"/>
+					<path id="track 34 " fill="none" stroke="currentColor" stroke-miterlimit="10" d="m697.14 190.29h-6.34"/>
+					<path id="track 33 " fill="none" stroke="currentColor" stroke-miterlimit="10" d="m697.14 199.8h-6.34"/>
 				</g>
 				<g id="tracks 2 ">
-					<path id="track 32 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m721.09 195.05h6.34"/>
-					<path id="track 31 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m721.09 199.8h6.34"/>
-					<path id="track 30 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m721.09 190.29h6.34"/>
+					<path id="track 32 " fill="none" stroke="currentColor" stroke-miterlimit="10" d="m721.09 195.05h6.34"/>
+					<path id="track 31 " fill="none" stroke="currentColor" stroke-miterlimit="10" d="m721.09 199.8h6.34"/>
+					<path id="track 30 " fill="none" stroke="currentColor" stroke-miterlimit="10" d="m721.09 190.29h6.34"/>
 				</g>
 			</g>
 			<g id="ram-sticks">
-				<path id="ram 3 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m737.75 158.5h3.81v60.91h-3.81z"/>
-				<path id="ram 2 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m745.62 158.5h3.81v60.91h-3.81z"/>
-				<path id="ram 1 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m753.49 158.5h3.8v60.91h-3.8z"/>
-				<path id="ram" fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m761.35 158.5h3.81v60.91h-3.81z"/>
+				<path id="ram 3 " fill="none" stroke="currentColor" stroke-miterlimit="10" d="m737.75 158.5h3.81v60.91h-3.81z"/>
+				<path id="ram 2 " fill="none" stroke="currentColor" stroke-miterlimit="10" d="m745.62 158.5h3.81v60.91h-3.81z"/>
+				<path id="ram 1 " fill="none" stroke="currentColor" stroke-miterlimit="10" d="m753.49 158.5h3.8v60.91h-3.8z"/>
+				<path id="ram" fill="none" stroke="currentColor" stroke-miterlimit="10" d="m761.35 158.5h3.81v60.91h-3.81z"/>
 			</g>
 			<g id="PCIe-slots">
-				<path id="PCIe 2 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m675.51 231.38h61.28"/>
-				<path id="PCIe 1 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m665.36 243.56h61.28"/>
-				<path id="PCIe" fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m665.36 257.77h61.28"/>
+				<path id="PCIe 2 " fill="none" stroke="currentColor" stroke-miterlimit="10" d="m675.51 231.38h61.28"/>
+				<path id="PCIe 1 " fill="none" stroke="currentColor" stroke-miterlimit="10" d="m665.36 243.56h61.28"/>
+				<path id="PCIe" fill="none" stroke="currentColor" stroke-miterlimit="10" d="m665.36 257.77h61.28"/>
 			</g>
 			<g id="heatsinks">
-				<path id="heatsink 2 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m679.28 150.47v60l-23.78 23.78v-83.78z"/>
-				<path id="marking" fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m667.39 162.56v40.74"/>
-				<path id="heatsink 3 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m683.9 161.55c1.19 1.19 1.85 1.85 3.04 3.04h39.47c1.19-1.19 1.86-1.85 3.05-3.04v-11.08h-50.18"/>
+				<path id="heatsink 2 " fill="none" stroke="currentColor" stroke-miterlimit="10" d="m679.28 150.47v60l-23.78 23.78v-83.78z"/>
+				<path id="marking" fill="none" stroke="currentColor" stroke-miterlimit="10" d="m667.39 162.56v40.74"/>
+				<path id="heatsink 3 " fill="none" stroke="currentColor" stroke-miterlimit="10" d="m683.9 161.55c1.19 1.19 1.85 1.85 3.04 3.04h39.47c1.19-1.19 1.86-1.85 3.05-3.04v-11.08h-50.18"/>
 			</g>
 			<g id="profile 1 ">
-				<path id="bottom 1 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m731.66 270.47h-76.16v-32.16"/>
-				<path id="top 2 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m733.52 150.47h41.98v120h-39.78v-25.46c6.74-6.74 10.52-10.52 17.26-17.25h18.46"/>
+				<path id="bottom 1 " fill="none" stroke="currentColor" stroke-miterlimit="10" d="m731.66 270.47h-76.16v-32.16"/>
+				<path id="top 2 " fill="none" stroke="currentColor" stroke-miterlimit="10" d="m733.52 150.47h41.98v120h-39.78v-25.46c6.74-6.74 10.52-10.52 17.26-17.25h18.46"/>
 			</g>
 		</g>
 </g>

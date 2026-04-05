@@ -2,50 +2,50 @@
 <g transform="translate(-3980.38,-404.47)" stroke-width="10.01">
 <g id="Temperature-flow-monitor-icon-v1 00000004529647018178512240000014504591178449930657 ">
 			<g id="amount 00000023993994376893278070000010222043927946644110 ">
-				<path id="&lt;Path&gt;" fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m4084.87 463.64v-1.59"/>
-				<path id="&lt;Path&gt;" fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m4086.87 463.64v-2.99"/>
-				<path id="&lt;Path&gt;" fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m4088.87 463.64v-4.39"/>
+				<path id="&lt;Path&gt;" fill="none" stroke="currentColor" stroke-miterlimit="10" d="m4084.87 463.64v-1.59"/>
+				<path id="&lt;Path&gt;" fill="none" stroke="currentColor" stroke-miterlimit="10" d="m4086.87 463.64v-2.99"/>
+				<path id="&lt;Path&gt;" fill="none" stroke="currentColor" stroke-miterlimit="10" d="m4088.87 463.64v-4.39"/>
 			</g>
 			<g id="28.3 00000017483839421574440310000006408665731031275412 ">
-				<path id="C 00000167359617847533863430000000118510123250647732 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m4091.3 452.3c0-0.55-0.45-1-1-1h-2.22c-0.55 0-1 0.45-1 1v4.17c0 0.55 0.45 1 1 1h2.22c0.55 0 1-0.45 1-1"/>
-				<path id="degrees 00000104671898830758005360000004296996203807745466 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m4085.17 453.1c0 0.83-0.67 1.5-1.5 1.5-0.83 0-1.5-0.67-1.5-1.5 0-0.83 0.67-1.5 1.5-1.5 0.83 0 1.5 0.67 1.5 1.5z"/>
-				<path id="3 00000020384454783339737780000005208229439612931241 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m4072.37 451.3h6.05c0.55 0 1 0.45 1 1v10.34c0 0.55-0.45 1-1 1h-6.05m2-6.17h3.08"/>
+				<path id="C 00000167359617847533863430000000118510123250647732 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m4091.3 452.3c0-0.55-0.45-1-1-1h-2.22c-0.55 0-1 0.45-1 1v4.17c0 0.55 0.45 1 1 1h2.22c0.55 0 1-0.45 1-1"/>
+				<path id="degrees 00000104671898830758005360000004296996203807745466 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m4085.17 453.1c0 0.83-0.67 1.5-1.5 1.5-0.83 0-1.5-0.67-1.5-1.5 0-0.83 0.67-1.5 1.5-1.5 0.83 0 1.5 0.67 1.5 1.5z"/>
+				<path id="3 00000020384454783339737780000005208229439612931241 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m4072.37 451.3h6.05c0.55 0 1 0.45 1 1v10.34c0 0.55-0.45 1-1 1h-6.05m2-6.17h3.08"/>
 				<g id="point 00000160877820181499947310000015349251808055046321 ">
 					<g id="point 00000159433136785994139190000011304320410343200649 ">
-						<path id="&lt;Path&gt;" fill="currentColor" d="m4069.87 461.54c-0.55 0-1 0.45-1 1 0 0.55 0.45 1 1 1 0.56 0 1-0.45 1-1 0-0.55-0.44-1-1-1z"/>
+						<path id="&lt;Path&gt;" fill="none" d="m4069.87 461.54c-0.55 0-1 0.45-1 1 0 0.55 0.45 1 1 1 0.56 0 1-0.45 1-1 0-0.55-0.44-1-1-1z"/>
 					</g>
 				</g>
-				<path id="8 00000009592569793666695840000008847666432933701039 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m4066.22 457.47c0.55 0 1 0.45 1 1v4.17c0 0.55-0.45 1-1 1h-5.05c-0.55 0-1-0.45-1-1v-4.17c0-0.55 0.45-1 1-1-0.55 0-1-0.45-1-1v-4.17c0-0.55 0.45-1 1-1h5.05c0.55 0 1 0.45 1 1v4.17c0 0.55-0.45 1-1 1zm-3.65 0h2.28"/>
-				<path id="2 00000126302172835620173120000010125003550228746164 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m4050.17 451.3h6.05c0.55 0 1 0.45 1 1v4.17c0 0.55-0.45 1-1 1h-5.05c-0.55 0-1 0.45-1 1v4.17c0 0.55 0.45 1 1 1h6.05"/>
+				<path id="8 00000009592569793666695840000008847666432933701039 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m4066.22 457.47c0.55 0 1 0.45 1 1v4.17c0 0.55-0.45 1-1 1h-5.05c-0.55 0-1-0.45-1-1v-4.17c0-0.55 0.45-1 1-1-0.55 0-1-0.45-1-1v-4.17c0-0.55 0.45-1 1-1h5.05c0.55 0 1 0.45 1 1v4.17c0 0.55-0.45 1-1 1zm-3.65 0h2.28"/>
+				<path id="2 00000126302172835620173120000010125003550228746164 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m4050.17 451.3h6.05c0.55 0 1 0.45 1 1v4.17c0 0.55-0.45 1-1 1h-5.05c-0.55 0-1 0.45-1 1v4.17c0 0.55 0.45 1 1 1h6.05"/>
 			</g>
 			<g id="amount 00000006698418360774757500000009540078374176799898 ">
-				<path id="&lt;Path&gt;" fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m4084.87 445.64v-1.59"/>
-				<path id="&lt;Path&gt;" fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m4086.87 445.64v-2.99"/>
-				<path id="&lt;Path&gt;" fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m4088.87 445.64v-4.39"/>
+				<path id="&lt;Path&gt;" fill="none" stroke="currentColor" stroke-miterlimit="10" d="m4084.87 445.64v-1.59"/>
+				<path id="&lt;Path&gt;" fill="none" stroke="currentColor" stroke-miterlimit="10" d="m4086.87 445.64v-2.99"/>
+				<path id="&lt;Path&gt;" fill="none" stroke="currentColor" stroke-miterlimit="10" d="m4088.87 445.64v-4.39"/>
 			</g>
 			<g id="12.0 00000157294732104147592730000011176583314393821630 ">
 				<g id="L/min 00000090290886013520175280000012574763385958639033 ">
-					<path id="n 00000160183599814236591320000010434336738338697655 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4098.24 439.47v-2.08c0-0.56 0.45-1 1-1h0.6c0.55 0 1 0.44 1 1v2.08"/>
-					<path id="i 00000140009556496036604850000006242050968659660939 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4096.64 439.47v-3.08"/>
-					<path id="m 00000180344237598426388310000007810146151278587056 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4095.04 439.47v-2.08c0-0.56-0.45-1-1-1h-0.59c-0.56 0-1 0.44-1 1 0-0.56-0.45-1-1-1h-0.6c-0.55 0-1 0.44-1 1v2.08m2.6 0v-2.08"/>
-					<path id="/ 00000032613984651320715370000002438622542722357183 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4086.87 439.47l2.32-6.17"/>
-					<path id="L 00000117675917879984605830000018208389638900235186 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4085.27 439.47h-2.1c-0.55 0-1-0.45-1-1v-5.17"/>
+					<path id="n 00000160183599814236591320000010434336738338697655 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4098.24 439.47v-2.08c0-0.56 0.45-1 1-1h0.6c0.55 0 1 0.44 1 1v2.08"/>
+					<path id="i 00000140009556496036604850000006242050968659660939 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4096.64 439.47v-3.08"/>
+					<path id="m 00000180344237598426388310000007810146151278587056 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4095.04 439.47v-2.08c0-0.56-0.45-1-1-1h-0.59c-0.56 0-1 0.44-1 1 0-0.56-0.45-1-1-1h-0.6c-0.55 0-1 0.44-1 1v2.08m2.6 0v-2.08"/>
+					<path id="/ 00000032613984651320715370000002438622542722357183 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4086.87 439.47l2.32-6.17"/>
+					<path id="L 00000117675917879984605830000018208389638900235186 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m4085.27 439.47h-2.1c-0.55 0-1-0.45-1-1v-5.17"/>
 				</g>
-				<path id="0 00000035524514314400127680000011580157169195417512 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m4073.37 433.3h5.05c0.55 0 1 0.45 1 1v10.34c0 0.55-0.45 1-1 1h-5.05c-0.55 0-1-0.45-1-1v-10.34c0-0.55 0.45-1 1-1z"/>
+				<path id="0 00000035524514314400127680000011580157169195417512 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m4073.37 433.3h5.05c0.55 0 1 0.45 1 1v10.34c0 0.55-0.45 1-1 1h-5.05c-0.55 0-1-0.45-1-1v-10.34c0-0.55 0.45-1 1-1z"/>
 				<g id="point 00000158724658677372024580000001367635413865963157 ">
 					<g id="point 00000051359155628934312400000003878568155936363916 ">
-						<path id="&lt;Path&gt;" fill="currentColor" d="m4069.87 443.54c-0.55 0-1 0.45-1 1 0 0.55 0.45 1 1 1 0.56 0 1-0.45 1-1 0-0.55-0.44-1-1-1z"/>
+						<path id="&lt;Path&gt;" fill="none" d="m4069.87 443.54c-0.55 0-1 0.45-1 1 0 0.55 0.45 1 1 1 0.56 0 1-0.45 1-1 0-0.55-0.44-1-1-1z"/>
 					</g>
 				</g>
-				<path id="2 00000043428707608881192460000000478381748002305413 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m4060.17 433.3h6.05c0.55 0 1 0.45 1 1v4.17c0 0.55-0.45 1-1 1h-5.05c-0.55 0-1 0.45-1 1v4.17c0 0.55 0.45 1 1 1h6.05"/>
-				<path id="1 00000039132256037424688380000015473784291118647687 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m4057.23 433.3v5.57m0 1.2v5.57"/>
+				<path id="2 00000043428707608881192460000000478381748002305413 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m4060.17 433.3h6.05c0.55 0 1 0.45 1 1v4.17c0 0.55-0.45 1-1 1h-5.05c-0.55 0-1 0.45-1 1v4.17c0 0.55 0.45 1 1 1h6.05"/>
+				<path id="1 00000039132256037424688380000015473784291118647687 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m4057.23 433.3v5.57m0 1.2v5.57"/>
 			</g>
-			<path id="rotary-indicator 00000116931643469032103090000016013065373265844110 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m4039.68 448.47c0 1-0.81 1.8-1.81 1.8-0.99 0-1.8-0.8-1.8-1.8 0-1 0.81-1.8 1.8-1.8 1 0 1.81 0.8 1.81 1.8zm0.57-2.81v-1.91c0-0.96-0.38-1.88-1.05-2.55l-1.73-1.73m-1.97 11.81v1.91c0 0.96 0.38 1.88 1.05 2.55l1.73 1.73m-3.22-11.38h-1.91c-0.95 0-1.87 0.38-2.55 1.06l-1.73 1.73m11.82 1.97h1.91c0.95 0 1.87-0.38 2.55-1.06l1.72-1.73m-9.3-3.26l-1.35-1.35c-0.68-0.68-1.6-1.06-2.55-1.06h-2.45m6.96 9.75l1.35 1.35c0.68 0.68 1.59 1.06 2.55 1.06h2.44m-10.32-5.77l-1.35 1.35c-0.67 0.67-1.05 1.59-1.05 2.55v2.44m9.74-6.96l1.36-1.35c0.67-0.67 1.05-1.59 1.05-2.55v-2.44"/>
-			<path id="screen 00000077284956363764578300000012883688489591908241 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m4101.62 467.53h-72.24c-2.2 0-4-1.79-4-4v-30.12c0-2.21 1.8-4 4-4h72.24c2.2 0 4 1.79 4 4v30.12c0 2.21-1.8 4-4 4z"/>
-			<path id="case 00000158718137355102694600000006684588116293882770 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m4129.62 477.47h-128.24c-2.34-2.34-3.65-3.66-6-6v-46c2.35-2.34 3.66-3.66 6-6h128.24c2.34 2.34 3.65 3.66 6 6v46c-2.35 2.34-3.66 3.66-6 6zm-119.24-56l2 3h106.24l2-3m0 54l-2-3h-106.24l-2 3"/>
+			<path id="rotary-indicator 00000116931643469032103090000016013065373265844110 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m4039.68 448.47c0 1-0.81 1.8-1.81 1.8-0.99 0-1.8-0.8-1.8-1.8 0-1 0.81-1.8 1.8-1.8 1 0 1.81 0.8 1.81 1.8zm0.57-2.81v-1.91c0-0.96-0.38-1.88-1.05-2.55l-1.73-1.73m-1.97 11.81v1.91c0 0.96 0.38 1.88 1.05 2.55l1.73 1.73m-3.22-11.38h-1.91c-0.95 0-1.87 0.38-2.55 1.06l-1.73 1.73m11.82 1.97h1.91c0.95 0 1.87-0.38 2.55-1.06l1.72-1.73m-9.3-3.26l-1.35-1.35c-0.68-0.68-1.6-1.06-2.55-1.06h-2.45m6.96 9.75l1.35 1.35c0.68 0.68 1.59 1.06 2.55 1.06h2.44m-10.32-5.77l-1.35 1.35c-0.67 0.67-1.05 1.59-1.05 2.55v2.44m9.74-6.96l1.36-1.35c0.67-0.67 1.05-1.59 1.05-2.55v-2.44"/>
+			<path id="screen 00000077284956363764578300000012883688489591908241 " fill="none" stroke="currentColor" stroke-miterlimit="10" d="m4101.62 467.53h-72.24c-2.2 0-4-1.79-4-4v-30.12c0-2.21 1.8-4 4-4h72.24c2.2 0 4 1.79 4 4v30.12c0 2.21-1.8 4-4 4z"/>
+			<path id="case 00000158718137355102694600000006684588116293882770 " fill="none" stroke="currentColor" stroke-miterlimit="10" d="m4129.62 477.47h-128.24c-2.34-2.34-3.65-3.66-6-6v-46c2.35-2.34 3.66-3.66 6-6h128.24c2.34 2.34 3.65 3.66 6 6v46c-2.35 2.34-3.66 3.66-6 6zm-119.24-56l2 3h106.24l2-3m0 54l-2-3h-106.24l-2 3"/>
 			<g id="screws 00000070811228696354494810000009364984050097871783 ">
-				<path id="screw 00000078035766035660679560000005317565873186803090 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m4018.71 454.47c0 4.21-3.42 7.63-7.63 7.63-4.21 0-7.63-3.42-7.63-7.63 0-4.21 3.42-7.63 7.63-7.63 4.21 0 7.63 3.42 7.63 7.63z"/>
-				<path id="screw 00000152967342983710228610000011808032468835350190 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m4112.29 454.47c0 4.21 3.42 7.63 7.63 7.63 4.21 0 7.63-3.42 7.63-7.63 0-4.21-3.42-7.63-7.63-7.63-4.21 0-7.63 3.42-7.63 7.63z"/>
+				<path id="screw 00000078035766035660679560000005317565873186803090 " fill="none" stroke="currentColor" stroke-miterlimit="10" d="m4018.71 454.47c0 4.21-3.42 7.63-7.63 7.63-4.21 0-7.63-3.42-7.63-7.63 0-4.21 3.42-7.63 7.63-7.63 4.21 0 7.63 3.42 7.63 7.63z"/>
+				<path id="screw 00000152967342983710228610000011808032468835350190 " fill="none" stroke="currentColor" stroke-miterlimit="10" d="m4112.29 454.47c0 4.21 3.42 7.63 7.63 7.63 4.21 0 7.63-3.42 7.63-7.63 0-4.21-3.42-7.63-7.63-7.63-4.21 0-7.63 3.42-7.63 7.63z"/>
 			</g>
 		</g>
 </g>

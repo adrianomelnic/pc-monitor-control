@@ -24,7 +24,7 @@ for (const rule of styleBlock.matchAll(/\.(s\d+)\s*\{([^}]+)\}/g)) {
     const [prop, val] = decl.split(':').map(s => s.trim());
     if (!prop || !val) continue;
     if (prop === 'fill') {
-      attrs.fill = (val === '#ffffff' || val === 'white') ? 'none' : 'currentColor';
+      attrs.fill = 'none'; // outline-only rendering — no filled areas
     } else if (prop === 'stroke') {
       attrs.stroke = val === 'none' ? 'none' : 'currentColor';
     } else if (['stroke-linecap','stroke-linejoin','stroke-miterlimit',

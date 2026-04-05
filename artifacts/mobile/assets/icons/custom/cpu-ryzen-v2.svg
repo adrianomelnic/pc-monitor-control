@@ -1,12 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 115.00 115.00">
 <g transform="translate(-1774.67,-1106.00)" stroke-width="6.76">
 <g id="CPU-Ryzen-icon-v2 00000032606588611442899670000007189341809974596249 ">
-			<path id="board 00000031197628017347248450000006280417560004533437 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m1789.67 1206h85v-85h-85z"/>
-			<path id="fiducial 00000090254195153878747900000008729143125019789711 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m1793.27 1196.8l5.6 5.6"/>
-			<path id="pins 00000182504440264739185740000011071565372100060055 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2" d="m1829.14 1130.26m-27.2 3.02m27.2 3.02m-27.2 3.02m27.2 3.02m-27.2 3.03m27.2 3.02m-27.2 3.02m0 6.05m42.32-30.23m0 6.05m0 6.04m0 12.09m0 6.05m-15.12 39.28m-27.2-3.02m27.2-3.02m-27.2-3.02m27.2-3.02m-27.2-3.03m27.2-3.02m-27.2-3.02m0-6.05m0-6.04m42.32 36.27m0-6.05m0-6.04m0-12.09m0-6.05m0-6.04"/>
+			<path id="board 00000031197628017347248450000006280417560004533437 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m1789.67 1206h85v-85h-85z"/>
+			<path id="fiducial 00000090254195153878747900000008729143125019789711 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m1793.27 1196.8l5.6 5.6"/>
+			<path id="pins 00000182504440264739185740000011071565372100060055 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2" d="m1829.14 1130.26m-27.2 3.02m27.2 3.02m-27.2 3.02m27.2 3.02m-27.2 3.03m27.2 3.02m-27.2 3.02m0 6.05m42.32-30.23m0 6.05m0 6.04m0 12.09m0 6.05m-15.12 39.28m-27.2-3.02m27.2-3.02m-27.2-3.02m27.2-3.02m-27.2-3.03m27.2-3.02m-27.2-3.02m0-6.05m0-6.04m42.32 36.27m0-6.05m0-6.04m0-12.09m0-6.05m0-6.04"/>
 			<g id="SMDs">
 				<g id="SMDs 00000142860001670247038800000011102212820090359970 ">
-					<path id="&lt;Compound Path&gt;" fill="currentColor" d="m1849.1 1143.54h-9.69v3.65h9.69zm-24.18 0h-9.69v3.64h9.69zm24.18 36.27h-9.69v3.64h9.69zm-24.18 0h-9.69v3.65h9.69zm23.18-35.27v1.65h-7.69v-1.65zm-24.18 0v1.65h-7.69v-1.65zm24.18 36.27v1.64h-7.69v-1.64zm-24.17 0v1.64h-7.69v-1.64z"/>
+					<path id="&lt;Compound Path&gt;" fill="none" d="m1849.1 1143.54h-9.69v3.65h9.69zm-24.18 0h-9.69v3.64h9.69zm24.18 36.27h-9.69v3.64h9.69zm-24.18 0h-9.69v3.65h9.69zm23.18-35.27v1.65h-7.69v-1.65zm-24.18 0v1.65h-7.69v-1.65zm24.18 36.27v1.64h-7.69v-1.64zm-24.17 0v1.64h-7.69v-1.64z"/>
 				</g>
 			</g>
 		</g>

@@ -157,8 +157,8 @@ import SiWifiExtenderV2 from '../../assets/icons/custom/wifi-extender-v2.svg';
 type IconProps = SvgProps & { width?: number; height?: number; color?: string };
 
 export function renderCustomIcon(name: string, props: IconProps) {
-  const { color = "currentColor", width = 24, height = 24, ...rest } = props;
-  const p = { fill: color, color, width, height, ...rest };
+  const { color = "currentColor", fill, width = 24, height = 24, ...rest } = props;
+  const p = { fill: 'none', color, width, height, ...rest };
   switch (name) {
     case 'aio-cooler-v1': return <SiAioCoolerV1 {...p} />;
     case 'aio-cooler-v2': return <SiAioCoolerV2 {...p} />;

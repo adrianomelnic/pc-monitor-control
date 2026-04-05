@@ -1,10 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 115.00 115.00">
 <g transform="translate(-1504.67,-1106.00)" stroke-width="6.76">
 <g id="CPU-Ryzen-icon-v1">
-			<path id="board 00000165234445374590565770000003000678146040003478 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m1519.67 1206h85v-85h-85z"/>
-			<path id="CPU 00000075126755534396859720000002707429835813580463 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m1533.83 1201.28h56.67c5.22 0 9.44-4.23 9.44-9.45v-56.66c0-5.22-4.22-9.45-9.44-9.45h-56.67c-5.21 0-9.44 4.23-9.44 9.45v56.66c0 5.22 4.23 9.45 9.44 9.45z"/>
-			<path id="markings" fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m1537.56 1166.33h49.21m-49.21-13.22h20.88"/>
-			<path id="fiducial" fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m1521.99 1198.01l5.67 5.66"/>
+			<path id="board 00000165234445374590565770000003000678146040003478 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m1519.67 1206h85v-85h-85z"/>
+			<path id="CPU 00000075126755534396859720000002707429835813580463 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m1533.83 1201.28h56.67c5.22 0 9.44-4.23 9.44-9.45v-56.66c0-5.22-4.22-9.45-9.44-9.45h-56.67c-5.21 0-9.44 4.23-9.44 9.45v56.66c0 5.22 4.23 9.45 9.44 9.45z"/>
+			<path id="markings" fill="none" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m1537.56 1166.33h49.21m-49.21-13.22h20.88"/>
+			<path id="fiducial" fill="none" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m1521.99 1198.01l5.67 5.66"/>
 		</g>
 </g>
 </svg>

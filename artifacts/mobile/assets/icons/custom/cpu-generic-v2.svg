@@ -1,44 +1,44 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120.00 120.00">
 <g transform="translate(-1232.17,-1341.50)" stroke-width="7.06">
 <g id="CPU-generic-icon-v2">
-			<path id="profile 00000009570460594920077720000015095201503729610156 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m1257.6 1372.38l5.44-5.44h62.31c0.54 0.54 0.84 0.84 1.38 1.38v66.36c-0.54 0.54-0.84 0.84-1.38 1.38h-66.36c-0.54-0.54-0.85-0.84-1.39-1.38z"/>
-			<path id="fiducial 00000101804233870151304200000015726450131275199664 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m1265.99 1370.56l-4.76 4.76"/>
+			<path id="profile 00000009570460594920077720000015095201503729610156 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m1257.6 1372.38l5.44-5.44h62.31c0.54 0.54 0.84 0.84 1.38 1.38v66.36c-0.54 0.54-0.84 0.84-1.38 1.38h-66.36c-0.54-0.54-0.85-0.84-1.39-1.38z"/>
+			<path id="fiducial 00000101804233870151304200000015726450131275199664 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m1265.99 1370.56l-4.76 4.76"/>
 			<g id="cpu 00000162337186334381494200000017018015228537543612 ">
 				<g id="cpu 00000044169404286511524880000003330277169592440254 ">
-					<path id="&lt;Compound Path&gt;" fill="currentColor" d="m1308.76 1380.76h-33.18c-2.29 0-4.15 1.86-4.15 4.15v33.18c0 2.29 1.86 4.15 4.15 4.15h33.18c2.29 0 4.14-1.86 4.14-4.15v-33.18c0-2.29-1.85-4.15-4.14-4.15zm0 1c1.73 0 3.14 1.41 3.14 3.15v33.18c0 1.74-1.41 3.15-3.14 3.15h-33.18c-1.74 0-3.15-1.41-3.15-3.15v-33.18c0-1.74 1.41-3.15 3.15-3.15z"/>
+					<path id="&lt;Compound Path&gt;" fill="none" d="m1308.76 1380.76h-33.18c-2.29 0-4.15 1.86-4.15 4.15v33.18c0 2.29 1.86 4.15 4.15 4.15h33.18c2.29 0 4.14-1.86 4.14-4.15v-33.18c0-2.29-1.85-4.15-4.14-4.15zm0 1c1.73 0 3.14 1.41 3.14 3.15v33.18c0 1.74-1.41 3.15-3.14 3.15h-33.18c-1.74 0-3.15-1.41-3.15-3.15v-33.18c0-1.74 1.41-3.15 3.15-3.15z"/>
 				</g>
 			</g>
 			<g id="tracks-T 00000025413380282571905980000002839615912362724266 ">
-				<path id="track 00000160148675062637232820000014754554278861146007 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m1271.43 1363.48v-6.98"/>
-				<path id="track 00000062185557188933155110000015325401135404959376 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m1279.72 1363.48v-6.98"/>
-				<path id="track 00000133526679895503403870000016902048495019951543 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m1288.02 1363.48v-6.98"/>
-				<path id="track 00000105405995272577283520000001648567908934798241 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m1296.31 1363.48v-6.98"/>
-				<path id="track 00000098211576046631953700000003680011212094707626 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m1304.61 1363.48v-6.98"/>
-				<path id="track 00000018937446828517842890000007735050918682382507 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m1312.9 1363.48v-6.98"/>
+				<path id="track 00000160148675062637232820000014754554278861146007 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m1271.43 1363.48v-6.98"/>
+				<path id="track 00000062185557188933155110000015325401135404959376 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m1279.72 1363.48v-6.98"/>
+				<path id="track 00000133526679895503403870000016902048495019951543 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m1288.02 1363.48v-6.98"/>
+				<path id="track 00000105405995272577283520000001648567908934798241 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m1296.31 1363.48v-6.98"/>
+				<path id="track 00000098211576046631953700000003680011212094707626 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m1304.61 1363.48v-6.98"/>
+				<path id="track 00000018937446828517842890000007735050918682382507 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m1312.9 1363.48v-6.98"/>
 			</g>
 			<g id="tracks-B 00000055697921530606680360000005202206666029868674 ">
-				<path id="track 00000019671273495420683400000008380227634098010529 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m1312.9 1439.52v6.98"/>
-				<path id="track 00000139251877700420066060000010577955984634167680 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m1304.61 1439.52v6.98"/>
-				<path id="track 00000181783236763348412020000017093758653211210908 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m1296.31 1439.52v6.98"/>
-				<path id="track 00000002347130524418805400000014154033731468941737 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m1288.02 1439.52v6.98"/>
-				<path id="track 00000047036057167441412420000009142654430595716231 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m1279.72 1439.52v6.98"/>
-				<path id="track 00000058563819053005329600000013069642612097204610 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m1271.43 1439.52v6.98"/>
+				<path id="track 00000019671273495420683400000008380227634098010529 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m1312.9 1439.52v6.98"/>
+				<path id="track 00000139251877700420066060000010577955984634167680 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m1304.61 1439.52v6.98"/>
+				<path id="track 00000181783236763348412020000017093758653211210908 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m1296.31 1439.52v6.98"/>
+				<path id="track 00000002347130524418805400000014154033731468941737 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m1288.02 1439.52v6.98"/>
+				<path id="track 00000047036057167441412420000009142654430595716231 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m1279.72 1439.52v6.98"/>
+				<path id="track 00000058563819053005329600000013069642612097204610 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m1271.43 1439.52v6.98"/>
 			</g>
 			<g id="tracks-R 00000054964772630096016990000009314747675117451414 ">
-				<path id="track 00000106112689941266282950000015379280481463671433 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m1330.19 1380.76h6.98"/>
-				<path id="track 00000038376823220970256160000014341834200398029990 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m1330.19 1389.06h6.98"/>
-				<path id="track 00000176010974296917328260000014026724803197025693 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m1330.19 1397.35h6.98"/>
-				<path id="track 00000031165932488667386690000013891539915871064448 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m1330.19 1405.65h6.98"/>
-				<path id="track 00000115486459703086264270000009550179888077795738 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m1330.19 1413.94h6.98"/>
-				<path id="track 00000067955692573681774780000006919807020211676295 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m1330.19 1422.24h6.98"/>
+				<path id="track 00000106112689941266282950000015379280481463671433 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m1330.19 1380.76h6.98"/>
+				<path id="track 00000038376823220970256160000014341834200398029990 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m1330.19 1389.06h6.98"/>
+				<path id="track 00000176010974296917328260000014026724803197025693 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m1330.19 1397.35h6.98"/>
+				<path id="track 00000031165932488667386690000013891539915871064448 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m1330.19 1405.65h6.98"/>
+				<path id="track 00000115486459703086264270000009550179888077795738 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m1330.19 1413.94h6.98"/>
+				<path id="track 00000067955692573681774780000006919807020211676295 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m1330.19 1422.24h6.98"/>
 			</g>
 			<g id="tracks-L 00000083804782229796560030000007148965137296565909 ">
-				<path id="track 00000073711085232741841710000012551228219640475023 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m1254.15 1422.24h-6.98"/>
-				<path id="track 00000076603264585484176960000012555860643272145804 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m1254.15 1413.94h-6.98"/>
-				<path id="track 00000116922869589865202920000008483251464883374254 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m1254.15 1405.65h-6.98"/>
-				<path id="track 00000147187880496571904230000001314960924502066334 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m1254.15 1397.35h-6.98"/>
-				<path id="track 00000057865623739595656550000008056261029924327568 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m1254.15 1389.06h-6.98"/>
-				<path id="track 00000051343146860832703700000014486478353798102154 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m1254.15 1380.76h-6.98"/>
+				<path id="track 00000073711085232741841710000012551228219640475023 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m1254.15 1422.24h-6.98"/>
+				<path id="track 00000076603264585484176960000012555860643272145804 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m1254.15 1413.94h-6.98"/>
+				<path id="track 00000116922869589865202920000008483251464883374254 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m1254.15 1405.65h-6.98"/>
+				<path id="track 00000147187880496571904230000001314960924502066334 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m1254.15 1397.35h-6.98"/>
+				<path id="track 00000057865623739595656550000008056261029924327568 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m1254.15 1389.06h-6.98"/>
+				<path id="track 00000051343146860832703700000014486478353798102154 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" d="m1254.15 1380.76h-6.98"/>
 			</g>
 		</g>
 </g>

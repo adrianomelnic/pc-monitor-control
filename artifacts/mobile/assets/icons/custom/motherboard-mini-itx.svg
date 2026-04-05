@@ -4,46 +4,46 @@
 			<g id="cpu 4 ">
 				<g id="silicon 3 ">
 					<g id="silicon 00000031189070136021764450000013312971935379580056 ">
-						<path id="&lt;Compound Path&gt;" fill="currentColor" d="m993.83 187.66h-17.85v17.85h17.85zm-1 1v15.85h-15.85v-15.85z"/>
+						<path id="&lt;Compound Path&gt;" fill="none" d="m993.83 187.66h-17.85v17.85h17.85zm-1 1v15.85h-15.85v-15.85z"/>
 					</g>
 				</g>
 				<g id="tracks 11 ">
-					<path id="track 59 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m984.91 206.98v3.55"/>
-					<path id="track 58 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m980.78 206.98v3.55"/>
-					<path id="track 57 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m989.03 206.98v3.55"/>
+					<path id="track 59 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m984.91 206.98v3.55"/>
+					<path id="track 58 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m980.78 206.98v3.55"/>
+					<path id="track 57 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m989.03 206.98v3.55"/>
 				</g>
 				<g id="tracks 10 ">
-					<path id="track 56 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m984.91 186.19v-3.55"/>
-					<path id="track 55 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m989.03 186.19v-3.55"/>
-					<path id="track 54 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m980.78 186.19v-3.55"/>
+					<path id="track 56 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m984.91 186.19v-3.55"/>
+					<path id="track 55 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m989.03 186.19v-3.55"/>
+					<path id="track 54 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m980.78 186.19v-3.55"/>
 				</g>
 				<g id="tracks 9 ">
-					<path id="track 53 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m974.51 196.59h-3.55"/>
-					<path id="track 52 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m974.51 192.46h-3.55"/>
-					<path id="track 51 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m974.51 200.71h-3.55"/>
+					<path id="track 53 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m974.51 196.59h-3.55"/>
+					<path id="track 52 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m974.51 192.46h-3.55"/>
+					<path id="track 51 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m974.51 200.71h-3.55"/>
 				</g>
 				<g id="tracks 8 ">
-					<path id="track 50 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m995.3 196.59h3.55"/>
-					<path id="track 49 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m995.3 200.71h3.55"/>
-					<path id="track 48 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m995.3 192.46h3.55"/>
+					<path id="track 50 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m995.3 196.59h3.55"/>
+					<path id="track 49 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m995.3 200.71h3.55"/>
+					<path id="track 48 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m995.3 192.46h3.55"/>
 				</g>
 			</g>
 			<g id="memory">
-				<path id="ram 6 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1014.25 183.62l-0.17 57.42h4.36l0.23-65.33h-4.37l-0.03 5.76h4.38"/>
-				<path id="ram 5 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1022.43 183.62l-0.17 57.42h4.36l0.22-65.33h-4.36l-0.03 5.76h4.37"/>
+				<path id="ram 6 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1014.25 183.62l-0.17 57.42h4.36l0.23-65.33h-4.37l-0.03 5.76h4.38"/>
+				<path id="ram 5 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1022.43 183.62l-0.17 57.42h4.36l0.22-65.33h-4.36l-0.03 5.76h4.37"/>
 			</g>
 			<g id="PCIe-slots 00000098221273252399896460000017775009688992994751 ">
-				<path id="PCIe 7 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m957.26 221.61h51.22"/>
-				<path id="PCIe 6 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m957.26 247.78h51.22"/>
+				<path id="PCIe 7 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m957.26 221.61h51.22"/>
+				<path id="PCIe 6 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m957.26 247.78h51.22"/>
 			</g>
 			<g id="heatsinks 2 ">
-				<path id="marking 3 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m947.94 171.92v31.93"/>
-				<path id="heatsink 5 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m960.09 171.12h72.59v-8.68h-94.06v65.67"/>
-				<path id="heatsink" fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m951.65 165.51l5.61 5.61v42.58l-6.77 6.77v8.72"/>
+				<path id="marking 3 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m947.94 171.92v31.93"/>
+				<path id="heatsink 5 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m960.09 171.12h72.59v-8.68h-94.06v65.67"/>
+				<path id="heatsink" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m951.65 165.51l5.61 5.61v42.58l-6.77 6.77v8.72"/>
 			</g>
 			<g id="board 1 ">
-				<path id="bottom 16 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1032.68 174.25v82.25h-94.06l-0.3-23.86 10.14-10.14"/>
-				<path id="bottom 7 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m950.49 254.25v-15.2h53.28v-7.76h-53.28v5.47"/>
+				<path id="bottom 16 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1032.68 174.25v82.25h-94.06l-0.3-23.86 10.14-10.14"/>
+				<path id="bottom 7 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m950.49 254.25v-15.2h53.28v-7.76h-53.28v5.47"/>
 			</g>
 		</g>
 </g>

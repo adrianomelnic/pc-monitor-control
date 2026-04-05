@@ -1,16 +1,16 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 83.83 150.00">
 <g transform="translate(-2366.92,-1802.58)" stroke-width="8.82">
 <g id="Pump-Reservoir-Combo-icon-v1 00000115510775780657461880000017919842849040212886 ">
-			<path id="lid 00000005247330688538528330000015875082610943440308 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2433.99 1820.74v13.36h-46.56v-13.36z"/>
-			<path id="plug 00000065060873074628623180000016235189889982153088 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2428.26 1817.58h-15.02"/>
+			<path id="lid 00000005247330688538528330000015875082610943440308 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2433.99 1820.74v13.36h-46.56v-13.36z"/>
+			<path id="plug 00000065060873074628623180000016235189889982153088 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2428.26 1817.58h-15.02"/>
 			<g id="reservoir 00000018229091432399678600000007657451810864011909 ">
-				<path id="left 00000170973862126635808160000012032218227420539779 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2389.19 1895.02v-58.42"/>
-				<path id="right 00000082340430214016623290000002371061666647326600 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2432.23 1834.1v58.42"/>
+				<path id="left 00000170973862126635808160000012032218227420539779 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2389.19 1895.02v-58.42"/>
+				<path id="right 00000082340430214016623290000002371061666647326600 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2432.23 1834.1v58.42"/>
 			</g>
-			<path id="downpipe 00000142168745065171139480000013539055036920433567 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2424.92 1834.1v46.73h-8.34v-46.73"/>
+			<path id="downpipe 00000142168745065171139480000013539055036920433567 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2424.92 1834.1v46.73h-8.34v-46.73"/>
 			<g id="pump 00000032617507853345942920000014653956635071370113 ">
-				<path id="top 00000159463856362761171800000004142800401024180881 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2385.67 1915.88v-20.86h48.41v4.81h-2.19v13.55"/>
-				<path id="bottom 00000049210806772043442930000017527730189410481801 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2381.92 1915.88h53.83v21.7h-53.83z"/>
+				<path id="top 00000159463856362761171800000004142800401024180881 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2385.67 1915.88v-20.86h48.41v4.81h-2.19v13.55"/>
+				<path id="bottom 00000049210806772043442930000017527730189410481801 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2381.92 1915.88h53.83v21.7h-53.83z"/>
 			</g>
 		</g>
 </g>

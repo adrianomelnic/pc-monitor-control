@@ -1,29 +1,29 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 250.00 80.00">
 <g transform="translate(-1167.17,-647.04)" stroke-width="14.71">
 <g id="PCIe-M.2-icon-v1 00000002362889225110553290000008534267351192818844 ">
-			<path id="connector 00000172430804410933878070000005743039092711046583 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1393.17 708.9h7.15c1.02 0 1.85-0.91 1.85-2.04v-5.69h-5.13c-0.81 0-1.48-0.64-1.51-1.45l-0.03-0.81c-0.03-0.85 0.65-1.56 1.5-1.56h5.17v-30.13c0-1.12-0.83-2.03-1.85-2.03h-7.15"/>
-			<path id="profile" fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1182.17 676.04c6.07 0 10.99 4.93 10.99 11 0 6.08-4.92 11-10.99 11v14h211v-50h-211z"/>
+			<path id="connector 00000172430804410933878070000005743039092711046583 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1393.17 708.9h7.15c1.02 0 1.85-0.91 1.85-2.04v-5.69h-5.13c-0.81 0-1.48-0.64-1.51-1.45l-0.03-0.81c-0.03-0.85 0.65-1.56 1.5-1.56h5.17v-30.13c0-1.12-0.83-2.03-1.85-2.03h-7.15"/>
+			<path id="profile" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1182.17 676.04c6.07 0 10.99 4.93 10.99 11 0 6.08-4.92 11-10.99 11v14h211v-50h-211z"/>
 			<g id="sticker 00000008131288194938190740000004757851493878189246 ">
-				<path id="sticker 00000183947492589756317960000012813829666200298900 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1281.82 708.9h77.41v-43.71h-77.41z"/>
+				<path id="sticker 00000183947492589756317960000012813829666200298900 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1281.82 708.9h77.41v-43.71h-77.41z"/>
 				<g id="text 00000054974368817665008810000013663038779186966163 ">
-					<path id="text 00000062156419295537520780000004223448559496128660 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1290.2 672.02h11.08"/>
-					<path id="text 00000159432325254717236970000004982342543837764535 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1307.43 672.02h21.86"/>
-					<path id="text 00000057139809752023273190000017431574917706885773 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1290.2 677.02h29.85"/>
+					<path id="text 00000062156419295537520780000004223448559496128660 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1290.2 672.02h11.08"/>
+					<path id="text 00000159432325254717236970000004982342543837764535 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1307.43 672.02h21.86"/>
+					<path id="text 00000057139809752023273190000017431574917706885773 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1290.2 677.02h29.85"/>
 				</g>
 			</g>
-			<path id="gold-plating" fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1182.17 694.57c4.15 0 7.52-3.37 7.52-7.53 0-4.15-3.37-7.52-7.52-7.52"/>
+			<path id="gold-plating" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1182.17 694.57c4.15 0 7.52-3.37 7.52-7.53 0-4.15-3.37-7.52-7.52-7.52"/>
 			<g id="chips">
-				<path id="chip-large" fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1241.6 708.9h-38.19v-43.71h38.19z"/>
-				<path id="chip 00000140737414541709383050000006372442801936717711 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1245.1 665.19h33.58v20h-33.58z"/>
-				<path id="chip" fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1245.1 688.9h26.23v15.31h-26.23z"/>
-				<path id="chip 00000139256344777573052900000016983734741973374855 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1383.1 697.07h-19.33v-31.88h19.33z"/>
+				<path id="chip-large" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1241.6 708.9h-38.19v-43.71h38.19z"/>
+				<path id="chip 00000140737414541709383050000006372442801936717711 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1245.1 665.19h33.58v20h-33.58z"/>
+				<path id="chip" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1245.1 688.9h26.23v15.31h-26.23z"/>
+				<path id="chip 00000139256344777573052900000016983734741973374855 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1383.1 697.07h-19.33v-31.88h19.33z"/>
 			</g>
 			<g id="M.2">
-				<path id="M" fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1291.1 700.22v-10.33c0-0.96 1.22-1.37 1.8-0.61l3.32 4.38c0.4 0.53 1.2 0.53 1.6 0l3.32-4.38c0.58-0.76 1.8-0.35 1.8 0.61v10.33"/>
-				<path id="2" fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1320.37 700.22h-7.87c-1.02 0-1.39-1.34-0.52-1.86l7.42-4.42c0.6-0.37 0.97-1.02 0.97-1.72v-1.34c0-1.1-0.89-2-2-2h-4.76c-0.53 0-1.04 0.22-1.41 0.59l-0.35 0.35"/>
+				<path id="M" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1291.1 700.22v-10.33c0-0.96 1.22-1.37 1.8-0.61l3.32 4.38c0.4 0.53 1.2 0.53 1.6 0l3.32-4.38c0.58-0.76 1.8-0.35 1.8 0.61v10.33"/>
+				<path id="2" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m1320.37 700.22h-7.87c-1.02 0-1.39-1.34-0.52-1.86l7.42-4.42c0.6-0.37 0.97-1.02 0.97-1.72v-1.34c0-1.1-0.89-2-2-2h-4.76c-0.53 0-1.04 0.22-1.41 0.59l-0.35 0.35"/>
 				<g id=".">
 					<g id=". 00000127036816096748317520000002604720733715399596 ">
-						<path id="&lt;Compound Path&gt;" fill="currentColor" d="m1307.22 697.47c-0.69 0-1.25 0.56-1.25 1.25 0 0.69 0.56 1.25 1.25 1.25 0.69 0 1.25-0.56 1.25-1.25 0-0.69-0.56-1.25-1.25-1.25zm0 1c0.13 0 0.25 0.11 0.25 0.25 0 0.14-0.12 0.25-0.25 0.25-0.14 0-0.25-0.11-0.25-0.25 0-0.14 0.11-0.25 0.25-0.25z"/>
+						<path id="&lt;Compound Path&gt;" fill="none" d="m1307.22 697.47c-0.69 0-1.25 0.56-1.25 1.25 0 0.69 0.56 1.25 1.25 1.25 0.69 0 1.25-0.56 1.25-1.25 0-0.69-0.56-1.25-1.25-1.25zm0 1c0.13 0 0.25 0.11 0.25 0.25 0 0.14-0.12 0.25-0.25 0.25-0.14 0-0.25-0.11-0.25-0.25 0-0.14 0.11-0.25 0.25-0.25z"/>
 					</g>
 				</g>
 			</g>

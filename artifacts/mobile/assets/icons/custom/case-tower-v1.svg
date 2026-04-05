@@ -1,31 +1,31 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 152.13 230.00">
 <g transform="translate(-2332.77,-95.47)" stroke-width="13.53">
 <g id="Case-icon-v1">
-			<path id="case 00000011006027245488025320000004217362861317520015 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2469.9 302.61h-109.82v-192.14h109.82z"/>
-			<path id="tempered-glass 00000002360457266930161990000013409624115321910658 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2373.69 293.88v-174.68h69.14v174.68"/>
-			<path id="power 00000127723946557019224810000007100858602839699626 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2460.36 131.61h-7.43v-7.43h7.43z"/>
-			<path id="reset 00000039833546739661894750000016302617447654628779 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2460.36 142.09h-7.43v-7.43h7.43z"/>
-			<path id="usb 00000062914226353820270990000011590116295490873498 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2461.88 154.1h-10.48v-3.49h10.48z"/>
-			<path id="usb 00000074433073679213538680000002526767708944970920 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2461.88 161.09h-10.48v-3.5h10.48z"/>
-			<path id="usb 00000078038192343157184700000000682962865959270831 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2461.88 168.07h-10.48v-3.49h10.48z"/>
-			<path id="audio 00000011724090060672173700000014203492523978242698 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2458.39 175.67c0 0.96-0.78 1.75-1.75 1.75-0.96 0-1.75-0.79-1.75-1.75 0-0.96 0.79-1.75 1.75-1.75 0.97 0 1.75 0.79 1.75 1.75z"/>
-			<path id="mic 00000078023995269104983760000009196431222247790218 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2458.39 180.91c0 0.96-0.78 1.75-1.75 1.75-0.96 0-1.75-0.79-1.75-1.75 0-0.96 0.79-1.75 1.75-1.75 0.97 0 1.75 0.79 1.75 1.75z"/>
-			<path id="foot 00000142868065144628250890000002754413452624476597 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2386.54 305.23v5.24h-19.47v-5.24"/>
-			<path id="foot 00000018238822124199393830000011298782223698161078 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2462.91 305.23v5.24h-19.46v-5.24"/>
+			<path id="case 00000011006027245488025320000004217362861317520015 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2469.9 302.61h-109.82v-192.14h109.82z"/>
+			<path id="tempered-glass 00000002360457266930161990000013409624115321910658 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2373.69 293.88v-174.68h69.14v174.68"/>
+			<path id="power 00000127723946557019224810000007100858602839699626 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2460.36 131.61h-7.43v-7.43h7.43z"/>
+			<path id="reset 00000039833546739661894750000016302617447654628779 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2460.36 142.09h-7.43v-7.43h7.43z"/>
+			<path id="usb 00000062914226353820270990000011590116295490873498 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2461.88 154.1h-10.48v-3.49h10.48z"/>
+			<path id="usb 00000074433073679213538680000002526767708944970920 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2461.88 161.09h-10.48v-3.5h10.48z"/>
+			<path id="usb 00000078038192343157184700000000682962865959270831 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2461.88 168.07h-10.48v-3.49h10.48z"/>
+			<path id="audio 00000011724090060672173700000014203492523978242698 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2458.39 175.67c0 0.96-0.78 1.75-1.75 1.75-0.96 0-1.75-0.79-1.75-1.75 0-0.96 0.79-1.75 1.75-1.75 0.97 0 1.75 0.79 1.75 1.75z"/>
+			<path id="mic 00000078023995269104983760000009196431222247790218 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2458.39 180.91c0 0.96-0.78 1.75-1.75 1.75-0.96 0-1.75-0.79-1.75-1.75 0-0.96 0.79-1.75 1.75-1.75 0.97 0 1.75 0.79 1.75 1.75z"/>
+			<path id="foot 00000142868065144628250890000002754413452624476597 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2386.54 305.23v5.24h-19.47v-5.24"/>
+			<path id="foot 00000018238822124199393830000011298782223698161078 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2462.91 305.23v5.24h-19.46v-5.24"/>
 			<g id="RGB 00000078026500440652227740000004070084459877449405 ">
-				<path id="B 00000118392452951224196670000012062092809621079734 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2448.21 195.96l15.04 15.04v82.88"/>
-				<path id="T 00000124146309092132477760000015579604371584480904 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2447.91 119.2v70.48l15.21 15.21"/>
+				<path id="B 00000118392452951224196670000012062092809621079734 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2448.21 195.96l15.04 15.04v82.88"/>
+				<path id="T 00000124146309092132477760000015579604371584480904 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2447.91 119.2v70.48l15.21 15.21"/>
 			</g>
-			<path id="glass-panel" fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m2353.77 113.47v46.06c0 0.86-0.55 1.63-1.37 1.9l-2.58 0.86c-1.23 0.41-2.05 1.55-2.05 2.85v22.01c0 1.29 0.82 2.43 2.05 2.84l2.58 0.86c0.82 0.27 1.37 1.04 1.37 1.9v94.06"/>
+			<path id="glass-panel" fill="none" stroke="currentColor" stroke-miterlimit="10" d="m2353.77 113.47v46.06c0 0.86-0.55 1.63-1.37 1.9l-2.58 0.86c-1.23 0.41-2.05 1.55-2.05 2.85v22.01c0 1.29 0.82 2.43 2.05 2.84l2.58 0.86c0.82 0.27 1.37 1.04 1.37 1.9v94.06"/>
 			<g id="hinges">
-				<path id="hinge" fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m2358.08 125.47h-4.31m0 19.34h4.31"/>
-				<path id="hinge 00000128466176318959445750000014529679497321663618 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m2358.08 255.48h-4.31m0 19.33h4.31"/>
+				<path id="hinge" fill="none" stroke="currentColor" stroke-miterlimit="10" d="m2358.08 125.47h-4.31m0 19.34h4.31"/>
+				<path id="hinge 00000128466176318959445750000014529679497321663618 " fill="none" stroke="currentColor" stroke-miterlimit="10" d="m2358.08 255.48h-4.31m0 19.33h4.31"/>
 			</g>
 			<g id="fan-plate 00000127759999085781993390000008910726566901204119 ">
-				<path id="cut-out" fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2420.26 130.47v8.92c7.17 4.15 12 11.9 12 20.78 0 6.09-2.27 11.64-6 15.87v20.69c3.56 4.15 5.72 9.54 5.72 15.44 0 5.9-2.16 11.3-5.72 15.45v20.69c3.73 4.23 6 9.78 6 15.86 0 8.89-4.83 16.63-12 20.78v8.93m-24-163.41v8.92c-7.17 4.15-12 11.9-12 20.78 0 6.09 2.27 11.64 6 15.87v20.69c-3.57 4.15-5.73 9.54-5.73 15.44 0 5.9 2.16 11.3 5.73 15.45v20.69c-3.73 4.23-6 9.78-6 15.86 0 8.89 4.83 16.63 12 20.78v8.93"/>
-				<path id="fixing-slots" fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2432.26 192.38v-12m0 51.35v12m-48 0v-12m48 54.15v8m-48 0v-8m0-93.5v-12m48-49.91v8m-48 0v-8"/>
+				<path id="cut-out" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2420.26 130.47v8.92c7.17 4.15 12 11.9 12 20.78 0 6.09-2.27 11.64-6 15.87v20.69c3.56 4.15 5.72 9.54 5.72 15.44 0 5.9-2.16 11.3-5.72 15.45v20.69c3.73 4.23 6 9.78 6 15.86 0 8.89-4.83 16.63-12 20.78v8.93m-24-163.41v8.92c-7.17 4.15-12 11.9-12 20.78 0 6.09 2.27 11.64 6 15.87v20.69c-3.57 4.15-5.73 9.54-5.73 15.44 0 5.9 2.16 11.3 5.73 15.45v20.69c-3.73 4.23-6 9.78-6 15.86 0 8.89 4.83 16.63 12 20.78v8.93"/>
+				<path id="fixing-slots" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2432.26 192.38v-12m0 51.35v12m-48 0v-12m48 54.15v8m-48 0v-8m0-93.5v-12m48-49.91v8m-48 0v-8"/>
 			</g>
-			<path id="branding 00000134215439812865282300000011852008302145929127 " fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2457.14 266.51v22.3"/>
+			<path id="branding 00000134215439812865282300000011852008302145929127 " fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m2457.14 266.51v22.3"/>
 		</g>
 </g>
 </svg>

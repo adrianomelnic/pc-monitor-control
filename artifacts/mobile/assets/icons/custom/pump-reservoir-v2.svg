@@ -1,15 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80.65 150.00">
 <g transform="translate(-2638.51,-1802.58)" stroke-width="8.82">
 <g id="Pump-Reservoir-Combo-icon-v2 00000029739590792663162980000003125229404429044385 ">
-			<path id="lid 00000124162961960615958890000006821608283151282581 " fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m2702.11 1820.74v13.36h-46.56v-13.36z"/>
-			<path id="plug 00000039106246434541179870000009804750271011162790 " fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m2696.38 1817.58h-15.02"/>
+			<path id="lid 00000124162961960615958890000006821608283151282581 " fill="none" stroke="currentColor" stroke-linejoin="round" d="m2702.11 1820.74v13.36h-46.56v-13.36z"/>
+			<path id="plug 00000039106246434541179870000009804750271011162790 " fill="none" stroke="currentColor" stroke-linejoin="round" d="m2696.38 1817.58h-15.02"/>
 			<g id="reservoir 00000179610821413755594760000006535787676589474199 ">
-				<path id="left 00000156570627474782813520000003327473277676950447 " fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m2657.31 1892.52v-55.92"/>
-				<path id="right 00000115509485352873504250000004857992924016785575 " fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m2700.36 1836.08v56.44"/>
+				<path id="left 00000156570627474782813520000003327473277676950447 " fill="none" stroke="currentColor" stroke-linejoin="round" d="m2657.31 1892.52v-55.92"/>
+				<path id="right 00000115509485352873504250000004857992924016785575 " fill="none" stroke="currentColor" stroke-linejoin="round" d="m2700.36 1836.08v56.44"/>
 			</g>
-			<path id="downpipe 00000013882998198711436090000002178572208119002811 " fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m2693.04 1834.1v46.73h-8.34v-46.73"/>
-			<path id="outlet 00000057145412289506709230000015759817721575588500 " fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m2691.86 1907.44c0 2.74-2.22 4.96-4.96 4.96-2.74 0-4.96-2.22-4.96-4.96 0-2.74 2.22-4.96 4.96-4.96 2.74 0 4.96 2.22 4.96 4.96z"/>
-			<path id="pump 00000105424477634033741450000010424726870128391558 " fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m2675.99 1912.9v-13.9h21.69v16.88h-44.17v21.7h50.65v-21.7h-1.98v-20.86h-46.69v17.88"/>
+			<path id="downpipe 00000013882998198711436090000002178572208119002811 " fill="none" stroke="currentColor" stroke-linejoin="round" d="m2693.04 1834.1v46.73h-8.34v-46.73"/>
+			<path id="outlet 00000057145412289506709230000015759817721575588500 " fill="none" stroke="currentColor" stroke-linejoin="round" d="m2691.86 1907.44c0 2.74-2.22 4.96-4.96 4.96-2.74 0-4.96-2.22-4.96-4.96 0-2.74 2.22-4.96 4.96-4.96 2.74 0 4.96 2.22 4.96 4.96z"/>
+			<path id="pump 00000105424477634033741450000010424726870128391558 " fill="none" stroke="currentColor" stroke-linejoin="round" d="m2675.99 1912.9v-13.9h21.69v16.88h-44.17v21.7h50.65v-21.7h-1.98v-20.86h-46.69v17.88"/>
 		</g>
 </g>
 </svg>

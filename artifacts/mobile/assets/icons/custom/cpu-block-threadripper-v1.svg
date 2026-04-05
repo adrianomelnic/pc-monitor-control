@@ -1,27 +1,27 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 135.67 181.36">
 <g transform="translate(-1224.33,-1549.28)" stroke-width="10.67">
 <g id="CPU-Block-Threadripper-icon-v1">
-			<path id="profile 00000088100423091435131350000001824238663856247684 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m1340 1715.64h-95.67c-2.76 0-5-2.24-5-5v-141.36c0-2.76 2.24-5 5-5h95.67c2.76 0 5 2.24 5 5v141.36c0 2.76-2.24 5-5 5z"/>
+			<path id="profile 00000088100423091435131350000001824238663856247684 " fill="none" stroke="currentColor" stroke-miterlimit="10" d="m1340 1715.64h-95.67c-2.76 0-5-2.24-5-5v-141.36c0-2.76 2.24-5 5-5h95.67c2.76 0 5 2.24 5 5v141.36c0 2.76-2.24 5-5 5z"/>
 			<g id="branding 00000054259814170969793250000011254678983964240273 ">
-				<path id="branding-strip 00000162343260146991857870000008203933082012472725 " fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m1239.33 1658.26l10-6h85.67l10 6m0 27.22l-10-10h-85.67l-10 10"/>
-				<path id="text 00000033328368305413850830000006365725554110441888 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m1257.33 1663.87h38.84m-18.84 4h18.84"/>
+				<path id="branding-strip 00000162343260146991857870000008203933082012472725 " fill="none" stroke="currentColor" stroke-linejoin="round" d="m1239.33 1658.26l10-6h85.67l10 6m0 27.22l-10-10h-85.67l-10 10"/>
+				<path id="text 00000033328368305413850830000006365725554110441888 " fill="none" stroke="currentColor" stroke-miterlimit="10" d="m1257.33 1663.87h38.84m-18.84 4h18.84"/>
 			</g>
 			<g id="in-out 00000086684914958829587200000005678732761722638508 ">
-				<path id="outlet 00000142892464495085539520000016025214668631905964 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m1278.72 1633.09c0 4.14-3.36 7.5-7.5 7.5-4.15 0-7.5-3.36-7.5-7.5 0-4.14 3.35-7.5 7.5-7.5 4.14 0 7.5 3.36 7.5 7.5z"/>
-				<path id="inlet 00000118374618072047983650000014505907105133308580 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m1303.67 1633.09c0 4.14-3.36 7.5-7.5 7.5-4.15 0-7.5-3.36-7.5-7.5 0-4.14 3.35-7.5 7.5-7.5 4.14 0 7.5 3.36 7.5 7.5z"/>
-				<path id="direction 00000012474774782486130310000007297712187528243883 " fill="currentColor" stroke="currentColor" stroke-linejoin="round" d="m1316.63 1635.89l-5.22-3.18 5.22-3.17z"/>
+				<path id="outlet 00000142892464495085539520000016025214668631905964 " fill="none" stroke="currentColor" stroke-miterlimit="10" d="m1278.72 1633.09c0 4.14-3.36 7.5-7.5 7.5-4.15 0-7.5-3.36-7.5-7.5 0-4.14 3.35-7.5 7.5-7.5 4.14 0 7.5 3.36 7.5 7.5z"/>
+				<path id="inlet 00000118374618072047983650000014505907105133308580 " fill="none" stroke="currentColor" stroke-miterlimit="10" d="m1303.67 1633.09c0 4.14-3.36 7.5-7.5 7.5-4.15 0-7.5-3.36-7.5-7.5 0-4.14 3.35-7.5 7.5-7.5 4.14 0 7.5 3.36 7.5 7.5z"/>
+				<path id="direction 00000012474774782486130310000007297712187528243883 " fill="none" stroke="currentColor" stroke-linejoin="round" d="m1316.63 1635.89l-5.22-3.18 5.22-3.17z"/>
 			</g>
 			<g id="insets 00000151528779784195438650000017896057604708181916 ">
-				<path id="inset 00000154387075452623192660000011372914483526834818 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m1330 1715.64v-9c0-3.32 2.69-6 6-6h9"/>
-				<path id="inset 00000096021521817621730590000004077675069826604699 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m1239.33 1700.64h9c3.31 0 6 2.68 6 6v9"/>
+				<path id="inset 00000154387075452623192660000011372914483526834818 " fill="none" stroke="currentColor" stroke-miterlimit="10" d="m1330 1715.64v-9c0-3.32 2.69-6 6-6h9"/>
+				<path id="inset 00000096021521817621730590000004077675069826604699 " fill="none" stroke="currentColor" stroke-miterlimit="10" d="m1239.33 1700.64h9c3.31 0 6 2.68 6 6v9"/>
 			</g>
 			<g id="fixing-holes 00000036967220050872924260000009820217199755772588 ">
-				<path id="fixing-hole 00000090270505733413349460000009851520138138641065 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m1249.33 1708.14c0 1.38-1.12 2.5-2.5 2.5-1.38 0-2.5-1.12-2.5-2.5 0-1.38 1.12-2.5 2.5-2.5 1.38 0 2.5 1.12 2.5 2.5z"/>
-				<path id="fixing-hole 00000127038327513972547840000008745094651594140570 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m1340 1708.14c0 1.38-1.12 2.5-2.5 2.5-1.38 0-2.5-1.12-2.5-2.5 0-1.38 1.12-2.5 2.5-2.5 1.38 0 2.5 1.12 2.5 2.5z"/>
-				<path id="hole 00000154408518340367693020000004098082352218462380 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m1265.33 1574.23c0 2.7-2.69 4.9-6 4.9-3.31 0-6-2.2-6-4.9 0-2.71 2.69-4.9 6-4.9 3.31 0 6 2.19 6 4.9z"/>
-				<path id="hole 00000068674736094178992560000013209872492919566232 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m1331 1574.23c0 2.7-2.68 4.9-6 4.9-3.31 0-6-2.2-6-4.9 0-2.71 2.69-4.9 6-4.9 3.32 0 6 2.19 6 4.9z"/>
+				<path id="fixing-hole 00000090270505733413349460000009851520138138641065 " fill="none" stroke="currentColor" stroke-miterlimit="10" d="m1249.33 1708.14c0 1.38-1.12 2.5-2.5 2.5-1.38 0-2.5-1.12-2.5-2.5 0-1.38 1.12-2.5 2.5-2.5 1.38 0 2.5 1.12 2.5 2.5z"/>
+				<path id="fixing-hole 00000127038327513972547840000008745094651594140570 " fill="none" stroke="currentColor" stroke-miterlimit="10" d="m1340 1708.14c0 1.38-1.12 2.5-2.5 2.5-1.38 0-2.5-1.12-2.5-2.5 0-1.38 1.12-2.5 2.5-2.5 1.38 0 2.5 1.12 2.5 2.5z"/>
+				<path id="hole 00000154408518340367693020000004098082352218462380 " fill="none" stroke="currentColor" stroke-miterlimit="10" d="m1265.33 1574.23c0 2.7-2.69 4.9-6 4.9-3.31 0-6-2.2-6-4.9 0-2.71 2.69-4.9 6-4.9 3.31 0 6 2.19 6 4.9z"/>
+				<path id="hole 00000068674736094178992560000013209872492919566232 " fill="none" stroke="currentColor" stroke-miterlimit="10" d="m1331 1574.23c0 2.7-2.68 4.9-6 4.9-3.31 0-6-2.2-6-4.9 0-2.71 2.69-4.9 6-4.9 3.32 0 6 2.19 6 4.9z"/>
 			</g>
-			<path id="bevel 00000079487740986934860160000016516614092807932053 " fill="currentColor" stroke="currentColor" stroke-miterlimit="10" d="m1335 1687.44h-85.67m85.67-100.13h-85.67m95.67-18.03l-10 18.03v100.13l5.69 13.2m-97.05 0l5.69-13.2v-100.13l-10-18.03"/>
+			<path id="bevel 00000079487740986934860160000016516614092807932053 " fill="none" stroke="currentColor" stroke-miterlimit="10" d="m1335 1687.44h-85.67m85.67-100.13h-85.67m95.67-18.03l-10 18.03v100.13l5.69 13.2m-97.05 0l5.69-13.2v-100.13l-10-18.03"/>
 		</g>
 </g>
 </svg>
