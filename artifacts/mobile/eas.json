@@ -13,7 +13,7 @@
       },
       "android": {
         "buildType": "apk",
-        "prebuildCommand": "npx expo prebuild --clean --platform android && node scripts/inject-network-security.js"
+        "prebuildCommand": "pnpm exec expo prebuild --clean --platform android && node scripts/inject-network-security.js"
       }
     },
     "production": {
@@ -22,7 +22,7 @@
       },
       "android": {
         "buildType": "app-bundle",
-        "prebuildCommand": "npx expo prebuild --clean --platform android && node scripts/inject-network-security.js"
+        "prebuildCommand": "pnpm exec expo prebuild --clean --platform android && node scripts/inject-network-security.js"
       }
     }
   },
