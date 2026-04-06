@@ -12,7 +12,8 @@
         "simulator": true
       },
       "android": {
-        "buildType": "apk"
+        "buildType": "apk",
+        "prebuildCommand": "npx expo prebuild --clean && node scripts/inject-network-security.js"
       }
     },
     "production": {
@@ -20,7 +21,8 @@
         "distribution": "store"
       },
       "android": {
-        "buildType": "app-bundle"
+        "buildType": "app-bundle",
+        "prebuildCommand": "npx expo prebuild --clean && node scripts/inject-network-security.js"
       }
     }
   },
