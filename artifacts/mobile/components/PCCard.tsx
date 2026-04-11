@@ -136,7 +136,7 @@ export function PCCard({ pc }: PCCardProps) {
             <MetricRing
               value={pc.metrics.cpuUsage}
               label="CPU"
-              color={C.tint}
+              color="#00D4FF"
               size={72}
             />
             <MetricRing

@@ -26,7 +26,7 @@ function RootLayoutNav() {
     <Stack
       screenOptions={{
         headerShown: false,
-        contentStyle: { backgroundColor: "#0A0F1E" },
+        contentStyle: { backgroundColor: "#000000" },
       }}
     >
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />

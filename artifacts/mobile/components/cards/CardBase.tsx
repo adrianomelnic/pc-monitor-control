@@ -17,7 +17,7 @@ export function TempBadge({ value }: TempBadgeProps) {
       ? "#FF8C00"
       : value >= 50
       ? "#FFB800"
-      : "#00CC88";
+      : C.success;
   return (
     <View style={[styles.tempBadge, { backgroundColor: color + "22", borderColor: color + "55" }]}>
       <Text style={[styles.tempText, { color }]}>{Math.round(value)}°C</Text>
