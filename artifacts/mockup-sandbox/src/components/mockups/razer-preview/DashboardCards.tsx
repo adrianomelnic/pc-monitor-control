@@ -1,22 +1,22 @@
 export function DashboardCards() {
   const G = "#44D62C";
   const BG = "#000000";
-  const CARD = "#0D0D0D";
-  const BORDER = "#1A1A1A";
+  const CARD = "#111111";
+  const BORDER = "#222222";
   const TEXT = "#FFFFFF";
-  const MUTED = "#666666";
-  const TEXT2 = "#999999";
+  const MUTED = "#555555";
+  const TEXT2 = "#888888";
 
   const StatBar = ({ value, color }: { value: number; color: string }) => (
-    <div style={{ height: 3, background: BORDER, flex: 1, borderRadius: 0 }}>
-      <div style={{ height: 3, width: `${value}%`, background: color, borderRadius: 0 }} />
+    <div style={{ height: 2, background: BORDER, flex: 1, borderRadius: 0 }}>
+      <div style={{ height: 2, width: `${value}%`, background: color, borderRadius: 0 }} />
     </div>
   );
 
   const StatRow = ({ label, value, pct, color }: { label: string; value: string; pct?: number; color?: string }) => (
-    <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <span style={{ fontSize: 11, color: MUTED, letterSpacing: 0.5, textTransform: "uppercase" }}>{label}</span>
+        <span style={{ fontSize: 10, color: MUTED, letterSpacing: 1, textTransform: "uppercase" }}>{label}</span>
         <span style={{ fontSize: 12, color: TEXT2, fontWeight: 500 }}>{value}</span>
       </div>
       {pct !== undefined && color && <StatBar value={pct} color={color} />}
@@ -24,32 +24,30 @@ export function DashboardCards() {
   );
 
   const Card = ({
-    title, icon, accent, children,
+    title, label, children,
   }: {
-    title: string; icon: string; accent: string; children: React.ReactNode;
+    title: string; label: string; children: React.ReactNode;
   }) => (
     <div style={{
       background: CARD,
       border: `1px solid ${BORDER}`,
-      borderTop: `2px solid ${accent}`,
+      borderTop: `2px solid ${G}`,
       borderRadius: 0,
       overflow: "hidden",
     }}>
       <div style={{
-        padding: "12px 14px",
-        display: "flex", alignItems: "center", gap: 10,
+        padding: "10px 14px",
+        display: "flex", alignItems: "center", justifyContent: "space-between",
         borderBottom: `1px solid ${BORDER}`,
       }}>
-        <div style={{
-          width: 28, height: 28,
-          background: `${accent}18`,
-          border: `1px solid ${accent}40`,
-          display: "flex", alignItems: "center", justifyContent: "center",
-          fontSize: 14, borderRadius: 0,
-        }}>
-          {icon}
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <div style={{
+            width: 4, height: 14,
+            background: G,
+          }} />
+          <span style={{ fontSize: 12, fontWeight: 700, color: TEXT, letterSpacing: 1, textTransform: "uppercase" }}>{title}</span>
         </div>
-        <span style={{ fontSize: 13, fontWeight: 700, color: TEXT, letterSpacing: 0.5 }}>{title}</span>
+        <span style={{ fontSize: 9, color: MUTED, letterSpacing: 1, textTransform: "uppercase" }}>{label}</span>
       </div>
       <div style={{ padding: "12px 14px", display: "flex", flexDirection: "column", gap: 10 }}>
         {children}
@@ -170,11 +168,11 @@ export function DashboardCards() {
       <div style={{ flex: 1, padding: "12px 12px", display: "flex", flexDirection: "column", gap: 2, overflowY: "auto" }}>
 
         {/* CPU Card */}
-        <Card title="CPU" icon="⬡" accent="#00D4FF">
+        <Card title="CPU" label="Intel i9-13900K">
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <BigMetric value="34" unit="%" label="Load" color="#00D4FF" />
-            <BigMetric value="1.24" unit="V" label="VCore" color="#00D4FF" />
-            <BigMetric value="65" unit="W" label="Power" color="#00D4FF" />
+            <BigMetric value="34" unit="%" label="Load" color={G} />
+            <BigMetric value="1.24" unit="V" label="VCore" color={G} />
+            <BigMetric value="65" unit="W" label="Power" color={G} />
           </div>
           <div style={{ height: 1, background: BORDER }} />
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -182,10 +180,10 @@ export function DashboardCards() {
             <div style={{ display: "grid", gridTemplateColumns: "repeat(8, 1fr)", gap: 3 }}>
               {[34, 12, 67, 23, 45, 11, 78, 29].map((v, i) => (
                 <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
-                  <div style={{ width: "100%", height: 32, background: BORDER, position: "relative" }}>
+                  <div style={{ width: "100%", height: 32, background: "#1a1a1a", position: "relative" }}>
                     <div style={{
                       position: "absolute", bottom: 0, width: "100%", height: `${v}%`,
-                      background: `#00D4FF${Math.round(40 + v * 1.5).toString(16)}`,
+                      background: `${G}${Math.round(80 + v * 1.2).toString(16)}`,
                     }} />
                   </div>
                   <span style={{ fontSize: 8, color: MUTED }}>{i}</span>
@@ -198,30 +196,30 @@ export function DashboardCards() {
         <div style={{ height: 2 }} />
 
         {/* GPU Card */}
-        <Card title="GPU" icon="⬡" accent="#34D399">
+        <Card title="GPU" label="RTX 4080 Super">
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <BigMetric value="72" unit="%" label="Load" color="#34D399" />
-            <BigMetric value="8.1" unit="GB" label="VRAM" color="#34D399" />
-            <BigMetric value="142" unit="W" label="Power" color="#34D399" />
+            <BigMetric value="72" unit="%" label="Load" color={G} />
+            <BigMetric value="8.1" unit="GB" label="VRAM" color={G} />
+            <BigMetric value="142" unit="W" label="Power" color={G} />
           </div>
           <div style={{ height: 1, background: BORDER }} />
-          <StatRow label="GPU Clock" value="1980 MHz" pct={72} color="#34D399" />
-          <StatRow label="Mem Clock" value="9800 MHz" pct={58} color="#34D399" />
-          <StatRow label="Fan Speed" value="1820 RPM" pct={45} color="#34D399" />
+          <StatRow label="GPU Clock" value="1980 MHz" pct={72} color={G} />
+          <StatRow label="Mem Clock" value="9800 MHz" pct={58} color={G} />
+          <StatRow label="Fan Speed" value="1820 RPM" pct={45} color={G} />
         </Card>
 
         <div style={{ height: 2 }} />
 
         {/* RAM Card */}
-        <Card title="RAM" icon="⬡" accent="#A78BFA">
+        <Card title="RAM" label="DDR5 32GB">
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <BigMetric value="62" unit="%" label="Used" color="#A78BFA" />
-            <BigMetric value="19.8" unit="GB" label="Used/32GB" color="#A78BFA" />
+            <BigMetric value="62" unit="%" label="Used" color={G} />
+            <BigMetric value="19.8" unit="GB" label="19.8 / 32GB" color={G} />
           </div>
           <div style={{ height: 1, background: BORDER }} />
-          <StatRow label="Physical" value="19.8 / 32 GB" pct={62} color="#A78BFA" />
+          <StatRow label="Physical" value="19.8 / 32 GB" pct={62} color={G} />
           <StatRow label="Available" value="12.2 GB" />
-          <StatRow label="Swap" value="0 / 0 GB" pct={0} color="#A78BFA" />
+          <StatRow label="Swap" value="0 / 0 GB" pct={0} color={G} />
         </Card>
 
       </div>
