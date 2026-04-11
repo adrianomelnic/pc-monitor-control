@@ -1,10 +1,10 @@
 export function HomeScreen() {
   const G = "#44D62C";
   const BG = "#000000";
-  const CARD = "#0D0D0D";
-  const BORDER = "#1A1A1A";
+  const CARD = "#111111";
+  const BORDER = "#222222";
   const TEXT = "#FFFFFF";
-  const MUTED = "#666666";
+  const MUTED = "#555555";
 
   const MetricRing = ({
     pct,
@@ -107,16 +107,18 @@ export function HomeScreen() {
       <div style={{ height: 1, background: BORDER, margin: "0 -2px" }} />
       <div style={{ display: "flex", justifyContent: "space-between" }}>
         <button style={{
-          background: "none", border: "none", display: "flex", alignItems: "center",
-          gap: 5, cursor: "pointer", padding: 0,
+          background: G, border: "none", display: "flex", alignItems: "center",
+          gap: 5, cursor: "pointer", padding: "6px 10px", borderRadius: 0,
         }}>
-          <span style={{ fontSize: 11, color: G, fontWeight: 600 }}>✎  Edit</span>
+          <span style={{ fontSize: 11, color: "#000", fontWeight: 700 }}>✎</span>
+          <span style={{ fontSize: 11, color: "#000", fontWeight: 700 }}>Edit</span>
         </button>
         <button style={{
-          background: "none", border: "none", display: "flex", alignItems: "center",
-          gap: 5, cursor: "pointer", padding: 0,
+          background: G, border: "none", display: "flex", alignItems: "center",
+          gap: 5, cursor: "pointer", padding: "6px 10px", borderRadius: 0,
         }}>
-          <span style={{ fontSize: 11, color: "#FF4444", fontWeight: 600 }}>⊗  Remove PC</span>
+          <span style={{ fontSize: 11, color: "#000", fontWeight: 700 }}>⊗</span>
+          <span style={{ fontSize: 11, color: "#000", fontWeight: 700 }}>Remove PC</span>
         </button>
       </div>
     </div>
