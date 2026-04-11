@@ -667,7 +667,7 @@ export default function PCDetailScreen() {
           <Feather
             name={card.visible ? "eye" : "eye-off"}
             size={15}
-            color={card.visible ? C.text : C.textMuted}
+            color="#000"
           />
         </Pressable>
 
@@ -684,7 +684,7 @@ export default function PCDetailScreen() {
           hitSlop={6}
           disabled={isFirst}
         >
-          <Feather name="chevron-up" size={16} color={isFirst ? C.textMuted : C.text} />
+          <Feather name="chevron-up" size={16} color="#000" />
         </Pressable>
 
         <Pressable
@@ -698,7 +698,7 @@ export default function PCDetailScreen() {
           hitSlop={6}
           disabled={isLast}
         >
-          <Feather name="chevron-down" size={16} color={isLast ? C.textMuted : C.text} />
+          <Feather name="chevron-down" size={16} color="#000" />
         </Pressable>
 
         {isCustom && (
@@ -712,11 +712,11 @@ export default function PCDetailScreen() {
               }}
               hitSlop={6}
             >
-              <Feather name="edit-2" size={14} color={C.tint} />
+              <Feather name="edit-2" size={14} color="#000" />
             </Pressable>
 
             <Pressable
-              style={styles.editBtn}
+              style={[styles.editBtn, { backgroundColor: C.danger }]}
               onPress={() => {
                 Alert.alert("Remove Card", `Remove "${name}"?`, [
                   { text: "Cancel", style: "cancel" },
@@ -732,7 +732,7 @@ export default function PCDetailScreen() {
               }}
               hitSlop={6}
             >
-              <Feather name="x" size={16} color={C.danger} />
+              <Feather name="x" size={16} color="#fff" />
             </Pressable>
           </>
         )}
@@ -1016,7 +1016,7 @@ export default function PCDetailScreen() {
                 ]}
                 hitSlop={6}
               >
-                <Feather name="sliders" size={16} color={editMode ? "#fff" : C.tint} />
+                <Feather name="sliders" size={16} color={editMode ? C.tint : "#000"} />
               </Pressable>
               <Pressable
                 onPress={() => togglePanel("terminal")}
@@ -1027,7 +1027,7 @@ export default function PCDetailScreen() {
                 ]}
                 hitSlop={6}
               >
-                <Feather name="terminal" size={16} color={activePanel === "terminal" ? "#fff" : C.tint} />
+                <Feather name="terminal" size={16} color={activePanel === "terminal" ? C.tint : "#000"} />
               </Pressable>
               <Pressable
                 onPress={() => togglePanel("controls")}
@@ -1038,7 +1038,7 @@ export default function PCDetailScreen() {
                 ]}
                 hitSlop={6}
               >
-                <Feather name="power" size={16} color={activePanel === "controls" ? "#fff" : C.tint} />
+                <Feather name="power" size={16} color={activePanel === "controls" ? C.tint : "#000"} />
               </Pressable>
             </View>
           </View>
@@ -1400,7 +1400,7 @@ const styles = StyleSheet.create({
   statusDot: {
     width: 8,
     height: 8,
-    borderRadius: 4,
+    borderRadius: 0,
   },
   statusText: {
     fontSize: 13,
@@ -1408,9 +1408,11 @@ const styles = StyleSheet.create({
   },
   infoCard: {
     backgroundColor: C.card,
-    borderRadius: 14,
+    borderRadius: 0,
     borderWidth: 1,
     borderColor: C.cardBorder,
+    borderTopWidth: 2,
+    borderTopColor: C.tint,
     paddingHorizontal: 14,
     paddingVertical: 10,
     gap: 8,
@@ -1446,7 +1448,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 7,
     backgroundColor: "rgba(249, 115, 22, 0.08)",
-    borderRadius: 10,
+    borderRadius: 0,
     borderWidth: 1,
     borderColor: "rgba(249, 115, 22, 0.25)",
     paddingHorizontal: 12,
@@ -1472,7 +1474,7 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
     gap: 8,
     backgroundColor: C.tint + "12",
-    borderRadius: 12,
+    borderRadius: 0,
     borderWidth: 1,
     borderColor: C.tint + "30",
     padding: 12,
@@ -1495,10 +1497,9 @@ const styles = StyleSheet.create({
     height: 30,
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: 8,
-    backgroundColor: C.backgroundSecondary,
-    borderWidth: 1,
-    borderColor: C.cardBorder,
+    borderRadius: 0,
+    backgroundColor: C.tint,
+    borderWidth: 0,
   },
   editBtnDisabled: {
     opacity: 0.35,
@@ -1517,7 +1518,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 10,
     backgroundColor: C.card,
-    borderRadius: 12,
+    borderRadius: 0,
     borderWidth: 1,
     borderColor: C.cardBorder,
     borderStyle: "dashed",
@@ -1534,7 +1535,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 10,
     paddingVertical: 14,
-    borderRadius: 14,
+    borderRadius: 0,
     borderWidth: 1.5,
     borderColor: C.tint + "50",
     borderStyle: "dashed",
@@ -1547,9 +1548,11 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: C.card,
-    borderRadius: 16,
+    borderRadius: 0,
     borderWidth: 1,
     borderColor: C.cardBorder,
+    borderTopWidth: 2,
+    borderTopColor: C.tint,
     padding: 16,
     gap: 12,
   },
@@ -1566,7 +1569,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     paddingHorizontal: 16,
     paddingVertical: 10,
-    borderRadius: 20,
+    borderRadius: 0,
     borderWidth: 1,
     marginTop: 4,
   },
@@ -1576,9 +1579,11 @@ const styles = StyleSheet.create({
   },
   offlineCard: {
     backgroundColor: C.card,
-    borderRadius: 16,
+    borderRadius: 0,
     borderWidth: 1,
     borderColor: C.cardBorder,
+    borderTopWidth: 2,
+    borderTopColor: C.danger,
     padding: 32,
     alignItems: "center",
     gap: 10,
@@ -1595,24 +1600,23 @@ const styles = StyleSheet.create({
   },
   retryBtn: {
     marginTop: 8,
-    backgroundColor: C.backgroundSecondary,
-    borderWidth: 1,
-    borderColor: C.cardBorder,
-    borderRadius: 10,
+    backgroundColor: C.tint,
+    borderWidth: 0,
+    borderRadius: 0,
     paddingHorizontal: 24,
     paddingVertical: 10,
   },
   retryBtnText: {
     fontSize: 14,
-    fontWeight: "600",
-    color: C.text,
+    fontWeight: "700",
+    color: "#000",
   },
   terminalInput: {
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
     backgroundColor: C.backgroundSecondary,
-    borderRadius: 10,
+    borderRadius: 0,
     padding: 12,
     borderWidth: 1,
     borderColor: C.cardBorder,
@@ -1626,7 +1630,7 @@ const styles = StyleSheet.create({
   },
   outputBox: {
     backgroundColor: C.background,
-    borderRadius: 8,
+    borderRadius: 0,
     padding: 12,
   },
   outputText: {
@@ -1641,7 +1645,7 @@ const styles = StyleSheet.create({
     gap: 4,
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 8,
+    borderRadius: 0,
     borderWidth: 1,
   },
   builtinDoneBtnText: {
@@ -1680,7 +1684,7 @@ const styles = StyleSheet.create({
   editPanelToggle: {
     width: 24,
     height: 24,
-    borderRadius: 6,
+    borderRadius: 0,
     borderWidth: 1.5,
     alignItems: "center",
     justifyContent: "center",
@@ -1716,7 +1720,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 6,
     borderWidth: 1,
-    borderRadius: 8,
+    borderRadius: 0,
     borderStyle: "dashed",
     paddingHorizontal: 10,
     paddingVertical: 7,
@@ -1729,7 +1733,7 @@ const styles = StyleSheet.create({
   editPanelIconBtn: {
     width: 26,
     height: 26,
-    borderRadius: 6,
+    borderRadius: 0,
     borderWidth: 1,
     borderColor: C.cardBorder,
     alignItems: "center",
@@ -1752,7 +1756,7 @@ const styles = StyleSheet.create({
   iconPickerBtn: {
     width: 52,
     height: 52,
-    borderRadius: 11,
+    borderRadius: 0,
     borderWidth: 1,
     borderColor: C.cardBorder,
     alignItems: "center",
@@ -1767,12 +1771,11 @@ const styles = StyleSheet.create({
   headerIconBtn: {
     width: 32,
     height: 32,
-    borderRadius: 16,
+    borderRadius: 0,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: C.tint + "18",
-    borderWidth: 1,
-    borderColor: C.tint + "40",
+    backgroundColor: C.tint,
+    borderWidth: 0,
   },
   inlinePanel: {
     overflow: "hidden",
@@ -1782,7 +1785,8 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   headerIconBtnActive: {
-    backgroundColor: C.tint,
+    backgroundColor: "#000",
+    borderWidth: 1,
     borderColor: C.tint,
   },
 });

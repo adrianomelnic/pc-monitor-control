@@ -46,26 +46,28 @@ export function CommandButton({
 
   const activeColor =
     result === "success" ? C.success : result === "error" ? C.danger : color;
+  const bgColor = result === "error" ? C.danger : C.tint;
+  const fgColor = "#000000";
 
   return (
     <Pressable
       onPress={handle}
       style={({ pressed }) => [
         styles.btn,
-        { borderColor: activeColor + "60", backgroundColor: activeColor + "12" },
+        { backgroundColor: bgColor },
         pressed && styles.pressed,
       ]}
     >
       {loading ? (
-        <ActivityIndicator size="small" color={activeColor} />
+        <ActivityIndicator size="small" color={fgColor} />
       ) : result === "success" ? (
-        <Feather name="check" size={15} color={C.success} />
+        <Feather name="check" size={15} color={fgColor} />
       ) : result === "error" ? (
-        <Feather name="x" size={15} color={C.danger} />
+        <Feather name="x" size={15} color="#fff" />
       ) : (
-        <Feather name={icon} size={15} color={activeColor} />
+        <Feather name={icon} size={15} color={fgColor} />
       )}
-      <Text style={[styles.label, { color: activeColor }]}>{label}</Text>
+      <Text style={[styles.label, { color: result === "error" ? "#fff" : fgColor }]}>{label}</Text>
     </Pressable>
   );
 }
@@ -75,11 +77,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 7,
-    borderRadius: 10,
-    borderWidth: 1,
+    borderRadius: 0,
+    borderWidth: 0,
     paddingVertical: 10,
     paddingHorizontal: 14,
     flex: 1,
+    backgroundColor: C.tint,
   },
   pressed: {
     opacity: 0.7,

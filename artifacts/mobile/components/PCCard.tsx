@@ -195,20 +195,20 @@ export function PCCard({ pc }: PCCardProps) {
 
         <View style={styles.cardActions}>
           <Pressable
-            style={({ pressed }) => [styles.actionBtn, pressed && { opacity: 0.65 }]}
+            style={({ pressed }) => [styles.actionBtn, pressed && { opacity: 0.75 }]}
             onPress={(e) => { e.stopPropagation?.(); openEdit(); }}
             hitSlop={8}
           >
-            <Feather name="edit-2" size={13} color={C.tint} />
-            <Text style={[styles.actionBtnText, { color: C.tint }]}>Edit</Text>
+            <Feather name="edit-2" size={13} color="#000" />
+            <Text style={styles.actionBtnText}>Edit</Text>
           </Pressable>
           <Pressable
-            style={({ pressed }) => [styles.actionBtn, pressed && { opacity: 0.65 }]}
+            style={({ pressed }) => [styles.actionBtnRemove, pressed && { opacity: 0.75 }]}
             onPress={(e) => { e.stopPropagation?.(); handleRemove(); }}
             hitSlop={8}
           >
-            <Feather name="trash-2" size={13} color={C.danger} />
-            <Text style={[styles.actionBtnText, { color: C.danger }]}>Remove PC</Text>
+            <Feather name="trash-2" size={13} color="#fff" />
+            <Text style={styles.actionBtnTextRemove}>Remove PC</Text>
           </Pressable>
         </View>
       </Pressable>
@@ -302,9 +302,11 @@ const C = Colors.light;
 const styles = StyleSheet.create({
   card: {
     backgroundColor: C.card,
-    borderRadius: 16,
+    borderRadius: 0,
     borderWidth: 1,
     borderColor: C.cardBorder,
+    borderTopWidth: 2,
+    borderTopColor: C.tint,
     padding: 16,
     gap: 14,
   },
@@ -325,7 +327,7 @@ const styles = StyleSheet.create({
   },
   demoBadge: {
     backgroundColor: "#F97316",
-    borderRadius: 4,
+    borderRadius: 0,
     paddingHorizontal: 5,
     paddingVertical: 1,
   },
@@ -338,7 +340,7 @@ const styles = StyleSheet.create({
   statusDot: {
     width: 8,
     height: 8,
-    borderRadius: 4,
+    borderRadius: 0,
   },
   name: {
     fontSize: 16,
@@ -378,10 +380,29 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    backgroundColor: C.tint,
+    borderRadius: 0,
+  },
+  actionBtnRemove: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    backgroundColor: C.danger,
+    borderRadius: 0,
   },
   actionBtnText: {
     fontSize: 12,
-    fontWeight: "600",
+    fontWeight: "700",
+    color: "#000",
+  },
+  actionBtnTextRemove: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#fff",
   },
   metrics: {
     flexDirection: "row",
@@ -423,12 +444,13 @@ const styles = StyleSheet.create({
   },
   sheet: {
     backgroundColor: C.card,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    borderTopWidth: 1,
+    borderTopLeftRadius: 0,
+    borderTopRightRadius: 0,
+    borderTopWidth: 2,
     borderLeftWidth: 1,
     borderRightWidth: 1,
     borderColor: C.cardBorder,
+    borderTopColor: C.tint,
     paddingHorizontal: 20,
     paddingTop: 12,
     paddingBottom: 40,
@@ -436,9 +458,9 @@ const styles = StyleSheet.create({
   },
   sheetHandle: {
     width: 36,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: C.cardBorder,
+    height: 3,
+    borderRadius: 0,
+    backgroundColor: C.tint,
     alignSelf: "center",
     marginBottom: 4,
   },
@@ -460,7 +482,7 @@ const styles = StyleSheet.create({
   },
   fieldInput: {
     backgroundColor: C.background,
-    borderRadius: 10,
+    borderRadius: 0,
     borderWidth: 1,
     borderColor: C.cardBorder,
     paddingHorizontal: 14,
@@ -485,7 +507,7 @@ const styles = StyleSheet.create({
   cancelBtn: {
     flex: 1,
     paddingVertical: 13,
-    borderRadius: 12,
+    borderRadius: 0,
     borderWidth: 1,
     borderColor: C.cardBorder,
     alignItems: "center",
@@ -498,13 +520,13 @@ const styles = StyleSheet.create({
   saveBtn: {
     flex: 1,
     paddingVertical: 13,
-    borderRadius: 12,
+    borderRadius: 0,
     backgroundColor: C.tint,
     alignItems: "center",
   },
   saveBtnText: {
     fontSize: 15,
     fontWeight: "700",
-    color: "#fff",
+    color: "#000",
   },
 });

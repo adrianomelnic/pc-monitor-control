@@ -66,13 +66,13 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   track: {
-    height: 6,
+    height: 4,
     backgroundColor: C.backgroundTertiary,
-    borderRadius: 3,
+    borderRadius: 0,
     overflow: "hidden",
   },
   fill: {
-    height: 6,
-    borderRadius: 3,
+    height: 4,
+    borderRadius: 0,
   },
 });
