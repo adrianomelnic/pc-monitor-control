@@ -67,6 +67,23 @@ export function DashboardCards() {
     </div>
   );
 
+  const CtrlBtn = ({
+    icon, label, color, danger,
+  }: {
+    icon: string; label: string; color: string; danger?: boolean;
+  }) => (
+    <div style={{
+      flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
+    }}>
+      <div style={{
+        width: 48, height: 48, background: G, border: "none", borderRadius: 0,
+        display: "flex", alignItems: "center", justifyContent: "center",
+        fontSize: 20, color: "#000",
+      }}>{icon}</div>
+      <span style={{ fontSize: 10, color: G, fontWeight: 700, letterSpacing: 0.5, textTransform: "uppercase" }}>{label}</span>
+    </div>
+  );
+
   return (
     <div style={{
       width: 390, minHeight: 844, background: BG,
@@ -76,9 +93,7 @@ export function DashboardCards() {
       {/* Status bar */}
       <div style={{ height: 44, paddingInline: 20, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <span style={{ fontSize: 13, fontWeight: 600, color: TEXT }}>9:41</span>
-        <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-          <span style={{ fontSize: 12, color: TEXT }}>▐▌▌▌  WiFi  ⬜</span>
-        </div>
+        <span style={{ fontSize: 12, color: TEXT }}>▐▌▌▌  WiFi  ⬜</span>
       </div>
 
       {/* Header */}
@@ -105,23 +120,51 @@ export function DashboardCards() {
             width: 32, height: 32, background: G, border: "none",
             borderRadius: 0, cursor: "pointer",
             display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: 14,
           }}>
-            <span style={{ color: "#000", fontWeight: 700 }}>⚙</span>
+            <span style={{ color: "#000", fontSize: 14, fontWeight: 700 }}>⌨</span>
           </button>
           <button style={{
             width: 32, height: 32, background: G, border: "none",
             borderRadius: 0, cursor: "pointer",
             display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: 14,
           }}>
-            <span style={{ color: "#000", fontWeight: 700 }}>✎</span>
+            <span style={{ color: "#000", fontSize: 14, fontWeight: 700 }}>✎</span>
+          </button>
+          {/* Power button — active (panel expanded) */}
+          <button style={{
+            width: 32, height: 32, background: G, border: "none",
+            borderRadius: 0, cursor: "pointer",
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}>
+            <span style={{ color: "#000", fontSize: 14, fontWeight: 700 }}>⏻</span>
           </button>
         </div>
       </div>
 
       {/* Green accent line */}
-      <div style={{ height: 2, background: G, opacity: 0.85 }} />
+      <div style={{ height: 2, background: G }} />
+
+      {/* ── Expandable controls panel (shown expanded) ── */}
+      <div style={{
+        background: "#0A0A0A",
+        borderBottom: `1px solid ${BORDER}`,
+        padding: "14px 16px",
+        display: "flex",
+        flexDirection: "column",
+        gap: 12,
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
+          <div style={{ height: 1, flex: 1, background: BORDER }} />
+          <span style={{ fontSize: 9, color: MUTED, letterSpacing: 1, textTransform: "uppercase" }}>PC Controls</span>
+          <div style={{ height: 1, flex: 1, background: BORDER }} />
+        </div>
+        <div style={{ display: "flex", justifyContent: "space-around" }}>
+          <CtrlBtn icon="🌙" label="Sleep" color={G} />
+          <CtrlBtn icon="🔒" label="Lock" color="#A78BFA" />
+          <CtrlBtn icon="↺" label="Restart" color="#FB923C" danger />
+          <CtrlBtn icon="⏻" label="Shutdown" color="#FF4444" danger />
+        </div>
+      </div>
 
       {/* Cards */}
       <div style={{ flex: 1, padding: "12px 12px", display: "flex", flexDirection: "column", gap: 2, overflowY: "auto" }}>
@@ -181,29 +224,6 @@ export function DashboardCards() {
           <StatRow label="Swap" value="0 / 0 GB" pct={0} color="#A78BFA" />
         </Card>
 
-      </div>
-
-      {/* Bottom quick actions bar */}
-      <div style={{
-        height: 83, borderTop: `1px solid ${BORDER}`,
-        background: "#050505",
-        display: "flex", alignItems: "flex-start", paddingTop: 10,
-      }}>
-        {[
-          { icon: "⏻", label: "Power" },
-          { icon: "↺", label: "Restart" },
-          { icon: "⊡", label: "Sleep" },
-          { icon: "⌨", label: "Terminal" },
-        ].map(({ icon, label }) => (
-          <div key={label} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
-            <div style={{
-              width: 32, height: 32, background: G, border: "none",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: 15, borderRadius: 0, color: "#000", fontWeight: 700,
-            }}>{icon}</div>
-            <span style={{ fontSize: 9, color: G, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase" }}>{label}</span>
-          </div>
-        ))}
       </div>
     </div>
   );
