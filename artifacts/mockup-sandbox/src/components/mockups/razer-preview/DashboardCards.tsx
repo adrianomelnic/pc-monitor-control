@@ -89,11 +89,11 @@ export function DashboardCards() {
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <button style={{
-            width: 32, height: 32, background: "#111", border: `1px solid ${BORDER}`,
+            width: 32, height: 32, background: G, border: "none",
             borderRadius: 0, cursor: "pointer",
             display: "flex", alignItems: "center", justifyContent: "center",
           }}>
-            <span style={{ color: TEXT, fontSize: 16 }}>←</span>
+            <span style={{ color: "#000", fontSize: 18, fontWeight: 700 }}>←</span>
           </button>
           <div>
             <div style={{ fontSize: 16, fontWeight: 700, color: TEXT }}>Gaming Rig</div>
@@ -102,17 +102,21 @@ export function DashboardCards() {
         </div>
         <div style={{ display: "flex", gap: 6 }}>
           <button style={{
-            width: 32, height: 32, background: "#111", border: `1px solid ${BORDER}`,
+            width: 32, height: 32, background: G, border: "none",
             borderRadius: 0, cursor: "pointer",
             display: "flex", alignItems: "center", justifyContent: "center",
             fontSize: 14,
-          }}>⚙</button>
+          }}>
+            <span style={{ color: "#000", fontWeight: 700 }}>⚙</span>
+          </button>
           <button style={{
-            width: 32, height: 32, background: "#111", border: `1px solid ${BORDER}`,
+            width: 32, height: 32, background: G, border: "none",
             borderRadius: 0, cursor: "pointer",
             display: "flex", alignItems: "center", justifyContent: "center",
             fontSize: 14,
-          }}>✎</button>
+          }}>
+            <span style={{ color: "#000", fontWeight: 700 }}>✎</span>
+          </button>
         </div>
       </div>
 
@@ -185,34 +189,21 @@ export function DashboardCards() {
         background: "#050505",
         display: "flex", alignItems: "flex-start", paddingTop: 10,
       }}>
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
-          <div style={{
-            width: 28, height: 28, background: `${G}20`, border: `1px solid ${G}60`,
-            display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, borderRadius: 0,
-          }}>⏻</div>
-          <span style={{ fontSize: 9, color: G, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase" }}>Power</span>
-        </div>
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
-          <div style={{
-            width: 28, height: 28, background: "#111", border: `1px solid ${BORDER}`,
-            display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, borderRadius: 0,
-          }}>↺</div>
-          <span style={{ fontSize: 9, color: MUTED, letterSpacing: 0.5, textTransform: "uppercase" }}>Restart</span>
-        </div>
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
-          <div style={{
-            width: 28, height: 28, background: "#111", border: `1px solid ${BORDER}`,
-            display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, borderRadius: 0,
-          }}>⊡</div>
-          <span style={{ fontSize: 9, color: MUTED, letterSpacing: 0.5, textTransform: "uppercase" }}>Sleep</span>
-        </div>
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
-          <div style={{
-            width: 28, height: 28, background: "#111", border: `1px solid ${BORDER}`,
-            display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, borderRadius: 0,
-          }}>⌨</div>
-          <span style={{ fontSize: 9, color: MUTED, letterSpacing: 0.5, textTransform: "uppercase" }}>Terminal</span>
-        </div>
+        {[
+          { icon: "⏻", label: "Power" },
+          { icon: "↺", label: "Restart" },
+          { icon: "⊡", label: "Sleep" },
+          { icon: "⌨", label: "Terminal" },
+        ].map(({ icon, label }) => (
+          <div key={label} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+            <div style={{
+              width: 32, height: 32, background: G, border: "none",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: 15, borderRadius: 0, color: "#000", fontWeight: 700,
+            }}>{icon}</div>
+            <span style={{ fontSize: 9, color: G, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase" }}>{label}</span>
+          </div>
+        ))}
       </div>
     </div>
   );
