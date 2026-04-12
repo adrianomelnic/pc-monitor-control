@@ -68,11 +68,11 @@ const styles = StyleSheet.create({
   track: {
     height: 4,
     backgroundColor: C.backgroundTertiary,
-    borderRadius: 0,
+    borderRadius: 2,
     overflow: "hidden",
   },
   fill: {
     height: 4,
-    borderRadius: 0,
+    borderRadius: 2,
   },
 });

@@ -69,7 +69,7 @@ export function MetricRing({
             fill="none"
             strokeDasharray={`${circumference} ${circumference}`}
             strokeDashoffset={strokeDashoffset}
-            strokeLinecap="round"
+            strokeLinecap="butt"
             transform={`rotate(-90 ${center} ${center})`}
           />
         </Svg>

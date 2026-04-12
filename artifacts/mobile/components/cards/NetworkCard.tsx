@@ -6,9 +6,9 @@ import { NetworkInterface } from "@/context/PcsContext";
 import { BuiltinCardEdit, CardBase, CardTitleEditConfig, StatRow } from "./CardBase";
 
 const C = Colors.light;
-const ACCENT = "#60A5FA";
-const UP_COLOR = "#00D4FF";
-const DOWN_COLOR = "#A78BFA";
+const ACCENT = "#40C4FF";
+const UP_COLOR = "#40C4FF";
+const DOWN_COLOR = "#FF6D00";
 
 function isVirtualIface(name: string): boolean {
   const n = name.toLowerCase();
@@ -151,11 +151,11 @@ const styles = StyleSheet.create({
   ifaceItem: { gap: 8, paddingVertical: 4 },
   ifaceDivider: { borderTopWidth: 1, borderTopColor: C.cardBorder, marginTop: 4, paddingTop: 12 },
   ifaceHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  nameBadge: { flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: ACCENT + "15", borderRadius: 6, paddingHorizontal: 8, paddingVertical: 4 },
+  nameBadge: { flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: ACCENT + "15", borderRadius: 4, paddingHorizontal: 8, paddingVertical: 4 },
   ifaceName: { fontSize: 12, fontWeight: "700", color: ACCENT, maxWidth: 180 },
   linkSpeed: { fontSize: 11, color: C.textMuted, fontWeight: "600" },
   speedRow: { flexDirection: "row", gap: 8 },
-  speedBox: { flex: 1, backgroundColor: C.backgroundSecondary, borderRadius: 10, borderWidth: 1, padding: 10, gap: 4 },
+  speedBox: { flex: 1, backgroundColor: C.backgroundSecondary, borderRadius: 4, borderWidth: 1, padding: 10, gap: 4 },
   speedLabel: { flexDirection: "row", alignItems: "center", gap: 4 },
   speedLabelText: { fontSize: 10, color: C.textMuted, fontWeight: "600", letterSpacing: 0.3 },
   speedVal: { fontSize: 16, fontWeight: "800", letterSpacing: -0.3 },

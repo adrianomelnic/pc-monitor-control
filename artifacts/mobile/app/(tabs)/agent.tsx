@@ -889,7 +889,7 @@ export default function AgentScreen() {
             <Feather
               name={copied ? "check" : "copy"}
               size={14}
-              color={copied ? "#000" : "#000"}
+              color="#fff"
             />
             <Text style={styles.copyBtnText}>{copied ? "Copied!" : "Copy"}</Text>
           </Pressable>
@@ -952,7 +952,7 @@ const styles = StyleSheet.create({
   stepNumText: {
     fontSize: 13,
     fontWeight: "800",
-    color: "#000",
+    color: "#fff",
   },
   stepContent: {
     flex: 1,
@@ -970,7 +970,7 @@ const styles = StyleSheet.create({
   },
   codeBlock: {
     backgroundColor: C.card,
-    borderRadius: 8,
+    borderRadius: 4,
     padding: 10,
     marginTop: 4,
   },
@@ -981,7 +981,7 @@ const styles = StyleSheet.create({
   },
   agentSection: {
     backgroundColor: C.card,
-    borderRadius: 14,
+    borderRadius: 6,
     borderWidth: 1,
     borderColor: C.cardBorder,
     overflow: "hidden",
@@ -1011,7 +1011,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 6,
     backgroundColor: C.tint,
-    borderRadius: 8,
+    borderRadius: 4,
     paddingHorizontal: 12,
     paddingVertical: 7,
   },
@@ -1021,7 +1021,7 @@ const styles = StyleSheet.create({
   copyBtnText: {
     fontSize: 13,
     fontWeight: "700",
-    color: "#000",
+    color: "#fff",
   },
   codeScroll: {
     maxHeight: 300,
@@ -1037,7 +1037,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 10,
     backgroundColor: "rgba(0, 212, 255, 0.07)",
-    borderRadius: 10,
+    borderRadius: 4,
     borderWidth: 1,
     borderColor: "rgba(0, 212, 255, 0.2)",
     padding: 14,
@@ -1058,7 +1058,7 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
     gap: 6,
     backgroundColor: "rgba(255, 184, 0, 0.08)",
-    borderRadius: 8,
+    borderRadius: 4,
     borderWidth: 1,
     borderColor: "rgba(255, 184, 0, 0.25)",
     padding: 10,

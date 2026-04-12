@@ -6,7 +6,7 @@ import { FanInfo } from "@/context/PcsContext";
 import { BuiltinCardEdit, CardBase, CardTitleEditConfig, StatRow } from "./CardBase";
 
 const C = Colors.light;
-const ACCENT = "#FB923C";
+const ACCENT = "#FF9100";
 
 function rpmColor(rpm: number) {
   if (rpm > 2500) return "#FF4444";
@@ -269,8 +269,8 @@ const styles = StyleSheet.create({
   fanLeft: { flexDirection: "row", alignItems: "center", gap: 6, width: 110, flexShrink: 0 },
   fanLabel: { fontSize: 12, color: C.textSecondary, fontWeight: "500", flex: 1 },
   fanRight: { flex: 1, gap: 4 },
-  fanBarTrack: { height: 5, backgroundColor: C.backgroundTertiary, borderRadius: 3, overflow: "hidden" },
-  fanBarFill: { height: 5, borderRadius: 3 },
+  fanBarTrack: { height: 4, backgroundColor: C.backgroundTertiary, borderRadius: 2, overflow: "hidden" },
+  fanBarFill: { height: 4, borderRadius: 2 },
   fanRpm: { fontSize: 11, fontWeight: "700" },
   emptyWrap: { gap: 8 },
   emptyRow: { flexDirection: "row", gap: 7, alignItems: "center" },
@@ -279,7 +279,7 @@ const styles = StyleSheet.create({
   emptyCode: { fontFamily: "Menlo, monospace", color: C.text, fontWeight: "600" },
   steps: { gap: 5, paddingLeft: 4 },
   stepRow: { flexDirection: "row", alignItems: "center", gap: 8 },
-  stepDot: { width: 5, height: 5, borderRadius: 3, backgroundColor: ACCENT, flexShrink: 0 },
+  stepDot: { width: 5, height: 5, borderRadius: 3, backgroundColor: "#FF9100", flexShrink: 0 },
   stepText: { fontSize: 12, color: C.textSecondary, lineHeight: 18 },
   diagWrap: { marginTop: 4, gap: 8 },
   diagBtn: {
@@ -287,7 +287,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 7,
     backgroundColor: C.backgroundTertiary,
-    borderRadius: 8,
+    borderRadius: 4,
     paddingHorizontal: 14,
     paddingVertical: 9,
     borderWidth: 1,
@@ -300,7 +300,7 @@ const styles = StyleSheet.create({
   diagBtnText: { fontSize: 13, fontWeight: "600", color: ACCENT },
   diagBox: {
     backgroundColor: C.backgroundTertiary,
-    borderRadius: 8,
+    borderRadius: 4,
     padding: 12,
     gap: 4,
     borderLeftWidth: 3,

@@ -5,7 +5,7 @@ import { GPUInfo } from "@/context/PcsContext";
 import { BuiltinCardEdit, CardBase, CardTitleEditConfig, MiniBar, StatRow } from "./CardBase";
 
 const C = Colors.light;
-const ACCENT = "#34D399";
+const ACCENT = "#FF6D00";
 
 function fmtMB(mb: number | null) {
   if (mb == null) return "—";

@@ -136,32 +136,32 @@ export function PCCard({ pc }: PCCardProps) {
             <MetricRing
               value={pc.metrics.cpuUsage}
               label="CPU"
-              color="#00D4FF"
+              color="#FF1744"
               size={72}
             />
             <MetricRing
               value={(pc.metrics.ramUsage / pc.metrics.ramTotal) * 100}
               label="RAM"
               sublabel={`${formatBytes(pc.metrics.ramUsage)}/${formatBytes(pc.metrics.ramTotal)}`}
-              color="#A78BFA"
+              color="#448AFF"
               size={72}
             />
             <MetricRing
               value={(pc.metrics.diskUsage / pc.metrics.diskTotal) * 100}
               label="Disk"
               sublabel={`${formatBytes(pc.metrics.diskUsage)}/${formatBytes(pc.metrics.diskTotal)}`}
-              color="#34D399"
+              color="#00BFA5"
               size={72}
             />
             <View style={styles.networkInfo}>
               <View style={styles.netRow}>
-                <Feather name="arrow-up" size={12} color={C.tint} />
+                <Feather name="arrow-up" size={12} color="#40C4FF" />
                 <Text style={styles.netVal}>
                   {formatBytes(pc.metrics.networkUp)}/s
                 </Text>
               </View>
               <View style={styles.netRow}>
-                <Feather name="arrow-down" size={12} color="#A78BFA" />
+                <Feather name="arrow-down" size={12} color="#448AFF" />
                 <Text style={styles.netVal}>
                   {formatBytes(pc.metrics.networkDown)}/s
                 </Text>
@@ -199,7 +199,7 @@ export function PCCard({ pc }: PCCardProps) {
             onPress={(e) => { e.stopPropagation?.(); openEdit(); }}
             hitSlop={8}
           >
-            <Feather name="edit-2" size={13} color="#000" />
+            <Feather name="edit-2" size={13} color={C.tint} />
             <Text style={styles.actionBtnText}>Edit</Text>
           </Pressable>
           <Pressable
@@ -207,13 +207,12 @@ export function PCCard({ pc }: PCCardProps) {
             onPress={(e) => { e.stopPropagation?.(); handleRemove(); }}
             hitSlop={8}
           >
-            <Feather name="trash-2" size={13} color="#fff" />
-            <Text style={styles.actionBtnTextRemove}>Remove PC</Text>
+            <Feather name="trash-2" size={13} color={C.danger} />
+            <Text style={styles.actionBtnTextRemove}>Remove</Text>
           </Pressable>
         </View>
       </Pressable>
 
-      {/* ── Edit PC Modal ── */}
       <Modal
         transparent
         visible={editVisible}
@@ -302,7 +301,7 @@ const C = Colors.light;
 const styles = StyleSheet.create({
   card: {
     backgroundColor: C.card,
-    borderRadius: 0,
+    borderRadius: 6,
     borderWidth: 1,
     borderColor: C.cardBorder,
     borderTopWidth: 2,
@@ -326,8 +325,8 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   demoBadge: {
-    backgroundColor: "#F97316",
-    borderRadius: 0,
+    backgroundColor: "#FF6D00",
+    borderRadius: 2,
     paddingHorizontal: 5,
     paddingVertical: 1,
   },
@@ -340,7 +339,7 @@ const styles = StyleSheet.create({
   statusDot: {
     width: 8,
     height: 8,
-    borderRadius: 0,
+    borderRadius: 4,
   },
   name: {
     fontSize: 16,
@@ -382,8 +381,10 @@ const styles = StyleSheet.create({
     gap: 6,
     paddingHorizontal: 12,
     paddingVertical: 7,
-    backgroundColor: C.tint,
-    borderRadius: 0,
+    backgroundColor: C.tint + "15",
+    borderWidth: 1,
+    borderColor: C.tint + "40",
+    borderRadius: 4,
   },
   actionBtnRemove: {
     flexDirection: "row",
@@ -391,18 +392,20 @@ const styles = StyleSheet.create({
     gap: 6,
     paddingHorizontal: 12,
     paddingVertical: 7,
-    backgroundColor: C.danger,
-    borderRadius: 0,
+    backgroundColor: C.danger + "12",
+    borderWidth: 1,
+    borderColor: C.danger + "35",
+    borderRadius: 4,
   },
   actionBtnText: {
     fontSize: 12,
     fontWeight: "700",
-    color: "#000",
+    color: C.tint,
   },
   actionBtnTextRemove: {
     fontSize: 12,
     fontWeight: "700",
-    color: "#fff",
+    color: C.danger,
   },
   metrics: {
     flexDirection: "row",
@@ -439,13 +442,13 @@ const styles = StyleSheet.create({
   },
   backdrop: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: "rgba(0,0,0,0.6)",
     justifyContent: "flex-end",
   },
   sheet: {
     backgroundColor: C.card,
-    borderTopLeftRadius: 0,
-    borderTopRightRadius: 0,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
     borderTopWidth: 2,
     borderLeftWidth: 1,
     borderRightWidth: 1,
@@ -459,8 +462,8 @@ const styles = StyleSheet.create({
   sheetHandle: {
     width: 36,
     height: 3,
-    borderRadius: 0,
-    backgroundColor: C.tint,
+    borderRadius: 2,
+    backgroundColor: C.textMuted,
     alignSelf: "center",
     marginBottom: 4,
   },
@@ -481,8 +484,8 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   fieldInput: {
-    backgroundColor: C.background,
-    borderRadius: 0,
+    backgroundColor: C.backgroundTertiary,
+    borderRadius: 4,
     borderWidth: 1,
     borderColor: C.cardBorder,
     paddingHorizontal: 14,
@@ -507,7 +510,7 @@ const styles = StyleSheet.create({
   cancelBtn: {
     flex: 1,
     paddingVertical: 13,
-    borderRadius: 0,
+    borderRadius: 4,
     borderWidth: 1,
     borderColor: C.cardBorder,
     alignItems: "center",
@@ -520,13 +523,13 @@ const styles = StyleSheet.create({
   saveBtn: {
     flex: 1,
     paddingVertical: 13,
-    borderRadius: 0,
+    borderRadius: 4,
     backgroundColor: C.tint,
     alignItems: "center",
   },
   saveBtnText: {
     fontSize: 15,
     fontWeight: "700",
-    color: "#000",
+    color: "#fff",
   },
 });

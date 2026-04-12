@@ -33,8 +33,12 @@ iOS/Android Expo app that connects directly to PC agents over local WiFi (HTTP p
 - ALL sensor types now exposed: temp, voltage, fan, current, power, clock, usage
 - Sensor types 0–8 mapped to units (°C, V, RPM, A, W, MHz, %)
 
-## Colors
-CPU=#00D4FF, GPU=#34D399, RAM=#A78BFA, Fans=#FB923C, Disk=#2DD4BF, Network=#60A5FA
+## Design System (ROG-inspired)
+- **Theme**: Dark ASUS ROG-inspired — primary `#FF1744` red, card `#141414`, border `#252525`, bg `#0A0A0A`
+- **Border radius**: cards=6, buttons/inputs=4, progress bars/badges=2
+- **Card accents**: CPU=`#FF1744`, GPU=`#FF6D00`, RAM=`#448AFF`, Fans=`#FF9100`, Disks=`#00BFA5`, Network=`#40C4FF`, Thermals=`#FF3D00`
+- **Button styles**: Primary action = solid red bg + white text; ghost buttons = red border + red text; header icon buttons = dark bg, active = red tint
+- **MetricRing**: `strokeLinecap="butt"` (sharp ends)
 
 ---
 # Workspace

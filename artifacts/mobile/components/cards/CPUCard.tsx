@@ -5,7 +5,7 @@ import { CPUInfo } from "@/context/PcsContext";
 import { BuiltinCardEdit, CardBase, CardTitleEditConfig, MiniBar, StatRow } from "./CardBase";
 
 const C = Colors.light;
-const ACCENT = "#00D4FF";
+const ACCENT = "#FF1744";
 
 function fmt(mhz: number) {
   return mhz >= 1000 ? `${(mhz / 1000).toFixed(2)} GHz` : `${mhz} MHz`;
@@ -231,12 +231,13 @@ const styles = StyleSheet.create({
     height: 52,
     justifyContent: "flex-end",
     backgroundColor: C.textMuted + "22",
-    borderRadius: 3,
+    borderRadius: 2,
     overflow: "hidden",
   },
   verticalBarFill: {
     width: "100%",
     borderRadius: 2,
+
   },
   verticalBarNum: {
     fontSize: 8,

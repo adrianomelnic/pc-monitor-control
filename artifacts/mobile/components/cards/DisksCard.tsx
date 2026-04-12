@@ -5,7 +5,7 @@ import { DiskInfo } from "@/context/PcsContext";
 import { BuiltinCardEdit, CardBase, CardTitleEditConfig, MiniBar, StatRow, TempBadge } from "./CardBase";
 
 const C = Colors.light;
-const ACCENT = "#2DD4BF";
+const ACCENT = "#00BFA5";
 
 function fmtMB(mb: number) {
   if (mb >= 1024 * 1024) return `${(mb / 1024 / 1024).toFixed(1)} TB`;
@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
   diskDivider: { borderTopWidth: 1, borderTopColor: Colors.light.cardBorder, marginTop: 4, paddingTop: 12 },
   diskHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   diskTitleRow: { flexDirection: "row", alignItems: "center", gap: 8 },
-  diskBadge: { borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 },
+  diskBadge: { borderRadius: 4, paddingHorizontal: 8, paddingVertical: 3 },
   diskBadgeText: { fontSize: 12, fontWeight: "700", letterSpacing: 0.5 },
   fstype: { fontSize: 10, color: Colors.light.textMuted, fontWeight: "600", letterSpacing: 0.5 },
   usageRow: { flexDirection: "row", alignItems: "center", gap: 8 },
@@ -124,7 +124,7 @@ const styles = StyleSheet.create({
   spaceFree: { fontSize: 11, color: "#00CC88", fontWeight: "600" },
   spaceTotal: { fontSize: 11, color: Colors.light.textMuted, fontWeight: "500" },
   spaceSep: { fontSize: 11, color: Colors.light.textMuted },
-  ioRow: { flexDirection: "row", alignItems: "center", backgroundColor: Colors.light.backgroundSecondary, borderRadius: 8, padding: 8, gap: 0 },
+  ioRow: { flexDirection: "row", alignItems: "center", backgroundColor: Colors.light.backgroundSecondary, borderRadius: 4, padding: 8, gap: 0 },
   ioItem: { flex: 1, alignItems: "center", gap: 2 },
   ioLabel: { fontSize: 9, color: Colors.light.textMuted, fontWeight: "600", letterSpacing: 0.8, textTransform: "uppercase" },
   ioVal: { fontSize: 13, fontWeight: "700" },

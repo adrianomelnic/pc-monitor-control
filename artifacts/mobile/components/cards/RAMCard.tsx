@@ -5,7 +5,7 @@ import { RAMInfo } from "@/context/PcsContext";
 import { BuiltinCardEdit, CardBase, CardTitleEditConfig, MiniBar, StatRow } from "./CardBase";
 
 const C = Colors.light;
-const ACCENT = "#A78BFA";
+const ACCENT = "#448AFF";
 const SWAP_COLOR = "#F472B6";
 
 function fmtMB(mb: number) {

@@ -179,7 +179,7 @@ export function MiniBar({
 const styles = StyleSheet.create({
   card: {
     backgroundColor: C.card,
-    borderRadius: 16,
+    borderRadius: 6,
     borderWidth: 1,
     borderColor: C.cardBorder,
     borderTopWidth: 2,
@@ -194,7 +194,7 @@ const styles = StyleSheet.create({
   iconWrap: {
     width: 32,
     height: 32,
-    borderRadius: 8,
+    borderRadius: 6,
     alignItems: "center",
     justifyContent: "center",
     flexShrink: 0,
@@ -232,7 +232,7 @@ const styles = StyleSheet.create({
     marginTop: 1,
   },
   tempBadge: {
-    borderRadius: 6,
+    borderRadius: 4,
     borderWidth: 1,
     paddingHorizontal: 7,
     paddingVertical: 3,
@@ -262,12 +262,12 @@ const styles = StyleSheet.create({
   },
   barTrack: {
     backgroundColor: Colors.light.backgroundTertiary,
-    borderRadius: 3,
+    borderRadius: 2,
     overflow: "hidden",
     width: "100%",
   },
   barFill: {
-    borderRadius: 3,
+    borderRadius: 2,
   },
   extraRows: {
     gap: 4,

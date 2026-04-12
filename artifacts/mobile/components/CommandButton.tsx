@@ -44,30 +44,38 @@ export function CommandButton({
     }
   };
 
-  const activeColor =
-    result === "success" ? C.success : result === "error" ? C.danger : color;
-  const bgColor = result === "error" ? C.danger : C.tint;
-  const fgColor = "#000000";
+  const bgColor =
+    result === "success" ? C.success + "18" :
+    result === "error" ? C.danger + "18" :
+    C.backgroundTertiary;
+  const borderColor =
+    result === "success" ? C.success + "50" :
+    result === "error" ? C.danger + "50" :
+    C.cardBorder;
+  const fgColor =
+    result === "success" ? C.success :
+    result === "error" ? C.danger :
+    C.text;
 
   return (
     <Pressable
       onPress={handle}
       style={({ pressed }) => [
         styles.btn,
-        { backgroundColor: bgColor },
+        { backgroundColor: bgColor, borderColor },
         pressed && styles.pressed,
       ]}
     >
       {loading ? (
-        <ActivityIndicator size="small" color={fgColor} />
+        <ActivityIndicator size="small" color={C.tint} />
       ) : result === "success" ? (
-        <Feather name="check" size={15} color={fgColor} />
+        <Feather name="check" size={15} color={C.success} />
       ) : result === "error" ? (
-        <Feather name="x" size={15} color="#fff" />
+        <Feather name="x" size={15} color={C.danger} />
       ) : (
-        <Feather name={icon} size={15} color={fgColor} />
+        <Feather name={icon} size={15} color={C.tint} />
       )}
-      <Text style={[styles.label, { color: result === "error" ? "#fff" : fgColor }]}>{label}</Text>
+      <Text style={[styles.label, { color: fgColor }]}>{label}</Text>
     </Pressable>
   );
 }
@@ -77,12 +85,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 7,
-    borderRadius: 0,
-    borderWidth: 0,
+    borderRadius: 4,
+    borderWidth: 1,
     paddingVertical: 10,
     paddingHorizontal: 14,
     flex: 1,
-    backgroundColor: C.tint,
   },
   pressed: {
     opacity: 0.7,

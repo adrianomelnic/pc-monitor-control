@@ -240,10 +240,9 @@ export function AddPcSheet({ visible, onClose }: AddPcSheetProps) {
               </View>
             </View>
 
-            {/* Test result */}
             {testState.kind === "ok" && (
               <View style={[styles.resultBox, styles.resultOk]}>
-                <Feather name="check-circle" size={15} color="#34D399" />
+                <Feather name="check-circle" size={15} color={C.success} />
                 <View style={{ flex: 1 }}>
                   <Text style={styles.resultOkText}>Connected successfully</Text>
                   <Text style={styles.resultOkSub}>
@@ -254,7 +253,7 @@ export function AddPcSheet({ visible, onClose }: AddPcSheetProps) {
             )}
             {testState.kind === "err" && (
               <View style={[styles.resultBox, styles.resultErr]}>
-                <Feather name="alert-circle" size={15} color="#F87171" style={{ marginTop: 2 }} />
+                <Feather name="alert-circle" size={15} color={C.danger} style={{ marginTop: 2 }} />
                 <View style={{ flex: 1 }}>
                   <Text style={styles.resultErrTitle}>{testState.message}</Text>
                   <Text style={styles.resultErrDetail}>{testState.detail}</Text>
@@ -311,8 +310,8 @@ const styles = StyleSheet.create({
   },
   sheet: {
     backgroundColor: C.backgroundSecondary,
-    borderTopLeftRadius: 0,
-    borderTopRightRadius: 0,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
     borderTopWidth: 2,
     borderTopColor: C.tint,
     paddingHorizontal: 20,
@@ -323,8 +322,8 @@ const styles = StyleSheet.create({
   handle: {
     width: 36,
     height: 3,
-    backgroundColor: C.tint,
-    borderRadius: 0,
+    backgroundColor: C.textMuted,
+    borderRadius: 2,
     alignSelf: "center",
     marginBottom: 16,
   },
@@ -365,7 +364,7 @@ const styles = StyleSheet.create({
     backgroundColor: C.card,
     borderWidth: 1,
     borderColor: C.cardBorder,
-    borderRadius: 0,
+    borderRadius: 4,
     paddingHorizontal: 14,
     paddingVertical: 12,
     color: C.text,
@@ -378,14 +377,15 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    backgroundColor: C.card,
+    backgroundColor: C.tint + "15",
     borderWidth: 1,
-    borderColor: C.tint + "50",
-    borderRadius: 0,
+    borderColor: C.tint + "40",
+    borderRadius: 4,
     paddingHorizontal: 14,
     paddingVertical: 12,
   },
   testBtnDisabled: {
+    backgroundColor: C.card,
     borderColor: C.cardBorder,
   },
   testBtnText: {
@@ -399,20 +399,20 @@ const styles = StyleSheet.create({
   resultBox: {
     flexDirection: "row",
     gap: 10,
-    borderRadius: 0,
+    borderRadius: 4,
     borderWidth: 1,
     padding: 12,
     marginBottom: 16,
     alignItems: "flex-start",
   },
   resultOk: {
-    backgroundColor: "rgba(52,211,153,0.08)",
-    borderColor: "rgba(52,211,153,0.3)",
+    backgroundColor: "rgba(105,240,174,0.08)",
+    borderColor: "rgba(105,240,174,0.3)",
   },
   resultOkText: {
     fontSize: 13,
     fontWeight: "600",
-    color: "#34D399",
+    color: "#69F0AE",
   },
   resultOkSub: {
     fontSize: 12,
@@ -420,13 +420,13 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   resultErr: {
-    backgroundColor: "rgba(248,113,113,0.08)",
-    borderColor: "rgba(248,113,113,0.3)",
+    backgroundColor: "rgba(255,82,82,0.08)",
+    borderColor: "rgba(255,82,82,0.3)",
   },
   resultErrTitle: {
     fontSize: 13,
     fontWeight: "600",
-    color: "#F87171",
+    color: C.danger,
     marginBottom: 4,
   },
   resultErrDetail: {
@@ -437,10 +437,10 @@ const styles = StyleSheet.create({
   setupBox: {
     flexDirection: "row",
     gap: 10,
-    backgroundColor: "rgba(0, 212, 255, 0.07)",
-    borderRadius: 0,
+    backgroundColor: C.tint + "0D",
+    borderRadius: 4,
     borderWidth: 1,
-    borderColor: "rgba(0, 212, 255, 0.2)",
+    borderColor: C.tint + "25",
     padding: 14,
     marginBottom: 20,
     alignItems: "flex-start",
@@ -457,7 +457,7 @@ const styles = StyleSheet.create({
   },
   addBtn: {
     backgroundColor: C.tint,
-    borderRadius: 0,
+    borderRadius: 4,
     paddingVertical: 14,
     alignItems: "center",
     marginTop: 8,
@@ -468,6 +468,6 @@ const styles = StyleSheet.create({
   addBtnText: {
     fontSize: 16,
     fontWeight: "700",
-    color: "#000",
+    color: "#fff",
   },
 });

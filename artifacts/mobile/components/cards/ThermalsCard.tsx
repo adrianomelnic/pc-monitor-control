@@ -7,7 +7,7 @@ import { BuiltinCardEdit, CardBase, CardTitleEditConfig } from "./CardBase";
 import { CUSTOM_ICON_NAMES, renderCustomIcon } from "../icons/CustomIcons";
 
 const C = Colors.light;
-export const THERMALS_ACCENT = "#F97316";
+export const THERMALS_ACCENT = "#FF3D00";
 
 const IMPORTANT_PATTERNS = [/cpu/i, /gpu/i, /ram/i, /memory/i, /vram/i, /dram/i];
 export function isImportantTemp(label: string): boolean {
@@ -285,7 +285,7 @@ const styles = StyleSheet.create({
   tile: {
     flex: 1,
     backgroundColor: C.backgroundSecondary,
-    borderRadius: 12,
+    borderRadius: 4,
     borderWidth: 1,
     borderColor: C.cardBorder,
     alignItems: "center",

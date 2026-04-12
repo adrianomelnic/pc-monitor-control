@@ -67,7 +67,7 @@ export default function HomeScreen() {
             setAddVisible(true);
           }}
         >
-          <Feather name="plus" size={20} color="#000" />
+          <Feather name="plus" size={20} color="#fff" />
         </Pressable>
       </View>
 
@@ -115,13 +115,13 @@ export default function HomeScreen() {
               onPress={handleDemo}
             >
               <View style={styles.demoBtnIcon}>
-                <Feather name="play-circle" size={20} color="#F97316" />
+                <Feather name="play-circle" size={20} color="#FF6D00" />
               </View>
               <View style={styles.demoBtnText}>
                 <Text style={styles.demoBtnTitle}>Try Demo Mode</Text>
                 <Text style={styles.demoBtnSub}>Explore with simulated data — no PC needed</Text>
               </View>
-              <Feather name="chevron-right" size={16} color="#F97316" />
+              <Feather name="chevron-right" size={16} color="#FF6D00" />
             </Pressable>
           </View>
         }
@@ -162,7 +162,7 @@ const styles = StyleSheet.create({
   addBtn: {
     width: 40,
     height: 40,
-    borderRadius: 12,
+    borderRadius: 4,
     backgroundColor: C.tint,
     alignItems: "center",
     justifyContent: "center",
@@ -197,23 +197,23 @@ const styles = StyleSheet.create({
   emptyBtn: {
     marginTop: 8,
     backgroundColor: C.tint,
-    borderRadius: 10,
+    borderRadius: 4,
     paddingHorizontal: 24,
     paddingVertical: 12,
   },
   emptyBtnText: {
     fontSize: 15,
     fontWeight: "700",
-    color: "#000",
+    color: "#fff",
   },
   demoBtn: {
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
-    backgroundColor: "rgba(249, 115, 22, 0.08)",
-    borderRadius: 14,
+    backgroundColor: "rgba(255, 109, 0, 0.08)",
+    borderRadius: 4,
     borderWidth: 1.5,
-    borderColor: "rgba(249, 115, 22, 0.3)",
+    borderColor: "rgba(255, 109, 0, 0.3)",
     paddingHorizontal: 14,
     paddingVertical: 12,
     marginTop: 4,
@@ -222,8 +222,8 @@ const styles = StyleSheet.create({
   demoBtnIcon: {
     width: 36,
     height: 36,
-    borderRadius: 9,
-    backgroundColor: "rgba(249, 115, 22, 0.13)",
+    borderRadius: 4,
+    backgroundColor: "rgba(255, 109, 0, 0.13)",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -234,7 +234,7 @@ const styles = StyleSheet.create({
   demoBtnTitle: {
     fontSize: 14,
     fontWeight: "700",
-    color: "#F97316",
+    color: "#FF6D00",
   },
   demoBtnSub: {
     fontSize: 12,

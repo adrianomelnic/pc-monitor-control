@@ -46,13 +46,13 @@ const CARD_NAMES: Record<string, string> = {
 };
 
 const CARD_ACCENTS: Record<string, string> = {
-  thermals: "#F97316",
-  cpu: "#00D4FF",
-  gpu: "#34D399",
-  ram: "#A78BFA",
-  fans: "#FB923C",
-  disks: "#2DD4BF",
-  network: "#60A5FA",
+  thermals: "#FF3D00",
+  cpu: "#FF1744",
+  gpu: "#FF6D00",
+  ram: "#448AFF",
+  fans: "#FF9100",
+  disks: "#00BFA5",
+  network: "#40C4FF",
 };
 
 const BUILTIN_CARD_FIELDS: Record<string, { key: string; label: string }[]> = {
@@ -667,7 +667,7 @@ export default function PCDetailScreen() {
           <Feather
             name={card.visible ? "eye" : "eye-off"}
             size={15}
-            color="#000"
+            color={C.textSecondary}
           />
         </Pressable>
 
@@ -684,7 +684,7 @@ export default function PCDetailScreen() {
           hitSlop={6}
           disabled={isFirst}
         >
-          <Feather name="chevron-up" size={16} color="#000" />
+          <Feather name="chevron-up" size={16} color={C.textSecondary} />
         </Pressable>
 
         <Pressable
@@ -698,7 +698,7 @@ export default function PCDetailScreen() {
           hitSlop={6}
           disabled={isLast}
         >
-          <Feather name="chevron-down" size={16} color="#000" />
+          <Feather name="chevron-down" size={16} color={C.textSecondary} />
         </Pressable>
 
         {isCustom && (
@@ -712,7 +712,7 @@ export default function PCDetailScreen() {
               }}
               hitSlop={6}
             >
-              <Feather name="edit-2" size={14} color="#000" />
+              <Feather name="edit-2" size={14} color={C.textSecondary} />
             </Pressable>
 
             <Pressable
@@ -1016,7 +1016,7 @@ export default function PCDetailScreen() {
                 ]}
                 hitSlop={6}
               >
-                <Feather name="sliders" size={16} color={editMode ? C.tint : "#000"} />
+                <Feather name="sliders" size={16} color={editMode ? C.tint : C.textSecondary} />
               </Pressable>
               <Pressable
                 onPress={() => togglePanel("terminal")}
@@ -1027,7 +1027,7 @@ export default function PCDetailScreen() {
                 ]}
                 hitSlop={6}
               >
-                <Feather name="terminal" size={16} color={activePanel === "terminal" ? C.tint : "#000"} />
+                <Feather name="terminal" size={16} color={activePanel === "terminal" ? C.tint : C.textSecondary} />
               </Pressable>
               <Pressable
                 onPress={() => togglePanel("controls")}
@@ -1038,7 +1038,7 @@ export default function PCDetailScreen() {
                 ]}
                 hitSlop={6}
               >
-                <Feather name="power" size={16} color={activePanel === "controls" ? C.tint : "#000"} />
+                <Feather name="power" size={16} color={activePanel === "controls" ? C.tint : C.textSecondary} />
               </Pressable>
             </View>
           </View>
@@ -1400,7 +1400,7 @@ const styles = StyleSheet.create({
   statusDot: {
     width: 8,
     height: 8,
-    borderRadius: 0,
+    borderRadius: 4,
   },
   statusText: {
     fontSize: 13,
@@ -1408,7 +1408,7 @@ const styles = StyleSheet.create({
   },
   infoCard: {
     backgroundColor: C.card,
-    borderRadius: 0,
+    borderRadius: 6,
     borderWidth: 1,
     borderColor: C.cardBorder,
     borderTopWidth: 2,
@@ -1447,10 +1447,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 7,
-    backgroundColor: "rgba(249, 115, 22, 0.08)",
-    borderRadius: 0,
+    backgroundColor: "rgba(255, 109, 0, 0.08)",
+    borderRadius: 4,
     borderWidth: 1,
-    borderColor: "rgba(249, 115, 22, 0.25)",
+    borderColor: "rgba(255, 109, 0, 0.25)",
     paddingHorizontal: 12,
     paddingVertical: 9,
     marginBottom: 4,
@@ -1474,7 +1474,7 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
     gap: 8,
     backgroundColor: C.tint + "12",
-    borderRadius: 0,
+    borderRadius: 4,
     borderWidth: 1,
     borderColor: C.tint + "30",
     padding: 12,
@@ -1497,9 +1497,10 @@ const styles = StyleSheet.create({
     height: 30,
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: 0,
-    backgroundColor: C.tint,
-    borderWidth: 0,
+    borderRadius: 4,
+    backgroundColor: C.backgroundTertiary,
+    borderWidth: 1,
+    borderColor: C.cardBorder,
   },
   editBtnDisabled: {
     opacity: 0.35,
@@ -1518,7 +1519,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 10,
     backgroundColor: C.card,
-    borderRadius: 0,
+    borderRadius: 6,
     borderWidth: 1,
     borderColor: C.cardBorder,
     borderStyle: "dashed",
@@ -1535,7 +1536,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 10,
     paddingVertical: 14,
-    borderRadius: 0,
+    borderRadius: 6,
     borderWidth: 1.5,
     borderColor: C.tint + "50",
     borderStyle: "dashed",
@@ -1548,7 +1549,7 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: C.card,
-    borderRadius: 0,
+    borderRadius: 6,
     borderWidth: 1,
     borderColor: C.cardBorder,
     borderTopWidth: 2,
@@ -1569,7 +1570,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     paddingHorizontal: 16,
     paddingVertical: 10,
-    borderRadius: 0,
+    borderRadius: 4,
     borderWidth: 1,
     marginTop: 4,
   },
@@ -1579,7 +1580,7 @@ const styles = StyleSheet.create({
   },
   offlineCard: {
     backgroundColor: C.card,
-    borderRadius: 0,
+    borderRadius: 6,
     borderWidth: 1,
     borderColor: C.cardBorder,
     borderTopWidth: 2,
@@ -1602,21 +1603,21 @@ const styles = StyleSheet.create({
     marginTop: 8,
     backgroundColor: C.tint,
     borderWidth: 0,
-    borderRadius: 0,
+    borderRadius: 4,
     paddingHorizontal: 24,
     paddingVertical: 10,
   },
   retryBtnText: {
     fontSize: 14,
     fontWeight: "700",
-    color: "#000",
+    color: "#fff",
   },
   terminalInput: {
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
     backgroundColor: C.backgroundSecondary,
-    borderRadius: 0,
+    borderRadius: 4,
     padding: 12,
     borderWidth: 1,
     borderColor: C.cardBorder,
@@ -1630,7 +1631,7 @@ const styles = StyleSheet.create({
   },
   outputBox: {
     backgroundColor: C.background,
-    borderRadius: 0,
+    borderRadius: 4,
     padding: 12,
   },
   outputText: {
@@ -1645,7 +1646,7 @@ const styles = StyleSheet.create({
     gap: 4,
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 0,
+    borderRadius: 4,
     borderWidth: 1,
   },
   builtinDoneBtnText: {
@@ -1684,7 +1685,7 @@ const styles = StyleSheet.create({
   editPanelToggle: {
     width: 24,
     height: 24,
-    borderRadius: 0,
+    borderRadius: 4,
     borderWidth: 1.5,
     alignItems: "center",
     justifyContent: "center",
@@ -1720,7 +1721,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 6,
     borderWidth: 1,
-    borderRadius: 0,
+    borderRadius: 4,
     borderStyle: "dashed",
     paddingHorizontal: 10,
     paddingVertical: 7,
@@ -1733,7 +1734,7 @@ const styles = StyleSheet.create({
   editPanelIconBtn: {
     width: 26,
     height: 26,
-    borderRadius: 0,
+    borderRadius: 4,
     borderWidth: 1,
     borderColor: C.cardBorder,
     alignItems: "center",
@@ -1756,7 +1757,7 @@ const styles = StyleSheet.create({
   iconPickerBtn: {
     width: 52,
     height: 52,
-    borderRadius: 0,
+    borderRadius: 4,
     borderWidth: 1,
     borderColor: C.cardBorder,
     alignItems: "center",
@@ -1771,11 +1772,12 @@ const styles = StyleSheet.create({
   headerIconBtn: {
     width: 32,
     height: 32,
-    borderRadius: 0,
+    borderRadius: 4,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: C.tint,
-    borderWidth: 0,
+    backgroundColor: C.backgroundTertiary,
+    borderWidth: 1,
+    borderColor: C.cardBorder,
   },
   inlinePanel: {
     overflow: "hidden",
@@ -1785,8 +1787,8 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   headerIconBtnActive: {
-    backgroundColor: "#000",
+    backgroundColor: C.tint + "18",
     borderWidth: 1,
-    borderColor: C.tint,
+    borderColor: C.tint + "60",
   },
 });
