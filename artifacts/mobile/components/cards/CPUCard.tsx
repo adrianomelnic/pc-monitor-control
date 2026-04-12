@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Platform, StyleSheet, Text, View } from "react-native";
 import Colors from "@/constants/colors";
 import { CPUInfo } from "@/context/PcsContext";
 import { BuiltinCardEdit, CardBase, CardTitleEditConfig, MiniBar, StatRow } from "./CardBase";
@@ -39,23 +39,22 @@ export function CPUCard({ cpu, titleEdit, cardEdit }: Props) {
   const showCpuBar = !hidden.has("cpuBar");
 
   function renderRightField(key: string): React.ReactNode {
-    // If a sensor source override exists for this field, use it
     if (extraMap[key] !== undefined && key !== "perCore" && key !== "perCoreVertical" && key !== "cpuBar") {
       return <StatRow key={key} label={getLabel(key, key)} value={extraMap[key]} />;
     }
     switch (key) {
       case "voltage":
-        return <StatRow key={key} label={getLabel("voltage", "CPU voltage")} value={cpu.voltage != null ? `${cpu.voltage.toFixed(3)} V` : "—"} color={ACCENT} />;
+        return <StatRow key={key} label={getLabel("voltage", "Voltage")} value={cpu.voltage != null ? `${cpu.voltage.toFixed(3)} V` : "—"} color={ACCENT} />;
       case "wattage":
-        return <StatRow key={key} label={getLabel("wattage", "CPU power")} value={cpu.power != null ? `${Math.round(cpu.power)} W` : "—"} />;
+        return <StatRow key={key} label={getLabel("wattage", "Power")} value={cpu.power != null ? `${Math.round(cpu.power)} W` : "—"} />;
       case "physicalCores":
-        return <StatRow key={key} label={getLabel("physicalCores", "Physical cores")} value={String(cpu.coresPhysical ?? "—")} />;
+        return <StatRow key={key} label={getLabel("physicalCores", "Phys Cores")} value={String(cpu.coresPhysical ?? "—")} />;
       case "logicalCores":
-        return <StatRow key={key} label={getLabel("logicalCores", "Logical cores")} value={String(cpu.coresLogical ?? "—")} />;
+        return <StatRow key={key} label={getLabel("logicalCores", "Logical")} value={String(cpu.coresLogical ?? "—")} />;
       case "freqCurrent":
-        return <StatRow key={key} label={getLabel("freqCurrent", "Current freq")} value={cpu.freqCurrent ? fmt(cpu.freqCurrent) : "—"} />;
+        return <StatRow key={key} label={getLabel("freqCurrent", "Freq")} value={cpu.freqCurrent ? fmt(cpu.freqCurrent) : "—"} />;
       case "freqMax":
-        return <StatRow key={key} label={getLabel("freqMax", "Max freq")} value={cpu.freqMax ? fmt(cpu.freqMax) : "—"} color={ACCENT} />;
+        return <StatRow key={key} label={getLabel("freqMax", "Max Freq")} value={cpu.freqMax ? fmt(cpu.freqMax) : "—"} color={ACCENT} />;
       default: {
         const val = extraMap[key];
         return val ? <StatRow key={key} label={getLabel(key, key)} value={val} /> : null;
@@ -83,8 +82,10 @@ export function CPUCard({ cpu, titleEdit, cardEdit }: Props) {
       {showHero ? (
         <View style={styles.heroRow}>
           <View style={styles.heroLeft}>
-            <Text style={[styles.bigNum, { color: ACCENT }]}>{Math.round(cpu.usageTotal)}%</Text>
-            <Text style={styles.bigLabel}>{getLabel("usage", "Usage")}</Text>
+            <Text style={[styles.bigNum, { color: ACCENT }]}>{Math.round(cpu.usageTotal)}
+              <Text style={styles.bigUnit}>%</Text>
+            </Text>
+            <Text style={styles.bigLabel}>{getLabel("usage", "USAGE")}</Text>
           </View>
           <View style={styles.heroRight}>
             {rightFields.map(key => renderRightField(key))}
@@ -108,7 +109,7 @@ export function CPUCard({ cpu, titleEdit, cardEdit }: Props) {
                     <Text style={styles.coreLabel}>C{i}</Text>
                     <Text style={[styles.corePct, { color: barColor }]}>{Math.round(val)}%</Text>
                   </View>
-                  <MiniBar value={val} color={ACCENT} height={4} />
+                  <MiniBar value={val} color={ACCENT} height={3} />
                 </View>
               );
             })}
@@ -147,7 +148,7 @@ export function CPUCard({ cpu, titleEdit, cardEdit }: Props) {
               {Math.round(cpu.usageTotal)}%
             </Text>
           </View>
-          <MiniBar value={cpu.usageTotal} color={ACCENT} height={6} />
+          <MiniBar value={cpu.usageTotal} color={ACCENT} height={5} />
         </View>
       )}
     </CardBase>
@@ -157,42 +158,49 @@ export function CPUCard({ cpu, titleEdit, cardEdit }: Props) {
 const styles = StyleSheet.create({
   heroRow: {
     flexDirection: "row",
-    gap: 12,
+    gap: 14,
     alignItems: "flex-start",
   },
   heroLeft: {
     alignItems: "center",
     justifyContent: "flex-start",
-    minWidth: 54,
-    paddingTop: 2,
+    minWidth: 60,
+    paddingTop: 0,
   },
   heroRight: {
     flex: 1,
-    gap: 5,
+    gap: 6,
   },
   bigNum: {
-    fontSize: 28,
+    fontSize: 32,
     fontWeight: "800",
-    letterSpacing: -1,
+    letterSpacing: -1.5,
+    fontVariant: ["tabular-nums"],
+    lineHeight: 36,
+  },
+  bigUnit: {
+    fontSize: 16,
+    fontWeight: "600",
   },
   bigLabel: {
-    fontSize: 11,
-    color: C.textSecondary,
-    fontWeight: "600",
-    marginTop: 1,
+    fontSize: 9,
+    color: C.textMuted,
+    fontWeight: "700",
+    marginTop: 2,
+    letterSpacing: 1.5,
   },
   fieldList: {
-    gap: 5,
+    gap: 6,
   },
   belowSection: {
-    marginTop: 6,
+    marginTop: 4,
     gap: 4,
   },
   sectionLabel: {
     fontSize: 9,
     fontWeight: "700",
     color: C.textMuted,
-    letterSpacing: 1.2,
+    letterSpacing: 1.5,
   },
   coreGrid: {
     flexDirection: "row",
@@ -208,13 +216,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   coreLabel: {
-    fontSize: 10,
+    fontSize: 9,
     color: C.textMuted,
-    fontWeight: "600",
+    fontWeight: "700",
+    letterSpacing: 0.5,
   },
   corePct: {
     fontSize: 10,
-    fontWeight: "700",
+    fontWeight: "800",
+    fontVariant: ["tabular-nums"],
   },
   verticalChartRow: {
     flexDirection: "row",
@@ -230,19 +240,18 @@ const styles = StyleSheet.create({
     width: "100%",
     height: 52,
     justifyContent: "flex-end",
-    backgroundColor: C.textMuted + "22",
-    borderRadius: 2,
+    backgroundColor: C.textMuted + "18",
+    borderRadius: 1,
     overflow: "hidden",
   },
   verticalBarFill: {
     width: "100%",
-    borderRadius: 2,
-
+    borderRadius: 1,
   },
   verticalBarNum: {
     fontSize: 8,
     color: C.textMuted,
-    fontWeight: "600",
+    fontWeight: "700",
   },
   cpuBarHeader: {
     flexDirection: "row",
@@ -251,6 +260,7 @@ const styles = StyleSheet.create({
   },
   cpuBarPct: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "800",
+    fontVariant: ["tabular-nums"],
   },
 });

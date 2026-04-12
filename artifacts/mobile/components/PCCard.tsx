@@ -301,11 +301,11 @@ const C = Colors.light;
 const styles = StyleSheet.create({
   card: {
     backgroundColor: C.card,
-    borderRadius: 6,
+    borderRadius: 4,
     borderWidth: 1,
     borderColor: C.cardBorder,
-    borderTopWidth: 2,
-    borderTopColor: C.tint,
+    borderLeftWidth: 3,
+    borderLeftColor: C.tint,
     padding: 16,
     gap: 14,
   },

@@ -14,106 +14,50 @@ export function isImportantTemp(label: string): boolean {
   return IMPORTANT_PATTERNS.some(p => p.test(label));
 }
 
-// Icons prefixed with "mci:" use MaterialCommunityIcons; others use Feather
 export const SENSOR_ICON_OPTIONS: string[] = [
-  // ── PC Case / Chassis ──
   "mci:desktop-tower", "mci:desktop-classic", "mci:server", "mci:server-outline",
   "mci:nas",
-
-  // ── Motherboard ──
   "mci:motherboard", "mci:motherboard-outline",
-
-  // ── CPU / Processor ──
   "mci:chip", "mci:cpu-64-bit", "mci:cpu-32-bit", "mci:integrated-circuit-chip",
-
-  // ── GPU / Graphics / Expansion Cards ──
   "mci:expansion-card", "mci:pci-card", "mci:pci-card-outline",
-
-  // ── RAM / Memory ──
   "mci:memory",
-
-  // ── Storage — HDD / SSD / M.2 ──
   "mci:harddisk", "mci:solid-state-drive", "mci:solid-state-drive-outline", "mci:disc",
-
-  // ── Storage — Removable ──
   "mci:sd-card", "mci:usb-flash-drive", "mci:usb-flash-drive-outline",
-
-  // ── Power Supply ──
   "mci:power-plug", "mci:power-plug-outline",
   "mci:power-socket", "mci:power-socket-eu",
   "mci:lightning-bolt", "mci:lightning-bolt-outline",
   "mci:battery-charging", "mci:battery-charging-100",
   "mci:transmission-tower",
-
-  // ── Case Fans ──
   "mci:fan", "mci:fan-speed-1", "mci:fan-speed-2", "mci:fan-speed-3",
   "mci:fan-alert", "mci:fan-auto", "mci:fan-plus", "mci:fan-minus",
-
-  // ── Air Cooling (CPU cooler / heatsink) ──
   "mci:heating-coil",
-
-  // ── Liquid Cooling — Pump / Reservoir ──
   "mci:water-pump", "mci:water-pump-off",
-
-  // ── Liquid Cooling — Coolant / Tubes ──
   "mci:water", "mci:water-outline",
   "mci:pipe", "mci:pipe-disconnected",
   "mci:snowflake", "mci:coolant-temperature",
-
-  // ── VRM / Electronics ──
   "mci:resistor",
-
-  // ── Temperature / Thermals ──
   "mci:thermometer", "mci:thermometer-high", "mci:thermometer-low",
   "mci:thermometer-alert", "mci:thermometer-lines",
-
-  // ── Speed / Gauge (RPM, pressure) ──
   "mci:gauge", "mci:gauge-full", "mci:gauge-low",
   "mci:speedometer", "mci:speedometer-medium", "mci:speedometer-slow",
-
-  // ── Networking / Connectivity ──
   "mci:ethernet", "mci:wifi",
   "mci:router-wireless", "mci:router-network",
   "mci:network", "mci:lan", "mci:lan-connect",
   "mci:access-point", "mci:access-point-network",
-
-  // ── Bluetooth ──
   "mci:bluetooth", "mci:bluetooth-audio",
-
-  // ── USB / IO Ports ──
   "mci:usb", "mci:usb-port", "mci:usb-c-port",
-
-  // ── Display / Monitor ──
   "mci:monitor", "mci:monitor-multiple", "mci:television", "mci:projector",
-
-  // ── Keyboard ──
   "mci:keyboard", "mci:keyboard-outline",
-
-  // ── Mouse ──
   "mci:mouse", "mci:mouse-outline",
-
-  // ── Headphones / Headset ──
   "mci:headphones", "mci:headset",
-
-  // ── Microphone ──
   "mci:microphone", "mci:microphone-outline", "mci:microphone-variant",
-
-  // ── Speaker / Audio ──
   "mci:speaker", "mci:speaker-multiple", "mci:surround-sound",
   "mci:speaker-wireless", "mci:volume-high",
-
-  // ── Webcam ──
   "mci:webcam", "mci:webcam-outline",
-
-  // ── Printer / Scanner ──
   "mci:printer", "mci:printer-outline", "mci:scanner",
-
-  // ── Gaming / Controllers ──
   "mci:gamepad-variant", "mci:gamepad-variant-outline",
   "mci:controller-classic", "mci:controller-classic-outline",
   "mci:joystick",
-
-  // ── Custom PC hardware icons (from SVG sprite) ──
   ...CUSTOM_ICON_NAMES.map(n => `si:${n}`),
 ];
 
@@ -131,7 +75,6 @@ export function defaultSensorIcon(key: string): string {
     if (/system|mb|motherboard/i.test(label)) return "mci:motherboard";
     return "mci:thermometer";
   }
-  // fans / pumps
   if (/pump/i.test(label)) return "mci:water-pump";
   if (/water|liquid|loop|coolant/i.test(label)) return "mci:water";
   if (/cpu/i.test(label)) return "mci:fan";
@@ -154,13 +97,13 @@ function tempColor(c: number): string {
   if (c >= 85) return "#FF4444";
   if (c >= 70) return "#FF8C00";
   if (c >= 50) return "#FBBF24";
-  return "#34D399";
+  return C.success;
 }
 
 function rpmColor(rpm: number): string {
   if (rpm >= 2000) return "#FF4444";
   if (rpm >= 1000) return "#FBBF24";
-  return "#34D399";
+  return C.success;
 }
 
 function chunk<T>(arr: T[], n: number): T[][] {
@@ -197,7 +140,6 @@ export function ThermalsCard({ temps, fans, titleEdit, cardEdit }: Props) {
 
   const hidden: Set<string> = (() => {
     if (cardEdit?.hiddenFields !== undefined) return new Set(cardEdit.hiddenFields);
-    // Default: hide all temperature sensors; show all fans
     const d = new Set<string>();
     for (const k of tempMap.keys()) d.add(k);
     return d;
@@ -246,15 +188,15 @@ export function ThermalsCard({ temps, fans, titleEdit, cardEdit }: Props) {
                 : getLabel(key, fan!.label);
 
               const valueText = isTemp
-                ? `${Math.round(sensor!.value)}°C`
+                ? `${Math.round(sensor!.value)}°`
                 : `${fan!.rpm}`;
 
               const color = isTemp ? tempColor(sensor!.value) : rpmColor(fan!.rpm);
               const icon = getIcon(key);
 
               return (
-                <View key={key} style={styles.tile}>
-                  <View style={styles.tileIcon}>{renderSensorIcon(icon, 22, C.textMuted)}</View>
+                <View key={key} style={[styles.tile, { borderLeftColor: color + "55" }]}>
+                  <View style={styles.tileIcon}>{renderSensorIcon(icon, 20, C.textMuted)}</View>
                   <Text style={styles.tileLabel} numberOfLines={1}>
                     {label.toUpperCase()}
                   </Text>
@@ -276,51 +218,53 @@ export function ThermalsCard({ temps, fans, titleEdit, cardEdit }: Props) {
 
 const styles = StyleSheet.create({
   grid: {
-    gap: 8,
+    gap: 6,
   },
   row: {
     flexDirection: "row",
-    gap: 8,
+    gap: 6,
   },
   tile: {
     flex: 1,
     backgroundColor: C.backgroundSecondary,
-    borderRadius: 4,
+    borderRadius: 2,
     borderWidth: 1,
     borderColor: C.cardBorder,
+    borderLeftWidth: 2,
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 16,
-    paddingHorizontal: 6,
+    paddingVertical: 14,
+    paddingHorizontal: 4,
     minWidth: 0,
   },
   tilePlaceholder: {
     flex: 1,
   },
   tileIcon: {
-    marginBottom: 6,
-    opacity: 0.55,
+    marginBottom: 5,
+    opacity: 0.5,
   },
   tileLabel: {
-    fontSize: 9,
+    fontSize: 8,
     fontWeight: "700",
     color: C.textMuted,
-    letterSpacing: 1.1,
-    marginBottom: 4,
+    letterSpacing: 1.2,
+    marginBottom: 3,
     textAlign: "center",
   },
   tileValue: {
     fontSize: 22,
-    fontWeight: "700",
+    fontWeight: "800",
     textAlign: "center",
     lineHeight: 26,
+    fontVariant: ["tabular-nums"],
   },
   tileUnit: {
-    fontSize: 9,
+    fontSize: 8,
     fontWeight: "700",
-    letterSpacing: 0.8,
+    letterSpacing: 1,
     marginTop: 1,
-    opacity: 0.75,
+    opacity: 0.7,
   },
   empty: {
     fontSize: 12,

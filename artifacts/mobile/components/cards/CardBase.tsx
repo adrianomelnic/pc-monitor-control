@@ -1,6 +1,6 @@
 import { Feather } from "@expo/vector-icons";
 import React, { useRef } from "react";
-import { Pressable, StyleSheet, Text, TextInput, View, ViewStyle } from "react-native";
+import { Platform, Pressable, StyleSheet, Text, TextInput, View, ViewStyle } from "react-native";
 import Colors from "@/constants/colors";
 
 const C = Colors.light;
@@ -19,19 +19,17 @@ export function TempBadge({ value }: TempBadgeProps) {
       ? "#FFB800"
       : C.success;
   return (
-    <View style={[styles.tempBadge, { backgroundColor: color + "22", borderColor: color + "55" }]}>
+    <View style={[styles.tempBadge, { backgroundColor: color + "18", borderColor: color + "44" }]}>
       <Text style={[styles.tempText, { color }]}>{Math.round(value)}°C</Text>
     </View>
   );
 }
 
-/** Extra sensor row data for built-in cards (resolved from HWiNFO64 sensors) */
 export interface ExtraSensorRow {
   label: string;
   value: string;
 }
 
-/** Config for built-in card sensor/field editing (passed alongside titleEdit) */
 export interface BuiltinCardEdit {
   hiddenFields?: string[];
   fieldOrder?: string[];
@@ -42,14 +40,12 @@ export interface BuiltinCardEdit {
   editPanel?: React.ReactNode;
 }
 
-/** Passed from [id].tsx into each built-in card to enable inline title editing */
 export interface CardTitleEditConfig {
   customTitle?: string;
   editable?: boolean;
   draft?: string;
   onChange?: (t: string) => void;
   onSubmit?: () => void;
-  /** Called when user taps the title text while in edit mode (activates keyboard) */
   onTitlePress?: () => void;
   rightAction?: React.ReactNode;
   borderStyle?: ViewStyle;
@@ -62,18 +58,14 @@ interface CardBaseProps {
   accentColor: string;
   temperature?: number | null;
   extraTemps?: { label: string; value: number }[];
-  /** Optional element shown in the header right slot (used when temperature is null) */
   rightAction?: React.ReactNode;
-  /** When true, the title renders as a TextInput for inline editing */
   titleEditable?: boolean;
   titleDraft?: string;
   onTitleChange?: (t: string) => void;
   onTitleSubmit?: () => void;
-  /** Tap handler on the title text — activates keyboard for renaming */
   onTitlePress?: () => void;
   children: React.ReactNode;
   style?: ViewStyle;
-  /** Edit panel node rendered at the very bottom of the card (in edit mode) */
   editPanel?: React.ReactNode;
 }
 
@@ -97,44 +89,47 @@ export function CardBase({
   const titleInputRef = useRef<TextInput>(null);
 
   return (
-    <View style={[styles.card, { borderTopColor: accentColor }, style]}>
-      <View style={styles.header}>
-        <View style={[styles.iconWrap, { backgroundColor: accentColor + "22" }]}>
-          <Feather name={icon} size={16} color={accentColor} />
+    <View style={[styles.card, style]}>
+      <View style={[styles.accentBar, { backgroundColor: accentColor }]} />
+      <View style={styles.cardInner}>
+        <View style={styles.header}>
+          <View style={[styles.iconWrap, { backgroundColor: accentColor + "18" }]}>
+            <Feather name={icon} size={15} color={accentColor} />
+          </View>
+          <View style={styles.titleBlock}>
+            {titleEditable ? (
+              <TextInput
+                ref={titleInputRef}
+                style={[styles.title, styles.titleInput, { borderBottomColor: accentColor }]}
+                value={titleDraft}
+                onChangeText={onTitleChange}
+                onSubmitEditing={onTitleSubmit}
+                autoCorrect={false}
+                returnKeyType="done"
+                selectTextOnFocus
+              />
+            ) : onTitlePress ? (
+              <Pressable onPress={onTitlePress} hitSlop={6}>
+                <View style={styles.titlePressable}>
+                  <Text style={styles.title} numberOfLines={1}>{title}</Text>
+                  <Feather name="edit-2" size={10} color={accentColor} style={styles.titleEditIcon} />
+                </View>
+              </Pressable>
+            ) : (
+              <Text style={styles.title} numberOfLines={1}>{title}</Text>
+            )}
+            {subtitle ? <Text style={styles.subtitle} numberOfLines={1}>{subtitle}</Text> : null}
+          </View>
+          <View style={styles.headerRight}>
+            {temperature != null && <TempBadge value={temperature} />}
+            {extraTemps?.map((t, i) => <TempBadge key={i} value={t.value} />)}
+            {rightAction}
+          </View>
         </View>
-        <View style={styles.titleBlock}>
-          {titleEditable ? (
-            <TextInput
-              ref={titleInputRef}
-              style={[styles.title, styles.titleInput, { borderBottomColor: accentColor }]}
-              value={titleDraft}
-              onChangeText={onTitleChange}
-              onSubmitEditing={onTitleSubmit}
-              autoCorrect={false}
-              returnKeyType="done"
-              selectTextOnFocus
-            />
-          ) : onTitlePress ? (
-            <Pressable onPress={onTitlePress} hitSlop={6}>
-              <View style={styles.titlePressable}>
-                <Text style={styles.title} numberOfLines={1}>{title}</Text>
-                <Feather name="edit-2" size={10} color={accentColor} style={styles.titleEditIcon} />
-              </View>
-            </Pressable>
-          ) : (
-            <Text style={styles.title} numberOfLines={1}>{title}</Text>
-          )}
-          {subtitle ? <Text style={styles.subtitle} numberOfLines={1}>{subtitle}</Text> : null}
-        </View>
-        <View style={styles.headerRight}>
-          {temperature != null && <TempBadge value={temperature} />}
-          {extraTemps?.map((t, i) => <TempBadge key={i} value={t.value} />)}
-          {rightAction}
-        </View>
+        <View style={[styles.divider, { backgroundColor: accentColor + "22" }]} />
+        {children}
+        {editPanel ?? null}
       </View>
-      <View style={styles.divider} />
-      {children}
-      {editPanel ?? null}
     </View>
   );
 }
@@ -179,10 +174,18 @@ export function MiniBar({
 const styles = StyleSheet.create({
   card: {
     backgroundColor: C.card,
-    borderRadius: 6,
+    borderRadius: 4,
     borderWidth: 1,
     borderColor: C.cardBorder,
-    borderTopWidth: 2,
+    flexDirection: "row",
+    overflow: "hidden",
+  },
+  accentBar: {
+    width: 3,
+    flexShrink: 0,
+  },
+  cardInner: {
+    flex: 1,
     padding: 14,
     gap: 10,
   },
@@ -192,9 +195,9 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   iconWrap: {
-    width: 32,
-    height: 32,
-    borderRadius: 6,
+    width: 30,
+    height: 30,
+    borderRadius: 4,
     alignItems: "center",
     justifyContent: "center",
     flexShrink: 0,
@@ -206,12 +209,14 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "700",
     color: C.text,
-    letterSpacing: 0.2,
+    letterSpacing: 0.6,
+    textTransform: "uppercase",
   },
   titleInput: {
     borderBottomWidth: 1.5,
     paddingVertical: 0,
     paddingHorizontal: 0,
+    textTransform: "none",
   },
   titlePressable: {
     flexDirection: "row",
@@ -227,23 +232,24 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   subtitle: {
-    fontSize: 11,
-    color: C.textSecondary,
+    fontSize: 10,
+    color: C.textMuted,
     marginTop: 1,
+    letterSpacing: 0.3,
   },
   tempBadge: {
-    borderRadius: 4,
+    borderRadius: 2,
     borderWidth: 1,
-    paddingHorizontal: 7,
-    paddingVertical: 3,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
   },
   tempText: {
-    fontSize: 12,
-    fontWeight: "700",
+    fontSize: 11,
+    fontWeight: "800",
+    fontVariant: ["tabular-nums"],
   },
   divider: {
     height: 1,
-    backgroundColor: C.cardBorder,
   },
   statRow: {
     flexDirection: "row",
@@ -251,23 +257,27 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   statLabel: {
-    fontSize: 12,
-    color: C.textSecondary,
-    fontWeight: "500",
+    fontSize: 11,
+    color: C.textMuted,
+    fontWeight: "600",
+    letterSpacing: 0.3,
+    textTransform: "uppercase",
   },
   statValue: {
     fontSize: 12,
     color: C.text,
     fontWeight: "700",
+    fontVariant: ["tabular-nums"],
+    letterSpacing: 0.2,
   },
   barTrack: {
-    backgroundColor: Colors.light.backgroundTertiary,
-    borderRadius: 2,
+    backgroundColor: C.backgroundTertiary,
+    borderRadius: 1,
     overflow: "hidden",
     width: "100%",
   },
   barFill: {
-    borderRadius: 2,
+    borderRadius: 1,
   },
   extraRows: {
     gap: 4,

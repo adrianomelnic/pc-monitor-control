@@ -11,7 +11,7 @@ const ACCENT = "#FF9100";
 function rpmColor(rpm: number) {
   if (rpm > 2500) return "#FF4444";
   if (rpm > 1500) return "#FFB800";
-  return "#00CC88";
+  return C.success;
 }
 
 function rpmBar(rpm: number, max = 3000) {
@@ -173,7 +173,7 @@ export function FansCard({ fans, baseUrl, apiKey, titleEdit, cardEdit }: Props) 
       return (
         <View key={key} style={styles.fanRow}>
           <View style={styles.fanLeft}>
-            <Feather name="wind" size={12} color={color} />
+            <View style={[styles.fanDot, { backgroundColor: color }]} />
             <Text style={styles.fanLabel} numberOfLines={1}>{fan.label}</Text>
           </View>
           <View style={styles.fanRight}>
@@ -267,11 +267,12 @@ const styles = StyleSheet.create({
   fanList: { gap: 10 },
   fanRow: { flexDirection: "row", alignItems: "center", gap: 10 },
   fanLeft: { flexDirection: "row", alignItems: "center", gap: 6, width: 110, flexShrink: 0 },
-  fanLabel: { fontSize: 12, color: C.textSecondary, fontWeight: "500", flex: 1 },
-  fanRight: { flex: 1, gap: 4 },
-  fanBarTrack: { height: 4, backgroundColor: C.backgroundTertiary, borderRadius: 2, overflow: "hidden" },
-  fanBarFill: { height: 4, borderRadius: 2 },
-  fanRpm: { fontSize: 11, fontWeight: "700" },
+  fanDot: { width: 4, height: 4, borderRadius: 2, flexShrink: 0 },
+  fanLabel: { fontSize: 11, color: C.textSecondary, fontWeight: "600", flex: 1, letterSpacing: 0.2 },
+  fanRight: { flex: 1, gap: 3 },
+  fanBarTrack: { height: 3, backgroundColor: C.backgroundTertiary, borderRadius: 1, overflow: "hidden" },
+  fanBarFill: { height: 3, borderRadius: 1 },
+  fanRpm: { fontSize: 11, fontWeight: "800", fontVariant: ["tabular-nums"], letterSpacing: 0.2 },
   emptyWrap: { gap: 8 },
   emptyRow: { flexDirection: "row", gap: 7, alignItems: "center" },
   emptyTitle: { fontSize: 13, fontWeight: "700", color: C.warning },
@@ -279,7 +280,7 @@ const styles = StyleSheet.create({
   emptyCode: { fontFamily: "Menlo, monospace", color: C.text, fontWeight: "600" },
   steps: { gap: 5, paddingLeft: 4 },
   stepRow: { flexDirection: "row", alignItems: "center", gap: 8 },
-  stepDot: { width: 5, height: 5, borderRadius: 3, backgroundColor: "#FF9100", flexShrink: 0 },
+  stepDot: { width: 4, height: 4, borderRadius: 2, backgroundColor: ACCENT, flexShrink: 0 },
   stepText: { fontSize: 12, color: C.textSecondary, lineHeight: 18 },
   diagWrap: { marginTop: 4, gap: 8 },
   diagBtn: {
@@ -287,26 +288,30 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 7,
     backgroundColor: C.backgroundTertiary,
-    borderRadius: 4,
+    borderRadius: 2,
     paddingHorizontal: 14,
     paddingVertical: 9,
     borderWidth: 1,
-    borderColor: ACCENT + "44",
+    borderColor: ACCENT + "33",
+    borderLeftWidth: 2,
+    borderLeftColor: ACCENT,
     alignSelf: "flex-start",
     minHeight: 36,
     minWidth: 200,
     justifyContent: "center",
   },
-  diagBtnText: { fontSize: 13, fontWeight: "600", color: ACCENT },
+  diagBtnText: { fontSize: 12, fontWeight: "700", color: ACCENT, letterSpacing: 0.3 },
   diagBox: {
     backgroundColor: C.backgroundTertiary,
-    borderRadius: 4,
+    borderRadius: 2,
     padding: 12,
     gap: 4,
-    borderLeftWidth: 3,
+    borderLeftWidth: 2,
     borderLeftColor: ACCENT,
+    borderWidth: 1,
+    borderColor: C.cardBorder,
   },
-  diagOk: { fontSize: 12, fontWeight: "700", color: "#00CC88", marginBottom: 4 },
+  diagOk: { fontSize: 12, fontWeight: "700", color: C.success, marginBottom: 4 },
   diagFail: { fontSize: 12, fontWeight: "700", color: "#FF4444", marginBottom: 4 },
   diagSection: { fontSize: 11, fontWeight: "700", color: C.textSecondary, marginTop: 6 },
   diagRow: { fontSize: 11, color: C.text, fontFamily: "Menlo, monospace" },

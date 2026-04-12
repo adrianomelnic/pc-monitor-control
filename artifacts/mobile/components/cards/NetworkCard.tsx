@@ -51,7 +51,6 @@ interface Props {
 export function NetworkCard({ interfaces, titleEdit, cardEdit }: Props) {
   const hidden = new Set(cardEdit?.hiddenFields ?? []);
   const allUp = interfaces.filter((i) => i.isUp);
-  // Default: show only physical interfaces. If the user has saved a custom order, respect it.
   const physicalUp = allUp.filter((i) => !isVirtualIface(i.name));
   const order = cardEdit?.fieldOrder ?? physicalUp.map((i) => i.name);
   const extraMap = cardEdit?.extraSensorMap ?? {};
@@ -68,7 +67,7 @@ export function NetworkCard({ interfaces, titleEdit, cardEdit }: Props) {
         <View key={key} style={[styles.ifaceItem, idx > 0 && styles.ifaceDivider]}>
           <View style={styles.ifaceHeader}>
             <View style={styles.nameBadge}>
-              <Feather name="wifi" size={11} color={ACCENT} />
+              <Feather name="wifi" size={10} color={ACCENT} />
               <Text style={styles.ifaceName} numberOfLines={1}>{iface.name}</Text>
             </View>
             {iface.speedMax ? (
@@ -78,17 +77,17 @@ export function NetworkCard({ interfaces, titleEdit, cardEdit }: Props) {
             ) : null}
           </View>
           <View style={styles.speedRow}>
-            <View style={[styles.speedBox, { borderColor: UP_COLOR + "33" }]}>
+            <View style={[styles.speedBox, { borderLeftColor: UP_COLOR }]}>
               <View style={styles.speedLabel}>
-                <Feather name="arrow-up" size={11} color={UP_COLOR} />
-                <Text style={styles.speedLabelText}>Upload</Text>
+                <Feather name="arrow-up" size={10} color={UP_COLOR} />
+                <Text style={styles.speedLabelText}>UPLOAD</Text>
               </View>
               <Text style={[styles.speedVal, { color: UP_COLOR }]}>{fmtSpeed(iface.speedUp)}</Text>
             </View>
-            <View style={[styles.speedBox, { borderColor: DOWN_COLOR + "33" }]}>
+            <View style={[styles.speedBox, { borderLeftColor: DOWN_COLOR }]}>
               <View style={styles.speedLabel}>
-                <Feather name="arrow-down" size={11} color={DOWN_COLOR} />
-                <Text style={styles.speedLabelText}>Download</Text>
+                <Feather name="arrow-down" size={10} color={DOWN_COLOR} />
+                <Text style={styles.speedLabelText}>DOWNLOAD</Text>
               </View>
               <Text style={[styles.speedVal, { color: DOWN_COLOR }]}>{fmtSpeed(iface.speedDown)}</Text>
             </View>
@@ -103,7 +102,7 @@ export function NetworkCard({ interfaces, titleEdit, cardEdit }: Props) {
             <Text style={styles.totalItem}>
               <Text style={{ color: DOWN_COLOR }}>↓ </Text>
               <Text style={styles.totalVal}>{fmtTotal(iface.totalRecv)}</Text>
-              <Text style={styles.totalLabel}> received</Text>
+              <Text style={styles.totalLabel}> recv</Text>
             </Text>
           </View>
         </View>
@@ -151,18 +150,37 @@ const styles = StyleSheet.create({
   ifaceItem: { gap: 8, paddingVertical: 4 },
   ifaceDivider: { borderTopWidth: 1, borderTopColor: C.cardBorder, marginTop: 4, paddingTop: 12 },
   ifaceHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  nameBadge: { flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: ACCENT + "15", borderRadius: 4, paddingHorizontal: 8, paddingVertical: 4 },
-  ifaceName: { fontSize: 12, fontWeight: "700", color: ACCENT, maxWidth: 180 },
-  linkSpeed: { fontSize: 11, color: C.textMuted, fontWeight: "600" },
-  speedRow: { flexDirection: "row", gap: 8 },
-  speedBox: { flex: 1, backgroundColor: C.backgroundSecondary, borderRadius: 4, borderWidth: 1, padding: 10, gap: 4 },
+  nameBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    backgroundColor: ACCENT + "12",
+    borderRadius: 2,
+    borderWidth: 1,
+    borderColor: ACCENT + "22",
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+  },
+  ifaceName: { fontSize: 11, fontWeight: "800", color: ACCENT, maxWidth: 180, letterSpacing: 0.3 },
+  linkSpeed: { fontSize: 10, color: C.textMuted, fontWeight: "700", letterSpacing: 0.3 },
+  speedRow: { flexDirection: "row", gap: 6 },
+  speedBox: {
+    flex: 1,
+    backgroundColor: C.backgroundSecondary,
+    borderRadius: 2,
+    borderWidth: 1,
+    borderColor: C.cardBorder,
+    borderLeftWidth: 2,
+    padding: 10,
+    gap: 4,
+  },
   speedLabel: { flexDirection: "row", alignItems: "center", gap: 4 },
-  speedLabelText: { fontSize: 10, color: C.textMuted, fontWeight: "600", letterSpacing: 0.3 },
-  speedVal: { fontSize: 16, fontWeight: "800", letterSpacing: -0.3 },
+  speedLabelText: { fontSize: 9, color: C.textMuted, fontWeight: "700", letterSpacing: 1 },
+  speedVal: { fontSize: 16, fontWeight: "800", letterSpacing: -0.3, fontVariant: ["tabular-nums"] },
   totalsRow: { flexDirection: "row", alignItems: "center", gap: 6 },
-  totalItem: { fontSize: 11 },
-  totalVal: { fontSize: 11, color: C.text, fontWeight: "700" },
-  totalLabel: { fontSize: 11, color: C.textMuted },
-  totalDot: { fontSize: 11, color: C.textMuted },
+  totalItem: { fontSize: 10 },
+  totalVal: { fontSize: 10, color: C.text, fontWeight: "700", fontVariant: ["tabular-nums"] },
+  totalLabel: { fontSize: 10, color: C.textMuted },
+  totalDot: { fontSize: 10, color: C.textMuted },
   empty: { fontSize: 12, color: C.textMuted, textAlign: "center", paddingVertical: 8 },
 });

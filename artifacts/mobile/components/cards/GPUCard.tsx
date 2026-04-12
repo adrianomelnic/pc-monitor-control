@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Platform, StyleSheet, Text, View } from "react-native";
 import Colors from "@/constants/colors";
 import { GPUInfo } from "@/context/PcsContext";
 import { BuiltinCardEdit, CardBase, CardTitleEditConfig, MiniBar, StatRow } from "./CardBase";
@@ -66,26 +66,25 @@ export function GPUCard({ gpus, titleEdit, cardEdit }: Props) {
         const rightFields = visibleOrder.filter(k => k !== "usage" && k !== "vram");
 
         function renderRightField(key: string): React.ReactNode {
-          // If a sensor source override exists for this built-in field, use it
           if (extraMap[key] !== undefined && key !== "vram") {
             return <StatRow key={key} label={getLabel(key, key)} value={extraMap[key]} />;
           }
           switch (key) {
             case "voltage":
-              return <StatRow key={key} label={getLabel("voltage", "GPU voltage")} value={gpu.voltage != null ? `${gpu.voltage.toFixed(3)} V` : "—"} color={ACCENT} />;
+              return <StatRow key={key} label={getLabel("voltage", "Voltage")} value={gpu.voltage != null ? `${gpu.voltage.toFixed(3)} V` : "—"} color={ACCENT} />;
             case "wattage":
-              return <StatRow key={key} label={getLabel("wattage", "GPU power")} value={gpu.power != null ? `${Math.round(gpu.power)} W` : "—"} />;
+              return <StatRow key={key} label={getLabel("wattage", "Power")} value={gpu.power != null ? `${Math.round(gpu.power)} W` : "—"} />;
             case "vramRow":
               return (
-                <StatRow key={key} label={getLabel("vramRow", "VRAM used")} value={`${fmtMB(gpu.vramUsed)} / ${fmtMB(gpu.vramTotal)}`} color={ACCENT} />
+                <StatRow key={key} label={getLabel("vramRow", "VRAM")} value={`${fmtMB(gpu.vramUsed)} / ${fmtMB(gpu.vramTotal)}`} color={ACCENT} />
               );
             case "clockGpu":
               return gpu.clockGpu != null ? (
-                <StatRow key={key} label={getLabel("clockGpu", "GPU clock")} value={`${gpu.clockGpu} MHz`} />
+                <StatRow key={key} label={getLabel("clockGpu", "GPU Clock")} value={`${gpu.clockGpu} MHz`} />
               ) : null;
             case "clockMem":
               return gpu.clockMem != null ? (
-                <StatRow key={key} label={getLabel("clockMem", "Mem clock")} value={`${gpu.clockMem} MHz`} />
+                <StatRow key={key} label={getLabel("clockMem", "Mem Clock")} value={`${gpu.clockMem} MHz`} />
               ) : null;
             default: {
               const val = extraMap[key];
@@ -115,8 +114,10 @@ export function GPUCard({ gpus, titleEdit, cardEdit }: Props) {
             {showHero ? (
               <View style={styles.heroRow}>
                 <View style={styles.heroLeft}>
-                  <Text style={[styles.bigNum, { color: ACCENT }]}>{Math.round(gpu.usage!)}%</Text>
-                  <Text style={styles.bigLabel}>{getLabel("usage", "GPU Load")}</Text>
+                  <Text style={[styles.bigNum, { color: ACCENT }]}>{Math.round(gpu.usage!)}
+                    <Text style={styles.bigUnit}>%</Text>
+                  </Text>
+                  <Text style={styles.bigLabel}>{getLabel("usage", "GPU LOAD")}</Text>
                 </View>
                 <View style={styles.heroRight}>
                   {rightFields.map(key => renderRightField(key))}
@@ -135,7 +136,7 @@ export function GPUCard({ gpus, titleEdit, cardEdit }: Props) {
                     {fmtMB(gpu.vramUsed)} / {fmtMB(gpu.vramTotal)}
                   </Text>
                 </View>
-                <MiniBar value={vramPct!} color={ACCENT} height={6} />
+                <MiniBar value={vramPct!} color={ACCENT} height={5} />
               </View>
             )}
           </CardBase>
@@ -148,35 +149,43 @@ export function GPUCard({ gpus, titleEdit, cardEdit }: Props) {
 const styles = StyleSheet.create({
   heroRow: {
     flexDirection: "row",
-    gap: 12,
+    gap: 14,
     alignItems: "flex-start",
   },
   heroLeft: {
     alignItems: "center",
     justifyContent: "flex-start",
-    minWidth: 54,
-    paddingTop: 2,
+    minWidth: 60,
+    paddingTop: 0,
   },
   heroRight: {
     flex: 1,
-    gap: 5,
+    gap: 6,
   },
   bigNum: {
-    fontSize: 28,
+    fontSize: 32,
     fontWeight: "800",
-    letterSpacing: -1,
+    letterSpacing: -1.5,
+    fontVariant: ["tabular-nums"],
+    lineHeight: 36,
+  },
+  bigUnit: {
+    fontSize: 16,
+    fontWeight: "600",
   },
   bigLabel: {
-    fontSize: 11,
-    color: C.textSecondary,
-    fontWeight: "600",
-    marginTop: 1,
+    fontSize: 9,
+    color: C.textMuted,
+    fontWeight: "700",
+    marginTop: 2,
+    letterSpacing: 1.5,
   },
   fieldList: {
-    gap: 5,
+    gap: 6,
   },
   barSection: {
     gap: 4,
+    marginTop: 2,
   },
   barHeader: {
     flexDirection: "row",
@@ -187,16 +196,17 @@ const styles = StyleSheet.create({
     fontSize: 9,
     fontWeight: "700",
     color: C.textMuted,
-    letterSpacing: 1.2,
+    letterSpacing: 1.5,
   },
   barPct: {
     fontSize: 11,
     fontWeight: "700",
   },
   barCaption: {
-    fontSize: 11,
+    fontSize: 10,
     color: C.textSecondary,
     fontWeight: "600",
+    fontVariant: ["tabular-nums"],
   },
   empty: {
     fontSize: 12,

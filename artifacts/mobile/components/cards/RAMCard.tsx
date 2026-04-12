@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Platform, StyleSheet, Text, View } from "react-native";
 import Colors from "@/constants/colors";
 import { RAMInfo } from "@/context/PcsContext";
 import { BuiltinCardEdit, CardBase, CardTitleEditConfig, MiniBar, StatRow } from "./CardBase";
@@ -38,7 +38,6 @@ export function RAMCard({ ram, titleEdit, cardEdit }: Props) {
   const showSwap = !hidden.has("swap") && ram.swapTotal > 0;
 
   function renderRightField(key: string): React.ReactNode {
-    // If a sensor source override exists for this field, use it
     if (extraMap[key] !== undefined) {
       return <StatRow key={key} label={getLabel(key, key)} value={extraMap[key]} />;
     }
@@ -46,7 +45,7 @@ export function RAMCard({ ram, titleEdit, cardEdit }: Props) {
       case "used":
         return <StatRow key={key} label={getLabel("used", "Used")} value={fmtMB(ram.used)} color={ACCENT} />;
       case "available":
-        return <StatRow key={key} label={getLabel("available", "Available")} value={fmtMB(ram.available)} color="#00CC88" />;
+        return <StatRow key={key} label={getLabel("available", "Free")} value={fmtMB(ram.available)} color={C.success} />;
       case "total":
         return <StatRow key={key} label={getLabel("total", "Total")} value={fmtMB(ram.total)} />;
       default: {
@@ -75,8 +74,10 @@ export function RAMCard({ ram, titleEdit, cardEdit }: Props) {
       {showHero ? (
         <View style={styles.heroRow}>
           <View style={styles.heroLeft}>
-            <Text style={[styles.bigNum, { color: usedColor }]}>{Math.round(ram.percent)}%</Text>
-            <Text style={styles.bigLabel}>{getLabel("usage", "In use")}</Text>
+            <Text style={[styles.bigNum, { color: usedColor }]}>{Math.round(ram.percent)}
+              <Text style={styles.bigUnit}>%</Text>
+            </Text>
+            <Text style={styles.bigLabel}>{getLabel("usage", "IN USE")}</Text>
           </View>
           <View style={styles.heroRight}>
             {rightFields.map(key => renderRightField(key))}
@@ -96,7 +97,7 @@ export function RAMCard({ ram, titleEdit, cardEdit }: Props) {
                 <Text style={styles.sectionLabel}>RAM</Text>
                 <Text style={styles.barCaption}>{fmtMB(ram.used)} / {fmtMB(ram.total)}</Text>
               </View>
-              <MiniBar value={ram.percent} color={ACCENT} height={6} />
+              <MiniBar value={ram.percent} color={ACCENT} height={5} />
             </View>
           )}
           {showSwap && (
@@ -105,7 +106,7 @@ export function RAMCard({ ram, titleEdit, cardEdit }: Props) {
                 <Text style={styles.sectionLabel}>SWAP / PAGE FILE</Text>
                 <Text style={styles.barCaption}>{fmtMB(ram.swapUsed)} / {fmtMB(ram.swapTotal)}</Text>
               </View>
-              <MiniBar value={swapPct} color={SWAP_COLOR} height={5} />
+              <MiniBar value={swapPct} color={SWAP_COLOR} height={4} />
             </View>
           )}
         </View>
@@ -117,35 +118,42 @@ export function RAMCard({ ram, titleEdit, cardEdit }: Props) {
 const styles = StyleSheet.create({
   heroRow: {
     flexDirection: "row",
-    gap: 12,
+    gap: 14,
     alignItems: "flex-start",
   },
   heroLeft: {
     alignItems: "center",
     justifyContent: "flex-start",
-    minWidth: 54,
-    paddingTop: 2,
+    minWidth: 60,
+    paddingTop: 0,
   },
   heroRight: {
     flex: 1,
-    gap: 5,
+    gap: 6,
   },
   bigNum: {
-    fontSize: 28,
+    fontSize: 32,
     fontWeight: "800",
-    letterSpacing: -1,
+    letterSpacing: -1.5,
+    fontVariant: ["tabular-nums"],
+    lineHeight: 36,
+  },
+  bigUnit: {
+    fontSize: 16,
+    fontWeight: "600",
   },
   bigLabel: {
-    fontSize: 11,
-    color: C.textSecondary,
-    fontWeight: "600",
-    marginTop: 1,
+    fontSize: 9,
+    color: C.textMuted,
+    fontWeight: "700",
+    marginTop: 2,
+    letterSpacing: 1.5,
   },
   fieldList: {
-    gap: 5,
+    gap: 6,
   },
   barsSection: {
-    marginTop: 6,
+    marginTop: 4,
     gap: 8,
   },
   barRow: {
@@ -160,11 +168,12 @@ const styles = StyleSheet.create({
     fontSize: 9,
     fontWeight: "700",
     color: C.textMuted,
-    letterSpacing: 1.2,
+    letterSpacing: 1.5,
   },
   barCaption: {
-    fontSize: 11,
+    fontSize: 10,
     color: C.textSecondary,
     fontWeight: "600",
+    fontVariant: ["tabular-nums"],
   },
 });

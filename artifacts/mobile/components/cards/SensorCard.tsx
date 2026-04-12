@@ -945,8 +945,10 @@ const styles = StyleSheet.create({
   tile: {
     flex: 1,
     backgroundColor: C.backgroundSecondary,
-    borderRadius: 4,
+    borderRadius: 2,
     borderWidth: 1,
+    borderColor: C.cardBorder,
+    borderLeftWidth: 2,
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: 14,
