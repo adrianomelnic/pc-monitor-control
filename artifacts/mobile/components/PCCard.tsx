@@ -109,7 +109,7 @@ export function PCCard({ pc }: PCCardProps) {
       ? { borderLeftWidth: theme.accentThickness, borderLeftColor: C.tint }
       : { borderTopWidth: theme.accentThickness, borderTopColor: C.tint };
 
-  const cpuRingColor = theme.name === "rog" ? "#FF1744" : C.tint;
+  const cpuRingColor = theme.id === "rog" ? "#FF1744" : C.tint;
 
   return (
     <>

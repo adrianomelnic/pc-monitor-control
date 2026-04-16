@@ -1,6 +1,17 @@
 import type { TextStyle } from "react-native";
 
-export type ThemeName = "rog" | "classic";
+export type ThemeId =
+  | "rog"
+  | "classic"
+  | "cyberpunk"
+  | "matrix"
+  | "ocean"
+  | "sunset"
+  | "nord"
+  | "minimal";
+
+export type ThemeMode = "light" | "dark" | "auto";
+export type ResolvedMode = "light" | "dark";
 
 export interface ThemeColors {
   text: string;
@@ -34,10 +45,7 @@ export interface CardAccents {
   sensor: string;
 }
 
-export interface Theme {
-  name: ThemeName;
-  colors: ThemeColors;
-  cardAccents: CardAccents;
+export interface ThemeShape {
   cardRadius: number;
   buttonRadius: number;
   innerRadius: number;
@@ -50,38 +58,29 @@ export interface Theme {
   tabularNumbers: boolean;
 }
 
-export const ROG_THEME: Theme = {
-  name: "rog",
-  colors: {
-    text: "#FFFFFF",
-    textSecondary: "#8A8A8A",
-    textMuted: "#555555",
-    background: "#0A0A0A",
-    backgroundSecondary: "#111111",
-    backgroundTertiary: "#1C1C1C",
-    card: "#141414",
-    cardBorder: "#252525",
-    tint: "#FF1744",
-    tintDark: "#D50000",
-    tabIconDefault: "#505050",
-    tabIconSelected: "#FF1744",
-    danger: "#FF4444",
-    warning: "#FFB800",
-    success: "#69F0AE",
-    online: "#69F0AE",
-    offline: "#FF5252",
-    idle: "#FFB300",
-  },
-  cardAccents: {
-    cpu: "#FF1744",
-    gpu: "#FF6D00",
-    ram: "#448AFF",
-    thermals: "#FF3D00",
-    fans: "#FF9100",
-    disks: "#00BFA5",
-    network: "#40C4FF",
-    sensor: "#9D50FF",
-  },
+export interface Theme extends ThemeShape {
+  id: ThemeId;
+  mode: ResolvedMode;
+  colors: ThemeColors;
+  cardAccents: CardAccents;
+}
+
+export interface ThemeVariant {
+  colors: ThemeColors;
+  cardAccents: CardAccents;
+}
+
+export interface ThemeDef {
+  id: ThemeId;
+  label: string;
+  description: string;
+  shape: ThemeShape;
+  dark: ThemeVariant;
+  light?: ThemeVariant;
+}
+
+// ─── Shape token presets ─────────────────────────────────────────────────────
+const SHAPE_TACTICAL: ThemeShape = {
   cardRadius: 4,
   buttonRadius: 4,
   innerRadius: 2,
@@ -94,38 +93,7 @@ export const ROG_THEME: Theme = {
   tabularNumbers: true,
 };
 
-export const CLASSIC_THEME: Theme = {
-  name: "classic",
-  colors: {
-    text: "#FFFFFF",
-    textSecondary: "#8FA3B8",
-    textMuted: "#556B85",
-    background: "#0A0F1E",
-    backgroundSecondary: "#121829",
-    backgroundTertiary: "#1A2236",
-    card: "#121829",
-    cardBorder: "#1F2A42",
-    tint: "#00D4FF",
-    tintDark: "#0288A8",
-    tabIconDefault: "#556B85",
-    tabIconSelected: "#00D4FF",
-    danger: "#FF6B6B",
-    warning: "#FFC857",
-    success: "#5BD9A6",
-    online: "#5BD9A6",
-    offline: "#FF6B6B",
-    idle: "#FFC857",
-  },
-  cardAccents: {
-    cpu: "#00D4FF",
-    gpu: "#FF8A65",
-    ram: "#7DA9FF",
-    thermals: "#FF7A7A",
-    fans: "#FFC857",
-    disks: "#5BD9A6",
-    network: "#82E0FF",
-    sensor: "#B388FF",
-  },
+const SHAPE_SOFT: ThemeShape = {
   cardRadius: 6,
   buttonRadius: 6,
   innerRadius: 4,
@@ -138,9 +106,547 @@ export const CLASSIC_THEME: Theme = {
   tabularNumbers: false,
 };
 
-export const THEMES: Record<ThemeName, Theme> = {
-  rog: ROG_THEME,
-  classic: CLASSIC_THEME,
+const SHAPE_ROUNDED: ThemeShape = {
+  cardRadius: 10,
+  buttonRadius: 8,
+  innerRadius: 6,
+  accentEdge: "top",
+  accentThickness: 2,
+  titleCase: "sentence",
+  titleLetterSpacing: 0,
+  titleFontSize: 14,
+  sectionLabelLetterSpacing: 0.3,
+  tabularNumbers: false,
+};
+
+// ─── Theme definitions ───────────────────────────────────────────────────────
+
+const ROG: ThemeDef = {
+  id: "rog",
+  label: "ROG",
+  description: "Red accents · sharp edges",
+  shape: SHAPE_TACTICAL,
+  dark: {
+    colors: {
+      text: "#FFFFFF",
+      textSecondary: "#8A8A8A",
+      textMuted: "#555555",
+      background: "#0A0A0A",
+      backgroundSecondary: "#111111",
+      backgroundTertiary: "#1C1C1C",
+      card: "#141414",
+      cardBorder: "#252525",
+      tint: "#FF1744",
+      tintDark: "#D50000",
+      tabIconDefault: "#505050",
+      tabIconSelected: "#FF1744",
+      danger: "#FF4444",
+      warning: "#FFB800",
+      success: "#69F0AE",
+      online: "#69F0AE",
+      offline: "#FF5252",
+      idle: "#FFB300",
+    },
+    cardAccents: {
+      cpu: "#FF1744",
+      gpu: "#FF6D00",
+      ram: "#448AFF",
+      thermals: "#FF3D00",
+      fans: "#FF9100",
+      disks: "#00BFA5",
+      network: "#40C4FF",
+      sensor: "#9D50FF",
+    },
+  },
+};
+
+const CLASSIC: ThemeDef = {
+  id: "classic",
+  label: "Classic",
+  description: "Cyan accents · softer edges",
+  shape: SHAPE_SOFT,
+  dark: {
+    colors: {
+      text: "#FFFFFF",
+      textSecondary: "#8FA3B8",
+      textMuted: "#556B85",
+      background: "#0A0F1E",
+      backgroundSecondary: "#121829",
+      backgroundTertiary: "#1A2236",
+      card: "#121829",
+      cardBorder: "#1F2A42",
+      tint: "#00D4FF",
+      tintDark: "#0288A8",
+      tabIconDefault: "#556B85",
+      tabIconSelected: "#00D4FF",
+      danger: "#FF6B6B",
+      warning: "#FFC857",
+      success: "#5BD9A6",
+      online: "#5BD9A6",
+      offline: "#FF6B6B",
+      idle: "#FFC857",
+    },
+    cardAccents: {
+      cpu: "#00D4FF",
+      gpu: "#FF8A65",
+      ram: "#7DA9FF",
+      thermals: "#FF7A7A",
+      fans: "#FFC857",
+      disks: "#5BD9A6",
+      network: "#82E0FF",
+      sensor: "#B388FF",
+    },
+  },
+  light: {
+    colors: {
+      text: "#0A1929",
+      textSecondary: "#4A5E78",
+      textMuted: "#8296B0",
+      background: "#F3F7FC",
+      backgroundSecondary: "#E8EEF7",
+      backgroundTertiary: "#DCE5F1",
+      card: "#FFFFFF",
+      cardBorder: "#D4DCE8",
+      tint: "#0091C2",
+      tintDark: "#006F94",
+      tabIconDefault: "#8296B0",
+      tabIconSelected: "#0091C2",
+      danger: "#E23B3B",
+      warning: "#CC8500",
+      success: "#1FA371",
+      online: "#1FA371",
+      offline: "#E23B3B",
+      idle: "#CC8500",
+    },
+    cardAccents: {
+      cpu: "#0091C2",
+      gpu: "#E8582B",
+      ram: "#3E6FD6",
+      thermals: "#E23B3B",
+      fans: "#CC8500",
+      disks: "#1FA371",
+      network: "#2FA4D4",
+      sensor: "#7A4EE0",
+    },
+  },
+};
+
+const CYBERPUNK: ThemeDef = {
+  id: "cyberpunk",
+  label: "Cyberpunk",
+  description: "Neon magenta · electric cyan",
+  shape: SHAPE_TACTICAL,
+  dark: {
+    colors: {
+      text: "#FFFFFF",
+      textSecondary: "#A88AB8",
+      textMuted: "#6A4D7A",
+      background: "#0A0014",
+      backgroundSecondary: "#130020",
+      backgroundTertiary: "#1C0030",
+      card: "#15001F",
+      cardBorder: "#3B0A55",
+      tint: "#FF00C8",
+      tintDark: "#B80091",
+      tabIconDefault: "#6A4D7A",
+      tabIconSelected: "#FF00C8",
+      danger: "#FF2266",
+      warning: "#FFD000",
+      success: "#00FFB2",
+      online: "#00FFB2",
+      offline: "#FF2266",
+      idle: "#FFD000",
+    },
+    cardAccents: {
+      cpu: "#FF00C8",
+      gpu: "#00F0FF",
+      ram: "#B14AFF",
+      thermals: "#FF2266",
+      fans: "#FFD000",
+      disks: "#00FFB2",
+      network: "#00F0FF",
+      sensor: "#FFA500",
+    },
+  },
+};
+
+const MATRIX: ThemeDef = {
+  id: "matrix",
+  label: "Matrix",
+  description: "Phosphor green on black",
+  shape: SHAPE_TACTICAL,
+  dark: {
+    colors: {
+      text: "#B8FFC8",
+      textSecondary: "#4CAE63",
+      textMuted: "#2A6A39",
+      background: "#000000",
+      backgroundSecondary: "#040A06",
+      backgroundTertiary: "#081710",
+      card: "#05100A",
+      cardBorder: "#133A22",
+      tint: "#00FF66",
+      tintDark: "#00B347",
+      tabIconDefault: "#2A6A39",
+      tabIconSelected: "#00FF66",
+      danger: "#FF4466",
+      warning: "#D4FF00",
+      success: "#00FF66",
+      online: "#00FF66",
+      offline: "#FF4466",
+      idle: "#D4FF00",
+    },
+    cardAccents: {
+      cpu: "#00FF66",
+      gpu: "#66FF00",
+      ram: "#00FFAA",
+      thermals: "#FF4466",
+      fans: "#D4FF00",
+      disks: "#00FFAA",
+      network: "#00FFD4",
+      sensor: "#B8FFC8",
+    },
+  },
+};
+
+const OCEAN: ThemeDef = {
+  id: "ocean",
+  label: "Ocean",
+  description: "Deep teal · calm blues",
+  shape: SHAPE_ROUNDED,
+  dark: {
+    colors: {
+      text: "#E6F4F6",
+      textSecondary: "#7FA8B4",
+      textMuted: "#4A6E78",
+      background: "#061820",
+      backgroundSecondary: "#0A2330",
+      backgroundTertiary: "#0F3040",
+      card: "#0C2A38",
+      cardBorder: "#1A4456",
+      tint: "#00BFA5",
+      tintDark: "#008572",
+      tabIconDefault: "#4A6E78",
+      tabIconSelected: "#00BFA5",
+      danger: "#FF6B6B",
+      warning: "#FFB74D",
+      success: "#4DD0B0",
+      online: "#4DD0B0",
+      offline: "#FF6B6B",
+      idle: "#FFB74D",
+    },
+    cardAccents: {
+      cpu: "#00BFA5",
+      gpu: "#4FC3F7",
+      ram: "#5C9CD8",
+      thermals: "#FF8A65",
+      fans: "#FFB74D",
+      disks: "#4DD0B0",
+      network: "#4FC3F7",
+      sensor: "#AB8AFF",
+    },
+  },
+  light: {
+    colors: {
+      text: "#0A2230",
+      textSecondary: "#456774",
+      textMuted: "#7C9AA5",
+      background: "#F0F7F9",
+      backgroundSecondary: "#E2EEF2",
+      backgroundTertiary: "#D3E4EA",
+      card: "#FFFFFF",
+      cardBorder: "#CFDEE3",
+      tint: "#00897B",
+      tintDark: "#00665B",
+      tabIconDefault: "#7C9AA5",
+      tabIconSelected: "#00897B",
+      danger: "#D84545",
+      warning: "#D68400",
+      success: "#2E9E7E",
+      online: "#2E9E7E",
+      offline: "#D84545",
+      idle: "#D68400",
+    },
+    cardAccents: {
+      cpu: "#00897B",
+      gpu: "#0288D1",
+      ram: "#3F6FC7",
+      thermals: "#E6603E",
+      fans: "#D68400",
+      disks: "#2E9E7E",
+      network: "#0288D1",
+      sensor: "#6A4FE0",
+    },
+  },
+};
+
+const SUNSET: ThemeDef = {
+  id: "sunset",
+  label: "Sunset",
+  description: "Warm orange · pink glow",
+  shape: SHAPE_ROUNDED,
+  dark: {
+    colors: {
+      text: "#FFF3EA",
+      textSecondary: "#C5A28C",
+      textMuted: "#7A5E4A",
+      background: "#1A0D12",
+      backgroundSecondary: "#241418",
+      backgroundTertiary: "#2E1B20",
+      card: "#2A141B",
+      cardBorder: "#4A2630",
+      tint: "#FF6D00",
+      tintDark: "#C75200",
+      tabIconDefault: "#7A5E4A",
+      tabIconSelected: "#FF6D00",
+      danger: "#FF3D7F",
+      warning: "#FFC947",
+      success: "#6DD997",
+      online: "#6DD997",
+      offline: "#FF3D7F",
+      idle: "#FFC947",
+    },
+    cardAccents: {
+      cpu: "#FF6D00",
+      gpu: "#FF3D7F",
+      ram: "#FFB547",
+      thermals: "#FF3D3D",
+      fans: "#FFC947",
+      disks: "#FFAD70",
+      network: "#FF8FA3",
+      sensor: "#B47AFF",
+    },
+  },
+  light: {
+    colors: {
+      text: "#2A1410",
+      textSecondary: "#6B473C",
+      textMuted: "#A68872",
+      background: "#FFF7F1",
+      backgroundSecondary: "#FFEFE2",
+      backgroundTertiary: "#FDE4CF",
+      card: "#FFFFFF",
+      cardBorder: "#F0D5BF",
+      tint: "#E65100",
+      tintDark: "#B04000",
+      tabIconDefault: "#A68872",
+      tabIconSelected: "#E65100",
+      danger: "#D81B60",
+      warning: "#C47A00",
+      success: "#2EA364",
+      online: "#2EA364",
+      offline: "#D81B60",
+      idle: "#C47A00",
+    },
+    cardAccents: {
+      cpu: "#E65100",
+      gpu: "#D81B60",
+      ram: "#C47A00",
+      thermals: "#D32F2F",
+      fans: "#C47A00",
+      disks: "#E0803A",
+      network: "#D47B8E",
+      sensor: "#7E4FD0",
+    },
+  },
+};
+
+const NORD: ThemeDef = {
+  id: "nord",
+  label: "Nord",
+  description: "Calm arctic blues",
+  shape: SHAPE_ROUNDED,
+  dark: {
+    colors: {
+      text: "#ECEFF4",
+      textSecondary: "#9FAEC5",
+      textMuted: "#5E6B80",
+      background: "#2E3440",
+      backgroundSecondary: "#363D4A",
+      backgroundTertiary: "#3B4252",
+      card: "#3B4252",
+      cardBorder: "#4C566A",
+      tint: "#88C0D0",
+      tintDark: "#5E81AC",
+      tabIconDefault: "#5E6B80",
+      tabIconSelected: "#88C0D0",
+      danger: "#BF616A",
+      warning: "#EBCB8B",
+      success: "#A3BE8C",
+      online: "#A3BE8C",
+      offline: "#BF616A",
+      idle: "#EBCB8B",
+    },
+    cardAccents: {
+      cpu: "#88C0D0",
+      gpu: "#81A1C1",
+      ram: "#5E81AC",
+      thermals: "#BF616A",
+      fans: "#EBCB8B",
+      disks: "#A3BE8C",
+      network: "#8FBCBB",
+      sensor: "#B48EAD",
+    },
+  },
+  light: {
+    colors: {
+      text: "#2E3440",
+      textSecondary: "#4C566A",
+      textMuted: "#7A8290",
+      background: "#ECEFF4",
+      backgroundSecondary: "#E5E9F0",
+      backgroundTertiary: "#D8DEE9",
+      card: "#FFFFFF",
+      cardBorder: "#D8DEE9",
+      tint: "#5E81AC",
+      tintDark: "#3B5C82",
+      tabIconDefault: "#7A8290",
+      tabIconSelected: "#5E81AC",
+      danger: "#BF616A",
+      warning: "#B88A30",
+      success: "#7A9660",
+      online: "#7A9660",
+      offline: "#BF616A",
+      idle: "#B88A30",
+    },
+    cardAccents: {
+      cpu: "#5E81AC",
+      gpu: "#4C6F93",
+      ram: "#3B5C82",
+      thermals: "#BF616A",
+      fans: "#B88A30",
+      disks: "#7A9660",
+      network: "#568C8A",
+      sensor: "#8A6690",
+    },
+  },
+};
+
+const MINIMAL: ThemeDef = {
+  id: "minimal",
+  label: "Minimal",
+  description: "Pure black & white",
+  shape: SHAPE_SOFT,
+  dark: {
+    colors: {
+      text: "#FFFFFF",
+      textSecondary: "#9A9A9A",
+      textMuted: "#5F5F5F",
+      background: "#000000",
+      backgroundSecondary: "#0A0A0A",
+      backgroundTertiary: "#141414",
+      card: "#101010",
+      cardBorder: "#222222",
+      tint: "#FFFFFF",
+      tintDark: "#BFBFBF",
+      tabIconDefault: "#5F5F5F",
+      tabIconSelected: "#FFFFFF",
+      danger: "#E66B6B",
+      warning: "#E6C26B",
+      success: "#7FE69A",
+      online: "#7FE69A",
+      offline: "#E66B6B",
+      idle: "#E6C26B",
+    },
+    cardAccents: {
+      cpu: "#FFFFFF",
+      gpu: "#D0D0D0",
+      ram: "#A8A8A8",
+      thermals: "#E66B6B",
+      fans: "#E6C26B",
+      disks: "#7FE69A",
+      network: "#A8D0E6",
+      sensor: "#C7A8E6",
+    },
+  },
+  light: {
+    colors: {
+      text: "#000000",
+      textSecondary: "#555555",
+      textMuted: "#8A8A8A",
+      background: "#FFFFFF",
+      backgroundSecondary: "#F5F5F5",
+      backgroundTertiary: "#EAEAEA",
+      card: "#FFFFFF",
+      cardBorder: "#DDDDDD",
+      tint: "#000000",
+      tintDark: "#333333",
+      tabIconDefault: "#8A8A8A",
+      tabIconSelected: "#000000",
+      danger: "#C84040",
+      warning: "#B88600",
+      success: "#2A9458",
+      online: "#2A9458",
+      offline: "#C84040",
+      idle: "#B88600",
+    },
+    cardAccents: {
+      cpu: "#000000",
+      gpu: "#444444",
+      ram: "#666666",
+      thermals: "#C84040",
+      fans: "#B88600",
+      disks: "#2A9458",
+      network: "#2E7FB8",
+      sensor: "#6B3FB0",
+    },
+  },
+};
+
+export const THEME_DEFS: Record<ThemeId, ThemeDef> = {
+  rog: ROG,
+  classic: CLASSIC,
+  cyberpunk: CYBERPUNK,
+  matrix: MATRIX,
+  ocean: OCEAN,
+  sunset: SUNSET,
+  nord: NORD,
+  minimal: MINIMAL,
+};
+
+export const THEME_ORDER: ThemeId[] = [
+  "rog",
+  "classic",
+  "cyberpunk",
+  "matrix",
+  "ocean",
+  "sunset",
+  "nord",
+  "minimal",
+];
+
+export function supportsLight(themeId: ThemeId): boolean {
+  return !!THEME_DEFS[themeId].light;
+}
+
+export function resolveTheme(themeId: ThemeId, mode: ResolvedMode): Theme {
+  const def = THEME_DEFS[themeId];
+  const variant = mode === "light" && def.light ? def.light : def.dark;
+  const effectiveMode: ResolvedMode = mode === "light" && def.light ? "light" : "dark";
+  return {
+    id: def.id,
+    mode: effectiveMode,
+    colors: variant.colors,
+    cardAccents: variant.cardAccents,
+    ...def.shape,
+  };
+}
+
+// ─── Backwards-compat exports (existing code references these) ───────────────
+export type ThemeName = ThemeId;
+
+export const ROG_THEME: Theme = resolveTheme("rog", "dark");
+export const CLASSIC_THEME: Theme = resolveTheme("classic", "dark");
+
+export const THEMES: Record<ThemeId, Theme> = {
+  rog: resolveTheme("rog", "dark"),
+  classic: resolveTheme("classic", "dark"),
+  cyberpunk: resolveTheme("cyberpunk", "dark"),
+  matrix: resolveTheme("matrix", "dark"),
+  ocean: resolveTheme("ocean", "dark"),
+  sunset: resolveTheme("sunset", "dark"),
+  nord: resolveTheme("nord", "dark"),
+  minimal: resolveTheme("minimal", "dark"),
 };
 
 export function tabularNumsVariant(theme: Theme): TextStyle["fontVariant"] {
