@@ -10,6 +10,7 @@ import {
   View,
 } from "react-native";
 import {
+  ResolvedMode,
   Theme,
   ThemeId,
   ThemeMode,
@@ -26,17 +27,50 @@ interface Props {
 }
 
 export function ThemePickerModal({ visible, onClose }: Props) {
-  const { theme, themeId, mode, resolvedMode, setThemeId, setMode } = useTheme();
+  const { theme, themeId, mode, setThemeId, setMode } = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const C = theme.colors;
 
-  const previewMode = resolvedMode;
+  const renderMiniPreview = (id: ThemeId, m: ResolvedMode) => {
+    const preview = resolveTheme(id, m);
+    const pc = preview.colors;
+    return (
+      <View
+        key={m}
+        style={[
+          styles.themePreview,
+          { backgroundColor: pc.background, borderColor: pc.cardBorder },
+        ]}
+      >
+        <View
+          style={[
+            styles.themePreviewCard,
+            { backgroundColor: pc.card, borderColor: pc.cardBorder },
+            preview.accentEdge === "left"
+              ? { borderLeftWidth: 2, borderLeftColor: pc.tint }
+              : { borderTopWidth: 2, borderTopColor: pc.tint },
+          ]}
+        >
+          <View
+            style={[
+              styles.themePreviewBar,
+              { backgroundColor: pc.tint, width: 14 },
+            ]}
+          />
+          <View
+            style={[
+              styles.themePreviewBar,
+              { backgroundColor: pc.tint + "55", width: 22 },
+            ]}
+          />
+        </View>
+      </View>
+    );
+  };
 
   const renderThemeTile = (id: ThemeId) => {
     const def = THEME_DEFS[id];
     const selected = themeId === id;
-    const preview = resolveTheme(id, previewMode);
-    const pc = preview.colors;
     const hasLight = supportsLight(id);
 
     return (
@@ -57,34 +91,9 @@ export function ThemePickerModal({ visible, onClose }: Props) {
           pressed && { opacity: 0.85 },
         ]}
       >
-        <View
-          style={[
-            styles.themePreview,
-            { backgroundColor: pc.background, borderColor: pc.cardBorder },
-          ]}
-        >
-          <View
-            style={[
-              styles.themePreviewCard,
-              { backgroundColor: pc.card, borderColor: pc.cardBorder },
-              theme.accentEdge === "left"
-                ? { borderLeftWidth: 2, borderLeftColor: pc.tint }
-                : { borderTopWidth: 2, borderTopColor: pc.tint },
-            ]}
-          >
-            <View
-              style={[
-                styles.themePreviewBar,
-                { backgroundColor: pc.tint, width: 14 },
-              ]}
-            />
-            <View
-              style={[
-                styles.themePreviewBar,
-                { backgroundColor: pc.tint + "55", width: 22 },
-              ]}
-            />
-          </View>
+        <View style={styles.themePreviewRow}>
+          {hasLight ? renderMiniPreview(id, "light") : null}
+          {renderMiniPreview(id, "dark")}
         </View>
         <View style={styles.themeTileInfo}>
           <View style={styles.themeTileLabelRow}>
@@ -293,7 +302,12 @@ const createStyles = (theme: Theme) => {
       padding: 8,
       gap: 8,
     },
+    themePreviewRow: {
+      flexDirection: "row",
+      gap: 6,
+    },
     themePreview: {
+      flex: 1,
       height: 54,
       borderRadius: theme.innerRadius,
       borderWidth: 1,
