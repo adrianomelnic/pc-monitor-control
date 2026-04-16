@@ -58,6 +58,7 @@
   },
   "dependencies": {
     "expo-clipboard": "^8.0.8",
+    "expo-updates": "~29.0.16",
     "react-native-draggable-flatlist": "^4.0.3"
   }
 }

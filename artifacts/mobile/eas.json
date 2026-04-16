@@ -1,13 +1,20 @@
 {
   "cli": {
-    "version": ">= 16.0.0"
+    "version": ">= 16.0.0",
+    "appVersionSource": "local"
   },
   "build": {
     "development": {
       "developmentClient": true,
-      "distribution": "internal"
+      "distribution": "internal",
+      "channel": "development",
+      "ios": {
+        "simulator": true
+      }
     },
     "preview": {
+      "distribution": "internal",
+      "channel": "preview",
       "ios": {
         "simulator": true
       },
@@ -17,6 +24,8 @@
       }
     },
     "production": {
+      "channel": "production",
+      "autoIncrement": true,
       "ios": {
         "distribution": "store"
       },
@@ -27,6 +36,14 @@
     }
   },
   "submit": {
-    "production": {}
+    "production": {
+      "ios": {
+        "ascAppId": "",
+        "appleTeamId": ""
+      },
+      "android": {
+        "track": "internal"
+      }
+    }
   }
 }

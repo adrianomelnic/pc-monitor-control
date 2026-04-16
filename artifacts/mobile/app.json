@@ -8,6 +8,15 @@
     "scheme": "pcmonitorcontrol",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/8274b5fe-3bcf-4757-a64a-fcec0349ac17",
+      "enabled": true,
+      "checkAutomatically": "ON_LOAD",
+      "fallbackToCacheTimeout": 0
+    },
     "splash": {
       "image": "./assets/images/splash-icon.png",
       "resizeMode": "contain",
@@ -15,10 +24,17 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.adrianomelnic.pcmonitorcontrol"
+      "bundleIdentifier": "com.adrianomelnic.pcmonitorcontrol",
+      "buildNumber": "1",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSLocalNetworkUsageDescription": "PC Monitor uses your local network to discover and connect to the PC Agent running on computers on the same Wi-Fi network.",
+        "NSBonjourServices": ["_http._tcp"]
+      }
     },
     "android": {
       "package": "com.adrianomelnic.pcmonitorcontrol",
+      "versionCode": 1,
       "usesCleartextTraffic": true,
       "permissions": [
         "android.permission.INTERNET",
@@ -41,7 +57,8 @@
         }
       ],
       "expo-font",
-      "expo-web-browser"
+      "expo-web-browser",
+      "expo-updates"
     ],
     "experiments": {
       "typedRoutes": true,
@@ -51,6 +68,7 @@
       "eas": {
         "projectId": "8274b5fe-3bcf-4757-a64a-fcec0349ac17"
       }
-    }
+    },
+    "owner": "adrianomelnic"
   }
 }
