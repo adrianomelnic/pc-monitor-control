@@ -31,7 +31,8 @@ function RootLayoutNav() {
         contentStyle: { backgroundColor: theme.colors.background },
       }}
     >
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen name="index" options={{ headerShown: false }} />
+      <Stack.Screen name="setup" options={{ headerShown: false }} />
       <Stack.Screen
         name="pc/[id]"
         options={{ headerShown: false, presentation: "card" }}

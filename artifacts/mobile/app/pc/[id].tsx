@@ -18,6 +18,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { CommandButton } from "@/components/CommandButton";
 import { SensorPickerModal } from "@/components/SensorPickerModal";
+import { ThemePickerModal } from "@/components/ThemePickerModal";
 import { SensorCard, CompactSensorPicker, formatValue } from "@/components/cards/SensorCard";
 import { CPUCard } from "@/components/cards/CPUCard";
 import { DisksCard } from "@/components/cards/DisksCard";
@@ -158,6 +159,7 @@ export default function PCDetailScreen() {
   const [titleInputActive, setTitleInputActive] = useState<BuiltinCardKind | null>(null);
   const [extraSensorPickerFor, setExtraSensorPickerFor] = useState<BuiltinCardKind | null>(null);
   const [thermalsSensorPickerOpen, setThermalsSensorPickerOpen] = useState(false);
+  const [themeVisible, setThemeVisible] = useState(false);
   const [replacingThermalKey, setReplacingThermalKey] = useState<string | null>(null);
   const [replacingExtraFor, setReplacingExtraFor] = useState<{ kind: BuiltinCardKind; key: string } | null>(null);
   const [replacingBuiltinField, setReplacingBuiltinField] = useState<{ kind: BuiltinCardKind; key: string } | null>(null);
@@ -1032,9 +1034,34 @@ export default function PCDetailScreen() {
               >
                 <Feather name="power" size={16} color={activePanel === "controls" ? C.tint : C.textSecondary} />
               </Pressable>
+              <Pressable
+                onPress={() => { Haptics.selectionAsync(); setThemeVisible(true); }}
+                style={({ pressed }) => [
+                  styles.headerIconBtn,
+                  pressed && { opacity: 0.7 },
+                ]}
+                hitSlop={6}
+              >
+                <Feather name="droplet" size={16} color={C.textSecondary} />
+              </Pressable>
             </View>
           </View>
-        ) : null}
+        ) : (
+          <View style={styles.headerRow2}>
+            <View style={styles.headerActions}>
+              <Pressable
+                onPress={() => { Haptics.selectionAsync(); setThemeVisible(true); }}
+                style={({ pressed }) => [
+                  styles.headerIconBtn,
+                  pressed && { opacity: 0.7 },
+                ]}
+                hitSlop={6}
+              >
+                <Feather name="droplet" size={16} color={C.textSecondary} />
+              </Pressable>
+            </View>
+          </View>
+        )}
       </View>
 
       {/* ── Inline expandable header panel ── */}
@@ -1327,6 +1354,11 @@ export default function PCDetailScreen() {
         initialIcon={editingCard?.icon}
         initialLayout={editingCard?.layout}
         isEdit={!!editingCard}
+      />
+
+      <ThemePickerModal
+        visible={themeVisible}
+        onClose={() => setThemeVisible(false)}
       />
     </ScrollView>
 

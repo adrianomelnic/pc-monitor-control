@@ -1,6 +1,7 @@
 import { Feather } from "@expo/vector-icons";
 import * as Clipboard from "expo-clipboard";
 import * as Haptics from "expo-haptics";
+import { router } from "expo-router";
 import React, { useMemo, useState } from "react";
 import {
   Platform,
@@ -11,15 +12,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import {
-  Theme,
-  ThemeId,
-  ThemeMode,
-  THEME_DEFS,
-  THEME_ORDER,
-  resolveTheme,
-  supportsLight,
-} from "@/constants/themes";
+import { Theme } from "@/constants/themes";
 import { useTheme } from "@/context/ThemeContext";
 
 const PYTHON_AGENT = `#!/usr/bin/env python3
@@ -829,166 +822,6 @@ const STEPS = [
   },
 ];
 
-function ThemeSwitcher() {
-  const { theme, themeId, mode, resolvedMode, setThemeId, setMode } = useTheme();
-  const styles = useMemo(() => createStyles(theme), [theme]);
-  const C = theme.colors;
-
-  // Preview swatch uses the user's current light/dark preference (so you can
-  // preview how each theme looks in the mode you care about).
-  const previewMode = resolvedMode;
-
-  const renderThemeTile = (id: ThemeId) => {
-    const def = THEME_DEFS[id];
-    const selected = themeId === id;
-    const preview = resolveTheme(id, previewMode);
-    const pc = preview.colors;
-    const hasLight = supportsLight(id);
-
-    return (
-      <Pressable
-        key={id}
-        onPress={() => {
-          if (themeId !== id) {
-            Haptics.selectionAsync();
-            setThemeId(id);
-          }
-        }}
-        style={({ pressed }) => [
-          styles.themeTile,
-          {
-            borderColor: selected ? C.tint : C.cardBorder,
-            backgroundColor: selected ? C.tint + "12" : C.backgroundTertiary,
-          },
-          pressed && { opacity: 0.85 },
-        ]}
-      >
-        <View
-          style={[
-            styles.themePreview,
-            { backgroundColor: pc.background, borderColor: pc.cardBorder },
-          ]}
-        >
-          <View
-            style={[
-              styles.themePreviewCard,
-              { backgroundColor: pc.card, borderColor: pc.cardBorder },
-              theme.accentEdge === "left"
-                ? { borderLeftWidth: 2, borderLeftColor: pc.tint }
-                : { borderTopWidth: 2, borderTopColor: pc.tint },
-            ]}
-          >
-            <View
-              style={[
-                styles.themePreviewBar,
-                { backgroundColor: pc.tint, width: 14 },
-              ]}
-            />
-            <View
-              style={[
-                styles.themePreviewBar,
-                { backgroundColor: pc.tint + "55", width: 22 },
-              ]}
-            />
-          </View>
-        </View>
-        <View style={styles.themeTileInfo}>
-          <View style={styles.themeTileLabelRow}>
-            <Text
-              style={[
-                styles.themeTileLabel,
-                { color: selected ? C.tint : C.text },
-              ]}
-              numberOfLines={1}
-            >
-              {def.label}
-            </Text>
-            {selected ? (
-              <Feather name="check-circle" size={14} color={C.tint} />
-            ) : null}
-          </View>
-          <Text style={styles.themeTileSub} numberOfLines={1}>
-            {def.description}
-          </Text>
-          {!hasLight ? (
-            <View style={styles.themeTileBadge}>
-              <Feather name="moon" size={9} color={C.textSecondary} />
-              <Text style={styles.themeTileBadgeText}>Dark only</Text>
-            </View>
-          ) : null}
-        </View>
-      </Pressable>
-    );
-  };
-
-  const renderModeButton = (m: ThemeMode, label: string, iconName: keyof typeof Feather.glyphMap) => {
-    const selected = mode === m;
-    const activeThemeHasLight = supportsLight(themeId);
-    const disabled = m === "light" && !activeThemeHasLight;
-
-    return (
-      <Pressable
-        key={m}
-        disabled={disabled}
-        onPress={() => {
-          if (mode !== m) {
-            Haptics.selectionAsync();
-            setMode(m);
-          }
-        }}
-        style={({ pressed }) => [
-          styles.modeButton,
-          {
-            borderColor: selected ? C.tint : C.cardBorder,
-            backgroundColor: selected ? C.tint + "18" : "transparent",
-            opacity: disabled ? 0.4 : 1,
-          },
-          pressed && !disabled && { opacity: 0.85 },
-        ]}
-      >
-        <Feather
-          name={iconName}
-          size={14}
-          color={selected ? C.tint : C.textSecondary}
-        />
-        <Text
-          style={[
-            styles.modeButtonText,
-            { color: selected ? C.tint : C.textSecondary },
-          ]}
-        >
-          {label}
-        </Text>
-      </Pressable>
-    );
-  };
-
-  return (
-    <View style={styles.themeSection}>
-      <Text style={styles.themeSectionTitle}>Appearance</Text>
-      <Text style={styles.themeSectionSub}>
-        Choose a theme and preferred mode. Changes apply instantly.
-      </Text>
-
-      <Text style={styles.themeGroupLabel}>Theme</Text>
-      <View style={styles.themeGrid}>
-        {THEME_ORDER.map((id) => renderThemeTile(id))}
-      </View>
-
-      <Text style={styles.themeGroupLabel}>Mode</Text>
-      <View style={styles.modeRow}>
-        {renderModeButton("light", "Light", "sun")}
-        {renderModeButton("dark", "Dark", "moon")}
-        {renderModeButton("auto", "Auto", "smartphone")}
-      </View>
-      {!supportsLight(themeId) ? (
-        <Text style={styles.modeHint}>
-          {THEME_DEFS[themeId].label} is a dark-only theme.
-        </Text>
-      ) : null}
-    </View>
-  );
-}
 
 export default function AgentScreen() {
   const insets = useSafeAreaInsets();
@@ -1014,13 +847,20 @@ export default function AgentScreen() {
       showsVerticalScrollIndicator={false}
     >
       <View style={styles.header}>
-        <Text style={styles.title}>PC Agent Setup</Text>
-        <Text style={styles.subtitle}>
-          Run the agent on any PC you want to control
-        </Text>
+        <Pressable
+          onPress={() => router.back()}
+          style={({ pressed }) => [styles.backBtn, pressed && { opacity: 0.7 }]}
+          hitSlop={8}
+        >
+          <Feather name="arrow-left" size={22} color={C.text} />
+        </Pressable>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.title}>PC Agent Setup</Text>
+          <Text style={styles.subtitle}>
+            Run the agent on any PC you want to control
+          </Text>
+        </View>
       </View>
-
-      <ThemeSwitcher />
 
       {STEPS.map((s) => (
         <View key={s.step} style={styles.step}>
@@ -1095,8 +935,19 @@ const createStyles = (theme: Theme) => {
     paddingHorizontal: 16,
   },
   header: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
     paddingTop: 12,
     paddingBottom: 20,
+  },
+  backBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: theme.buttonRadius,
+    backgroundColor: C.backgroundTertiary,
+    alignItems: "center",
+    justifyContent: "center",
   },
   title: {
     fontSize: 28,
@@ -1244,121 +1095,6 @@ const createStyles = (theme: Theme) => {
     fontSize: 12,
     color: C.warning,
     lineHeight: 17,
-  },
-  themeSection: {
-    backgroundColor: C.card,
-    borderRadius: theme.cardRadius,
-    borderWidth: 1,
-    borderColor: C.cardBorder,
-    padding: 14,
-    marginBottom: 16,
-  },
-  themeSectionTitle: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: C.text,
-  },
-  themeSectionSub: {
-    fontSize: 12,
-    color: C.textSecondary,
-    marginTop: 4,
-    marginBottom: 14,
-  },
-  themeGroupLabel: {
-    fontSize: 11,
-    fontWeight: "700",
-    color: C.textMuted,
-    letterSpacing: theme.titleCase === "upper" ? 1.2 : 0.4,
-    textTransform: theme.titleCase === "upper" ? "uppercase" : "none",
-    marginBottom: 8,
-    marginTop: 4,
-  },
-  themeGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-    marginBottom: 14,
-  },
-  themeTile: {
-    width: "48.5%",
-    flexDirection: "column",
-    borderWidth: 1,
-    borderRadius: theme.buttonRadius,
-    padding: 8,
-    gap: 8,
-  },
-  themePreview: {
-    height: 54,
-    borderRadius: theme.innerRadius,
-    borderWidth: 1,
-    padding: 6,
-    justifyContent: "center",
-  },
-  themePreviewCard: {
-    borderRadius: theme.innerRadius,
-    borderWidth: 1,
-    paddingVertical: 6,
-    paddingHorizontal: 8,
-    gap: 4,
-  },
-  themePreviewBar: {
-    height: 3,
-    borderRadius: 1,
-  },
-  themeTileInfo: {
-    gap: 2,
-  },
-  themeTileLabelRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 6,
-  },
-  themeTileLabel: {
-    fontSize: 13,
-    fontWeight: "700",
-    flexShrink: 1,
-  },
-  themeTileSub: {
-    fontSize: 10,
-    color: C.textSecondary,
-  },
-  themeTileBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 3,
-    marginTop: 4,
-  },
-  themeTileBadgeText: {
-    fontSize: 9,
-    color: C.textSecondary,
-    fontWeight: "600",
-    letterSpacing: 0.3,
-  },
-  modeRow: {
-    flexDirection: "row",
-    gap: 8,
-  },
-  modeButton: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-    borderWidth: 1,
-    borderRadius: theme.buttonRadius,
-    paddingVertical: 10,
-  },
-  modeButtonText: {
-    fontSize: 12,
-    fontWeight: "700",
-    letterSpacing: theme.titleCase === "upper" ? 0.5 : 0,
-  },
-  modeHint: {
-    fontSize: 11,
-    color: C.textMuted,
-    marginTop: 8,
-    fontStyle: "italic",
   },
   });
 };

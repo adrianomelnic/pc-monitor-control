@@ -15,6 +15,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AddPcSheet } from "@/components/AddPcSheet";
 import { PCCard } from "@/components/PCCard";
+import { ThemePickerModal } from "@/components/ThemePickerModal";
 import { Theme } from "@/constants/themes";
 import { useTheme } from "@/context/ThemeContext";
 import { DEMO_PC_HOST, DEMO_PC_ID, usePcs } from "@/context/PcsContext";
@@ -25,6 +26,7 @@ export default function HomeScreen() {
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { pcs, refreshAll, addDemoMode } = usePcs();
   const [addVisible, setAddVisible] = useState(false);
+  const [themeVisible, setThemeVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
@@ -62,15 +64,45 @@ export default function HomeScreen() {
               : `${onlineCount}/${pcs.length} online`}
           </Text>
         </View>
-        <Pressable
-          style={({ pressed }) => [styles.addBtn, pressed && { opacity: 0.7 }]}
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            setAddVisible(true);
-          }}
-        >
-          <Feather name="plus" size={20} color="#fff" />
-        </Pressable>
+        <View style={styles.headerActions}>
+          <Pressable
+            style={({ pressed }) => [
+              styles.iconBtn,
+              pressed && { opacity: 0.7 },
+            ]}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setThemeVisible(true);
+            }}
+            hitSlop={6}
+          >
+            <Feather name="droplet" size={18} color={C.text} />
+          </Pressable>
+          {pcs.length > 0 ? (
+            <Pressable
+              style={({ pressed }) => [
+                styles.iconBtn,
+                pressed && { opacity: 0.7 },
+              ]}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                router.push("/setup");
+              }}
+              hitSlop={6}
+            >
+              <Feather name="info" size={18} color={C.text} />
+            </Pressable>
+          ) : null}
+          <Pressable
+            style={({ pressed }) => [styles.addBtn, pressed && { opacity: 0.7 }]}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setAddVisible(true);
+            }}
+          >
+            <Feather name="plus" size={20} color="#fff" />
+          </Pressable>
+        </View>
       </View>
 
       <FlatList
@@ -125,6 +157,18 @@ export default function HomeScreen() {
               </View>
               <Feather name="chevron-right" size={16} color="#FF6D00" />
             </Pressable>
+
+            <Pressable
+              style={({ pressed }) => [
+                styles.setupLink,
+                pressed && { opacity: 0.7 },
+              ]}
+              onPress={() => router.push("/setup")}
+              hitSlop={6}
+            >
+              <Feather name="book-open" size={14} color={C.textSecondary} />
+              <Text style={styles.setupLinkText}>Setup PC Agent</Text>
+            </Pressable>
           </View>
         }
       />
@@ -132,6 +176,11 @@ export default function HomeScreen() {
       <AddPcSheet
         visible={addVisible}
         onClose={() => setAddVisible(false)}
+      />
+
+      <ThemePickerModal
+        visible={themeVisible}
+        onClose={() => setThemeVisible(false)}
       />
     </View>
   );
@@ -151,6 +200,19 @@ const createStyles = (t: Theme) => {
     },
     title: { fontSize: 28, fontWeight: "800", color: C.text, letterSpacing: -0.5 },
     subtitle: { fontSize: 13, color: C.textSecondary, marginTop: 2 },
+    headerActions: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+    },
+    iconBtn: {
+      width: 40,
+      height: 40,
+      borderRadius: t.buttonRadius,
+      backgroundColor: C.backgroundTertiary,
+      alignItems: "center",
+      justifyContent: "center",
+    },
     addBtn: {
       width: 40,
       height: 40,
@@ -158,6 +220,20 @@ const createStyles = (t: Theme) => {
       backgroundColor: C.tint,
       alignItems: "center",
       justifyContent: "center",
+    },
+    setupLink: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 6,
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      marginTop: 8,
+    },
+    setupLinkText: {
+      fontSize: 13,
+      fontWeight: "600",
+      color: C.textSecondary,
+      textDecorationLine: "underline",
     },
     list: { paddingHorizontal: 16, paddingTop: 8 },
     columnWrapper: { gap: 12 },
