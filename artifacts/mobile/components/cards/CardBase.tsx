@@ -1,26 +1,39 @@
 import { Feather } from "@expo/vector-icons";
-import React, { useRef } from "react";
-import { Platform, Pressable, StyleSheet, Text, TextInput, View, ViewStyle } from "react-native";
-import Colors from "@/constants/colors";
-
-const C = Colors.light;
+import React, { useMemo, useRef } from "react";
+import { Pressable, StyleSheet, Text, TextInput, View, ViewStyle } from "react-native";
+import { Theme, tabularNumsVariant } from "@/constants/themes";
+import { useTheme } from "@/context/ThemeContext";
 
 interface TempBadgeProps {
   value: number;
 }
 
 export function TempBadge({ value }: TempBadgeProps) {
+  const { theme } = useTheme();
+  const C = theme.colors;
   const color =
     value >= 85
-      ? "#FF4444"
+      ? C.danger
       : value >= 70
-      ? "#FF8C00"
+      ? C.warning
       : value >= 50
-      ? "#FFB800"
+      ? C.idle
       : C.success;
+  const fontVariant = tabularNumsVariant(theme);
   return (
-    <View style={[styles.tempBadge, { backgroundColor: color + "18", borderColor: color + "44" }]}>
-      <Text style={[styles.tempText, { color }]}>{Math.round(value)}°C</Text>
+    <View
+      style={{
+        borderRadius: theme.innerRadius,
+        borderWidth: 1,
+        paddingHorizontal: 6,
+        paddingVertical: 2,
+        backgroundColor: color + "18",
+        borderColor: color + "44",
+      }}
+    >
+      <Text style={{ fontSize: 11, fontWeight: "800", color, fontVariant }}>
+        {Math.round(value)}°C
+      </Text>
     </View>
   );
 }
@@ -87,10 +100,32 @@ export function CardBase({
   editPanel,
 }: CardBaseProps) {
   const titleInputRef = useRef<TextInput>(null);
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+  const isLeft = theme.accentEdge === "left";
+  const displayTitle =
+    theme.titleCase === "upper" ? title.toUpperCase() : title;
+
+  const accentNode = isLeft ? (
+    <View
+      style={{
+        width: theme.accentThickness,
+        flexShrink: 0,
+        backgroundColor: accentColor,
+      }}
+    />
+  ) : (
+    <View
+      style={{
+        height: theme.accentThickness,
+        backgroundColor: accentColor,
+      }}
+    />
+  );
 
   return (
     <View style={[styles.card, style]}>
-      <View style={[styles.accentBar, { backgroundColor: accentColor }]} />
+      {accentNode}
       <View style={styles.cardInner}>
         <View style={styles.header}>
           <View style={[styles.iconWrap, { backgroundColor: accentColor + "18" }]}>
@@ -111,12 +146,12 @@ export function CardBase({
             ) : onTitlePress ? (
               <Pressable onPress={onTitlePress} hitSlop={6}>
                 <View style={styles.titlePressable}>
-                  <Text style={styles.title} numberOfLines={1}>{title}</Text>
+                  <Text style={styles.title} numberOfLines={1}>{displayTitle}</Text>
                   <Feather name="edit-2" size={10} color={accentColor} style={styles.titleEditIcon} />
                 </View>
               </Pressable>
             ) : (
-              <Text style={styles.title} numberOfLines={1}>{title}</Text>
+              <Text style={styles.title} numberOfLines={1}>{displayTitle}</Text>
             )}
             {subtitle ? <Text style={styles.subtitle} numberOfLines={1}>{subtitle}</Text> : null}
           </View>
@@ -143,9 +178,12 @@ export function StatRow({
   value: string;
   color?: string;
 }) {
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+  const displayLabel = theme.titleCase === "upper" ? label.toUpperCase() : label;
   return (
     <View style={styles.statRow}>
-      <Text style={styles.statLabel}>{label}</Text>
+      <Text style={styles.statLabel}>{displayLabel}</Text>
       <Text style={[styles.statValue, color ? { color } : null]}>{value}</Text>
     </View>
   );
@@ -162,129 +200,116 @@ export function MiniBar({
   color: string;
   height?: number;
 }) {
+  const { theme } = useTheme();
+  const C = theme.colors;
   const pct = Math.min(100, Math.max(0, (value / max) * 100));
-  const barColor = pct > 85 ? "#FF4444" : pct > 65 ? "#FFB800" : color;
+  const barColor = pct > 85 ? C.danger : pct > 65 ? C.warning : color;
   return (
-    <View style={[styles.barTrack, { height }]}>
-      <View style={[styles.barFill, { width: `${pct}%` as any, backgroundColor: barColor, height }]} />
+    <View
+      style={{
+        height,
+        backgroundColor: C.backgroundTertiary,
+        borderRadius: 1,
+        overflow: "hidden",
+        width: "100%",
+      }}
+    >
+      <View
+        style={{
+          width: `${pct}%` as `${number}%`,
+          backgroundColor: barColor,
+          height,
+          borderRadius: 1,
+        }}
+      />
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: C.card,
-    borderRadius: 4,
-    borderWidth: 1,
-    borderColor: C.cardBorder,
-    flexDirection: "row",
-    overflow: "hidden",
-  },
-  accentBar: {
-    width: 3,
-    flexShrink: 0,
-  },
-  cardInner: {
-    flex: 1,
-    padding: 14,
-    gap: 10,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
-  iconWrap: {
-    width: 30,
-    height: 30,
-    borderRadius: 4,
-    alignItems: "center",
-    justifyContent: "center",
-    flexShrink: 0,
-  },
-  titleBlock: {
-    flex: 1,
-  },
-  title: {
-    fontSize: 13,
-    fontWeight: "700",
-    color: C.text,
-    letterSpacing: 0.6,
-    textTransform: "uppercase",
-  },
-  titleInput: {
-    borderBottomWidth: 1.5,
-    paddingVertical: 0,
-    paddingHorizontal: 0,
-    textTransform: "none",
-  },
-  titlePressable: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 5,
-  },
-  titleEditIcon: {
-    opacity: 0.7,
-  },
-  headerRight: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  subtitle: {
-    fontSize: 10,
-    color: C.textMuted,
-    marginTop: 1,
-    letterSpacing: 0.3,
-  },
-  tempBadge: {
-    borderRadius: 2,
-    borderWidth: 1,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-  },
-  tempText: {
-    fontSize: 11,
-    fontWeight: "800",
-    fontVariant: ["tabular-nums"],
-  },
-  divider: {
-    height: 1,
-  },
-  statRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  statLabel: {
-    fontSize: 11,
-    color: C.textMuted,
-    fontWeight: "600",
-    letterSpacing: 0.3,
-    textTransform: "uppercase",
-  },
-  statValue: {
-    fontSize: 12,
-    color: C.text,
-    fontWeight: "700",
-    fontVariant: ["tabular-nums"],
-    letterSpacing: 0.2,
-  },
-  barTrack: {
-    backgroundColor: C.backgroundTertiary,
-    borderRadius: 1,
-    overflow: "hidden",
-    width: "100%",
-  },
-  barFill: {
-    borderRadius: 1,
-  },
-  extraRows: {
-    gap: 4,
-  },
-  extraDivider: {
-    height: 1,
-    backgroundColor: Colors.light.cardBorder,
-    marginBottom: 4,
-  },
-});
+const createStyles = (t: Theme) => {
+  const C = t.colors;
+  const isLeft = t.accentEdge === "left";
+  const fontVariant = tabularNumsVariant(t);
+  return StyleSheet.create({
+    card: {
+      backgroundColor: C.card,
+      borderRadius: t.cardRadius,
+      borderWidth: 1,
+      borderColor: C.cardBorder,
+      flexDirection: isLeft ? "row" : "column",
+      overflow: "hidden",
+    },
+    cardInner: {
+      flex: isLeft ? 1 : 0,
+      padding: 14,
+      gap: 10,
+    },
+    header: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 10,
+    },
+    iconWrap: {
+      width: 30,
+      height: 30,
+      borderRadius: t.innerRadius,
+      alignItems: "center",
+      justifyContent: "center",
+      flexShrink: 0,
+    },
+    titleBlock: {
+      flex: 1,
+    },
+    title: {
+      fontSize: t.titleFontSize,
+      fontWeight: "700",
+      color: C.text,
+      letterSpacing: t.titleLetterSpacing,
+    },
+    titleInput: {
+      borderBottomWidth: 1.5,
+      paddingVertical: 0,
+      paddingHorizontal: 0,
+    },
+    titlePressable: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 5,
+    },
+    titleEditIcon: {
+      opacity: 0.7,
+    },
+    headerRight: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 6,
+    },
+    subtitle: {
+      fontSize: 10,
+      color: C.textMuted,
+      marginTop: 1,
+      letterSpacing: t.sectionLabelLetterSpacing,
+    },
+    divider: {
+      height: 1,
+    },
+    statRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+    },
+    statLabel: {
+      fontSize: 11,
+      color: C.textMuted,
+      fontWeight: "600",
+      letterSpacing: t.sectionLabelLetterSpacing,
+    },
+    statValue: {
+      fontSize: 12,
+      color: C.text,
+      fontWeight: "700",
+      fontVariant,
+      letterSpacing: 0.2,
+    },
+  });
+};

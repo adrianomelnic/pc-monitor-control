@@ -1,11 +1,9 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { StyleSheet, Text, View } from "react-native";
-import Colors from "@/constants/colors";
+import { Theme, tabularNumsVariant } from "@/constants/themes";
+import { useTheme } from "@/context/ThemeContext";
 import { DiskInfo } from "@/context/PcsContext";
 import { BuiltinCardEdit, CardBase, CardTitleEditConfig, MiniBar, StatRow, TempBadge } from "./CardBase";
-
-const C = Colors.light;
-const ACCENT = "#00BFA5";
 
 function fmtMB(mb: number) {
   if (mb >= 1024 * 1024) return `${(mb / 1024 / 1024).toFixed(1)} TB`;
@@ -24,6 +22,13 @@ interface Props {
 }
 
 export function DisksCard({ disks, titleEdit, cardEdit }: Props) {
+  const { theme } = useTheme();
+  const C = theme.colors;
+  const ACCENT = theme.cardAccents.disks;
+  const WRITE_COLOR = theme.cardAccents.gpu;
+  const styles = useMemo(() => createStyles(theme), [theme]);
+  const sectionLabel = (s: string) => (theme.titleCase === "upper" ? s.toUpperCase() : s);
+
   if (!disks || disks.length === 0) return null;
   const hidden = new Set(cardEdit?.hiddenFields ?? []);
   const defaultKeys = disks.map(d => d.device || d.mountpoint);
@@ -39,7 +44,7 @@ export function DisksCard({ disks, titleEdit, cardEdit }: Props) {
     const disk = diskMap.get(key);
     if (disk) {
       const label = disk.device.replace(/\\\\.\\/, "").replace(/\/$/, "") || disk.mountpoint;
-      const diskColor = disk.percent > 85 ? "#FF4444" : disk.percent > 65 ? "#FFB800" : ACCENT;
+      const diskColor = disk.percent > 85 ? C.danger : disk.percent > 65 ? C.warning : ACCENT;
       return (
         <View key={key} style={[styles.diskItem, idx > 0 && styles.diskDivider]}>
           <View style={styles.diskHeader}>
@@ -48,7 +53,7 @@ export function DisksCard({ disks, titleEdit, cardEdit }: Props) {
                 <Text style={[styles.diskBadgeText, { color: ACCENT }]}>{label}</Text>
               </View>
               {disk.fstype ? (
-                <Text style={styles.fstype}>{disk.fstype.toUpperCase()}</Text>
+                <Text style={styles.fstype}>{sectionLabel(disk.fstype)}</Text>
               ) : null}
             </View>
             {disk.temperature != null ? <TempBadge value={disk.temperature} /> : null}
@@ -68,13 +73,13 @@ export function DisksCard({ disks, titleEdit, cardEdit }: Props) {
           </View>
           <View style={styles.ioRow}>
             <View style={styles.ioItem}>
-              <Text style={styles.ioLabel}>READ</Text>
+              <Text style={styles.ioLabel}>{sectionLabel("Read")}</Text>
               <Text style={[styles.ioVal, { color: ACCENT }]}>{fmtSpeed(disk.readSpeed ?? 0)}</Text>
             </View>
             <View style={styles.ioSep} />
             <View style={styles.ioItem}>
-              <Text style={styles.ioLabel}>WRITE</Text>
-              <Text style={[styles.ioVal, { color: "#FF6D00" }]}>{fmtSpeed(disk.writeSpeed ?? 0)}</Text>
+              <Text style={styles.ioLabel}>{sectionLabel("Write")}</Text>
+              <Text style={[styles.ioVal, { color: WRITE_COLOR }]}>{fmtSpeed(disk.writeSpeed ?? 0)}</Text>
             </View>
           </View>
         </View>
@@ -107,35 +112,39 @@ export function DisksCard({ disks, titleEdit, cardEdit }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  diskList: { gap: 0 },
-  diskItem: { gap: 7, paddingVertical: 4 },
-  diskDivider: { borderTopWidth: 1, borderTopColor: C.cardBorder, marginTop: 4, paddingTop: 12 },
-  diskHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  diskTitleRow: { flexDirection: "row", alignItems: "center", gap: 8 },
-  diskBadge: { borderRadius: 2, paddingHorizontal: 8, paddingVertical: 3, borderWidth: 1 },
-  diskBadgeText: { fontSize: 12, fontWeight: "800", letterSpacing: 0.8, fontVariant: ["tabular-nums"] },
-  fstype: { fontSize: 9, color: C.textMuted, fontWeight: "700", letterSpacing: 1 },
-  usageRow: { flexDirection: "row", alignItems: "center", gap: 8 },
-  usageFlex: { flex: 1 },
-  usagePct: { fontSize: 12, fontWeight: "800", width: 36, textAlign: "right", fontVariant: ["tabular-nums"] },
-  spaceRow: { flexDirection: "row", alignItems: "center", gap: 6 },
-  spaceUsed: { fontSize: 10, color: C.text, fontWeight: "600", fontVariant: ["tabular-nums"] },
-  spaceFree: { fontSize: 10, color: C.success, fontWeight: "600", fontVariant: ["tabular-nums"] },
-  spaceTotal: { fontSize: 10, color: C.textMuted, fontWeight: "500", fontVariant: ["tabular-nums"] },
-  spaceSep: { fontSize: 10, color: C.textMuted },
-  ioRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: C.backgroundSecondary,
-    borderRadius: 2,
-    borderWidth: 1,
-    borderColor: C.cardBorder,
-    padding: 8,
-    gap: 0,
-  },
-  ioItem: { flex: 1, alignItems: "center", gap: 2 },
-  ioLabel: { fontSize: 9, color: C.textMuted, fontWeight: "700", letterSpacing: 1.2 },
-  ioVal: { fontSize: 13, fontWeight: "800", fontVariant: ["tabular-nums"] },
-  ioSep: { width: 1, height: 28, backgroundColor: C.cardBorder },
-});
+const createStyles = (t: Theme) => {
+  const C = t.colors;
+  const fontVariant = tabularNumsVariant(t);
+  return StyleSheet.create({
+    diskList: { gap: 0 },
+    diskItem: { gap: 7, paddingVertical: 4 },
+    diskDivider: { borderTopWidth: 1, borderTopColor: C.cardBorder, marginTop: 4, paddingTop: 12 },
+    diskHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+    diskTitleRow: { flexDirection: "row", alignItems: "center", gap: 8 },
+    diskBadge: { borderRadius: t.innerRadius, paddingHorizontal: 8, paddingVertical: 3, borderWidth: 1 },
+    diskBadgeText: { fontSize: 12, fontWeight: "800", letterSpacing: t.sectionLabelLetterSpacing, fontVariant },
+    fstype: { fontSize: 9, color: C.textMuted, fontWeight: "700", letterSpacing: t.sectionLabelLetterSpacing },
+    usageRow: { flexDirection: "row", alignItems: "center", gap: 8 },
+    usageFlex: { flex: 1 },
+    usagePct: { fontSize: 12, fontWeight: "800", width: 36, textAlign: "right", fontVariant },
+    spaceRow: { flexDirection: "row", alignItems: "center", gap: 6 },
+    spaceUsed: { fontSize: 10, color: C.text, fontWeight: "600", fontVariant },
+    spaceFree: { fontSize: 10, color: C.success, fontWeight: "600", fontVariant },
+    spaceTotal: { fontSize: 10, color: C.textMuted, fontWeight: "500", fontVariant },
+    spaceSep: { fontSize: 10, color: C.textMuted },
+    ioRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: C.backgroundSecondary,
+      borderRadius: t.innerRadius,
+      borderWidth: 1,
+      borderColor: C.cardBorder,
+      padding: 8,
+      gap: 0,
+    },
+    ioItem: { flex: 1, alignItems: "center", gap: 2 },
+    ioLabel: { fontSize: 9, color: C.textMuted, fontWeight: "700", letterSpacing: t.sectionLabelLetterSpacing },
+    ioVal: { fontSize: 13, fontWeight: "800", fontVariant },
+    ioSep: { width: 1, height: 28, backgroundColor: C.cardBorder },
+  });
+};

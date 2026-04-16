@@ -1,10 +1,8 @@
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
-  KeyboardAvoidingView,
   Modal,
-  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -15,12 +13,11 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SensorReading } from "@/context/PcsContext";
 import { CustomCardLayout } from "@/context/DashboardContext";
-import Colors from "@/constants/colors";
+import { Theme, tabularNumsVariant, accentEdgeStyle } from "@/constants/themes";
+import { useTheme } from "@/context/ThemeContext";
 import { CardBase, MiniBar, StatRow } from "./CardBase";
 import { DraggableFieldList } from "@/components/DraggableFieldList";
 import { SENSOR_ICON_OPTIONS, renderSensorIcon } from "./ThermalsCard";
-
-const C = Colors.light;
 
 // ─── Formatting helpers ───────────────────────────────────────────────────────
 
@@ -54,10 +51,10 @@ function formatBigNum(s: SensorReading): { num: string; unit: string } {
   }
 }
 
-function valueColor(s: SensorReading, accent: string): string {
+function valueColor(s: SensorReading, accent: string, theme: Theme): string {
   if (s.type === "temperature") {
-    if (s.value > 85) return "#FF4444";
-    if (s.value > 70) return "#FFB800";
+    if (s.value > 85) return theme.colors.danger;
+    if (s.value > 70) return theme.colors.warning;
   }
   return accent;
 }
@@ -133,6 +130,9 @@ export function CompactSensorPicker({
   onClose,
 }: CompactPickerProps) {
   const insets = useSafeAreaInsets();
+  const { theme } = useTheme();
+  const C = theme.colors;
+  const pickerStyles = useMemo(() => createPickerStyles(theme), [theme]);
   const [search, setSearch] = useState("");
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
 
@@ -173,7 +173,6 @@ export function CompactSensorPicker({
       onRequestClose={onClose}
     >
       <View style={[pickerStyles.root, { paddingBottom: insets.bottom }]}>
-        {/* Header */}
         <View style={pickerStyles.header}>
           <Pressable onPress={onClose} hitSlop={10}>
             <Text style={pickerStyles.cancel}>Cancel</Text>
@@ -182,7 +181,6 @@ export function CompactSensorPicker({
           <View style={{ width: 56 }} />
         </View>
 
-        {/* Search */}
         <View style={pickerStyles.searchWrap}>
           <Feather name="search" size={14} color={C.textMuted} />
           <TextInput
@@ -196,7 +194,6 @@ export function CompactSensorPicker({
           />
         </View>
 
-        {/* Sensor list */}
         <ScrollView
           style={pickerStyles.scroll}
           keyboardShouldPersistTaps="handled"
@@ -244,116 +241,76 @@ export function CompactSensorPicker({
   );
 }
 
-const pickerStyles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: C.background,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingTop: 20,
-    paddingBottom: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: C.cardBorder,
-  },
-  cancel: {
-    fontSize: 14,
-    color: C.tint,
-    fontWeight: "500",
-    width: 56,
-  },
-  heading: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: C.text,
-  },
-  searchWrap: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    margin: 12,
-    backgroundColor: C.card,
-    borderRadius: 4,
-    borderWidth: 1,
-    borderColor: C.cardBorder,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: 14,
-    color: C.text,
-  },
-  scroll: {
-    flex: 1,
-    paddingHorizontal: 12,
-  },
-  empty: {
-    fontSize: 13,
-    color: C.textMuted,
-    textAlign: "center",
-    marginTop: 40,
-  },
-  group: {
-    marginBottom: 10,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: C.cardBorder,
-    overflow: "hidden",
-    backgroundColor: C.card,
-  },
-  groupHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    padding: 10,
-    backgroundColor: C.backgroundSecondary,
-  },
-  groupName: {
-    flex: 1,
-    fontSize: 12,
-    fontWeight: "700",
-    color: C.text,
-  },
-  groupCount: {
-    fontSize: 11,
-    color: C.textMuted,
-  },
-  sensorRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    paddingVertical: 9,
-    paddingHorizontal: 12,
-    borderTopWidth: 1,
-    borderTopColor: C.cardBorder,
-  },
-  typeBadge: {
-    borderRadius: 4,
-    paddingHorizontal: 5,
-    paddingVertical: 2,
-    minWidth: 32,
-    alignItems: "center",
-  },
-  typeBadgeText: {
-    fontSize: 10,
-    fontWeight: "700",
-  },
-  sensorLabel: {
-    flex: 1,
-    fontSize: 12,
-    color: C.text,
-  },
-  sensorValue: {
-    fontSize: 12,
-    color: C.textMuted,
-  },
-});
-
-
+const createPickerStyles = (t: Theme) => {
+  const C = t.colors;
+  const fontVariant = tabularNumsVariant(t);
+  return StyleSheet.create({
+    root: { flex: 1, backgroundColor: C.background },
+    header: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      paddingHorizontal: 16,
+      paddingTop: 20,
+      paddingBottom: 12,
+      borderBottomWidth: 1,
+      borderBottomColor: C.cardBorder,
+    },
+    cancel: { fontSize: 14, color: C.tint, fontWeight: "500", width: 56 },
+    heading: { fontSize: 15, fontWeight: "700", color: C.text },
+    searchWrap: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+      margin: 12,
+      backgroundColor: C.card,
+      borderRadius: t.buttonRadius,
+      borderWidth: 1,
+      borderColor: C.cardBorder,
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+    },
+    searchInput: { flex: 1, fontSize: 14, color: C.text },
+    scroll: { flex: 1, paddingHorizontal: 12 },
+    empty: { fontSize: 13, color: C.textMuted, textAlign: "center", marginTop: 40 },
+    group: {
+      marginBottom: 10,
+      borderRadius: t.innerRadius,
+      borderWidth: 1,
+      borderColor: C.cardBorder,
+      overflow: "hidden",
+      backgroundColor: C.card,
+    },
+    groupHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+      padding: 10,
+      backgroundColor: C.backgroundSecondary,
+    },
+    groupName: { flex: 1, fontSize: 12, fontWeight: "700", color: C.text },
+    groupCount: { fontSize: 11, color: C.textMuted, fontVariant },
+    sensorRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+      paddingVertical: 9,
+      paddingHorizontal: 12,
+      borderTopWidth: 1,
+      borderTopColor: C.cardBorder,
+    },
+    typeBadge: {
+      borderRadius: t.buttonRadius,
+      paddingHorizontal: 5,
+      paddingVertical: 2,
+      minWidth: 32,
+      alignItems: "center",
+    },
+    typeBadgeText: { fontSize: 10, fontWeight: "700", fontVariant },
+    sensorLabel: { flex: 1, fontSize: 12, color: C.text },
+    sensorValue: { fontSize: 12, color: C.textMuted, fontVariant },
+  });
+};
 
 // ─── Main SensorCard component ────────────────────────────────────────────────
 
@@ -398,42 +355,40 @@ export function SensorCard({
   onToggleHidden,
   onUpdateSensorIcon,
 }: Props) {
-  // ── Inline edit state ──────────────────────────────────────────────────────
+  const { theme } = useTheme();
+  const C = theme.colors;
+  const styles = useMemo(() => createStyles(theme), [theme]);
+  const dragStyles = useMemo(() => createDragStyles(theme), [theme]);
+  const sectionLabel = (s: string) => (theme.titleCase === "upper" ? s.toUpperCase() : s);
+
   const [inlineEdit, setInlineEdit] = useState(false);
   const [titleDraft, setTitleDraft] = useState(title);
 
-  // Label renaming
   const [editingOriginal, setEditingOriginal] = useState<string | null>(null);
   const [editText, setEditText] = useState("");
   const [localAliases, setLocalAliases] = useState<Record<string, string>>(sensorAliases ?? {});
 
-  // Compact sensor picker for swap/add
   const [pickerMode, setPickerMode] = useState<"swap" | "add" | null>(null);
   const [swappingOriginal, setSwappingOriginal] = useState<string | null>(null);
 
-  // Icon picker (per-sensor)
   const [iconPickerKey, setIconPickerKey] = useState<string | null>(null);
 
-  // Sync aliases from props
   useEffect(() => {
     setLocalAliases(sensorAliases ?? {});
   }, [sensorAliases]);
 
-  // Sync title draft from props
   useEffect(() => {
     if (!inlineEdit) setTitleDraft(title);
   }, [title, inlineEdit]);
 
   const getDisplayLabel = (original: string) => localAliases[original] ?? original;
 
-  // Long-press enters inline edit mode
   const handleLongPress = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     setTitleDraft(title);
     setInlineEdit(true);
   };
 
-  // Commit any pending label rename
   const commitLabel = () => {
     if (editingOriginal === null) return;
     const newAlias = editText.trim();
@@ -466,7 +421,6 @@ export function SensorCard({
     setEditingOriginal(null);
   };
 
-  // ── Sensor resolution ──────────────────────────────────────────────────────
   const sensorMap = new Map<string, SensorReading>();
   if (sensors) for (const s of sensors) sensorMap.set(s.label, s);
 
@@ -479,11 +433,9 @@ export function SensorCard({
 
   const missing = sensorLabels.filter((lbl) => !sensorMap.has(lbl));
 
-  // ── Sensor icon helper ─────────────────────────────────────────────────────
   const getSensorIcon = (key: string, type?: string): string =>
     sensorIcons?.[key] ?? (type ? sensorTypeIcon(type) : "sliders");
 
-  // ── Layout decision ────────────────────────────────────────────────────────
   const effectiveLayout = layout === "auto"
     ? (resolvedVisible.length >= 2 && resolvedVisible.length <= 8 ? "split" : "list")
     : layout;
@@ -492,11 +444,10 @@ export function SensorCard({
   const featuredItem = featured ? resolvedVisible.find((r) => r.sensor === featured) ?? null : null;
   const rest = featuredItem ? resolvedVisible.filter((r) => r !== featuredItem) : resolvedVisible;
 
-  const bigColor = featured ? valueColor(featured, accentColor) : accentColor;
+  const bigColor = featured ? valueColor(featured, accentColor, theme) : accentColor;
   const bigNum = featured ? formatBigNum(featured) : null;
   const headerTemp = !inlineEdit && featured?.type === "temperature" ? featured.value : null;
 
-  // Exclude labels for the picker
   const excludeForPicker =
     pickerMode === "add"
       ? sensorLabels
@@ -504,7 +455,6 @@ export function SensorCard({
       ? sensorLabels.filter((l) => l !== swappingOriginal)
       : [];
 
-  // ── Right action ──────────────────────────────────────────────────────────
   const rightAction = inlineEdit ? (
     <Pressable
       onPress={exitInlineEdit}
@@ -516,17 +466,15 @@ export function SensorCard({
     </Pressable>
   ) : undefined;
 
-  // ── View-mode sensor row ───────────────────────────────────────────────────
   const renderSensorRow = (r: { original: string; sensor: SensorReading }, i: number) => (
     <StatRow
       key={i}
       label={getDisplayLabel(r.original)}
       value={formatValue(r.sensor)}
-      color={valueColor(r.sensor, accentColor)}
+      color={valueColor(r.sensor, accentColor, theme)}
     />
   );
 
-  // ── Edit-mode draggable row ────────────────────────────────────────────────
   const renderEditRow = (key: string, drag: () => void, isActive: boolean) => {
     const sensorReading = sensorMap.get(key);
     const isEditingThisLabel = editingOriginal === key;
@@ -538,7 +486,6 @@ export function SensorCard({
     return (
       <View key={key}>
         <View style={[dragStyles.editPanelRow, isActive && { opacity: 0.85 }]}>
-          {/* ≡ drag handle */}
           <Pressable
             onLongPress={drag}
             delayLongPress={150}
@@ -548,7 +495,6 @@ export function SensorCard({
             <Feather name="menu" size={15} color={isActive ? accentColor : C.textMuted + "99"} />
           </Pressable>
 
-          {/* Eye toggle */}
           <Pressable onPress={() => onToggleHidden?.(key)} hitSlop={4}>
             <View style={[dragStyles.editPanelToggle, {
               borderColor: isHidden ? C.textMuted : accentColor,
@@ -558,7 +504,6 @@ export function SensorCard({
             </View>
           </Pressable>
 
-          {/* Icon picker button */}
           <Pressable
             onPress={() => { commitLabel(); setIconPickerKey(isPickerOpen ? null : key); }}
             hitSlop={4}
@@ -567,7 +512,6 @@ export function SensorCard({
             {renderSensorIcon(currentIcon, 13, isPickerOpen ? accentColor : C.textMuted)}
           </Pressable>
 
-          {/* Label */}
           {isEditingThisLabel ? (
             <TextInput
               style={[dragStyles.editPanelRowText, dragStyles.editPanelLabelInput, { borderBottomColor: accentColor }]}
@@ -595,7 +539,6 @@ export function SensorCard({
             </Pressable>
           )}
 
-          {/* Replace */}
           <Pressable
             onPress={() => { commitLabel(); setIconPickerKey(null); setSwappingOriginal(key); setPickerMode("swap"); }}
             hitSlop={8}
@@ -604,7 +547,6 @@ export function SensorCard({
             <Feather name="refresh-cw" size={13} color={accentColor} style={{ opacity: 0.7 }} />
           </Pressable>
 
-          {/* Remove */}
           <Pressable
             onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onRemoveSensor?.(key); }}
             hitSlop={8}
@@ -614,7 +556,6 @@ export function SensorCard({
           </Pressable>
         </View>
 
-        {/* Icon picker (opens below row) */}
         {isPickerOpen && (
           <ScrollView
             style={[dragStyles.iconPickerScroll, { borderColor: accentColor + "33" }]}
@@ -673,7 +614,6 @@ export function SensorCard({
               {onEdit ? " Long-press to edit." : ""}
             </Text>
           ) : inlineEdit ? (
-            /* ── EDIT MODE: unified draggable list (all layouts) ── */
             <DraggableFieldList
               keys={sensorLabels}
               onReorder={(newOrder) => onReorder?.(newOrder)}
@@ -685,10 +625,8 @@ export function SensorCard({
               Sensor data unavailable — make sure HWiNFO64 is running.
             </Text>
           ) : useSplitLayout && featured && featuredItem ? (
-            /* ── SPLIT LAYOUT ── */
             <>
               <View style={styles.mainRow}>
-                {/* Featured big number */}
                 <View style={styles.bigStat}>
                   <Text style={[styles.bigNum, { color: bigColor }]}>
                     {bigNum!.num}
@@ -697,7 +635,6 @@ export function SensorCard({
                   {renderBigLabel(featuredItem.original)}
                 </View>
 
-                {/* Stat rows */}
                 <View style={styles.detailGrid}>
                   {rest.slice(0, 6).map((r, i) => renderSensorRow(r, i))}
                 </View>
@@ -716,7 +653,6 @@ export function SensorCard({
               )}
             </>
           ) : resolvedVisible.length === 1 ? (
-            /* ── SINGLE SENSOR ── */
             <View style={styles.singleStat}>
               <Text style={[styles.singleNum, { color: bigColor }]}>
                 {formatBigNum(resolvedVisible[0].sensor).num}
@@ -730,20 +666,19 @@ export function SensorCard({
               )}
             </View>
           ) : effectiveLayout === "tiles" ? (
-            /* ── TILES LAYOUT ── */
             <View style={styles.tilesGrid}>
               {chunkArray(resolvedVisible, 3).map((row, ri) => (
                 <View key={ri} style={styles.tilesRow}>
                   {row.map((r) => {
                     const { num, unit } = formatBigNum(r.sensor);
-                    const col = valueColor(r.sensor, accentColor);
+                    const col = valueColor(r.sensor, accentColor, theme);
                     return (
-                      <View key={r.original} style={[styles.tile, { borderColor: accentColor + "30" }]}>
+                      <View key={r.original} style={[styles.tile, { borderColor: accentColor + "30" }, accentEdgeStyle(theme, accentColor + "55", 2)]}>
                         <View style={styles.tileIcon}>
                           {renderSensorIcon(getSensorIcon(r.original, r.sensor.type), 14, accentColor)}
                         </View>
                         <Text style={styles.tileLabel} numberOfLines={2}>
-                          {getDisplayLabel(r.original).toUpperCase()}
+                          {sectionLabel(getDisplayLabel(r.original))}
                         </Text>
                         <Text style={[styles.tileValue, { color: col }]}>{num}</Text>
                         <Text style={[styles.tileUnit, { color: accentColor }]}>{unit}</Text>
@@ -757,20 +692,17 @@ export function SensorCard({
               ))}
             </View>
           ) : (
-            /* ── PURE STAT ROWS ── */
             <View style={styles.pureRows}>
               {resolvedVisible.map((r, i) => renderSensorRow(r, i))}
             </View>
           )}
 
-          {/* Missing sensors notice */}
           {missing.length > 0 && !inlineEdit && (
             <Text style={styles.missingNote}>
               {missing.length} sensor{missing.length > 1 ? "s" : ""} not in current data
             </Text>
           )}
 
-          {/* Add sensor + Full edit (inline edit mode only) */}
           {inlineEdit && (
             <View style={styles.editActions}>
               <Pressable
@@ -802,7 +734,6 @@ export function SensorCard({
         </CardBase>
       </Pressable>
 
-      {/* Compact sensor picker modal */}
       <CompactSensorPicker
         visible={pickerMode !== null}
         title={pickerMode === "add" ? "Add Sensor" : "Replace Sensor"}
@@ -827,239 +758,160 @@ export function SensorCard({
   );
 }
 
-const styles = StyleSheet.create({
-  doneBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    borderRadius: 4,
-    borderWidth: 1,
-    paddingHorizontal: 9,
-    paddingVertical: 4,
-  },
-  doneBtnText: {
-    fontSize: 12,
-    fontWeight: "700",
-  },
-  mainRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 16,
-  },
-  bigStat: {
-    alignItems: "center",
-    minWidth: 68,
-  },
-  bigNum: {
-    fontSize: 34,
-    fontWeight: "800",
-    letterSpacing: -1,
-    lineHeight: 38,
-  },
-  bigUnit: {
-    fontSize: 16,
-    fontWeight: "500",
-  },
-  bigLabelText: {
-    fontSize: 11,
-    color: C.textSecondary,
-    marginTop: 3,
-    textAlign: "center",
-    lineHeight: 14,
-  },
-  detailGrid: {
-    flex: 1,
-    gap: 6,
-    justifyContent: "center",
-  },
-  barSection: {
-    marginTop: 2,
-  },
-  overflowRows: {
-    gap: 6,
-    borderTopWidth: 1,
-    borderTopColor: C.cardBorder,
-    paddingTop: 8,
-    marginTop: 4,
-  },
-  singleStat: {
-    alignItems: "center",
-    paddingVertical: 8,
-  },
-  singleNum: {
-    fontSize: 48,
-    fontWeight: "800",
-    letterSpacing: -2,
-    lineHeight: 52,
-  },
-  singleUnit: {
-    fontSize: 22,
-    fontWeight: "500",
-  },
-  pureRows: {
-    gap: 6,
-  },
-  editActions: {
-    flexDirection: "row",
-    gap: 8,
-    marginTop: 8,
-    borderTopWidth: 1,
-    borderTopColor: C.cardBorder,
-    paddingTop: 10,
-  },
-  editActionBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 5,
-    borderRadius: 4,
-    borderWidth: 1,
-    borderColor: C.cardBorder,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-  },
-  editActionText: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: C.textMuted,
-  },
-  empty: {
-    fontSize: 13,
-    color: C.textMuted,
-    textAlign: "center",
-    paddingVertical: 12,
-    lineHeight: 20,
-  },
-  missingNote: {
-    fontSize: 11,
-    color: C.textMuted,
-    fontStyle: "italic",
-    textAlign: "right",
-  },
-  tilesGrid: {
-    gap: 8,
-  },
-  tilesRow: {
-    flexDirection: "row",
-    gap: 8,
-  },
-  tile: {
-    flex: 1,
-    backgroundColor: C.backgroundSecondary,
-    borderRadius: 2,
-    borderWidth: 1,
-    borderColor: C.cardBorder,
-    borderLeftWidth: 2,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 14,
-    paddingHorizontal: 4,
-    minWidth: 0,
-  },
-  tilePlaceholder: {
-    flex: 1,
-  },
-  tileIcon: {
-    marginBottom: 5,
-    opacity: 0.6,
-  },
-  tileLabel: {
-    fontSize: 8,
-    fontWeight: "700",
-    color: C.textMuted,
-    letterSpacing: 0.8,
-    marginBottom: 3,
-    textAlign: "center",
-  },
-  tileValue: {
-    fontSize: 20,
-    fontWeight: "700",
-    textAlign: "center",
-    lineHeight: 24,
-  },
-  tileUnit: {
-    fontSize: 9,
-    fontWeight: "700",
-    letterSpacing: 0.6,
-    marginTop: 1,
-    opacity: 0.75,
-  },
-});
+const createStyles = (t: Theme) => {
+  const C = t.colors;
+  const fontVariant = tabularNumsVariant(t);
+  return StyleSheet.create({
+    doneBtn: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 4,
+      borderRadius: t.buttonRadius,
+      borderWidth: 1,
+      paddingHorizontal: 9,
+      paddingVertical: 4,
+    },
+    doneBtnText: { fontSize: 12, fontWeight: "700" },
+    mainRow: { flexDirection: "row", alignItems: "flex-start", gap: 16 },
+    bigStat: { alignItems: "center", minWidth: 68 },
+    bigNum: { fontSize: 34, fontWeight: "800", letterSpacing: -1, lineHeight: 38, fontVariant },
+    bigUnit: { fontSize: 16, fontWeight: "500" },
+    bigLabelText: {
+      fontSize: 11,
+      color: C.textSecondary,
+      marginTop: 3,
+      textAlign: "center",
+      lineHeight: 14,
+    },
+    detailGrid: { flex: 1, gap: 6, justifyContent: "center" },
+    barSection: { marginTop: 2 },
+    overflowRows: {
+      gap: 6,
+      borderTopWidth: 1,
+      borderTopColor: C.cardBorder,
+      paddingTop: 8,
+      marginTop: 4,
+    },
+    singleStat: { alignItems: "center", paddingVertical: 8 },
+    singleNum: { fontSize: 48, fontWeight: "800", letterSpacing: -2, lineHeight: 52, fontVariant },
+    singleUnit: { fontSize: 22, fontWeight: "500" },
+    pureRows: { gap: 6 },
+    editActions: {
+      flexDirection: "row",
+      gap: 8,
+      marginTop: 8,
+      borderTopWidth: 1,
+      borderTopColor: C.cardBorder,
+      paddingTop: 10,
+    },
+    editActionBtn: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 5,
+      borderRadius: t.buttonRadius,
+      borderWidth: 1,
+      borderColor: C.cardBorder,
+      paddingHorizontal: 10,
+      paddingVertical: 6,
+    },
+    editActionText: { fontSize: 12, fontWeight: "600", color: C.textMuted },
+    empty: {
+      fontSize: 13,
+      color: C.textMuted,
+      textAlign: "center",
+      paddingVertical: 12,
+      lineHeight: 20,
+    },
+    missingNote: { fontSize: 11, color: C.textMuted, fontStyle: "italic", textAlign: "right" },
+    tilesGrid: { gap: 8 },
+    tilesRow: { flexDirection: "row", gap: 8 },
+    tile: {
+      flex: 1,
+      backgroundColor: C.backgroundSecondary,
+      borderRadius: t.innerRadius,
+      borderWidth: 1,
+      borderColor: C.cardBorder,
+      alignItems: "center",
+      justifyContent: "center",
+      paddingVertical: 14,
+      paddingHorizontal: 4,
+      minWidth: 0,
+    },
+    tilePlaceholder: { flex: 1 },
+    tileIcon: { marginBottom: 5, opacity: 0.6 },
+    tileLabel: {
+      fontSize: 8,
+      fontWeight: "700",
+      color: C.textMuted,
+      letterSpacing: t.sectionLabelLetterSpacing,
+      marginBottom: 3,
+      textAlign: "center",
+    },
+    tileValue: { fontSize: 20, fontWeight: "700", textAlign: "center", lineHeight: 24, fontVariant },
+    tileUnit: {
+      fontSize: 9,
+      fontWeight: "700",
+      letterSpacing: t.sectionLabelLetterSpacing,
+      marginTop: 1,
+      opacity: 0.75,
+    },
+  });
+};
 
-const dragStyles = StyleSheet.create({
-  editPanelRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    paddingVertical: 3,
-  },
-  editPanelDragHandle: {
-    paddingHorizontal: 3,
-    paddingVertical: 4,
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 2,
-  },
-  editPanelToggle: {
-    width: 24,
-    height: 24,
-    borderRadius: 4,
-    borderWidth: 1.5,
-    alignItems: "center",
-    justifyContent: "center",
-    flexShrink: 0,
-  },
-  editPanelIconBtn: {
-    width: 26,
-    height: 26,
-    borderRadius: 4,
-    borderWidth: 1,
-    borderColor: C.cardBorder,
-    alignItems: "center",
-    justifyContent: "center",
-    flexShrink: 0,
-  },
-  editPanelLabelPress: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 5,
-  },
-  editPanelRowText: {
-    fontSize: 12,
-    color: C.text,
-    fontWeight: "500",
-    flex: 1,
-  },
-  editPanelLabelInput: {
-    borderBottomWidth: 1.5,
-    paddingVertical: 0,
-    paddingHorizontal: 0,
-  },
-  editPanelActionBtn: {
-    paddingLeft: 8,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  iconPickerScroll: {
-    maxHeight: 364,
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    marginBottom: 2,
-  },
-  iconPickerRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 6,
-    paddingVertical: 8,
-    paddingHorizontal: 4,
-  },
-  iconPickerBtn: {
-    width: 52,
-    height: 52,
-    borderRadius: 4,
-    borderWidth: 1,
-    borderColor: C.cardBorder,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-});
+const createDragStyles = (t: Theme) => {
+  const C = t.colors;
+  return StyleSheet.create({
+    editPanelRow: { flexDirection: "row", alignItems: "center", gap: 8, paddingVertical: 3 },
+    editPanelDragHandle: {
+      paddingHorizontal: 3,
+      paddingVertical: 4,
+      justifyContent: "center",
+      alignItems: "center",
+      marginRight: 2,
+    },
+    editPanelToggle: {
+      width: 24,
+      height: 24,
+      borderRadius: t.buttonRadius,
+      borderWidth: 1.5,
+      alignItems: "center",
+      justifyContent: "center",
+      flexShrink: 0,
+    },
+    editPanelIconBtn: {
+      width: 26,
+      height: 26,
+      borderRadius: t.buttonRadius,
+      borderWidth: 1,
+      borderColor: C.cardBorder,
+      alignItems: "center",
+      justifyContent: "center",
+      flexShrink: 0,
+    },
+    editPanelLabelPress: { flex: 1, flexDirection: "row", alignItems: "center", gap: 5 },
+    editPanelRowText: { fontSize: 12, color: C.text, fontWeight: "500", flex: 1 },
+    editPanelLabelInput: {
+      borderBottomWidth: 1.5,
+      paddingVertical: 0,
+      paddingHorizontal: 0,
+    },
+    editPanelActionBtn: { paddingLeft: 8, justifyContent: "center", alignItems: "center" },
+    iconPickerScroll: { maxHeight: 364, borderTopWidth: 1, borderBottomWidth: 1, marginBottom: 2 },
+    iconPickerRow: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      gap: 6,
+      paddingVertical: 8,
+      paddingHorizontal: 4,
+    },
+    iconPickerBtn: {
+      width: 52,
+      height: 52,
+      borderRadius: t.buttonRadius,
+      borderWidth: 1,
+      borderColor: C.cardBorder,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+  });
+};

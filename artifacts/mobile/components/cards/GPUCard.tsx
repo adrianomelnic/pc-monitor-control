@@ -1,11 +1,9 @@
-import React from "react";
-import { Platform, StyleSheet, Text, View } from "react-native";
-import Colors from "@/constants/colors";
+import React, { useMemo } from "react";
+import { StyleSheet, Text, View } from "react-native";
+import { Theme, tabularNumsVariant } from "@/constants/themes";
+import { useTheme } from "@/context/ThemeContext";
 import { GPUInfo } from "@/context/PcsContext";
 import { BuiltinCardEdit, CardBase, CardTitleEditConfig, MiniBar, StatRow } from "./CardBase";
-
-const C = Colors.light;
-const ACCENT = "#FF6D00";
 
 function fmtMB(mb: number | null) {
   if (mb == null) return "—";
@@ -21,6 +19,10 @@ interface Props {
 }
 
 export function GPUCard({ gpus, titleEdit, cardEdit }: Props) {
+  const { theme } = useTheme();
+  const ACCENT = theme.cardAccents.gpu;
+  const styles = useMemo(() => createStyles(theme), [theme]);
+  const sectionLabel = (s: string) => (theme.titleCase === "upper" ? s.toUpperCase() : s);
   const base = titleEdit?.customTitle ?? "GPU";
   const hidden = cardEdit?.hiddenFields !== undefined
     ? new Set(cardEdit.hiddenFields)
@@ -117,7 +119,7 @@ export function GPUCard({ gpus, titleEdit, cardEdit }: Props) {
                   <Text style={[styles.bigNum, { color: ACCENT }]}>{Math.round(gpu.usage!)}
                     <Text style={styles.bigUnit}>%</Text>
                   </Text>
-                  <Text style={styles.bigLabel}>{getLabel("usage", "GPU LOAD")}</Text>
+                  <Text style={styles.bigLabel}>{sectionLabel(getLabel("usage", "GPU Load"))}</Text>
                 </View>
                 <View style={styles.heroRight}>
                   {rightFields.map(key => renderRightField(key))}
@@ -131,7 +133,7 @@ export function GPUCard({ gpus, titleEdit, cardEdit }: Props) {
             {showVram && (
               <View style={styles.barSection}>
                 <View style={styles.barHeader}>
-                  <Text style={styles.sectionLabel}>VRAM</Text>
+                  <Text style={styles.sectionLabel}>{sectionLabel("VRAM")}</Text>
                   <Text style={styles.barCaption}>
                     {fmtMB(gpu.vramUsed)} / {fmtMB(gpu.vramTotal)}
                   </Text>
@@ -146,72 +148,48 @@ export function GPUCard({ gpus, titleEdit, cardEdit }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  heroRow: {
-    flexDirection: "row",
-    gap: 14,
-    alignItems: "flex-start",
-  },
-  heroLeft: {
-    alignItems: "center",
-    justifyContent: "flex-start",
-    minWidth: 60,
-    paddingTop: 0,
-  },
-  heroRight: {
-    flex: 1,
-    gap: 6,
-  },
-  bigNum: {
-    fontSize: 32,
-    fontWeight: "800",
-    letterSpacing: -1.5,
-    fontVariant: ["tabular-nums"],
-    lineHeight: 36,
-  },
-  bigUnit: {
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  bigLabel: {
-    fontSize: 9,
-    color: C.textMuted,
-    fontWeight: "700",
-    marginTop: 2,
-    letterSpacing: 1.5,
-  },
-  fieldList: {
-    gap: 6,
-  },
-  barSection: {
-    gap: 4,
-    marginTop: 2,
-  },
-  barHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  sectionLabel: {
-    fontSize: 9,
-    fontWeight: "700",
-    color: C.textMuted,
-    letterSpacing: 1.5,
-  },
-  barPct: {
-    fontSize: 11,
-    fontWeight: "700",
-  },
-  barCaption: {
-    fontSize: 10,
-    color: C.textSecondary,
-    fontWeight: "600",
-    fontVariant: ["tabular-nums"],
-  },
-  empty: {
-    fontSize: 12,
-    color: C.textMuted,
-    textAlign: "center",
-    paddingVertical: 8,
-  },
-});
+const createStyles = (t: Theme) => {
+  const C = t.colors;
+  const fontVariant = tabularNumsVariant(t);
+  return StyleSheet.create({
+    heroRow: { flexDirection: "row", gap: 14, alignItems: "flex-start" },
+    heroLeft: { alignItems: "center", justifyContent: "flex-start", minWidth: 60, paddingTop: 0 },
+    heroRight: { flex: 1, gap: 6 },
+    bigNum: {
+      fontSize: 32,
+      fontWeight: "800",
+      letterSpacing: -1.5,
+      fontVariant,
+      lineHeight: 36,
+    },
+    bigUnit: { fontSize: 16, fontWeight: "600" },
+    bigLabel: {
+      fontSize: 9,
+      color: C.textMuted,
+      fontWeight: "700",
+      marginTop: 2,
+      letterSpacing: t.sectionLabelLetterSpacing,
+    },
+    fieldList: { gap: 6 },
+    barSection: { gap: 4, marginTop: 2 },
+    barHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+    sectionLabel: {
+      fontSize: 9,
+      fontWeight: "700",
+      color: C.textMuted,
+      letterSpacing: t.sectionLabelLetterSpacing,
+    },
+    barCaption: {
+      fontSize: 10,
+      color: C.textSecondary,
+      fontWeight: "600",
+      fontVariant,
+    },
+    empty: {
+      fontSize: 12,
+      color: C.textMuted,
+      textAlign: "center",
+      paddingVertical: 8,
+    },
+  });
+};

@@ -13,9 +13,8 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ACCENT_COLORS, CustomCardLayout } from "@/context/DashboardContext";
 import { SensorReading } from "@/context/PcsContext";
-import Colors from "@/constants/colors";
-
-const C = Colors.light;
+import { Theme, tabularNumsVariant, accentEdgeStyle } from "@/constants/themes";
+import { useTheme } from "@/context/ThemeContext";
 
 // ─── Icon picker options ──────────────────────────────────────────────────────
 
@@ -42,7 +41,6 @@ export const ICON_OPTIONS: { name: string; label: string }[] = [
   { name: "eye",         label: "Monitor"  },
 ];
 
-// Short badge label for each reading type
 const TYPE_BADGE: Record<string, { label: string; color: string }> = {
   temperature: { label: "°C",  color: "#FB923C" },
   fan:         { label: "RPM", color: "#60A5FA" },
@@ -97,6 +95,11 @@ export function SensorPickerModal({
   isEdit = false,
 }: Props) {
   const insets = useSafeAreaInsets();
+  const { theme } = useTheme();
+  const C = theme.colors;
+  const styles = useMemo(() => createStyles(theme), [theme]);
+  const sectionLabel = (s: string) => (theme.titleCase === "upper" ? s.toUpperCase() : s);
+
   const [title, setTitle] = useState(initialTitle);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [accentColor, setAccentColor] = useState(initialColor ?? ACCENT_COLORS[0]);
@@ -105,10 +108,8 @@ export function SensorPickerModal({
   const [search, setSearch] = useState("");
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
-  // Build a compound key so sensors with the same label in different components don't collide
   const compKey = (comp: string, label: string) => `${comp}\x00${label}`;
 
-  // Map saved labels back to compound keys using the current sensors list
   const labelsToKeys = (labels: string[]): Set<string> => {
     const result = new Set<string>();
     for (const label of labels) {
@@ -139,7 +140,6 @@ export function SensorPickerModal({
     });
   };
 
-  // Group by component (hardware device), preserving HWiNFO64 order
   const grouped = useMemo(() => {
     const q = search.toLowerCase();
     const orderMap: Record<string, number> = {};
@@ -158,7 +158,6 @@ export function SensorPickerModal({
       map[comp].push(s);
     }
 
-    // Sort by original appearance order (not alphabetically)
     return Object.keys(map)
       .sort((a, b) => orderMap[a] - orderMap[b])
       .map((comp) => ({ comp, items: map[comp] }));
@@ -174,7 +173,6 @@ export function SensorPickerModal({
     });
   };
 
-  // Select / deselect all sensors for a component group
   const toggleGroup = (comp: string, items: SensorReading[]) => {
     const keys = items.map(s => compKey(comp, s.label));
     const allSelected = keys.every(k => selected.has(k));
@@ -190,7 +188,6 @@ export function SensorPickerModal({
   };
 
   const handleSave = () => {
-    // Strip the component prefix — save only the label portion
     const labels = Array.from(selected).map(key => {
       const sep = key.indexOf("\x00");
       return sep >= 0 ? key.slice(sep + 1) : key;
@@ -204,7 +201,6 @@ export function SensorPickerModal({
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
       <View style={[styles.root, { paddingTop: insets.top > 0 ? insets.top : 16 }]}>
-        {/* ── Header ── */}
         <View style={styles.sheetHeader}>
           <Pressable onPress={onClose} hitSlop={8}>
             <Text style={styles.cancelBtn}>Cancel</Text>
@@ -218,9 +214,8 @@ export function SensorPickerModal({
         </View>
 
         <ScrollView style={styles.scroll} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
-          {/* ── Card Title ── */}
           <View style={styles.section}>
-            <Text style={styles.sectionLabel}>CARD TITLE</Text>
+            <Text style={styles.sectionLabel}>{sectionLabel("Card Title")}</Text>
             <TextInput
               style={styles.titleInput}
               value={title}
@@ -232,9 +227,8 @@ export function SensorPickerModal({
             />
           </View>
 
-          {/* ── Icon Picker ── */}
           <View style={styles.section}>
-            <Text style={styles.sectionLabel}>ICON</Text>
+            <Text style={styles.sectionLabel}>{sectionLabel("Icon")}</Text>
             <View style={styles.iconGrid}>
               {ICON_OPTIONS.map((opt) => {
                 const active = icon === opt.name;
@@ -256,9 +250,8 @@ export function SensorPickerModal({
             </View>
           </View>
 
-          {/* ── Accent Color ── */}
           <View style={styles.section}>
-            <Text style={styles.sectionLabel}>ACCENT COLOR</Text>
+            <Text style={styles.sectionLabel}>{sectionLabel("Accent Color")}</Text>
             <View style={styles.colorRow}>
               {ACCENT_COLORS.map((col) => (
                 <Pressable
@@ -270,9 +263,8 @@ export function SensorPickerModal({
             </View>
           </View>
 
-          {/* ── Layout ── */}
           <View style={styles.section}>
-            <Text style={styles.sectionLabel}>LAYOUT</Text>
+            <Text style={styles.sectionLabel}>{sectionLabel("Layout")}</Text>
             <View style={styles.layoutRow}>
               {LAYOUT_OPTIONS.map((opt) => {
                 const active = layout === opt.value;
@@ -295,10 +287,9 @@ export function SensorPickerModal({
             </View>
           </View>
 
-          {/* ── Search ── */}
           <View style={styles.section}>
             <Text style={styles.sectionLabel}>
-              SELECT SENSORS{selected.size > 0 ? ` · ${selected.size} selected` : ""}
+              {sectionLabel("Select Sensors")}{selected.size > 0 ? ` · ${selected.size} selected` : ""}
             </Text>
             <View style={styles.searchBar}>
               <Feather name="search" size={14} color={C.textMuted} />
@@ -313,7 +304,6 @@ export function SensorPickerModal({
               />
             </View>
 
-            {/* ── Sensor list grouped by hardware component ── */}
             {sensors.length === 0 ? (
               <View style={styles.emptyBox}>
                 <Feather name="alert-circle" size={28} color={C.textMuted} />
@@ -331,7 +321,6 @@ export function SensorPickerModal({
                 const isCollapsed = search.trim() ? false : !expanded.has(comp);
                 return (
                   <View key={comp} style={styles.group}>
-                    {/* Component header row: checkbox = select-all, rest = expand/collapse */}
                     <View style={styles.groupHeader}>
                       <Pressable
                         style={[
@@ -361,7 +350,6 @@ export function SensorPickerModal({
                       </Pressable>
                     </View>
 
-                    {/* Individual sensor rows — hidden when collapsed */}
                     {!isCollapsed && items.map((s, si) => {
                       const isSelected = selected.has(compKey(comp, s.label));
                       const badge = TYPE_BADGE[s.type] ?? TYPE_BADGE.other;
@@ -398,254 +386,167 @@ export function SensorPickerModal({
   );
 }
 
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: C.background,
-  },
-  sheetHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingBottom: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: C.cardBorder,
-  },
-  sheetTitle: {
-    fontSize: 17,
-    fontWeight: "700",
-    color: C.text,
-  },
-  cancelBtn: {
-    fontSize: 16,
-    color: C.textSecondary,
-  },
-  saveBtn: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: C.tint,
-  },
-  scroll: { flex: 1 },
-  section: {
-    paddingHorizontal: 16,
-    paddingTop: 20,
-    gap: 10,
-  },
-  sectionLabel: {
-    fontSize: 11,
-    fontWeight: "700",
-    color: C.textMuted,
-    letterSpacing: 1,
-  },
-  titleInput: {
-    backgroundColor: C.card,
-    borderWidth: 1,
-    borderColor: C.cardBorder,
-    borderRadius: 4,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: 15,
-    color: C.text,
-  },
-  colorRow: {
-    flexDirection: "row",
-    gap: 12,
-    flexWrap: "wrap",
-  },
-  colorDot: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-  },
-  colorDotActive: {
-    borderWidth: 3,
-    borderColor: "#fff",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.3,
-    shadowRadius: 2,
-    elevation: 3,
-  },
-  searchBar: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    backgroundColor: C.card,
-    borderWidth: 1,
-    borderColor: C.cardBorder,
-    borderRadius: 4,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: 14,
-    color: C.text,
-    padding: 0,
-  },
-  emptyBox: {
-    alignItems: "center",
-    gap: 8,
-    paddingVertical: 36,
-  },
-  emptyTitle: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: C.textSecondary,
-  },
-  emptyDesc: {
-    fontSize: 13,
-    color: C.textMuted,
-    textAlign: "center",
-    lineHeight: 20,
-    paddingHorizontal: 8,
-  },
-  group: {
-    marginTop: 16,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: C.cardBorder,
-    overflow: "hidden",
-    backgroundColor: C.card,
-  },
-  groupHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    backgroundColor: C.backgroundSecondary,
-    borderBottomWidth: 1,
-    borderBottomColor: C.cardBorder,
-  },
-  groupHeaderLabel: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  groupCheck: {
-    width: 20,
-    height: 20,
-    borderRadius: 4,
-    borderWidth: 1.5,
-    borderColor: C.cardBorder,
-    alignItems: "center",
-    justifyContent: "center",
-    flexShrink: 0,
-  },
-  groupCheckDash: {
-    width: 10,
-    height: 2,
-    backgroundColor: "#fff",
-    borderRadius: 1,
-  },
-  groupName: {
-    flex: 1,
-    fontSize: 12,
-    fontWeight: "700",
-    color: C.text,
-    lineHeight: 16,
-  },
-  groupCount: {
-    fontSize: 11,
-    color: C.textMuted,
-    fontWeight: "600",
-  },
-  sensorRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: C.cardBorder,
-    borderLeftWidth: 2,
-    borderLeftColor: "transparent",
-  },
-  checkbox: {
-    width: 20,
-    height: 20,
-    borderRadius: 4,
-    borderWidth: 1.5,
-    borderColor: C.cardBorder,
-    alignItems: "center",
-    justifyContent: "center",
-    flexShrink: 0,
-  },
-  typeBadge: {
-    borderRadius: 4,
-    paddingHorizontal: 5,
-    paddingVertical: 2,
-    flexShrink: 0,
-    minWidth: 32,
-    alignItems: "center",
-  },
-  typeBadgeText: {
-    fontSize: 10,
-    fontWeight: "700",
-    fontVariant: ["tabular-nums"],
-  },
-  sensorLabel: {
-    flex: 1,
-    fontSize: 12,
-    color: C.text,
-  },
-  sensorValue: {
-    fontSize: 12,
-    color: C.textMuted,
-    fontVariant: ["tabular-nums"],
-    flexShrink: 0,
-  },
-  iconGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-    marginTop: 4,
-  },
-  iconCell: {
-    width: "22%",
-    alignItems: "center",
-    gap: 5,
-    paddingVertical: 10,
-    borderRadius: 4,
-    borderWidth: 1.5,
-    borderColor: C.cardBorder,
-    backgroundColor: C.card,
-  },
-  iconLabel: {
-    fontSize: 9,
-    fontWeight: "600",
-    color: C.textMuted,
-    letterSpacing: 0.2,
-  },
-  layoutRow: {
-    flexDirection: "row",
-    gap: 8,
-    marginTop: 4,
-  },
-  layoutCell: {
-    flex: 1,
-    alignItems: "center",
-    gap: 5,
-    paddingVertical: 12,
-    paddingHorizontal: 6,
-    borderRadius: 6,
-    borderWidth: 1.5,
-    borderColor: C.cardBorder,
-    backgroundColor: C.card,
-  },
-  layoutLabel: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: C.textMuted,
-  },
-  layoutDesc: {
-    fontSize: 9,
-    fontWeight: "500",
-    color: C.textMuted,
-    textAlign: "center",
-    lineHeight: 13,
-  },
-});
+const createStyles = (t: Theme) => {
+  const C = t.colors;
+  const fontVariant = tabularNumsVariant(t);
+  return StyleSheet.create({
+    root: { flex: 1, backgroundColor: C.background },
+    sheetHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      paddingHorizontal: 20,
+      paddingBottom: 14,
+      borderBottomWidth: 1,
+      borderBottomColor: C.cardBorder,
+    },
+    sheetTitle: { fontSize: 17, fontWeight: "700", color: C.text },
+    cancelBtn: { fontSize: 16, color: C.textSecondary },
+    saveBtn: { fontSize: 16, fontWeight: "700", color: C.tint },
+    scroll: { flex: 1 },
+    section: { paddingHorizontal: 16, paddingTop: 20, gap: 10 },
+    sectionLabel: {
+      fontSize: 11,
+      fontWeight: "700",
+      color: C.textMuted,
+      letterSpacing: t.sectionLabelLetterSpacing,
+    },
+    titleInput: {
+      backgroundColor: C.card,
+      borderWidth: 1,
+      borderColor: C.cardBorder,
+      borderRadius: t.buttonRadius,
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+      fontSize: 15,
+      color: C.text,
+    },
+    colorRow: { flexDirection: "row", gap: 12, flexWrap: "wrap" },
+    colorDot: { width: 32, height: 32, borderRadius: 16 },
+    colorDotActive: {
+      borderWidth: 3,
+      borderColor: C.text,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.3,
+      shadowRadius: 2,
+      elevation: 3,
+    },
+    searchBar: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+      backgroundColor: C.card,
+      borderWidth: 1,
+      borderColor: C.cardBorder,
+      borderRadius: t.buttonRadius,
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+    },
+    searchInput: { flex: 1, fontSize: 14, color: C.text, padding: 0 },
+    emptyBox: { alignItems: "center", gap: 8, paddingVertical: 36 },
+    emptyTitle: { fontSize: 15, fontWeight: "700", color: C.textSecondary },
+    emptyDesc: {
+      fontSize: 13,
+      color: C.textMuted,
+      textAlign: "center",
+      lineHeight: 20,
+      paddingHorizontal: 8,
+    },
+    group: {
+      marginTop: 16,
+      borderRadius: t.innerRadius,
+      borderWidth: 1,
+      borderColor: C.cardBorder,
+      overflow: "hidden",
+      backgroundColor: C.card,
+    },
+    groupHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 10,
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+      backgroundColor: C.backgroundSecondary,
+      borderBottomWidth: 1,
+      borderBottomColor: C.cardBorder,
+    },
+    groupHeaderLabel: { flex: 1, flexDirection: "row", alignItems: "center", gap: 6 },
+    groupCheck: {
+      width: 20,
+      height: 20,
+      borderRadius: t.buttonRadius,
+      borderWidth: 1.5,
+      borderColor: C.cardBorder,
+      alignItems: "center",
+      justifyContent: "center",
+      flexShrink: 0,
+    },
+    groupCheckDash: { width: 10, height: 2, backgroundColor: "#fff", borderRadius: 1 },
+    groupName: { flex: 1, fontSize: 12, fontWeight: "700", color: C.text, lineHeight: 16 },
+    groupCount: { fontSize: 11, color: C.textMuted, fontWeight: "600", fontVariant },
+    sensorRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+      paddingVertical: 8,
+      paddingHorizontal: 12,
+      borderBottomWidth: 1,
+      borderBottomColor: C.cardBorder,
+      ...accentEdgeStyle(t, "transparent", 2),
+    },
+    checkbox: {
+      width: 20,
+      height: 20,
+      borderRadius: t.buttonRadius,
+      borderWidth: 1.5,
+      borderColor: C.cardBorder,
+      alignItems: "center",
+      justifyContent: "center",
+      flexShrink: 0,
+    },
+    typeBadge: {
+      borderRadius: t.buttonRadius,
+      paddingHorizontal: 5,
+      paddingVertical: 2,
+      flexShrink: 0,
+      minWidth: 32,
+      alignItems: "center",
+    },
+    typeBadgeText: { fontSize: 10, fontWeight: "700", fontVariant },
+    sensorLabel: { flex: 1, fontSize: 12, color: C.text },
+    sensorValue: { fontSize: 12, color: C.textMuted, fontVariant, flexShrink: 0 },
+    iconGrid: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 4 },
+    iconCell: {
+      width: "22%",
+      alignItems: "center",
+      gap: 5,
+      paddingVertical: 10,
+      borderRadius: t.buttonRadius,
+      borderWidth: 1.5,
+      borderColor: C.cardBorder,
+      backgroundColor: C.card,
+    },
+    iconLabel: { fontSize: 9, fontWeight: "600", color: C.textMuted, letterSpacing: 0.2 },
+    layoutRow: { flexDirection: "row", gap: 8, marginTop: 4 },
+    layoutCell: {
+      flex: 1,
+      alignItems: "center",
+      gap: 5,
+      paddingVertical: 12,
+      paddingHorizontal: 6,
+      borderRadius: t.innerRadius,
+      borderWidth: 1.5,
+      borderColor: C.cardBorder,
+      backgroundColor: C.card,
+    },
+    layoutLabel: { fontSize: 12, fontWeight: "700", color: C.textMuted },
+    layoutDesc: {
+      fontSize: 9,
+      fontWeight: "500",
+      color: C.textMuted,
+      textAlign: "center",
+      lineHeight: 13,
+    },
+  });
+};

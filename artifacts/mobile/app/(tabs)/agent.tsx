@@ -1,7 +1,7 @@
 import { Feather } from "@expo/vector-icons";
 import * as Clipboard from "expo-clipboard";
 import * as Haptics from "expo-haptics";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   Platform,
   Pressable,
@@ -11,9 +11,8 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Colors from "@/constants/colors";
-
-const C = Colors.light;
+import { Theme, ThemeName, THEMES } from "@/constants/themes";
+import { useTheme } from "@/context/ThemeContext";
 
 const PYTHON_AGENT = `#!/usr/bin/env python3
 """
@@ -822,8 +821,69 @@ const STEPS = [
   },
 ];
 
+function ThemeSwitcher() {
+  const { theme, themeName, setTheme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+  const C = theme.colors;
+
+  const renderOption = (name: ThemeName, label: string, swatchColor: string, swatchBg: string) => {
+    const selected = themeName === name;
+    return (
+      <Pressable
+        key={name}
+        onPress={() => {
+          if (themeName !== name) {
+            Haptics.selectionAsync();
+            setTheme(name);
+          }
+        }}
+        style={({ pressed }) => [
+          styles.themeOption,
+          {
+            borderColor: selected ? C.tint : C.cardBorder,
+            backgroundColor: selected ? C.tint + "12" : C.backgroundTertiary,
+          },
+          pressed && { opacity: 0.85 },
+        ]}
+      >
+        <View style={[styles.themeSwatch, { backgroundColor: swatchBg, borderColor: swatchColor }]}>
+          <View style={[styles.themeSwatchAccent, { backgroundColor: swatchColor }]} />
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={[styles.themeOptionTitle, { color: selected ? C.tint : C.text }]}>{label}</Text>
+          <Text style={styles.themeOptionSub}>
+            {name === "rog" ? "Red accents · sharp edges" : "Cyan accents · softer edges"}
+          </Text>
+        </View>
+        <View
+          style={[
+            styles.themeRadio,
+            { borderColor: selected ? C.tint : C.textMuted, backgroundColor: selected ? C.tint : "transparent" },
+          ]}
+        >
+          {selected ? <Feather name="check" size={11} color="#fff" /> : null}
+        </View>
+      </Pressable>
+    );
+  };
+
+  return (
+    <View style={styles.themeSection}>
+      <Text style={styles.themeSectionTitle}>Appearance</Text>
+      <Text style={styles.themeSectionSub}>Choose how the app looks. Changes apply instantly.</Text>
+      <View style={styles.themeOptions}>
+        {renderOption("rog", "ROG", THEMES.rog.colors.tint, THEMES.rog.colors.background)}
+        {renderOption("classic", "Classic", THEMES.classic.colors.tint, THEMES.classic.colors.background)}
+      </View>
+    </View>
+  );
+}
+
 export default function AgentScreen() {
   const insets = useSafeAreaInsets();
+  const { theme } = useTheme();
+  const C = theme.colors;
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const [copied, setCopied] = useState(false);
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
@@ -848,6 +908,8 @@ export default function AgentScreen() {
           Run the agent on any PC you want to control
         </Text>
       </View>
+
+      <ThemeSwitcher />
 
       {STEPS.map((s) => (
         <View key={s.step} style={styles.step}>
@@ -913,7 +975,9 @@ export default function AgentScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme: Theme) => {
+  const C = theme.colors;
+  return StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: C.background,
@@ -1070,4 +1134,65 @@ const styles = StyleSheet.create({
     color: C.warning,
     lineHeight: 17,
   },
-});
+  themeSection: {
+    backgroundColor: C.card,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: C.cardBorder,
+    padding: 14,
+    marginBottom: 16,
+  },
+  themeSectionTitle: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: C.text,
+  },
+  themeSectionSub: {
+    fontSize: 12,
+    color: C.textSecondary,
+    marginTop: 4,
+    marginBottom: 12,
+  },
+  themeOptions: {
+    gap: 10,
+  },
+  themeOption: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    borderWidth: 1,
+    borderRadius: 6,
+    padding: 12,
+  },
+  themeSwatch: {
+    width: 36,
+    height: 36,
+    borderRadius: 6,
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  themeSwatchAccent: {
+    width: 16,
+    height: 4,
+    borderRadius: 2,
+  },
+  themeOptionTitle: {
+    fontSize: 14,
+    fontWeight: "700",
+  },
+  themeOptionSub: {
+    fontSize: 11,
+    color: C.textSecondary,
+    marginTop: 2,
+  },
+  themeRadio: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    borderWidth: 1.5,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  });
+};

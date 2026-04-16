@@ -1,7 +1,7 @@
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   FlatList,
   Platform,
@@ -15,12 +15,14 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AddPcSheet } from "@/components/AddPcSheet";
 import { PCCard } from "@/components/PCCard";
-import Colors from "@/constants/colors";
+import { Theme } from "@/constants/themes";
+import { useTheme } from "@/context/ThemeContext";
 import { DEMO_PC_HOST, DEMO_PC_ID, usePcs } from "@/context/PcsContext";
 
-const C = Colors.light;
-
 export default function HomeScreen() {
+  const { theme } = useTheme();
+  const C = theme.colors;
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const { pcs, refreshAll, addDemoMode } = usePcs();
   const [addVisible, setAddVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -135,110 +137,65 @@ export default function HomeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: C.background,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    paddingBottom: 8,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: "800",
-    color: C.text,
-    letterSpacing: -0.5,
-  },
-  subtitle: {
-    fontSize: 13,
-    color: C.textSecondary,
-    marginTop: 2,
-  },
-  addBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 4,
-    backgroundColor: C.tint,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  list: {
-    paddingHorizontal: 16,
-    paddingTop: 8,
-  },
-  columnWrapper: {
-    gap: 12,
-  },
-  pcCardWrapper: {
-    flex: 1,
-  },
-  empty: {
-    alignItems: "center",
-    paddingTop: 80,
-    gap: 12,
-    paddingHorizontal: 32,
-  },
-  emptyTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: C.text,
-  },
-  emptyText: {
-    fontSize: 14,
-    color: C.textSecondary,
-    textAlign: "center",
-    lineHeight: 21,
-  },
-  emptyBtn: {
-    marginTop: 8,
-    backgroundColor: C.tint,
-    borderRadius: 4,
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-  },
-  emptyBtnText: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: "#fff",
-  },
-  demoBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    backgroundColor: "rgba(255, 109, 0, 0.08)",
-    borderRadius: 4,
-    borderWidth: 1.5,
-    borderColor: "rgba(255, 109, 0, 0.3)",
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    marginTop: 4,
-    width: "100%",
-  },
-  demoBtnIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 4,
-    backgroundColor: "rgba(255, 109, 0, 0.13)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  demoBtnText: {
-    flex: 1,
-    gap: 2,
-  },
-  demoBtnTitle: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: "#FF6D00",
-  },
-  demoBtnSub: {
-    fontSize: 12,
-    color: C.textSecondary,
-    lineHeight: 16,
-  },
-});
+const createStyles = (t: Theme) => {
+  const C = t.colors;
+  return StyleSheet.create({
+    root: { flex: 1, backgroundColor: C.background },
+    header: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      paddingHorizontal: 20,
+      paddingVertical: 12,
+      paddingBottom: 8,
+    },
+    title: { fontSize: 28, fontWeight: "800", color: C.text, letterSpacing: -0.5 },
+    subtitle: { fontSize: 13, color: C.textSecondary, marginTop: 2 },
+    addBtn: {
+      width: 40,
+      height: 40,
+      borderRadius: t.buttonRadius,
+      backgroundColor: C.tint,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    list: { paddingHorizontal: 16, paddingTop: 8 },
+    columnWrapper: { gap: 12 },
+    pcCardWrapper: { flex: 1 },
+    empty: { alignItems: "center", paddingTop: 80, gap: 12, paddingHorizontal: 32 },
+    emptyTitle: { fontSize: 20, fontWeight: "700", color: C.text },
+    emptyText: { fontSize: 14, color: C.textSecondary, textAlign: "center", lineHeight: 21 },
+    emptyBtn: {
+      marginTop: 8,
+      backgroundColor: C.tint,
+      borderRadius: t.buttonRadius,
+      paddingHorizontal: 24,
+      paddingVertical: 12,
+    },
+    emptyBtnText: { fontSize: 15, fontWeight: "700", color: "#fff" },
+    demoBtn: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 10,
+      backgroundColor: "rgba(255, 109, 0, 0.08)",
+      borderRadius: t.buttonRadius,
+      borderWidth: 1.5,
+      borderColor: "rgba(255, 109, 0, 0.3)",
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+      marginTop: 4,
+      width: "100%",
+    },
+    demoBtnIcon: {
+      width: 36,
+      height: 36,
+      borderRadius: t.buttonRadius,
+      backgroundColor: "rgba(255, 109, 0, 0.13)",
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    demoBtnText: { flex: 1, gap: 2 },
+    demoBtnTitle: { fontSize: 14, fontWeight: "700", color: "#FF6D00" },
+    demoBtnSub: { fontSize: 12, color: C.textSecondary, lineHeight: 16 },
+  });
+};

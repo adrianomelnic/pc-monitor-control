@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { StyleSheet, Text, View } from "react-native";
-import Colors from "@/constants/colors";
+import { Theme, tabularNumsVariant } from "@/constants/themes";
+import { useTheme } from "@/context/ThemeContext";
 
 interface StatBarProps {
   label: string;
@@ -11,19 +12,20 @@ interface StatBarProps {
   showPercentage?: boolean;
 }
 
-const C = Colors.light;
-
 export function StatBar({
   label,
   value,
   max = 100,
   unit = "",
-  color = C.tint,
+  color,
   showPercentage = false,
 }: StatBarProps) {
+  const { theme } = useTheme();
+  const C = theme.colors;
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const pct = Math.min(100, Math.max(0, (value / max) * 100));
-  const barColor =
-    pct > 85 ? C.danger : pct > 65 ? C.warning : color;
+  const accent = color ?? C.tint;
+  const barColor = pct > 85 ? C.danger : pct > 65 ? C.warning : accent;
 
   return (
     <View style={styles.container}>
@@ -40,39 +42,34 @@ export function StatBar({
       </View>
       <View style={styles.track}>
         <View
-          style={[styles.fill, { width: `${pct}%` as any, backgroundColor: barColor }]}
+          style={[styles.fill, { width: `${pct}%` as `${number}%`, backgroundColor: barColor }]}
         />
       </View>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    gap: 6,
-  },
-  labelRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  label: {
-    fontSize: 13,
-    color: C.textSecondary,
-    fontWeight: "500",
-  },
-  value: {
-    fontSize: 13,
-    fontWeight: "700",
-  },
-  track: {
-    height: 4,
-    backgroundColor: C.backgroundTertiary,
-    borderRadius: 2,
-    overflow: "hidden",
-  },
-  fill: {
-    height: 4,
-    borderRadius: 2,
-  },
-});
+const createStyles = (t: Theme) => {
+  const C = t.colors;
+  return StyleSheet.create({
+    container: { gap: 6 },
+    labelRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+    },
+    label: { fontSize: 13, color: C.textSecondary, fontWeight: "500" },
+    value: {
+      fontSize: 13,
+      fontWeight: "700",
+      fontVariant: tabularNumsVariant(t),
+    },
+    track: {
+      height: 4,
+      backgroundColor: C.backgroundTertiary,
+      borderRadius: 2,
+      overflow: "hidden",
+    },
+    fill: { height: 4, borderRadius: 2 },
+  });
+};

@@ -1,11 +1,9 @@
-import React from "react";
-import { Platform, StyleSheet, Text, View } from "react-native";
-import Colors from "@/constants/colors";
+import React, { useMemo } from "react";
+import { StyleSheet, Text, View } from "react-native";
+import { Theme, tabularNumsVariant } from "@/constants/themes";
+import { useTheme } from "@/context/ThemeContext";
 import { CPUInfo } from "@/context/PcsContext";
 import { BuiltinCardEdit, CardBase, CardTitleEditConfig, MiniBar, StatRow } from "./CardBase";
-
-const C = Colors.light;
-const ACCENT = "#FF1744";
 
 function fmt(mhz: number) {
   return mhz >= 1000 ? `${(mhz / 1000).toFixed(2)} GHz` : `${mhz} MHz`;
@@ -20,6 +18,10 @@ interface Props {
 }
 
 export function CPUCard({ cpu, titleEdit, cardEdit }: Props) {
+  const { theme } = useTheme();
+  const C = theme.colors;
+  const ACCENT = theme.cardAccents.cpu;
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const cores = cpu.usagePerCore ?? [];
   const cols = cores.length > 8 ? 4 : 2;
   const hidden = cardEdit?.hiddenFields !== undefined
@@ -29,6 +31,7 @@ export function CPUCard({ cpu, titleEdit, cardEdit }: Props) {
   const extraMap = cardEdit?.extraSensorMap ?? {};
   const aliases = cardEdit?.fieldAliases ?? {};
   const getLabel = (key: string, def: string) => aliases[key] ?? def;
+  const sectionLabel = (s: string) => (theme.titleCase === "upper" ? s.toUpperCase() : s);
 
   const visibleOrder = order.filter(k => !hidden.has(k));
   const showHero = !hidden.has("usage");
@@ -85,7 +88,7 @@ export function CPUCard({ cpu, titleEdit, cardEdit }: Props) {
             <Text style={[styles.bigNum, { color: ACCENT }]}>{Math.round(cpu.usageTotal)}
               <Text style={styles.bigUnit}>%</Text>
             </Text>
-            <Text style={styles.bigLabel}>{getLabel("usage", "USAGE")}</Text>
+            <Text style={styles.bigLabel}>{sectionLabel(getLabel("usage", "Usage"))}</Text>
           </View>
           <View style={styles.heroRight}>
             {rightFields.map(key => renderRightField(key))}
@@ -99,10 +102,10 @@ export function CPUCard({ cpu, titleEdit, cardEdit }: Props) {
 
       {showPerCore && (
         <View style={styles.belowSection}>
-          <Text style={styles.sectionLabel}>{getLabel("perCore", "PER CORE")}</Text>
+          <Text style={styles.sectionLabel}>{sectionLabel(getLabel("perCore", "Per Core"))}</Text>
           <View style={[styles.coreGrid, { gap: cols === 4 ? 6 : 8 }]}>
             {cores.map((val, i) => {
-              const barColor = val > 85 ? "#FF4444" : val > 65 ? "#FFB800" : ACCENT;
+              const barColor = val > 85 ? C.danger : val > 65 ? C.warning : ACCENT;
               return (
                 <View key={i} style={[styles.coreItem, { width: cols === 4 ? "22%" : "47%" }]}>
                   <View style={styles.coreHeader}>
@@ -120,11 +123,11 @@ export function CPUCard({ cpu, titleEdit, cardEdit }: Props) {
       {showPerCoreVertical && (
         <View style={styles.belowSection}>
           <Text style={styles.sectionLabel}>
-            {getLabel("perCoreVertical", "PER CORE")}{cores.length > 8 ? `  (${cores.length})` : ""}
+            {sectionLabel(getLabel("perCoreVertical", "Per Core"))}{cores.length > 8 ? `  (${cores.length})` : ""}
           </Text>
           <View style={styles.verticalChartRow}>
             {cores.map((val, i) => {
-              const barColor = val > 85 ? "#FF4444" : val > 65 ? "#FFB800" : ACCENT;
+              const barColor = val > 85 ? C.danger : val > 65 ? C.warning : ACCENT;
               const fillH = Math.max((val / 100) * 52, 2);
               const showLabel = cores.length <= 8;
               return (
@@ -143,8 +146,8 @@ export function CPUCard({ cpu, titleEdit, cardEdit }: Props) {
       {showCpuBar && (
         <View style={styles.belowSection}>
           <View style={styles.cpuBarHeader}>
-            <Text style={styles.sectionLabel}>{getLabel("cpuBar", "CPU LOAD")}</Text>
-            <Text style={[styles.cpuBarPct, { color: cpu.usageTotal > 85 ? "#FF4444" : cpu.usageTotal > 65 ? "#FFB800" : ACCENT }]}>
+            <Text style={styles.sectionLabel}>{sectionLabel(getLabel("cpuBar", "CPU Load"))}</Text>
+            <Text style={[styles.cpuBarPct, { color: cpu.usageTotal > 85 ? C.danger : cpu.usageTotal > 65 ? C.warning : ACCENT }]}>
               {Math.round(cpu.usageTotal)}%
             </Text>
           </View>
@@ -155,112 +158,116 @@ export function CPUCard({ cpu, titleEdit, cardEdit }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  heroRow: {
-    flexDirection: "row",
-    gap: 14,
-    alignItems: "flex-start",
-  },
-  heroLeft: {
-    alignItems: "center",
-    justifyContent: "flex-start",
-    minWidth: 60,
-    paddingTop: 0,
-  },
-  heroRight: {
-    flex: 1,
-    gap: 6,
-  },
-  bigNum: {
-    fontSize: 32,
-    fontWeight: "800",
-    letterSpacing: -1.5,
-    fontVariant: ["tabular-nums"],
-    lineHeight: 36,
-  },
-  bigUnit: {
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  bigLabel: {
-    fontSize: 9,
-    color: C.textMuted,
-    fontWeight: "700",
-    marginTop: 2,
-    letterSpacing: 1.5,
-  },
-  fieldList: {
-    gap: 6,
-  },
-  belowSection: {
-    marginTop: 4,
-    gap: 4,
-  },
-  sectionLabel: {
-    fontSize: 9,
-    fontWeight: "700",
-    color: C.textMuted,
-    letterSpacing: 1.5,
-  },
-  coreGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-  },
-  coreItem: {
-    gap: 3,
-    marginBottom: 6,
-  },
-  coreHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  coreLabel: {
-    fontSize: 9,
-    color: C.textMuted,
-    fontWeight: "700",
-    letterSpacing: 0.5,
-  },
-  corePct: {
-    fontSize: 10,
-    fontWeight: "800",
-    fontVariant: ["tabular-nums"],
-  },
-  verticalChartRow: {
-    flexDirection: "row",
-    alignItems: "flex-end",
-    gap: 2,
-  },
-  verticalBarCol: {
-    flex: 1,
-    alignItems: "center",
-    gap: 3,
-  },
-  verticalBarTrack: {
-    width: "100%",
-    height: 52,
-    justifyContent: "flex-end",
-    backgroundColor: C.textMuted + "18",
-    borderRadius: 1,
-    overflow: "hidden",
-  },
-  verticalBarFill: {
-    width: "100%",
-    borderRadius: 1,
-  },
-  verticalBarNum: {
-    fontSize: 8,
-    color: C.textMuted,
-    fontWeight: "700",
-  },
-  cpuBarHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  cpuBarPct: {
-    fontSize: 11,
-    fontWeight: "800",
-    fontVariant: ["tabular-nums"],
-  },
-});
+const createStyles = (t: Theme) => {
+  const C = t.colors;
+  const fontVariant = tabularNumsVariant(t);
+  return StyleSheet.create({
+    heroRow: {
+      flexDirection: "row",
+      gap: 14,
+      alignItems: "flex-start",
+    },
+    heroLeft: {
+      alignItems: "center",
+      justifyContent: "flex-start",
+      minWidth: 60,
+      paddingTop: 0,
+    },
+    heroRight: {
+      flex: 1,
+      gap: 6,
+    },
+    bigNum: {
+      fontSize: 32,
+      fontWeight: "800",
+      letterSpacing: -1.5,
+      fontVariant,
+      lineHeight: 36,
+    },
+    bigUnit: {
+      fontSize: 16,
+      fontWeight: "600",
+    },
+    bigLabel: {
+      fontSize: 9,
+      color: C.textMuted,
+      fontWeight: "700",
+      marginTop: 2,
+      letterSpacing: t.sectionLabelLetterSpacing,
+    },
+    fieldList: {
+      gap: 6,
+    },
+    belowSection: {
+      marginTop: 4,
+      gap: 4,
+    },
+    sectionLabel: {
+      fontSize: 9,
+      fontWeight: "700",
+      color: C.textMuted,
+      letterSpacing: t.sectionLabelLetterSpacing,
+    },
+    coreGrid: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+    },
+    coreItem: {
+      gap: 3,
+      marginBottom: 6,
+    },
+    coreHeader: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+    },
+    coreLabel: {
+      fontSize: 9,
+      color: C.textMuted,
+      fontWeight: "700",
+      letterSpacing: 0.5,
+    },
+    corePct: {
+      fontSize: 10,
+      fontWeight: "800",
+      fontVariant,
+    },
+    verticalChartRow: {
+      flexDirection: "row",
+      alignItems: "flex-end",
+      gap: 2,
+    },
+    verticalBarCol: {
+      flex: 1,
+      alignItems: "center",
+      gap: 3,
+    },
+    verticalBarTrack: {
+      width: "100%",
+      height: 52,
+      justifyContent: "flex-end",
+      backgroundColor: C.textMuted + "18",
+      borderRadius: 1,
+      overflow: "hidden",
+    },
+    verticalBarFill: {
+      width: "100%",
+      borderRadius: 1,
+    },
+    verticalBarNum: {
+      fontSize: 8,
+      color: C.textMuted,
+      fontWeight: "700",
+    },
+    cpuBarHeader: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+    },
+    cpuBarPct: {
+      fontSize: 11,
+      fontWeight: "800",
+      fontVariant,
+    },
+  });
+};

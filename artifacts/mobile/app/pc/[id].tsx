@@ -1,7 +1,7 @@
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { router, useLocalSearchParams } from "expo-router";
-import React, { useRef, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import {
   Alert,
   Animated,
@@ -26,14 +26,12 @@ import { GPUCard } from "@/components/cards/GPUCard";
 import { NetworkCard } from "@/components/cards/NetworkCard";
 import { RAMCard } from "@/components/cards/RAMCard";
 import { ThermalsCard, SENSOR_ICON_OPTIONS, defaultSensorIcon, renderSensorIcon } from "@/components/cards/ThermalsCard";
-import Colors from "@/constants/colors";
+import { Theme, accentEdgeStyle } from "@/constants/themes";
+import { useTheme } from "@/context/ThemeContext";
 import { BuiltinCardConfig, BuiltinCardKind, CardConfig, CustomCardConfig, useDashboard } from "@/context/DashboardContext";
 import { BuiltinCardEdit, CardTitleEditConfig } from "@/components/cards/CardBase";
 import { DraggableFieldList } from "@/components/DraggableFieldList";
 import { usePcs, DEMO_PC_HOST, SensorReading } from "@/context/PcsContext";
-
-const C = Colors.light;
-
 
 const CARD_NAMES: Record<string, string> = {
   thermals: "Thermals & Fans",
@@ -43,16 +41,6 @@ const CARD_NAMES: Record<string, string> = {
   fans: "Fans",
   disks: "Storage",
   network: "Network",
-};
-
-const CARD_ACCENTS: Record<string, string> = {
-  thermals: "#FF3D00",
-  cpu: "#FF1744",
-  gpu: "#FF6D00",
-  ram: "#448AFF",
-  fans: "#FF9100",
-  disks: "#00BFA5",
-  network: "#40C4FF",
 };
 
 const BUILTIN_CARD_FIELDS: Record<string, { key: string; label: string }[]> = {
@@ -136,6 +124,10 @@ export default function PCDetailScreen() {
   const pc = pcs.find((p) => p.id === id);
   const isDemo = pc?.host === DEMO_PC_HOST;
   const insets = useSafeAreaInsets();
+  const { theme } = useTheme();
+  const C = theme.colors;
+  const styles = useMemo(() => createStyles(theme), [theme]);
+  const CARD_ACCENTS = theme.cardAccents;
 
   const [refreshing, setRefreshing] = useState(false);
   const [cmdInput, setCmdInput] = useState("");
@@ -809,7 +801,7 @@ export default function PCDetailScreen() {
 
     // ── Built-in cards: long-press to inline-edit title ───────────────────────
     const builtinCard = card as BuiltinCardConfig;
-    const accent = CARD_ACCENTS[card.kind] ?? C.tint;
+    const accent = CARD_ACCENTS[card.kind as keyof typeof CARD_ACCENTS] ?? C.tint;
     const isEditing = inlineEditBuiltin === card.kind;
     const isTitleActive = titleInputActive === card.kind;
 
@@ -1253,7 +1245,7 @@ export default function PCDetailScreen() {
       <CompactSensorPicker
         visible={extraSensorPickerFor != null}
         title={replacingBuiltinField ? "Replace Field Sensor" : replacingExtraFor ? "Replace Sensor" : "Add HWiNFO64 Sensor"}
-        accentColor={extraSensorPickerFor ? (CARD_ACCENTS[extraSensorPickerFor] ?? C.tint) : C.tint}
+        accentColor={extraSensorPickerFor ? (CARD_ACCENTS[extraSensorPickerFor as keyof typeof CARD_ACCENTS] ?? C.tint) : C.tint}
         sensors={allSensors}
         excludeLabels={
           extraSensorPickerFor
@@ -1342,7 +1334,9 @@ export default function PCDetailScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (t: Theme) => {
+  const C = t.colors;
+  return StyleSheet.create({
   pageContainer: {
     flex: 1,
     backgroundColor: C.background,
@@ -1408,11 +1402,10 @@ const styles = StyleSheet.create({
   },
   infoCard: {
     backgroundColor: C.card,
-    borderRadius: 4,
+    borderRadius: t.cardRadius,
     borderWidth: 1,
     borderColor: C.cardBorder,
-    borderLeftWidth: 3,
-    borderLeftColor: C.tint,
+    ...accentEdgeStyle(t, C.tint),
     paddingHorizontal: 14,
     paddingVertical: 10,
     gap: 8,
@@ -1447,10 +1440,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 7,
-    backgroundColor: "rgba(255, 109, 0, 0.08)",
-    borderRadius: 4,
+    backgroundColor: C.warning + "14",
+    borderRadius: t.cardRadius,
     borderWidth: 1,
-    borderColor: "rgba(255, 109, 0, 0.25)",
+    borderColor: C.warning + "40",
     paddingHorizontal: 12,
     paddingVertical: 9,
     marginBottom: 4,
@@ -1474,7 +1467,7 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
     gap: 8,
     backgroundColor: C.tint + "12",
-    borderRadius: 4,
+    borderRadius: t.cardRadius,
     borderWidth: 1,
     borderColor: C.tint + "30",
     padding: 12,
@@ -1497,7 +1490,7 @@ const styles = StyleSheet.create({
     height: 30,
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: 4,
+    borderRadius: t.buttonRadius,
     backgroundColor: C.backgroundTertiary,
     borderWidth: 1,
     borderColor: C.cardBorder,
@@ -1519,7 +1512,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 10,
     backgroundColor: C.card,
-    borderRadius: 4,
+    borderRadius: t.cardRadius,
     borderWidth: 1,
     borderColor: C.cardBorder,
     borderStyle: "dashed",
@@ -1536,7 +1529,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 10,
     paddingVertical: 14,
-    borderRadius: 4,
+    borderRadius: t.cardRadius,
     borderWidth: 1.5,
     borderColor: C.tint + "50",
     borderStyle: "dashed",
@@ -1549,11 +1542,10 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: C.card,
-    borderRadius: 4,
+    borderRadius: t.cardRadius,
     borderWidth: 1,
     borderColor: C.cardBorder,
-    borderLeftWidth: 3,
-    borderLeftColor: C.tint,
+    ...accentEdgeStyle(t, C.tint),
     padding: 16,
     gap: 12,
   },
@@ -1570,7 +1562,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     paddingHorizontal: 16,
     paddingVertical: 10,
-    borderRadius: 4,
+    borderRadius: t.buttonRadius,
     borderWidth: 1,
     marginTop: 4,
   },
@@ -1580,11 +1572,10 @@ const styles = StyleSheet.create({
   },
   offlineCard: {
     backgroundColor: C.card,
-    borderRadius: 4,
+    borderRadius: t.cardRadius,
     borderWidth: 1,
     borderColor: C.cardBorder,
-    borderLeftWidth: 3,
-    borderLeftColor: C.danger,
+    ...accentEdgeStyle(t, C.danger),
     padding: 32,
     alignItems: "center",
     gap: 10,
@@ -1603,7 +1594,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
     backgroundColor: C.tint,
     borderWidth: 0,
-    borderRadius: 4,
+    borderRadius: t.buttonRadius,
     paddingHorizontal: 24,
     paddingVertical: 10,
   },
@@ -1617,7 +1608,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 10,
     backgroundColor: C.backgroundSecondary,
-    borderRadius: 4,
+    borderRadius: t.innerRadius,
     padding: 12,
     borderWidth: 1,
     borderColor: C.cardBorder,
@@ -1631,7 +1622,7 @@ const styles = StyleSheet.create({
   },
   outputBox: {
     backgroundColor: C.background,
-    borderRadius: 4,
+    borderRadius: t.innerRadius,
     padding: 12,
   },
   outputText: {
@@ -1646,7 +1637,7 @@ const styles = StyleSheet.create({
     gap: 4,
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 4,
+    borderRadius: t.buttonRadius,
     borderWidth: 1,
   },
   builtinDoneBtnText: {
@@ -1685,7 +1676,7 @@ const styles = StyleSheet.create({
   editPanelToggle: {
     width: 24,
     height: 24,
-    borderRadius: 4,
+    borderRadius: t.buttonRadius,
     borderWidth: 1.5,
     alignItems: "center",
     justifyContent: "center",
@@ -1721,7 +1712,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 6,
     borderWidth: 1,
-    borderRadius: 4,
+    borderRadius: t.buttonRadius,
     borderStyle: "dashed",
     paddingHorizontal: 10,
     paddingVertical: 7,
@@ -1734,7 +1725,7 @@ const styles = StyleSheet.create({
   editPanelIconBtn: {
     width: 26,
     height: 26,
-    borderRadius: 4,
+    borderRadius: t.buttonRadius,
     borderWidth: 1,
     borderColor: C.cardBorder,
     alignItems: "center",
@@ -1757,7 +1748,7 @@ const styles = StyleSheet.create({
   iconPickerBtn: {
     width: 52,
     height: 52,
-    borderRadius: 4,
+    borderRadius: t.buttonRadius,
     borderWidth: 1,
     borderColor: C.cardBorder,
     alignItems: "center",
@@ -1772,7 +1763,7 @@ const styles = StyleSheet.create({
   headerIconBtn: {
     width: 32,
     height: 32,
-    borderRadius: 4,
+    borderRadius: t.buttonRadius,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: C.backgroundTertiary,
@@ -1791,4 +1782,5 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: C.tint + "60",
   },
-});
+  });
+};

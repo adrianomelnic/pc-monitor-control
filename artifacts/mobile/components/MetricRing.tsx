@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { Animated, StyleSheet, Text, View } from "react-native";
 import Svg, { Circle } from "react-native-svg";
-import Colors from "@/constants/colors";
+import { useTheme } from "@/context/ThemeContext";
 
 interface MetricRingProps {
   value: number;
@@ -20,8 +20,11 @@ export function MetricRing({
   strokeWidth = 7,
   label,
   sublabel,
-  color = Colors.light.tint,
+  color,
 }: MetricRingProps) {
+  const { theme } = useTheme();
+  const C = theme.colors;
+  const accent = color ?? C.tint;
   const animValue = useRef(new Animated.Value(0)).current;
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
@@ -42,11 +45,7 @@ export function MetricRing({
 
   const clampedValue = Math.min(100, Math.max(0, value));
   const ringColor =
-    clampedValue > 85
-      ? Colors.light.danger
-      : clampedValue > 65
-      ? Colors.light.warning
-      : color;
+    clampedValue > 85 ? C.danger : clampedValue > 65 ? C.warning : accent;
 
   return (
     <View style={styles.container}>
@@ -56,7 +55,7 @@ export function MetricRing({
             cx={center}
             cy={center}
             r={radius}
-            stroke={Colors.light.backgroundTertiary}
+            stroke={C.backgroundTertiary}
             strokeWidth={strokeWidth}
             fill="none"
           />
@@ -78,33 +77,16 @@ export function MetricRing({
           <Text style={styles.pct}>%</Text>
         </Text>
       </View>
-      <Text style={styles.label}>{label}</Text>
-      {sublabel ? <Text style={styles.sublabel}>{sublabel}</Text> : null}
+      <Text style={[styles.label, { color: C.text }]}>{label}</Text>
+      {sublabel ? <Text style={[styles.sublabel, { color: C.textSecondary }]}>{sublabel}</Text> : null}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    alignItems: "center",
-    gap: 4,
-  },
-  value: {
-    fontSize: 16,
-    fontWeight: "700",
-  },
-  pct: {
-    fontSize: 10,
-    fontWeight: "400",
-  },
-  label: {
-    fontSize: 11,
-    fontWeight: "600",
-    color: Colors.light.text,
-    letterSpacing: 0.5,
-  },
-  sublabel: {
-    fontSize: 10,
-    color: Colors.light.textSecondary,
-  },
+  container: { alignItems: "center", gap: 4 },
+  value: { fontSize: 16, fontWeight: "700" },
+  pct: { fontSize: 10, fontWeight: "400" },
+  label: { fontSize: 11, fontWeight: "600", letterSpacing: 0.5 },
+  sublabel: { fontSize: 10 },
 });

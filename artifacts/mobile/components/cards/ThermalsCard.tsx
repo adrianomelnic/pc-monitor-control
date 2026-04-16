@@ -1,13 +1,11 @@
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
-import React from "react";
+import React, { useMemo } from "react";
 import { StyleSheet, Text, View } from "react-native";
-import Colors from "@/constants/colors";
+import { Theme, tabularNumsVariant, accentEdgeStyle } from "@/constants/themes";
+import { useTheme } from "@/context/ThemeContext";
 import { FanInfo, SensorReading } from "@/context/PcsContext";
 import { BuiltinCardEdit, CardBase, CardTitleEditConfig } from "./CardBase";
 import { CUSTOM_ICON_NAMES, renderCustomIcon } from "../icons/CustomIcons";
-
-const C = Colors.light;
-export const THERMALS_ACCENT = "#FF3D00";
 
 const IMPORTANT_PATTERNS = [/cpu/i, /gpu/i, /ram/i, /memory/i, /vram/i, /dram/i];
 export function isImportantTemp(label: string): boolean {
@@ -93,19 +91,6 @@ export function renderSensorIcon(name: string, size: number, color: string): Rea
   return <Feather name={name as any} size={size} color={color} />;
 }
 
-function tempColor(c: number): string {
-  if (c >= 85) return "#FF4444";
-  if (c >= 70) return "#FF8C00";
-  if (c >= 50) return "#FBBF24";
-  return C.success;
-}
-
-function rpmColor(rpm: number): string {
-  if (rpm >= 2000) return "#FF4444";
-  if (rpm >= 1000) return "#FBBF24";
-  return C.success;
-}
-
 function chunk<T>(arr: T[], n: number): T[][] {
   const out: T[][] = [];
   for (let i = 0; i < arr.length; i += n) out.push(arr.slice(i, i + n));
@@ -120,6 +105,24 @@ interface Props {
 }
 
 export function ThermalsCard({ temps, fans, titleEdit, cardEdit }: Props) {
+  const { theme } = useTheme();
+  const C = theme.colors;
+  const ACCENT = theme.cardAccents.thermals;
+  const styles = useMemo(() => createStyles(theme), [theme]);
+  const sectionLabel = (s: string) => (theme.titleCase === "upper" ? s.toUpperCase() : s);
+
+  const tempColor = (c: number): string => {
+    if (c >= 85) return C.danger;
+    if (c >= 70) return C.warning;
+    if (c >= 50) return C.idle;
+    return C.success;
+  };
+  const rpmColor = (rpm: number): string => {
+    if (rpm >= 2000) return C.danger;
+    if (rpm >= 1000) return C.warning;
+    return C.success;
+  };
+
   const aliases = cardEdit?.fieldAliases ?? {};
   const sensorIcons = cardEdit?.sensorIcons ?? {};
   const getLabel = (key: string, def: string) => aliases[key] ?? def;
@@ -160,7 +163,7 @@ export function ThermalsCard({ temps, fans, titleEdit, cardEdit }: Props) {
     <CardBase
       icon="thermometer"
       title={titleEdit?.customTitle ?? "Thermals & Fans"}
-      accentColor={THERMALS_ACCENT}
+      accentColor={ACCENT}
       temperature={maxTemp}
       titleEditable={titleEdit?.editable}
       titleDraft={titleEdit?.draft}
@@ -195,10 +198,10 @@ export function ThermalsCard({ temps, fans, titleEdit, cardEdit }: Props) {
               const icon = getIcon(key);
 
               return (
-                <View key={key} style={[styles.tile, { borderLeftColor: color + "55" }]}>
+                <View key={key} style={[styles.tile, accentEdgeStyle(theme, color + "55", 2)]}>
                   <View style={styles.tileIcon}>{renderSensorIcon(icon, 20, C.textMuted)}</View>
                   <Text style={styles.tileLabel} numberOfLines={1}>
-                    {label.toUpperCase()}
+                    {sectionLabel(label)}
                   </Text>
                   <Text style={[styles.tileValue, { color }]}>{valueText}</Text>
                   {!isTemp && <Text style={[styles.tileUnit, { color }]}>RPM</Text>}
@@ -216,60 +219,53 @@ export function ThermalsCard({ temps, fans, titleEdit, cardEdit }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  grid: {
-    gap: 6,
-  },
-  row: {
-    flexDirection: "row",
-    gap: 6,
-  },
-  tile: {
-    flex: 1,
-    backgroundColor: C.backgroundSecondary,
-    borderRadius: 2,
-    borderWidth: 1,
-    borderColor: C.cardBorder,
-    borderLeftWidth: 2,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 14,
-    paddingHorizontal: 4,
-    minWidth: 0,
-  },
-  tilePlaceholder: {
-    flex: 1,
-  },
-  tileIcon: {
-    marginBottom: 5,
-    opacity: 0.5,
-  },
-  tileLabel: {
-    fontSize: 8,
-    fontWeight: "700",
-    color: C.textMuted,
-    letterSpacing: 1.2,
-    marginBottom: 3,
-    textAlign: "center",
-  },
-  tileValue: {
-    fontSize: 22,
-    fontWeight: "800",
-    textAlign: "center",
-    lineHeight: 26,
-    fontVariant: ["tabular-nums"],
-  },
-  tileUnit: {
-    fontSize: 8,
-    fontWeight: "700",
-    letterSpacing: 1,
-    marginTop: 1,
-    opacity: 0.7,
-  },
-  empty: {
-    fontSize: 12,
-    color: C.textMuted,
-    textAlign: "center",
-    paddingVertical: 6,
-  },
-});
+const createStyles = (t: Theme) => {
+  const C = t.colors;
+  const fontVariant = tabularNumsVariant(t);
+  return StyleSheet.create({
+    grid: { gap: 6 },
+    row: { flexDirection: "row", gap: 6 },
+    tile: {
+      flex: 1,
+      backgroundColor: C.backgroundSecondary,
+      borderRadius: t.innerRadius,
+      borderWidth: 1,
+      borderColor: C.cardBorder,
+      alignItems: "center",
+      justifyContent: "center",
+      paddingVertical: 14,
+      paddingHorizontal: 4,
+      minWidth: 0,
+    },
+    tilePlaceholder: { flex: 1 },
+    tileIcon: { marginBottom: 5, opacity: 0.5 },
+    tileLabel: {
+      fontSize: 8,
+      fontWeight: "700",
+      color: C.textMuted,
+      letterSpacing: t.sectionLabelLetterSpacing,
+      marginBottom: 3,
+      textAlign: "center",
+    },
+    tileValue: {
+      fontSize: 22,
+      fontWeight: "800",
+      textAlign: "center",
+      lineHeight: 26,
+      fontVariant,
+    },
+    tileUnit: {
+      fontSize: 8,
+      fontWeight: "700",
+      letterSpacing: t.sectionLabelLetterSpacing,
+      marginTop: 1,
+      opacity: 0.7,
+    },
+    empty: {
+      fontSize: 12,
+      color: C.textMuted,
+      textAlign: "center",
+      paddingVertical: 6,
+    },
+  });
+};

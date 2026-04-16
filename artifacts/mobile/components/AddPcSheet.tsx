@@ -1,5 +1,5 @@
 import { Feather } from "@expo/vector-icons";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -13,15 +13,14 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
-import Colors from "@/constants/colors";
+import { Theme } from "@/constants/themes";
+import { useTheme } from "@/context/ThemeContext";
 import { usePcs } from "@/context/PcsContext";
 
 interface AddPcSheetProps {
   visible: boolean;
   onClose: () => void;
 }
-
-const C = Colors.light;
 
 type TestState =
   | { kind: "idle" }
@@ -64,6 +63,11 @@ function friendlyError(e: unknown): { message: string; detail: string } {
 }
 
 export function AddPcSheet({ visible, onClose }: AddPcSheetProps) {
+  const { theme } = useTheme();
+  const C = theme.colors;
+  const styles = useMemo(() => createStyles(theme), [theme]);
+  const fieldLabel = (s: string) => (theme.titleCase === "upper" ? s.toUpperCase() : s);
+
   const { addPc } = usePcs();
   const [name, setName] = useState("");
   const [host, setHost] = useState("");
@@ -169,7 +173,7 @@ export function AddPcSheet({ visible, onClose }: AddPcSheetProps) {
             </Text>
 
             <View style={styles.fieldGroup}>
-              <Text style={styles.fieldLabel}>DISPLAY NAME</Text>
+              <Text style={styles.fieldLabel}>{fieldLabel("Display Name")}</Text>
               <TextInput
                 style={styles.input}
                 value={name}
@@ -181,7 +185,7 @@ export function AddPcSheet({ visible, onClose }: AddPcSheetProps) {
             </View>
 
             <View style={styles.fieldGroup}>
-              <Text style={styles.fieldLabel}>IP ADDRESS / HOSTNAME</Text>
+              <Text style={styles.fieldLabel}>{fieldLabel("IP Address / Hostname")}</Text>
               <TextInput
                 style={styles.input}
                 value={host}
@@ -199,7 +203,7 @@ export function AddPcSheet({ visible, onClose }: AddPcSheetProps) {
 
             <View style={styles.fieldRow}>
               <View style={[styles.fieldGroup, { flex: 1 }]}>
-                <Text style={styles.fieldLabel}>PORT</Text>
+                <Text style={styles.fieldLabel}>{fieldLabel("Port")}</Text>
                 <TextInput
                   style={styles.input}
                   value={port}
@@ -262,7 +266,7 @@ export function AddPcSheet({ visible, onClose }: AddPcSheetProps) {
             )}
 
             <View style={styles.fieldGroup}>
-              <Text style={styles.fieldLabel}>API KEY (OPTIONAL)</Text>
+              <Text style={styles.fieldLabel}>{fieldLabel("API Key (Optional)")}</Text>
               <TextInput
                 style={styles.input}
                 value={apiKey}
@@ -297,177 +301,180 @@ export function AddPcSheet({ visible, onClose }: AddPcSheetProps) {
   );
 }
 
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.6)",
-  },
-  sheetWrapper: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-  },
-  sheet: {
-    backgroundColor: C.backgroundSecondary,
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    borderTopWidth: 2,
-    borderTopColor: C.tint,
-    paddingHorizontal: 20,
-    paddingBottom: Platform.OS === "ios" ? 40 : 24,
-    paddingTop: 12,
-    maxHeight: "90%",
-  },
-  handle: {
-    width: 36,
-    height: 3,
-    backgroundColor: C.textMuted,
-    borderRadius: 2,
-    alignSelf: "center",
-    marginBottom: 16,
-  },
-  sheetHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 16,
-  },
-  sheetTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: C.text,
-  },
-  hint: {
-    fontSize: 13,
-    color: C.textSecondary,
-    marginBottom: 20,
-    lineHeight: 19,
-  },
-  fieldGroup: {
-    marginBottom: 16,
-  },
-  fieldRow: {
-    flexDirection: "row",
-    gap: 10,
-    alignItems: "flex-end",
-    marginBottom: 16,
-  },
-  fieldLabel: {
-    fontSize: 10,
-    fontWeight: "700",
-    color: C.textSecondary,
-    letterSpacing: 1,
-    marginBottom: 6,
-  },
-  input: {
-    backgroundColor: C.card,
-    borderWidth: 1,
-    borderColor: C.cardBorder,
-    borderRadius: 4,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    color: C.text,
-    fontSize: 15,
-  },
-  testBtnWrapper: {
-    paddingBottom: 1,
-  },
-  testBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    backgroundColor: C.tint + "15",
-    borderWidth: 1,
-    borderColor: C.tint + "40",
-    borderRadius: 4,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-  },
-  testBtnDisabled: {
-    backgroundColor: C.card,
-    borderColor: C.cardBorder,
-  },
-  testBtnText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: C.tint,
-  },
-  testBtnTextDisabled: {
-    color: C.textMuted,
-  },
-  resultBox: {
-    flexDirection: "row",
-    gap: 10,
-    borderRadius: 4,
-    borderWidth: 1,
-    padding: 12,
-    marginBottom: 16,
-    alignItems: "flex-start",
-  },
-  resultOk: {
-    backgroundColor: "rgba(105,240,174,0.08)",
-    borderColor: "rgba(105,240,174,0.3)",
-  },
-  resultOkText: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: "#69F0AE",
-  },
-  resultOkSub: {
-    fontSize: 12,
-    color: C.textSecondary,
-    marginTop: 2,
-  },
-  resultErr: {
-    backgroundColor: "rgba(255,82,82,0.08)",
-    borderColor: "rgba(255,82,82,0.3)",
-  },
-  resultErrTitle: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: C.danger,
-    marginBottom: 4,
-  },
-  resultErrDetail: {
-    fontSize: 12,
-    color: C.textSecondary,
-    lineHeight: 18,
-  },
-  setupBox: {
-    flexDirection: "row",
-    gap: 10,
-    backgroundColor: C.tint + "0D",
-    borderRadius: 4,
-    borderWidth: 1,
-    borderColor: C.tint + "25",
-    padding: 14,
-    marginBottom: 20,
-    alignItems: "flex-start",
-  },
-  setupText: {
-    flex: 1,
-    fontSize: 12,
-    color: C.textSecondary,
-    lineHeight: 18,
-  },
-  setupCode: {
-    fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace",
-    color: C.tint,
-  },
-  addBtn: {
-    backgroundColor: C.tint,
-    borderRadius: 4,
-    paddingVertical: 14,
-    alignItems: "center",
-    marginTop: 8,
-  },
-  addBtnDisabled: {
-    opacity: 0.4,
-  },
-  addBtnText: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#fff",
-  },
-});
+const createStyles = (t: Theme) => {
+  const C = t.colors;
+  return StyleSheet.create({
+    overlay: {
+      flex: 1,
+      backgroundColor: "rgba(0,0,0,0.6)",
+    },
+    sheetWrapper: {
+      position: "absolute",
+      bottom: 0,
+      left: 0,
+      right: 0,
+    },
+    sheet: {
+      backgroundColor: C.backgroundSecondary,
+      borderTopLeftRadius: 16,
+      borderTopRightRadius: 16,
+      borderTopWidth: 2,
+      borderTopColor: C.tint,
+      paddingHorizontal: 20,
+      paddingBottom: Platform.OS === "ios" ? 40 : 24,
+      paddingTop: 12,
+      maxHeight: "90%",
+    },
+    handle: {
+      width: 36,
+      height: 3,
+      backgroundColor: C.textMuted,
+      borderRadius: 2,
+      alignSelf: "center",
+      marginBottom: 16,
+    },
+    sheetHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      marginBottom: 16,
+    },
+    sheetTitle: {
+      fontSize: 20,
+      fontWeight: "700",
+      color: C.text,
+    },
+    hint: {
+      fontSize: 13,
+      color: C.textSecondary,
+      marginBottom: 20,
+      lineHeight: 19,
+    },
+    fieldGroup: {
+      marginBottom: 16,
+    },
+    fieldRow: {
+      flexDirection: "row",
+      gap: 10,
+      alignItems: "flex-end",
+      marginBottom: 16,
+    },
+    fieldLabel: {
+      fontSize: 10,
+      fontWeight: "700",
+      color: C.textSecondary,
+      letterSpacing: t.sectionLabelLetterSpacing,
+      marginBottom: 6,
+    },
+    input: {
+      backgroundColor: C.card,
+      borderWidth: 1,
+      borderColor: C.cardBorder,
+      borderRadius: t.buttonRadius,
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+      color: C.text,
+      fontSize: 15,
+    },
+    testBtnWrapper: {
+      paddingBottom: 1,
+    },
+    testBtn: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 6,
+      backgroundColor: C.tint + "15",
+      borderWidth: 1,
+      borderColor: C.tint + "40",
+      borderRadius: t.buttonRadius,
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+    },
+    testBtnDisabled: {
+      backgroundColor: C.card,
+      borderColor: C.cardBorder,
+    },
+    testBtnText: {
+      fontSize: 14,
+      fontWeight: "600",
+      color: C.tint,
+    },
+    testBtnTextDisabled: {
+      color: C.textMuted,
+    },
+    resultBox: {
+      flexDirection: "row",
+      gap: 10,
+      borderRadius: t.buttonRadius,
+      borderWidth: 1,
+      padding: 12,
+      marginBottom: 16,
+      alignItems: "flex-start",
+    },
+    resultOk: {
+      backgroundColor: C.success + "14",
+      borderColor: C.success + "4D",
+    },
+    resultOkText: {
+      fontSize: 13,
+      fontWeight: "600",
+      color: C.success,
+    },
+    resultOkSub: {
+      fontSize: 12,
+      color: C.textSecondary,
+      marginTop: 2,
+    },
+    resultErr: {
+      backgroundColor: C.danger + "14",
+      borderColor: C.danger + "4D",
+    },
+    resultErrTitle: {
+      fontSize: 13,
+      fontWeight: "600",
+      color: C.danger,
+      marginBottom: 4,
+    },
+    resultErrDetail: {
+      fontSize: 12,
+      color: C.textSecondary,
+      lineHeight: 18,
+    },
+    setupBox: {
+      flexDirection: "row",
+      gap: 10,
+      backgroundColor: C.tint + "0D",
+      borderRadius: t.buttonRadius,
+      borderWidth: 1,
+      borderColor: C.tint + "25",
+      padding: 14,
+      marginBottom: 20,
+      alignItems: "flex-start",
+    },
+    setupText: {
+      flex: 1,
+      fontSize: 12,
+      color: C.textSecondary,
+      lineHeight: 18,
+    },
+    setupCode: {
+      fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace",
+      color: C.tint,
+    },
+    addBtn: {
+      backgroundColor: C.tint,
+      borderRadius: t.buttonRadius,
+      paddingVertical: 14,
+      alignItems: "center",
+      marginTop: 8,
+    },
+    addBtnDisabled: {
+      opacity: 0.4,
+    },
+    addBtnText: {
+      fontSize: 16,
+      fontWeight: "700",
+      color: "#fff",
+    },
+  });
+};

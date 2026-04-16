@@ -1,7 +1,7 @@
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   Alert,
   KeyboardAvoidingView,
@@ -13,7 +13,8 @@ import {
   TextInput,
   View,
 } from "react-native";
-import Colors from "@/constants/colors";
+import { Theme } from "@/constants/themes";
+import { useTheme } from "@/context/ThemeContext";
 import { DEMO_PC_HOST, PC, usePcs } from "@/context/PcsContext";
 import { MetricRing } from "./MetricRing";
 
@@ -36,7 +37,9 @@ function formatUptime(seconds: number) {
 }
 
 export function PCCard({ pc }: PCCardProps) {
-  const C = Colors.light;
+  const { theme } = useTheme();
+  const C = theme.colors;
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const { removePc, updatePc } = usePcs();
   const isDemo = pc.host === DEMO_PC_HOST;
 
@@ -100,11 +103,19 @@ export function PCCard({ pc }: PCCardProps) {
     );
   };
 
+  // Theme-aware accent placement: ROG = left bar, Classic = top border
+  const accentEdgeStyle =
+    theme.accentEdge === "left"
+      ? { borderLeftWidth: theme.accentThickness, borderLeftColor: C.tint }
+      : { borderTopWidth: theme.accentThickness, borderTopColor: C.tint };
+
+  const cpuRingColor = theme.name === "rog" ? "#FF1744" : C.tint;
+
   return (
     <>
       <Pressable
         onPress={() => router.push(`/pc/${pc.id}`)}
-        style={({ pressed }) => [styles.card, pressed && { opacity: 0.85 }]}
+        style={({ pressed }) => [styles.card, accentEdgeStyle, pressed && { opacity: 0.85 }]}
       >
         <View style={styles.header}>
           <View style={styles.titleRow}>
@@ -136,7 +147,7 @@ export function PCCard({ pc }: PCCardProps) {
             <MetricRing
               value={pc.metrics.cpuUsage}
               label="CPU"
-              color="#FF1744"
+              color={cpuRingColor}
               size={72}
             />
             <MetricRing
@@ -296,240 +307,235 @@ export function PCCard({ pc }: PCCardProps) {
   );
 }
 
-const C = Colors.light;
-
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: C.card,
-    borderRadius: 4,
-    borderWidth: 1,
-    borderColor: C.cardBorder,
-    borderLeftWidth: 3,
-    borderLeftColor: C.tint,
-    padding: 16,
-    gap: 14,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  titleRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
-  nameRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  demoBadge: {
-    backgroundColor: "#FF6D00",
-    borderRadius: 2,
-    paddingHorizontal: 5,
-    paddingVertical: 1,
-  },
-  demoBadgeText: {
-    fontSize: 9,
-    fontWeight: "800",
-    color: "#fff",
-    letterSpacing: 0.8,
-  },
-  statusDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
-  name: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: C.text,
-    letterSpacing: -0.3,
-  },
-  host: {
-    fontSize: 12,
-    color: C.textSecondary,
-    marginTop: 1,
-  },
-  headerRight: {
-    alignItems: "flex-end",
-    gap: 3,
-  },
-  statusLabel: {
-    fontSize: 11,
-    fontWeight: "600",
-  },
-  osText: {
-    fontSize: 10,
-    color: C.textMuted,
-    maxWidth: 100,
-  },
-  cardSeparator: {
-    height: 1,
-    backgroundColor: C.cardBorder,
-    marginHorizontal: -2,
-  },
-  cardActions: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  actionBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    backgroundColor: C.tint + "15",
-    borderWidth: 1,
-    borderColor: C.tint + "40",
-    borderRadius: 4,
-  },
-  actionBtnRemove: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    backgroundColor: C.danger + "12",
-    borderWidth: 1,
-    borderColor: C.danger + "35",
-    borderRadius: 4,
-  },
-  actionBtnText: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: C.tint,
-  },
-  actionBtnTextRemove: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: C.danger,
-  },
-  metrics: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  networkInfo: {
-    alignItems: "center",
-    gap: 4,
-  },
-  netRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 3,
-  },
-  netVal: {
-    fontSize: 11,
-    color: C.textSecondary,
-    fontWeight: "500",
-  },
-  uptimeText: {
-    fontSize: 10,
-    color: C.textMuted,
-    marginTop: 2,
-  },
-  offlineRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  offlineText: {
-    fontSize: 13,
-    color: C.textMuted,
-  },
-  backdrop: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.6)",
-    justifyContent: "flex-end",
-  },
-  sheet: {
-    backgroundColor: C.card,
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    borderTopWidth: 2,
-    borderLeftWidth: 1,
-    borderRightWidth: 1,
-    borderColor: C.cardBorder,
-    borderTopColor: C.tint,
-    paddingHorizontal: 20,
-    paddingTop: 12,
-    paddingBottom: 40,
-    gap: 16,
-  },
-  sheetHandle: {
-    width: 36,
-    height: 3,
-    borderRadius: 2,
-    backgroundColor: C.textMuted,
-    alignSelf: "center",
-    marginBottom: 4,
-  },
-  sheetTitle: {
-    fontSize: 17,
-    fontWeight: "700",
-    color: C.text,
-    letterSpacing: -0.3,
-  },
-  field: {
-    gap: 6,
-  },
-  fieldLabel: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: C.textSecondary,
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-  },
-  fieldInput: {
-    backgroundColor: C.backgroundTertiary,
-    borderRadius: 4,
-    borderWidth: 1,
-    borderColor: C.cardBorder,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: 15,
-    color: C.text,
-    fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace",
-  },
-  fieldInputDisabled: {
-    opacity: 0.45,
-  },
-  fieldHint: {
-    fontSize: 11,
-    color: C.textMuted,
-    marginTop: -2,
-  },
-  sheetBtns: {
-    flexDirection: "row",
-    gap: 10,
-    marginTop: 4,
-  },
-  cancelBtn: {
-    flex: 1,
-    paddingVertical: 13,
-    borderRadius: 4,
-    borderWidth: 1,
-    borderColor: C.cardBorder,
-    alignItems: "center",
-  },
-  cancelBtnText: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: C.textSecondary,
-  },
-  saveBtn: {
-    flex: 1,
-    paddingVertical: 13,
-    borderRadius: 4,
-    backgroundColor: C.tint,
-    alignItems: "center",
-  },
-  saveBtnText: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: "#fff",
-  },
-});
+const createStyles = (t: Theme) => {
+  const C = t.colors;
+  return StyleSheet.create({
+    card: {
+      backgroundColor: C.card,
+      borderRadius: t.cardRadius,
+      borderWidth: 1,
+      borderColor: C.cardBorder,
+      padding: 16,
+      gap: 14,
+    },
+    header: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+    },
+    titleRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 10,
+    },
+    nameRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+    },
+    demoBadge: {
+      backgroundColor: "#FF6D00",
+      borderRadius: t.innerRadius,
+      paddingHorizontal: 5,
+      paddingVertical: 1,
+    },
+    demoBadgeText: {
+      fontSize: 9,
+      fontWeight: "800",
+      color: "#fff",
+      letterSpacing: 0.8,
+    },
+    statusDot: {
+      width: 8,
+      height: 8,
+      borderRadius: 4,
+    },
+    name: {
+      fontSize: 16,
+      fontWeight: "700",
+      color: C.text,
+      letterSpacing: -0.3,
+    },
+    host: {
+      fontSize: 12,
+      color: C.textSecondary,
+      marginTop: 1,
+    },
+    headerRight: {
+      alignItems: "flex-end",
+      gap: 3,
+    },
+    statusLabel: {
+      fontSize: 11,
+      fontWeight: "600",
+    },
+    osText: {
+      fontSize: 10,
+      color: C.textMuted,
+      maxWidth: 100,
+    },
+    cardSeparator: {
+      height: 1,
+      backgroundColor: C.cardBorder,
+      marginHorizontal: -2,
+    },
+    cardActions: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+    },
+    actionBtn: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 6,
+      paddingHorizontal: 12,
+      paddingVertical: 7,
+      backgroundColor: C.tint + "15",
+      borderWidth: 1,
+      borderColor: C.tint + "40",
+      borderRadius: t.buttonRadius,
+    },
+    actionBtnRemove: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 6,
+      paddingHorizontal: 12,
+      paddingVertical: 7,
+      backgroundColor: C.danger + "12",
+      borderWidth: 1,
+      borderColor: C.danger + "35",
+      borderRadius: t.buttonRadius,
+    },
+    actionBtnText: {
+      fontSize: 12,
+      fontWeight: "700",
+      color: C.tint,
+    },
+    actionBtnTextRemove: {
+      fontSize: 12,
+      fontWeight: "700",
+      color: C.danger,
+    },
+    metrics: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+    },
+    networkInfo: {
+      alignItems: "center",
+      gap: 4,
+    },
+    netRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 3,
+    },
+    netVal: {
+      fontSize: 11,
+      color: C.textSecondary,
+      fontWeight: "500",
+    },
+    uptimeText: {
+      fontSize: 10,
+      color: C.textMuted,
+      marginTop: 2,
+    },
+    offlineRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+    },
+    offlineText: {
+      fontSize: 13,
+      color: C.textMuted,
+    },
+    backdrop: {
+      flex: 1,
+      backgroundColor: "rgba(0,0,0,0.6)",
+      justifyContent: "flex-end",
+    },
+    sheet: {
+      backgroundColor: C.card,
+      borderTopLeftRadius: 16,
+      borderTopRightRadius: 16,
+      borderTopWidth: 2,
+      borderLeftWidth: 1,
+      borderRightWidth: 1,
+      borderColor: C.cardBorder,
+      borderTopColor: C.tint,
+      paddingHorizontal: 20,
+      paddingTop: 12,
+      paddingBottom: 40,
+      gap: 16,
+    },
+    sheetHandle: {
+      width: 36,
+      height: 3,
+      borderRadius: 2,
+      backgroundColor: C.textMuted,
+      alignSelf: "center",
+      marginBottom: 4,
+    },
+    sheetTitle: {
+      fontSize: 17,
+      fontWeight: "700",
+      color: C.text,
+      letterSpacing: -0.3,
+    },
+    field: { gap: 6 },
+    fieldLabel: {
+      fontSize: 12,
+      fontWeight: "600",
+      color: C.textSecondary,
+      textTransform: "uppercase",
+      letterSpacing: 0.5,
+    },
+    fieldInput: {
+      backgroundColor: C.backgroundTertiary,
+      borderRadius: t.buttonRadius,
+      borderWidth: 1,
+      borderColor: C.cardBorder,
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+      fontSize: 15,
+      color: C.text,
+      fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace",
+    },
+    fieldInputDisabled: { opacity: 0.45 },
+    fieldHint: {
+      fontSize: 11,
+      color: C.textMuted,
+      marginTop: -2,
+    },
+    sheetBtns: {
+      flexDirection: "row",
+      gap: 10,
+      marginTop: 4,
+    },
+    cancelBtn: {
+      flex: 1,
+      paddingVertical: 13,
+      borderRadius: t.buttonRadius,
+      borderWidth: 1,
+      borderColor: C.cardBorder,
+      alignItems: "center",
+    },
+    cancelBtnText: {
+      fontSize: 15,
+      fontWeight: "600",
+      color: C.textSecondary,
+    },
+    saveBtn: {
+      flex: 1,
+      paddingVertical: 13,
+      borderRadius: t.buttonRadius,
+      backgroundColor: C.tint,
+      alignItems: "center",
+    },
+    saveBtnText: {
+      fontSize: 15,
+      fontWeight: "700",
+      color: "#fff",
+    },
+  });
+};

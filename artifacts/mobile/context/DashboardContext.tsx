@@ -68,7 +68,7 @@ interface DashboardContextType {
   updateCustomCard: (
     pcId: string,
     cardId: string,
-    updates: Partial<Pick<CustomCardConfig, "title" | "sensorLabels" | "accentColor" | "icon" | "sensorAliases" | "layout">>
+    updates: Partial<Pick<CustomCardConfig, "title" | "sensorLabels" | "accentColor" | "icon" | "sensorAliases" | "layout" | "hiddenSensors" | "sensorIcons">>
   ) => void;
   updateBuiltinCard: (pcId: string, cardId: BuiltinCardKind, updates: { customTitle?: string; extraSensors?: string[]; hiddenFields?: string[]; fieldOrder?: string[]; fieldAliases?: Record<string, string>; sensorIcons?: Record<string, string>; sensorSource?: Record<string, string> }) => void;
 }
