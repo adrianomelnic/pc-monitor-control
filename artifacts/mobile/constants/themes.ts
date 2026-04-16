@@ -650,7 +650,7 @@ export const THEMES: Record<ThemeId, Theme> = {
 };
 
 export function tabularNumsVariant(theme: Theme): TextStyle["fontVariant"] {
-  return theme.tabularNumbers ? ["tabular-nums"] : undefined;
+  return theme.tabularNumbers ? ["tabular-nums"] : [];
 }
 
 /**
