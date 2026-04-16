@@ -649,8 +649,11 @@ export const THEMES: Record<ThemeId, Theme> = {
   minimal: resolveTheme("minimal", "dark"),
 };
 
+const TABULAR_NUMS_ON: TextStyle["fontVariant"] = ["tabular-nums"];
+const TABULAR_NUMS_OFF: TextStyle["fontVariant"] = ["proportional-nums"];
+
 export function tabularNumsVariant(theme: Theme): TextStyle["fontVariant"] {
-  return theme.tabularNumbers ? ["tabular-nums"] : [];
+  return theme.tabularNumbers ? TABULAR_NUMS_ON : TABULAR_NUMS_OFF;
 }
 
 /**
