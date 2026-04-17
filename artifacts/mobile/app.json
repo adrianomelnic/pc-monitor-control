@@ -25,11 +25,13 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.adrianomelnic.pcmonitorcontrol",
-      "buildNumber": "3",
+      "buildNumber": "4",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSLocalNetworkUsageDescription": "PC Monitor uses your local network to discover and connect to the PC Agent running on computers on the same Wi-Fi network.",
-        "NSBonjourServices": ["_http._tcp"]
+        "NSBonjourServices": [
+          "_http._tcp"
+        ]
       }
     },
     "android": {
