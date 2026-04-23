@@ -968,7 +968,7 @@ export default function AgentScreen() {
               size={14}
               color="#fff"
             />
-            <Text style={styles.copyBtnText}>{copied ? "Copied!" : "Copy to clipboard"}</Text>
+            <Text style={styles.copyBtnText}>{copied ? "Copied!" : "Manual: Copy to clipboard"}</Text>
           </Pressable>
         </View>
         <ScrollView
