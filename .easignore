@@ -1,0 +1,5 @@
+attached_assets/
+.local/
+.git/
+artifacts/api-server/node_modules/
+artifacts/mockup-sandbox/node_modules/
