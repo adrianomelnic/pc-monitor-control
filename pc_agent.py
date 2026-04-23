@@ -1,26 +1,4 @@
-import { Feather } from "@expo/vector-icons";
-import * as Clipboard from "expo-clipboard";
-import * as Haptics from "expo-haptics";
-import { router } from "expo-router";
-import React, { useMemo, useState } from "react";
-import {
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Theme } from "@/constants/themes";
-import { useTheme } from "@/context/ThemeContext";
-
-const GITHUB_RAW_URL =
-  "https://raw.githubusercontent.com/adrianomelnic/pc-monitor-control/main/pc_agent.py";
-const WIN_CMD = `powershell -c "irm '${GITHUB_RAW_URL}' | Out-File pc_agent.py"`;
-const MAC_CMD = `curl -fsSL '${GITHUB_RAW_URL}' -o pc_agent.py`;
-
-const PYTHON_AGENT = `#!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 PC Monitor Agent v2 - Full hardware monitoring.
 Install: python -m pip install psutil flask flask-cors
@@ -72,7 +50,7 @@ def _init_cpu_name():
         try:
             import winreg
             key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE,
-                r"HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0")
+                r"HARDWARE\DESCRIPTION\System\CentralProcessor\0")
             name = winreg.QueryValueEx(key, "ProcessorNameString")[0].strip()
             winreg.CloseKey(key)
             if name:
@@ -161,7 +139,7 @@ def read_hwinfo64():
         return None
     try:
         import ctypes, struct
-        HWINFO_SM2_KEY = "Global\\\\HWiNFO_SENS_SM2"
+        HWINFO_SM2_KEY = "Global\\HWiNFO_SENS_SM2"
         FILE_MAP_READ = 0x0004
         k32 = ctypes.windll.kernel32
         # Set correct return types so 64-bit pointers aren't truncated
@@ -225,10 +203,10 @@ def read_hwinfo64():
             if raw[1] == 0:
                 # High byte of first char is null → UTF-16-LE (old HWiNFO format)
                 s = raw.decode('utf-16-le', errors='ignore')
-                cut = s.find('\\x00')
+                cut = s.find('\x00')
                 return (s[:cut] if cut >= 0 else s).strip()
             # Non-null second byte → ASCII / Latin-1 (new HWiNFO v7+ format)
-            cut = raw.find(b'\\x00')
+            cut = raw.find(b'\x00')
             return (raw[:cut] if cut >= 0 else raw).decode('latin-1').strip()
 
         # All HWiNFO64 sensor reading types and their units
@@ -483,7 +461,7 @@ def get_disks(prev_io, elapsed):
             try:
                 usage = psutil.disk_usage(part.mountpoint)
                 read_spd = write_spd = 0.0
-                dev_key = part.device.replace("\\\\\\\\.\\\\", "").rstrip("\\\\").rstrip(":")
+                dev_key = part.device.replace("\\\\.\\", "").rstrip("\\").rstrip(":")
                 for key in [dev_key, part.device, part.mountpoint]:
                     if key in curr_io and prev_io and key in prev_io:
                         read_spd = max(0, (curr_io[key].read_bytes - prev_io[key].read_bytes) / elapsed / 1024)
@@ -671,7 +649,7 @@ def hwinfo_debug():
         return jsonify({"status": "not_windows", "detail": "HWiNFO64 is Windows-only."})
     try:
         import ctypes, struct
-        HWINFO_SM2_KEY = "Global\\\\HWiNFO_SENS_SM2"
+        HWINFO_SM2_KEY = "Global\\HWiNFO_SENS_SM2"
         FILE_MAP_READ = 0x0004
         k32 = ctypes.windll.kernel32
         k32.OpenFileMappingW.restype = ctypes.c_void_p
@@ -739,9 +717,9 @@ def hwinfo_debug():
                 return ""
             if raw[1] == 0:
                 s = raw.decode('utf-16-le', errors='ignore')
-                cut = s.find('\\x00')
+                cut = s.find('\x00')
                 return (s[:cut] if cut >= 0 else s).strip()
-            cut = raw.find(b'\\x00')
+            cut = raw.find(b'\x00')
             return (raw[:cut] if cut >= 0 else raw).decode('latin-1').strip()
 
         # Hex dump of first element for diagnosis
@@ -786,481 +764,3 @@ if __name__ == "__main__":
     print(f"API Key: {'set' if API_KEY else 'not set (open access)'}")
     open_firewall_port(PORT)
     app.run(host="0.0.0.0", port=PORT, debug=False)
-`;
-
-const STEPS = [
-  {
-    step: "1",
-    title: "Install Python",
-    desc: 'Download Python 3.8+ from python.org. On Windows, check "Add Python to PATH" during install.',
-    code: "python --version",
-  },
-  {
-    step: "2",
-    title: "Install dependencies",
-    desc: "Open Command Prompt (Windows) or Terminal (Mac/Linux) and run:",
-    code: "python -m pip install psutil flask flask-cors",
-    note: 'Use "python -m pip" — plain "pip" may not be recognized on Windows.',
-  },
-  {
-    step: "3",
-    title: "Get the agent script",
-    desc: "Download it with one terminal command (see below), or copy it manually from this screen and save as pc_agent.py.",
-  },
-  {
-    step: "4",
-    title: "Run as Administrator (Windows)",
-    desc: "Right-click Command Prompt → Run as administrator. Navigate to the file and run:",
-    code: "python pc_agent.py",
-    note: "Running as Admin lets the agent automatically open the firewall port so your phone can connect.",
-  },
-  {
-    step: "5",
-    title: "Find your PC's IP address",
-    desc: 'Run ipconfig in Command Prompt and look for your IPv4 Address (e.g. 192.168.1.100). Your phone must be on the same Wi-Fi network.',
-    code: "ipconfig",
-  },
-  {
-    step: "6",
-    title: "Add your PC in the app",
-    desc: "Go to the My PCs tab, tap +, enter the name, IP address, and port 8765.",
-  },
-];
-
-
-export default function AgentScreen() {
-  const insets = useSafeAreaInsets();
-  const { theme } = useTheme();
-  const C = theme.colors;
-  const styles = useMemo(() => createStyles(theme), [theme]);
-  const [copied, setCopied] = useState(false);
-  const [osTab, setOsTab] = useState<"windows" | "mac">("windows");
-  const [copiedCmd, setCopiedCmd] = useState(false);
-  const [copiedUrl, setCopiedUrl] = useState(false);
-
-  const topPad = Platform.OS === "web" ? 67 : insets.top;
-  const bottomPad = Platform.OS === "web" ? 34 : 0;
-
-  const copyAgent = async () => {
-    await Clipboard.setStringAsync(PYTHON_AGENT);
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2500);
-  };
-
-  const copyCmd = async () => {
-    await Clipboard.setStringAsync(osTab === "windows" ? WIN_CMD : MAC_CMD);
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    setCopiedCmd(true);
-    setTimeout(() => setCopiedCmd(false), 2500);
-  };
-
-  const copyUrl = async () => {
-    await Clipboard.setStringAsync(GITHUB_RAW_URL);
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    setCopiedUrl(true);
-    setTimeout(() => setCopiedUrl(false), 2500);
-  };
-
-  return (
-    <ScrollView
-      style={[styles.root, { paddingTop: topPad }]}
-      contentContainerStyle={{ paddingBottom: 100 + bottomPad }}
-      showsVerticalScrollIndicator={false}
-    >
-      <View style={styles.header}>
-        <Pressable
-          onPress={() => router.back()}
-          style={({ pressed }) => [styles.backBtn, pressed && { opacity: 0.7 }]}
-          hitSlop={8}
-        >
-          <Feather name="arrow-left" size={22} color={C.text} />
-        </Pressable>
-        <View style={{ flex: 1 }}>
-          <Text style={styles.title}>PC Agent Setup</Text>
-          <Text style={styles.subtitle}>
-            Run the agent on any PC you want to control
-          </Text>
-        </View>
-      </View>
-
-      {STEPS.map((s) => (
-        <View key={s.step} style={styles.step}>
-          <View style={styles.stepNum}>
-            <Text style={styles.stepNumText}>{s.step}</Text>
-          </View>
-          <View style={styles.stepContent}>
-            <Text style={styles.stepTitle}>{s.title}</Text>
-            <Text style={styles.stepDesc}>{s.desc}</Text>
-            {s.code && (
-              <View style={styles.codeBlock}>
-                <Text style={styles.codeText}>{s.code}</Text>
-              </View>
-            )}
-            {s.note && (
-              <View style={styles.noteBox}>
-                <Feather name="info" size={12} color={C.warning} />
-                <Text style={styles.noteText}>{s.note}</Text>
-              </View>
-            )}
-          </View>
-        </View>
-      ))}
-
-      <View style={styles.downloadSection}>
-        <View style={styles.downloadHeader}>
-          <Feather name="download" size={15} color={C.tint} />
-          <Text style={styles.downloadTitle}>Download Script</Text>
-        </View>
-        <View style={styles.osTabRow}>
-          {(["windows", "mac"] as const).map((tab) => (
-            <Pressable
-              key={tab}
-              style={[styles.osTab, osTab === tab && styles.osTabActive]}
-              onPress={() => setOsTab(tab)}
-            >
-              <Text style={[styles.osTabText, osTab === tab && styles.osTabTextActive]}>
-                {tab === "windows" ? "Windows" : "Mac / Linux"}
-              </Text>
-            </Pressable>
-          ))}
-        </View>
-        <View style={styles.cmdRow}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flex: 1 }}>
-            <Text style={styles.cmdText}>{osTab === "windows" ? WIN_CMD : MAC_CMD}</Text>
-          </ScrollView>
-          <Pressable
-            style={({ pressed }) => [styles.cmdCopyBtn, copiedCmd && styles.cmdCopyBtnDone, pressed && { opacity: 0.8 }]}
-            onPress={copyCmd}
-          >
-            <Feather name={copiedCmd ? "check" : "copy"} size={14} color="#fff" />
-            <Text style={styles.cmdCopyText}>{copiedCmd ? "Copied!" : "Copy"}</Text>
-          </Pressable>
-        </View>
-        <View style={styles.urlRow}>
-          <Feather name="github" size={12} color={C.textSecondary} />
-          <Text style={styles.urlText} numberOfLines={1}>{GITHUB_RAW_URL}</Text>
-          <Pressable
-            style={({ pressed }) => [styles.urlCopyBtn, pressed && { opacity: 0.7 }]}
-            onPress={copyUrl}
-          >
-            <Text style={styles.urlCopyText}>{copiedUrl ? "Copied!" : "Copy URL"}</Text>
-          </Pressable>
-        </View>
-      </View>
-
-      <View style={styles.agentSection}>
-        <View style={styles.agentHeader}>
-          <View>
-            <Text style={styles.agentTitle}>pc_agent.py</Text>
-            <Text style={styles.agentSub}>Or copy manually to your PC</Text>
-          </View>
-          <Pressable
-            style={({ pressed }) => [
-              styles.copyBtn,
-              copied && styles.copyBtnDone,
-              pressed && { opacity: 0.8 },
-            ]}
-            onPress={copyAgent}
-          >
-            <Feather
-              name={copied ? "check" : "copy"}
-              size={14}
-              color="#fff"
-            />
-            <Text style={styles.copyBtnText}>{copied ? "Copied!" : "Copy"}</Text>
-          </Pressable>
-        </View>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.codeScroll}
-        >
-          <Text style={styles.agentCode}>{PYTHON_AGENT}</Text>
-        </ScrollView>
-      </View>
-
-      <View style={styles.tipBox}>
-        <Feather name="shield" size={14} color={C.tint} />
-        <Text style={styles.tipText}>
-          Set <Text style={styles.tipCode}>PC_AGENT_KEY=yourkey</Text> env var and enter it in the app for secure access.
-        </Text>
-      </View>
-    </ScrollView>
-  );
-}
-
-const createStyles = (theme: Theme) => {
-  const C = theme.colors;
-  return StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: C.background,
-    paddingHorizontal: 16,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    paddingTop: 12,
-    paddingBottom: 20,
-  },
-  backBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: theme.buttonRadius,
-    backgroundColor: C.backgroundTertiary,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: "800",
-    color: C.text,
-    letterSpacing: -0.5,
-  },
-  subtitle: {
-    fontSize: 14,
-    color: C.textSecondary,
-    marginTop: 4,
-  },
-  step: {
-    flexDirection: "row",
-    gap: 14,
-    marginBottom: 20,
-  },
-  stepNum: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: C.tint,
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 2,
-    flexShrink: 0,
-  },
-  stepNumText: {
-    fontSize: 13,
-    fontWeight: "800",
-    color: "#fff",
-  },
-  stepContent: {
-    flex: 1,
-    gap: 4,
-  },
-  stepTitle: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: C.text,
-  },
-  stepDesc: {
-    fontSize: 13,
-    color: C.textSecondary,
-    lineHeight: 19,
-  },
-  codeBlock: {
-    backgroundColor: C.card,
-    borderRadius: 4,
-    padding: 10,
-    marginTop: 4,
-  },
-  codeText: {
-    fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace",
-    fontSize: 13,
-    color: C.tint,
-  },
-  downloadSection: {
-    backgroundColor: C.card,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: C.cardBorder,
-    overflow: "hidden",
-    marginBottom: 12,
-  },
-  downloadHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: C.cardBorder,
-  },
-  downloadTitle: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: C.text,
-  },
-  osTabRow: {
-    flexDirection: "row",
-    paddingHorizontal: 12,
-    paddingTop: 10,
-    paddingBottom: 6,
-    gap: 8,
-  },
-  osTab: {
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-    borderRadius: 20,
-    backgroundColor: C.backgroundTertiary,
-  },
-  osTabActive: {
-    backgroundColor: C.tint,
-  },
-  osTabText: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: C.textSecondary,
-  },
-  osTabTextActive: {
-    color: "#fff",
-  },
-  cmdRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginHorizontal: 12,
-    marginBottom: 8,
-    backgroundColor: C.backgroundTertiary,
-    borderRadius: 6,
-    overflow: "hidden",
-  },
-  cmdText: {
-    fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace",
-    fontSize: 12,
-    color: C.tint,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-  },
-  cmdCopyBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 5,
-    backgroundColor: C.tint,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-  },
-  cmdCopyBtnDone: {
-    backgroundColor: C.success,
-  },
-  cmdCopyText: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: "#fff",
-  },
-  urlRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    paddingHorizontal: 12,
-    paddingBottom: 12,
-  },
-  urlText: {
-    flex: 1,
-    fontSize: 11,
-    color: C.textSecondary,
-    fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace",
-  },
-  urlCopyBtn: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 4,
-    backgroundColor: C.backgroundTertiary,
-  },
-  urlCopyText: {
-    fontSize: 11,
-    fontWeight: "600",
-    color: C.tint,
-  },
-  agentSection: {
-    backgroundColor: C.card,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: C.cardBorder,
-    overflow: "hidden",
-    marginBottom: 16,
-  },
-  agentHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: C.cardBorder,
-  },
-  agentTitle: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: C.text,
-    fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace",
-  },
-  agentSub: {
-    fontSize: 11,
-    color: C.textSecondary,
-    marginTop: 2,
-  },
-  copyBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    backgroundColor: C.tint,
-    borderRadius: 4,
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-  },
-  copyBtnDone: {
-    backgroundColor: C.success,
-  },
-  copyBtnText: {
-    fontSize: 13,
-    fontWeight: "700",
-    color: "#fff",
-  },
-  codeScroll: {
-    maxHeight: 300,
-  },
-  agentCode: {
-    fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace",
-    fontSize: 11,
-    color: C.textSecondary,
-    padding: 14,
-    lineHeight: 18,
-  },
-  tipBox: {
-    flexDirection: "row",
-    gap: 10,
-    backgroundColor: "rgba(0, 212, 255, 0.07)",
-    borderRadius: 4,
-    borderWidth: 1,
-    borderColor: "rgba(0, 212, 255, 0.2)",
-    padding: 14,
-    alignItems: "flex-start",
-  },
-  tipText: {
-    flex: 1,
-    fontSize: 12,
-    color: C.textSecondary,
-    lineHeight: 18,
-  },
-  tipCode: {
-    fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace",
-    color: C.tint,
-  },
-  noteBox: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 6,
-    backgroundColor: "rgba(255, 184, 0, 0.08)",
-    borderRadius: 4,
-    borderWidth: 1,
-    borderColor: "rgba(255, 184, 0, 0.25)",
-    padding: 10,
-    marginTop: 4,
-  },
-  noteText: {
-    flex: 1,
-    fontSize: 12,
-    color: C.warning,
-    lineHeight: 17,
-  },
-  });
-};
