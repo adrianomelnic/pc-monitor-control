@@ -933,8 +933,8 @@ export default function AgentScreen() {
             style={({ pressed }) => [styles.cmdCopyBtn, copiedCmd && styles.cmdCopyBtnDone, pressed && { opacity: 0.8 }]}
             onPress={copyCmd}
           >
-            <Feather name={copiedCmd ? "check" : "copy"} size={14} color={C.tintForeground} />
-            <Text style={styles.cmdCopyText}>{copiedCmd ? "Copied!" : "Copy"}</Text>
+            <Feather name={copiedCmd ? "check" : "copy"} size={14} color={copiedCmd ? C.successForeground : C.tintForeground} />
+            <Text style={[styles.cmdCopyText, copiedCmd && { color: C.successForeground }]}>{copiedCmd ? "Copied!" : "Copy"}</Text>
           </Pressable>
         </View>
         <View style={styles.urlRow}>
@@ -966,9 +966,9 @@ export default function AgentScreen() {
             <Feather
               name={copied ? "check" : "copy"}
               size={14}
-              color={C.tintForeground}
+              color={copied ? C.successForeground : C.tintForeground}
             />
-            <Text style={styles.copyBtnText}>{copied ? "Copied!" : "Manual: Copy to clipboard"}</Text>
+            <Text style={[styles.copyBtnText, copied && { color: C.successForeground }]}>{copied ? "Copied!" : "Manual: Copy to clipboard"}</Text>
           </Pressable>
         </View>
         <ScrollView

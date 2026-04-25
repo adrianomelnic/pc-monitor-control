@@ -726,7 +726,7 @@ export default function PCDetailScreen() {
               }}
               hitSlop={6}
             >
-              <Feather name="x" size={16} color="#fff" />
+              <Feather name="x" size={16} color={C.dangerForeground} />
             </Pressable>
           </>
         )}
