@@ -11,6 +11,13 @@ export type ThemeId =
   | "nord"
   | "minimal";
 
+export interface CustomThemeDef {
+  id: string;
+  label: string;
+  tint: string;
+  createdAt: number;
+}
+
 export type ThemeMode = "light" | "dark" | "auto";
 export type ResolvedMode = "light" | "dark";
 
@@ -709,6 +716,95 @@ export function resolveTheme(themeId: ThemeId, mode: ResolvedMode): Theme {
     colors: variant.colors,
     cardAccents: variant.cardAccents,
     ...def.shape,
+  };
+}
+
+// ─── Custom theme builder ────────────────────────────────────────────────────
+
+/**
+ * Derives a slightly-darkened variant of a hex tint for tintDark.
+ * Reduces lightness by ~20% in HSL space.
+ */
+function darkenHex(hex: string, amount = 0.22): string {
+  const h = hex.replace(/^#/, "");
+  const full = h.length === 3 ? h.split("").map((c) => c + c).join("") : h;
+  let r = parseInt(full.slice(0, 2), 16) / 255;
+  let g = parseInt(full.slice(2, 4), 16) / 255;
+  let b = parseInt(full.slice(4, 6), 16) / 255;
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  let h2 = 0, s = 0;
+  let l = (max + min) / 2;
+  if (max !== min) {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    switch (max) {
+      case r: h2 = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+      case g: h2 = ((b - r) / d + 2) / 6; break;
+      case b: h2 = ((r - g) / d + 4) / 6; break;
+    }
+  }
+  l = Math.max(0, l - amount);
+  const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+  const p = 2 * l - q;
+  const hue2rgb = (p2: number, q2: number, t: number) => {
+    if (t < 0) t += 1;
+    if (t > 1) t -= 1;
+    if (t < 1 / 6) return p2 + (q2 - p2) * 6 * t;
+    if (t < 1 / 2) return q2;
+    if (t < 2 / 3) return p2 + (q2 - p2) * (2 / 3 - t) * 6;
+    return p2;
+  };
+  r = hue2rgb(p, q, h2 + 1 / 3);
+  g = hue2rgb(p, q, h2);
+  b = hue2rgb(p, q, h2 - 1 / 3);
+  const toHex = (v: number) => Math.round(v * 255).toString(16).padStart(2, "0");
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+}
+
+/**
+ * Builds a complete dark Theme from a CustomThemeDef.
+ * Uses a neutral dark background; the tint color controls all accents.
+ */
+export function buildCustomTheme(def: CustomThemeDef): Theme {
+  const tint = def.tint;
+  const tintDark = darkenHex(tint);
+  const tintForeground = contrastForeground(tint);
+  return {
+    id: def.id as ThemeId,
+    mode: "dark",
+    colors: {
+      text: "#FFFFFF",
+      textSecondary: "#8A8A8A",
+      textMuted: "#555555",
+      background: "#0A0A0A",
+      backgroundSecondary: "#111111",
+      backgroundTertiary: "#1C1C1C",
+      card: "#141414",
+      cardBorder: "#252525",
+      tint,
+      tintDark,
+      tintForeground,
+      tabIconDefault: "#505050",
+      tabIconSelected: tint,
+      danger: "#FF4444",
+      warning: "#FFB800",
+      success: "#69F0AE",
+      online: "#69F0AE",
+      offline: "#FF5252",
+      idle: "#FFB300",
+    },
+    cardAccents: {
+      cpu: tint,
+      gpu: tint,
+      ram: tint,
+      thermals: tint,
+      fans: tint,
+      disks: tint,
+      network: tint,
+      sensor: tint,
+    },
+    ...SHAPE_TACTICAL,
   };
 }
 
