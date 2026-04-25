@@ -65,6 +65,7 @@
     "expo-file-system": "^19.0.21",
     "expo-sharing": "^14.0.8",
     "expo-updates": "~29.0.16",
-    "react-native-draggable-flatlist": "^4.0.3"
+    "react-native-draggable-flatlist": "^4.0.3",
+    "react-native-qrcode-svg": "^6.3.21"
   }
 }

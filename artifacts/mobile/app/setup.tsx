@@ -17,8 +17,12 @@ import { useTheme } from "@/context/ThemeContext";
 
 const GITHUB_RAW_URL =
   "https://raw.githubusercontent.com/adrianomelnic/pc-monitor-control/main/pc_agent.py";
-const WIN_CMD = `powershell -c "irm '${GITHUB_RAW_URL}' | Out-File pc_agent.py"`;
-const MAC_CMD = `curl -fsSL '${GITHUB_RAW_URL}' -o pc_agent.py`;
+const INSTALL_PS1_URL =
+  "https://raw.githubusercontent.com/adrianomelnic/pc-monitor-control/main/scripts/install.ps1";
+const INSTALL_SH_URL =
+  "https://raw.githubusercontent.com/adrianomelnic/pc-monitor-control/main/scripts/install.sh";
+const WIN_CMD = `powershell -c "irm ${INSTALL_PS1_URL} | iex"`;
+const MAC_CMD = `curl -fsSL ${INSTALL_SH_URL} | bash`;
 
 const PYTHON_AGENT = `#!/usr/bin/env python3
 """
@@ -797,31 +801,23 @@ const STEPS = [
   },
   {
     step: "2",
-    title: "Install dependencies",
-    desc: "Open Command Prompt (Windows) or Terminal (Mac/Linux) and run:",
-    code: "python -m pip install psutil flask flask-cors",
-    note: 'Use "python -m pip" — plain "pip" may not be recognized on Windows.',
+    title: "Run the one-line installer",
+    desc: "Open Command Prompt / PowerShell on Windows or Terminal on Mac/Linux and paste the command below. It downloads pc_agent.py, installs Python dependencies, and starts the agent automatically.",
   },
   {
     step: "3",
-    title: "Get the agent script",
-    desc: "Download it with one terminal command (see below), or copy it manually from this screen and save as pc_agent.py.",
+    title: "Approve the admin prompt (Windows)",
+    desc: "Windows will pop up a UAC prompt the first time the agent runs. Click Yes so the agent can open the firewall port for your phone.",
+    note: "If you skip the prompt, your phone will not be able to reach the agent on port 8765.",
   },
   {
     step: "4",
-    title: "Run as Administrator (Windows)",
-    desc: "Right-click Command Prompt → Run as administrator. Navigate to the file and run:",
-    code: "python pc_agent.py",
-    note: "Running as Admin lets the agent automatically open the firewall port so your phone can connect.",
-  },
-  {
-    step: "5",
     title: "Find your PC's IP address",
     desc: 'Run ipconfig in Command Prompt and look for your IPv4 Address (e.g. 192.168.1.100). Your phone must be on the same Wi-Fi network.',
     code: "ipconfig",
   },
   {
-    step: "6",
+    step: "5",
     title: "Add your PC in the app",
     desc: "Go to the My PCs tab, tap +, enter the name, IP address, and port 8765.",
   },
@@ -909,8 +905,8 @@ export default function AgentScreen() {
 
       <View style={styles.downloadSection}>
         <View style={styles.downloadHeader}>
-          <Feather name="download" size={15} color={C.tint} />
-          <Text style={styles.downloadTitle}>Download Script</Text>
+          <Feather name="terminal" size={15} color={C.tint} />
+          <Text style={styles.downloadTitle}>One-line installer</Text>
         </View>
         <View style={styles.osTabRow}>
           {(["windows", "mac"] as const).map((tab) => (
@@ -953,7 +949,7 @@ export default function AgentScreen() {
         <View style={styles.agentHeader}>
           <View>
             <Text style={styles.agentTitle}>pc_agent.py</Text>
-            <Text style={styles.agentSub}>Or copy manually to your PC</Text>
+            <Text style={styles.agentSub}>Manual fallback — copy and save as pc_agent.py</Text>
           </View>
           <Pressable
             style={({ pressed }) => [
