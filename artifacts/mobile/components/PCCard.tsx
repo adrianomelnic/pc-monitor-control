@@ -109,7 +109,7 @@ export function PCCard({ pc }: PCCardProps) {
       ? { borderLeftWidth: theme.accentThickness, borderLeftColor: C.tint }
       : { borderTopWidth: theme.accentThickness, borderTopColor: C.tint };
 
-  const cpuRingColor = theme.id === "rog" ? "#FF1744" : C.tint;
+  const cpuRingColor = theme.cardAccents.cpu;
 
   return (
     <>
@@ -341,18 +341,18 @@ const createStyles = (t: Theme) => {
     },
     demoBadgeText: {
       fontSize: 9,
-      fontWeight: "800",
+      fontFamily: "Inter_700Bold",
       color: "#fff",
       letterSpacing: 0.8,
     },
     statusDot: {
-      width: 8,
-      height: 8,
+      width: 7,
+      height: 7,
       borderRadius: 4,
     },
     name: {
       fontSize: 16,
-      fontWeight: "700",
+      fontFamily: "Inter_700Bold",
       color: C.text,
       letterSpacing: -0.3,
     },
@@ -367,7 +367,7 @@ const createStyles = (t: Theme) => {
     },
     statusLabel: {
       fontSize: 11,
-      fontWeight: "600",
+      fontFamily: "Inter_600SemiBold",
     },
     osText: {
       fontSize: 10,
@@ -408,12 +408,12 @@ const createStyles = (t: Theme) => {
     },
     actionBtnText: {
       fontSize: 12,
-      fontWeight: "700",
+      fontFamily: "Inter_600SemiBold",
       color: C.tint,
     },
     actionBtnTextRemove: {
       fontSize: 12,
-      fontWeight: "700",
+      fontFamily: "Inter_600SemiBold",
       color: C.danger,
     },
     metrics: {
@@ -433,7 +433,7 @@ const createStyles = (t: Theme) => {
     netVal: {
       fontSize: 11,
       color: C.textSecondary,
-      fontWeight: "500",
+      fontFamily: "Inter_500Medium",
     },
     uptimeText: {
       fontSize: 10,
@@ -456,13 +456,12 @@ const createStyles = (t: Theme) => {
     },
     sheet: {
       backgroundColor: C.card,
-      borderTopLeftRadius: 16,
-      borderTopRightRadius: 16,
-      borderTopWidth: 2,
+      borderTopLeftRadius: 12,
+      borderTopRightRadius: 12,
+      borderTopWidth: 1,
       borderLeftWidth: 1,
       borderRightWidth: 1,
-      borderColor: C.cardBorder,
-      borderTopColor: C.tint,
+      borderColor: C.tint,
       paddingHorizontal: 20,
       paddingTop: 12,
       paddingBottom: 40,
@@ -470,25 +469,25 @@ const createStyles = (t: Theme) => {
     },
     sheetHandle: {
       width: 36,
-      height: 3,
+      height: 4,
       borderRadius: 2,
       backgroundColor: C.textMuted,
       alignSelf: "center",
       marginBottom: 4,
     },
     sheetTitle: {
-      fontSize: 17,
-      fontWeight: "700",
+      fontSize: 15,
+      fontFamily: "Inter_600SemiBold",
       color: C.text,
-      letterSpacing: -0.3,
+      letterSpacing: 0.3,
     },
     field: { gap: 6 },
     fieldLabel: {
-      fontSize: 12,
-      fontWeight: "600",
+      fontSize: 11,
+      fontFamily: "Inter_600SemiBold",
       color: C.textSecondary,
       textTransform: "uppercase",
-      letterSpacing: 0.5,
+      letterSpacing: 2,
     },
     fieldInput: {
       backgroundColor: C.backgroundTertiary,
@@ -521,8 +520,8 @@ const createStyles = (t: Theme) => {
       alignItems: "center",
     },
     cancelBtnText: {
-      fontSize: 15,
-      fontWeight: "600",
+      fontSize: 14,
+      fontFamily: "Inter_600SemiBold",
       color: C.textSecondary,
     },
     saveBtn: {
@@ -533,9 +532,9 @@ const createStyles = (t: Theme) => {
       alignItems: "center",
     },
     saveBtnText: {
-      fontSize: 15,
-      fontWeight: "700",
-      color: "#fff",
+      fontSize: 14,
+      fontFamily: "Inter_700Bold",
+      color: "#000",
     },
   });
 };

@@ -1015,12 +1015,13 @@ const createStyles = (theme: Theme) => {
   },
   title: {
     fontSize: 28,
-    fontWeight: "800",
+    fontFamily: "Inter_700Bold",
     color: C.text,
     letterSpacing: -0.5,
   },
   subtitle: {
     fontSize: 14,
+    fontFamily: "Inter_400Regular",
     color: C.textSecondary,
     marginTop: 4,
   },
@@ -1041,8 +1042,8 @@ const createStyles = (theme: Theme) => {
   },
   stepNumText: {
     fontSize: 13,
-    fontWeight: "800",
-    color: "#fff",
+    fontFamily: "Inter_700Bold",
+    color: "#000",
   },
   stepContent: {
     flex: 1,
@@ -1050,7 +1051,7 @@ const createStyles = (theme: Theme) => {
   },
   stepTitle: {
     fontSize: 15,
-    fontWeight: "700",
+    fontFamily: "Inter_700Bold",
     color: C.text,
   },
   stepDesc: {
@@ -1088,7 +1089,7 @@ const createStyles = (theme: Theme) => {
   },
   downloadTitle: {
     fontSize: 14,
-    fontWeight: "700",
+    fontFamily: "Inter_600SemiBold",
     color: C.text,
   },
   osTabRow: {
@@ -1109,11 +1110,11 @@ const createStyles = (theme: Theme) => {
   },
   osTabText: {
     fontSize: 13,
-    fontWeight: "600",
+    fontFamily: "Inter_600SemiBold",
     color: C.textSecondary,
   },
   osTabTextActive: {
-    color: "#fff",
+    color: "#000",
   },
   cmdRow: {
     flexDirection: "row",
@@ -1144,8 +1145,8 @@ const createStyles = (theme: Theme) => {
   },
   cmdCopyText: {
     fontSize: 12,
-    fontWeight: "700",
-    color: "#fff",
+    fontFamily: "Inter_700Bold",
+    color: "#000",
   },
   urlRow: {
     flexDirection: "row",
@@ -1168,7 +1169,7 @@ const createStyles = (theme: Theme) => {
   },
   urlCopyText: {
     fontSize: 11,
-    fontWeight: "600",
+    fontFamily: "Inter_600SemiBold",
     color: C.tint,
   },
   agentSection: {
@@ -1189,7 +1190,6 @@ const createStyles = (theme: Theme) => {
   },
   agentTitle: {
     fontSize: 15,
-    fontWeight: "700",
     color: C.text,
     fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace",
   },
@@ -1212,8 +1212,8 @@ const createStyles = (theme: Theme) => {
   },
   copyBtnText: {
     fontSize: 13,
-    fontWeight: "700",
-    color: "#fff",
+    fontFamily: "Inter_700Bold",
+    color: "#000",
   },
   codeScroll: {
     maxHeight: 300,

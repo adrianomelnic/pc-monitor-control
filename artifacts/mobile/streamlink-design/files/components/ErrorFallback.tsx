@@ -69,12 +69,11 @@ export function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
       ) : null}
 
       <View style={styles.content}>
-        <Feather name="alert-circle" size={28} color={colors.mutedForeground} />
-        <Text style={[styles.title, { color: colors.foreground, fontFamily: "Inter_700Bold" }]}>
+        <Text style={[styles.title, { color: colors.foreground }]}>
           Something went wrong
         </Text>
 
-        <Text style={[styles.message, { color: colors.mutedForeground, fontFamily: "Inter_400Regular" }]}>
+        <Text style={[styles.message, { color: colors.mutedForeground }]}>
           Please reload the app to continue.
         </Text>
 
@@ -85,10 +84,16 @@ export function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
             {
               backgroundColor: colors.primary,
               opacity: pressed ? 0.9 : 1,
+              transform: [{ scale: pressed ? 0.98 : 1 }],
             },
           ]}
         >
-          <Text style={[styles.buttonText, { color: colors.primaryForeground, fontFamily: "Inter_600SemiBold" }]}>
+          <Text
+            style={[
+              styles.buttonText,
+              { color: colors.primaryForeground },
+            ]}
+          >
             Try Again
           </Text>
         </Pressable>
@@ -105,7 +110,7 @@ export function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
             <View
               style={[
                 styles.modalContainer,
-                { backgroundColor: colors.background, borderColor: colors.border },
+                { backgroundColor: colors.background },
               ]}
             >
               <View
@@ -114,7 +119,7 @@ export function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
                   { borderBottomColor: colors.border },
                 ]}
               >
-                <Text style={[styles.modalTitle, { color: colors.foreground, fontFamily: "Inter_600SemiBold" }]}>
+                <Text style={[styles.modalTitle, { color: colors.foreground }]}>
                   Error Details
                 </Text>
                 <Pressable
@@ -141,13 +146,16 @@ export function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
                 <View
                   style={[
                     styles.errorContainer,
-                    { backgroundColor: colors.card, borderColor: colors.border },
+                    { backgroundColor: colors.card },
                   ]}
                 >
                   <Text
                     style={[
                       styles.errorText,
-                      { color: colors.foreground, fontFamily: monoFont },
+                      {
+                        color: colors.foreground,
+                        fontFamily: monoFont,
+                      },
                     ]}
                     selectable
                   >
@@ -180,67 +188,73 @@ const styles = StyleSheet.create({
     maxWidth: 600,
   },
   title: {
-    fontSize: 20,
+    fontSize: 28,
+    fontWeight: "700",
     textAlign: "center",
-    letterSpacing: 0.5,
+    lineHeight: 40,
   },
   message: {
-    fontSize: 14,
+    fontSize: 16,
     textAlign: "center",
-    lineHeight: 22,
+    lineHeight: 24,
   },
   topButton: {
     position: "absolute",
     right: 16,
     width: 44,
     height: 44,
-    borderRadius: 4,
+    borderRadius: 8,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     zIndex: 10,
   },
   button: {
-    paddingVertical: 12,
-    borderRadius: 4,
-    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderRadius: 8,
+    paddingHorizontal: 24,
     minWidth: 200,
-    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   buttonText: {
-    fontSize: 14,
+    fontWeight: "600",
     textAlign: "center",
+    fontSize: 16,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
     justifyContent: "flex-end",
   },
   modalContainer: {
     width: "100%",
     height: "90%",
-    borderTopLeftRadius: 12,
-    borderTopRightRadius: 12,
-    borderTopWidth: 1,
-    borderLeftWidth: 1,
-    borderRightWidth: 1,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
   },
   modalHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
     paddingTop: 16,
     paddingBottom: 12,
     borderBottomWidth: 1,
   },
   modalTitle: {
-    fontSize: 15,
-    letterSpacing: 0.3,
+    fontSize: 20,
+    fontWeight: "600",
   },
   closeButton: {
-    width: 38,
-    height: 38,
+    width: 44,
+    height: 44,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -252,8 +266,7 @@ const styles = StyleSheet.create({
   },
   errorContainer: {
     width: "100%",
-    borderRadius: 4,
-    borderWidth: 1,
+    borderRadius: 8,
     overflow: "hidden",
     padding: 16,
   },

@@ -198,8 +198,8 @@ const createStyles = (t: Theme) => {
       paddingVertical: 12,
       paddingBottom: 8,
     },
-    title: { fontSize: 28, fontWeight: "800", color: C.text, letterSpacing: -0.5 },
-    subtitle: { fontSize: 13, color: C.textSecondary, marginTop: 2 },
+    title: { fontSize: 28, fontFamily: "Inter_700Bold", color: C.text, letterSpacing: -0.5 },
+    subtitle: { fontSize: 13, fontFamily: "Inter_400Regular", color: C.textSecondary, marginTop: 2 },
     headerActions: {
       flexDirection: "row",
       alignItems: "center",
@@ -231,7 +231,7 @@ const createStyles = (t: Theme) => {
     },
     setupLinkText: {
       fontSize: 13,
-      fontWeight: "600",
+      fontFamily: "Inter_600SemiBold",
       color: C.textSecondary,
       textDecorationLine: "underline",
     },
@@ -239,8 +239,8 @@ const createStyles = (t: Theme) => {
     columnWrapper: { gap: 12 },
     pcCardWrapper: { flex: 1 },
     empty: { alignItems: "center", paddingTop: 80, gap: 12, paddingHorizontal: 32 },
-    emptyTitle: { fontSize: 20, fontWeight: "700", color: C.text },
-    emptyText: { fontSize: 14, color: C.textSecondary, textAlign: "center", lineHeight: 21 },
+    emptyTitle: { fontSize: 20, fontFamily: "Inter_700Bold", color: C.text },
+    emptyText: { fontSize: 14, fontFamily: "Inter_400Regular", color: C.textSecondary, textAlign: "center", lineHeight: 21 },
     emptyBtn: {
       marginTop: 8,
       backgroundColor: C.tint,
@@ -248,7 +248,7 @@ const createStyles = (t: Theme) => {
       paddingHorizontal: 24,
       paddingVertical: 12,
     },
-    emptyBtnText: { fontSize: 15, fontWeight: "700", color: "#fff" },
+    emptyBtnText: { fontSize: 15, fontFamily: "Inter_700Bold", color: "#000" },
     demoBtn: {
       flexDirection: "row",
       alignItems: "center",
@@ -271,7 +271,7 @@ const createStyles = (t: Theme) => {
       justifyContent: "center",
     },
     demoBtnText: { flex: 1, gap: 2 },
-    demoBtnTitle: { fontSize: 14, fontWeight: "700", color: "#FF6D00" },
-    demoBtnSub: { fontSize: 12, color: C.textSecondary, lineHeight: 16 },
+    demoBtnTitle: { fontSize: 14, fontFamily: "Inter_700Bold", color: "#FF6D00" },
+    demoBtnSub: { fontSize: 12, fontFamily: "Inter_400Regular", color: C.textSecondary, lineHeight: 16 },
   });
 };

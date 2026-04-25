@@ -40,12 +40,12 @@ interface ThemeContextValue {
 
 const ThemeContext = createContext<ThemeContextValue>({
   theme: ROG_THEME,
-  themeId: "rog",
+  themeId: "streamlink",
   mode: "dark",
   resolvedMode: "dark",
   setThemeId: () => {},
   setMode: () => {},
-  themeName: "rog",
+  themeName: "streamlink",
   setTheme: () => {},
   ready: true,
 });
@@ -55,7 +55,7 @@ function resolveSystemMode(scheme: ColorSchemeName): ResolvedMode {
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [themeId, setThemeIdState] = useState<ThemeId>("rog");
+  const [themeId, setThemeIdState] = useState<ThemeId>("streamlink");
   const [mode, setModeState] = useState<ThemeMode>("dark");
   const [systemScheme, setSystemScheme] = useState<ColorSchemeName>(
     Appearance.getColorScheme(),

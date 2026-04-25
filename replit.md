@@ -33,12 +33,26 @@ iOS/Android Expo app that connects directly to PC agents over local WiFi (HTTP p
 - ALL sensor types now exposed: temp, voltage, fan, current, power, clock, usage
 - Sensor types 0–8 mapped to units (°C, V, RPM, A, W, MHz, %)
 
-## Design System (ROG-inspired)
-- **Theme**: Dark ASUS ROG-inspired — primary `#FF1744` red, card `#141414`, border `#252525`, bg `#0A0A0A`
-- **Border radius**: cards=6, buttons/inputs=4, progress bars/badges=2
-- **Card accents**: CPU=`#FF1744`, GPU=`#FF6D00`, RAM=`#448AFF`, Fans=`#FF9100`, Disks=`#00BFA5`, Network=`#40C4FF`, Thermals=`#FF3D00`
-- **Button styles**: Primary action = solid red bg + white text; ghost buttons = red border + red text; header icon buttons = dark bg, active = red tint
+## Design System — StreamLink (default)
+- **Default theme**: "StreamLink" — neon green `#44D62C`, true black `#0A0A0A` bg, `#141414` card, `#2A2A2A` border, `SHAPE_TACTICAL` (radius 4, accentEdge "left")
+- **Typography**: Inter (via `@expo-google-fonts/inter`) — `Inter_400Regular`, `Inter_500Medium`, `Inter_600SemiBold`, `Inter_700Bold` used throughout; Feather icons bundled via `...Feather.font` for Android
+- **Section labels**: `fontSize: 11, fontFamily: "Inter_600SemiBold", textTransform: "uppercase", letterSpacing: 2`
+- **Sheets**: `borderTopRadius: 12`, 36×4 handle pill, tint-color top border
+- **Button text**: `#000` on tint-colored (green) buttons for contrast
+- **Card accents**: CPU=`#44D62C`, GPU=`#00C2FF`, RAM=`#7C6FFF`, Thermals=`#FF6B35`, Fans=`#FFD23F`, Disks=`#00E5B5`, Network=`#40C4FF`, Sensor=`#C86FFF`
+- **cpuRingColor**: now uses `theme.cardAccents.cpu` (was hardcoded per theme ID)
+- **Multi-theme**: 9 themes total — streamlink (default), rog, classic, cyberpunk, matrix, ocean, sunset, nord, minimal
+- **app.json**: `userInterfaceStyle: "dark"`, `splash.backgroundColor: "#0a0a0a"`
 - **MetricRing**: `strokeLinecap="butt"` (sharp ends)
+
+## Design System Files
+- `constants/colors.ts` — StreamLink palette (flat single-export, matches `useColors()` contract)
+- `hooks/useColors.ts` — returns StreamLink palette (used by bundle components)
+- `context/GamepadContext.tsx` — no-op shim (satisfies imports from bundle components)
+- `utils/sounds.ts` — no-op sound shim
+- `components/Focusable.tsx` — gamepad-aware pressable wrapper
+- `components/FocusableTextInput.tsx` — gamepad-aware text input
+- `components/ControllerToast.tsx` — toast for controller connect/disconnect
 
 ---
 # Workspace

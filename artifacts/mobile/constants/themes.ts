@@ -1,6 +1,7 @@
 import type { TextStyle } from "react-native";
 
 export type ThemeId =
+  | "streamlink"
   | "rog"
   | "classic"
   | "cyberpunk"
@@ -120,6 +121,45 @@ const SHAPE_ROUNDED: ThemeShape = {
 };
 
 // ─── Theme definitions ───────────────────────────────────────────────────────
+
+const STREAMLINK: ThemeDef = {
+  id: "streamlink",
+  label: "StreamLink",
+  description: "Neon green · true black",
+  shape: SHAPE_TACTICAL,
+  dark: {
+    colors: {
+      text: "#E8E8E8",
+      textSecondary: "#6B6B6B",
+      textMuted: "#444444",
+      background: "#0A0A0A",
+      backgroundSecondary: "#141414",
+      backgroundTertiary: "#1E1E1E",
+      card: "#141414",
+      cardBorder: "#2A2A2A",
+      tint: "#44D62C",
+      tintDark: "#2DA01E",
+      tabIconDefault: "#444444",
+      tabIconSelected: "#44D62C",
+      danger: "#FF3B30",
+      warning: "#F59E0B",
+      success: "#44D62C",
+      online: "#44D62C",
+      offline: "#444444",
+      idle: "#F59E0B",
+    },
+    cardAccents: {
+      cpu: "#44D62C",
+      gpu: "#00C2FF",
+      ram: "#7C6FFF",
+      thermals: "#FF6B35",
+      fans: "#FFD23F",
+      disks: "#00E5B5",
+      network: "#40C4FF",
+      sensor: "#C86FFF",
+    },
+  },
+};
 
 const ROG: ThemeDef = {
   id: "rog",
@@ -594,6 +634,7 @@ const MINIMAL: ThemeDef = {
 };
 
 export const THEME_DEFS: Record<ThemeId, ThemeDef> = {
+  streamlink: STREAMLINK,
   rog: ROG,
   classic: CLASSIC,
   cyberpunk: CYBERPUNK,
@@ -605,6 +646,7 @@ export const THEME_DEFS: Record<ThemeId, ThemeDef> = {
 };
 
 export const THEME_ORDER: ThemeId[] = [
+  "streamlink",
   "rog",
   "classic",
   "cyberpunk",
@@ -639,6 +681,7 @@ export const ROG_THEME: Theme = resolveTheme("rog", "dark");
 export const CLASSIC_THEME: Theme = resolveTheme("classic", "dark");
 
 export const THEMES: Record<ThemeId, Theme> = {
+  streamlink: resolveTheme("streamlink", "dark"),
   rog: resolveTheme("rog", "dark"),
   classic: resolveTheme("classic", "dark"),
   cyberpunk: resolveTheme("cyberpunk", "dark"),

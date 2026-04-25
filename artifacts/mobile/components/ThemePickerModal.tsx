@@ -256,12 +256,14 @@ const createStyles = (theme: Theme) => {
       gap: 12,
     },
     title: {
-      fontSize: 17,
-      fontWeight: "700",
+      fontSize: 15,
+      fontFamily: "Inter_600SemiBold",
       color: C.text,
+      letterSpacing: 0.3,
     },
     subtitle: {
       fontSize: 12,
+      fontFamily: "Inter_400Regular",
       color: C.textSecondary,
       marginTop: 4,
     },
@@ -281,10 +283,10 @@ const createStyles = (theme: Theme) => {
     },
     groupLabel: {
       fontSize: 11,
-      fontWeight: "700",
+      fontFamily: "Inter_600SemiBold",
       color: C.textMuted,
-      letterSpacing: theme.titleCase === "upper" ? 1.2 : 0.4,
-      textTransform: theme.titleCase === "upper" ? "uppercase" : "none",
+      letterSpacing: 2,
+      textTransform: "uppercase",
       marginBottom: 8,
       marginTop: 4,
     },
@@ -336,11 +338,12 @@ const createStyles = (theme: Theme) => {
     },
     themeTileLabel: {
       fontSize: 13,
-      fontWeight: "700",
+      fontFamily: "Inter_700Bold",
       flexShrink: 1,
     },
     themeTileSub: {
       fontSize: 10,
+      fontFamily: "Inter_400Regular",
       color: C.textSecondary,
     },
     themeTileBadge: {
@@ -351,8 +354,8 @@ const createStyles = (theme: Theme) => {
     },
     themeTileBadgeText: {
       fontSize: 9,
+      fontFamily: "Inter_600SemiBold",
       color: C.textSecondary,
-      fontWeight: "600",
       letterSpacing: 0.3,
     },
     modeRow: {
@@ -371,8 +374,8 @@ const createStyles = (theme: Theme) => {
     },
     modeButtonText: {
       fontSize: 12,
-      fontWeight: "700",
-      letterSpacing: theme.titleCase === "upper" ? 0.5 : 0,
+      fontFamily: "Inter_600SemiBold",
+      letterSpacing: 0.5,
     },
     modeHint: {
       fontSize: 11,

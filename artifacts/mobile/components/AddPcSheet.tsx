@@ -316,10 +316,12 @@ const createStyles = (t: Theme) => {
     },
     sheet: {
       backgroundColor: C.backgroundSecondary,
-      borderTopLeftRadius: 16,
-      borderTopRightRadius: 16,
-      borderTopWidth: 2,
-      borderTopColor: C.tint,
+      borderTopLeftRadius: 12,
+      borderTopRightRadius: 12,
+      borderTopWidth: 1,
+      borderLeftWidth: 1,
+      borderRightWidth: 1,
+      borderColor: C.tint,
       paddingHorizontal: 20,
       paddingBottom: Platform.OS === "ios" ? 40 : 24,
       paddingTop: 12,
@@ -327,7 +329,7 @@ const createStyles = (t: Theme) => {
     },
     handle: {
       width: 36,
-      height: 3,
+      height: 4,
       backgroundColor: C.textMuted,
       borderRadius: 2,
       alignSelf: "center",
@@ -340,12 +342,14 @@ const createStyles = (t: Theme) => {
       marginBottom: 16,
     },
     sheetTitle: {
-      fontSize: 20,
-      fontWeight: "700",
+      fontSize: 15,
+      fontFamily: "Inter_600SemiBold",
       color: C.text,
+      letterSpacing: 0.3,
     },
     hint: {
       fontSize: 13,
+      fontFamily: "Inter_400Regular",
       color: C.textSecondary,
       marginBottom: 20,
       lineHeight: 19,
@@ -360,10 +364,11 @@ const createStyles = (t: Theme) => {
       marginBottom: 16,
     },
     fieldLabel: {
-      fontSize: 10,
-      fontWeight: "700",
+      fontSize: 11,
+      fontFamily: "Inter_600SemiBold",
       color: C.textSecondary,
-      letterSpacing: t.sectionLabelLetterSpacing,
+      textTransform: "uppercase",
+      letterSpacing: 2,
       marginBottom: 6,
     },
     input: {
@@ -396,7 +401,7 @@ const createStyles = (t: Theme) => {
     },
     testBtnText: {
       fontSize: 14,
-      fontWeight: "600",
+      fontFamily: "Inter_600SemiBold",
       color: C.tint,
     },
     testBtnTextDisabled: {
@@ -417,11 +422,12 @@ const createStyles = (t: Theme) => {
     },
     resultOkText: {
       fontSize: 13,
-      fontWeight: "600",
+      fontFamily: "Inter_600SemiBold",
       color: C.success,
     },
     resultOkSub: {
       fontSize: 12,
+      fontFamily: "Inter_400Regular",
       color: C.textSecondary,
       marginTop: 2,
     },
@@ -431,12 +437,13 @@ const createStyles = (t: Theme) => {
     },
     resultErrTitle: {
       fontSize: 13,
-      fontWeight: "600",
+      fontFamily: "Inter_600SemiBold",
       color: C.danger,
       marginBottom: 4,
     },
     resultErrDetail: {
       fontSize: 12,
+      fontFamily: "Inter_400Regular",
       color: C.textSecondary,
       lineHeight: 18,
     },
@@ -472,9 +479,9 @@ const createStyles = (t: Theme) => {
       opacity: 0.4,
     },
     addBtnText: {
-      fontSize: 16,
-      fontWeight: "700",
-      color: "#fff",
+      fontSize: 15,
+      fontFamily: "Inter_700Bold",
+      color: "#000",
     },
   });
 };
