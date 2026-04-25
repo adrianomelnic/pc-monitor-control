@@ -7,9 +7,16 @@ build/pc-agent.spec and .github/workflows/build-agent.yml. They just
 double-click pc-agent.exe (Windows) or pc-agent (macOS) and it starts
 listening on port 8765.
 
+Hardware sensors come from LibreHardwareMonitor (bundled DLL, called via
+pythonnet) when running on Windows. If LHM cannot initialise (DLL missing,
+.NET runtime broken, kernel driver refused) we silently fall back to
+reading HWiNFO64's shared-memory block, so a power user with HWiNFO64
+already running keeps working.
+
 Developers can also run from source:
   python -m pip install psutil flask flask-cors
-  python pc_agent.py     (auto-elevates to admin on Windows via UAC)
+  python -m pip install pythonnet      # Windows only, for the LHM path
+  python pc_agent.py                   (auto-elevates to admin on Windows via UAC)
 """
 import os, platform, subprocess, time, socket, re, ctypes, sys
 import psutil
@@ -144,11 +151,174 @@ def open_firewall_port(port):
     except Exception as e:
         print(f"Could not add firewall rule: {e}")
 
+# ── LibreHardwareMonitor (preferred sensor source on Windows) ───────────────
+# Bundled as LibreHardwareMonitorLib.dll and called via pythonnet. End users
+# do not install anything — the DLL ships inside the PyInstaller binary.
+_LHM_COMPUTER = None
+_LHM_VISITOR = None
+_LHM_FAILED = False  # latch True after first failure so we don't retry every poll
+
+# LHM SensorType enum string -> (our type tag, unit). These match the type
+# tags read_hwinfo64() emits, so the rest of the agent (and the mobile app)
+# does not care which source the data came from.
+_LHM_TYPE_MAP = {
+    "Temperature": ("temperature", "\u00b0C"),
+    "Voltage":     ("voltage",     "V"),
+    "Fan":         ("fan",         "RPM"),
+    "Current":     ("current",     "A"),
+    "Power":       ("power",       "W"),
+    "Clock":       ("clock",       "MHz"),
+    "Load":        ("usage",       "%"),
+}
+
+def _lhm_dll_dir():
+    """Return the directory that should contain LibreHardwareMonitorLib.dll.
+    Inside a PyInstaller onefile bundle, datas are unpacked under
+    sys._MEIPASS; in dev we look next to this script.
+    """
+    base = sys._MEIPASS if IS_FROZEN else os.path.dirname(os.path.abspath(__file__))
+    return os.path.join(base, "vendor")
+
+def _init_lhm():
+    """Lazy-init LHM. Returns True on success, False if LHM is unavailable
+    (DLL missing, pythonnet not installed, .NET runtime broken, etc.)."""
+    global _LHM_COMPUTER, _LHM_VISITOR
+    if not IS_WINDOWS:
+        return False
+
+    dll_dir = _lhm_dll_dir()
+    dll_path = os.path.join(dll_dir, "LibreHardwareMonitorLib.dll")
+    if not os.path.exists(dll_path):
+        print(f"LibreHardwareMonitor: DLL not found at {dll_path}")
+        return False
+
+    # net472 LHM build needs the .NET Framework runtime, not modern .NET.
+    # Set this BEFORE importing pythonnet/clr.
+    os.environ.setdefault("PYTHONNET_RUNTIME", "netfx")
+    # Make sure HidSharp.dll and other side-by-side deps resolve.
+    os.environ["PATH"] = dll_dir + os.pathsep + os.environ.get("PATH", "")
+
+    import clr  # type: ignore  # provided by pythonnet
+    clr.AddReference(dll_path)
+
+    from LibreHardwareMonitor.Hardware import Computer, IVisitor  # type: ignore
+
+    class _UpdateVisitor(IVisitor):  # type: ignore[misc]
+        # pythonnet requires __namespace__ when implementing a .NET interface.
+        __namespace__ = "PCAgent"
+        def VisitComputer(self, computer):
+            computer.Traverse(self)
+        def VisitHardware(self, hardware):
+            hardware.Update()
+            for sub in hardware.SubHardware:
+                sub.Accept(self)
+        def VisitSensor(self, sensor):
+            pass
+        def VisitParameter(self, parameter):
+            pass
+
+    computer = Computer()
+    computer.IsCpuEnabled = True
+    computer.IsGpuEnabled = True
+    computer.IsMemoryEnabled = True
+    computer.IsMotherboardEnabled = True
+    computer.IsControllerEnabled = True
+    computer.IsStorageEnabled = True
+    # Network counters come from psutil — no need to pay LHM's overhead for them.
+    computer.IsNetworkEnabled = False
+    computer.Open()
+
+    _LHM_COMPUTER = computer
+    _LHM_VISITOR = _UpdateVisitor()
+    print("LibreHardwareMonitor: initialised, sensors active")
+    return True
+
+def read_lhm():
+    """Read sensor data from LibreHardwareMonitor. Returns the same dict
+    shape as read_hwinfo64() — {temps, fans, sensors} — or None if LHM is
+    not usable on this machine (silent fallback then takes over)."""
+    global _LHM_COMPUTER, _LHM_VISITOR, _LHM_FAILED
+    if _LHM_FAILED or not IS_WINDOWS:
+        return None
+    if _LHM_COMPUTER is None:
+        try:
+            if not _init_lhm():
+                _LHM_FAILED = True
+                return None
+        except Exception as e:
+            _LHM_FAILED = True
+            print(f"LibreHardwareMonitor init failed: {e}; falling back to HWiNFO64 if available")
+            return None
+
+    try:
+        _LHM_COMPUTER.Accept(_LHM_VISITOR)
+        temps, fans, sensors = [], [], []
+        fan_counter = [0]
+
+        def _walk(hw, comp_name):
+            for sensor in hw.Sensors:
+                stype = str(sensor.SensorType)
+                mapping = _LHM_TYPE_MAP.get(stype)
+                if not mapping:
+                    continue  # skip Frequency, Control, Throughput, etc.
+                kind, unit = mapping
+                v = sensor.Value
+                if v is None:
+                    continue
+                try:
+                    value = float(v)
+                except (TypeError, ValueError):
+                    continue
+                label = str(sensor.Name) or ""
+                if not label and kind == "fan":
+                    fan_counter[0] += 1
+                    label = f"Fan #{fan_counter[0]}"
+                if not label:
+                    continue
+                sensors.append({
+                    "label": label,
+                    "value": round(value, 3),
+                    "unit": unit,
+                    "type": kind,
+                    "component": comp_name,
+                })
+                if kind == "temperature":
+                    temps.append({"label": label, "value": round(value, 1)})
+                elif kind == "fan":
+                    fans.append({"label": label, "rpm": round(value)})
+            for sub in hw.SubHardware:
+                _walk(sub, f"{comp_name} / {str(sub.Name)}")
+
+        for hardware in _LHM_COMPUTER.Hardware:
+            _walk(hardware, str(hardware.Name))
+
+        return {"temps": temps, "fans": fans, "sensors": sensors}
+    except Exception as e:
+        # Latch the failure so we don't keep paying the exception cost on every
+        # poll — the HWiNFO64 fallback (if available) will take over for the
+        # rest of the agent's lifetime.
+        _LHM_FAILED = True
+        print(f"LibreHardwareMonitor read error: {e}; falling back to HWiNFO64 if available")
+        return None
+
+def read_sensors():
+    """Try LibreHardwareMonitor first, fall back to HWiNFO64 shared memory.
+    Returns {temps, fans, sensors} or None if neither source is available.
+    """
+    data = read_lhm()
+    if data is not None:
+        return data
+    return read_hwinfo64()
+
 def read_hwinfo64():
     """Read sensor data from HWiNFO64 shared memory (Windows only).
     HWiNFO64 must be running with 'Shared Memory Support' enabled:
     HWiNFO64 -> Settings -> HWiNFO64 -> check 'Shared Memory Support'.
     Returns dict with 'temps' and 'fans', or None if unavailable.
+
+    NOTE: this is now the silent fallback path — bundled LibreHardwareMonitor
+    is tried first. Kept for users who already have HWiNFO64 running and want
+    the agent to use it if LHM ever fails.
     """
     if not IS_WINDOWS:
         return None
@@ -544,12 +714,12 @@ def _collect_metrics():
     now = time.time()
     elapsed = max(now - _prev_time, 0.1)
 
-    hwinfo_data = read_hwinfo64()
-    cpu_info = get_cpu_info(hwinfo_data)
+    sensor_data = read_sensors()
+    cpu_info = get_cpu_info(sensor_data)
     gpu_info = get_gpu_info()
     ram_info = get_ram_info()
-    ram_info["temperature"] = get_memory_temp_hwinfo(hwinfo_data)
-    fans = get_fans(hwinfo_data)
+    ram_info["temperature"] = get_memory_temp_hwinfo(sensor_data)
+    fans = get_fans(sensor_data)
     disks, new_disk_io = get_disks(_prev_disk_io, elapsed)
     network, new_net_io = get_network(_prev_net_io, elapsed)
 
@@ -582,7 +752,7 @@ def _collect_metrics():
             "fans": fans,
             "disks": disks,
             "network": network,
-            "sensors": hwinfo_data.get("sensors", []) if hwinfo_data else [],
+            "sensors": sensor_data.get("sensors", []) if sensor_data else [],
         }
     })
 
@@ -656,6 +826,39 @@ def command():
             return jsonify({"success": False, "error": str(e)})
 
     return jsonify({"success": False, "error": f"Unknown command: {cmd}"})
+
+@app.route("/sensor_debug")
+def sensor_debug():
+    """Quick health check for the sensor pipeline. Returns which source is
+    active (LHM vs HWiNFO64) and how many readings it produced."""
+    auth = check_key()
+    if auth: return auth
+    lhm_data = read_lhm()
+    if lhm_data is not None:
+        return jsonify({
+            "source": "lhm",
+            "num_temps": len(lhm_data.get("temps") or []),
+            "num_fans": len(lhm_data.get("fans") or []),
+            "num_sensors": len(lhm_data.get("sensors") or []),
+            "temps_sample": (lhm_data.get("temps") or [])[:5],
+            "fans_sample": (lhm_data.get("fans") or [])[:5],
+        })
+    hw = read_hwinfo64()
+    if hw is not None:
+        return jsonify({
+            "source": "hwinfo64",
+            "num_temps": len(hw.get("temps") or []),
+            "num_fans": len(hw.get("fans") or []),
+            "num_sensors": len(hw.get("sensors") or []),
+            "temps_sample": (hw.get("temps") or [])[:5],
+            "fans_sample": (hw.get("fans") or [])[:5],
+        })
+    return jsonify({
+        "source": "none",
+        "detail": "No sensor source available. On Windows the bundled "
+                  "LibreHardwareMonitor DLL should be unpacked next to the "
+                  "agent — check the agent's terminal for an init error.",
+    })
 
 @app.route("/hwinfo_debug")
 def hwinfo_debug():

@@ -11,6 +11,12 @@ on:
 permissions:
   contents: write  # needed to create the GitHub Release
 
+# Pinned LibreHardwareMonitor release. Bump this to upgrade the bundled
+# sensor library — its DLL ships inside the Windows agent so users don't
+# have to install HWiNFO64 (or anything else) to see hardware metrics.
+env:
+  LHM_VERSION: "0.9.4"
+
 jobs:
   build:
     name: Build on ${{ matrix.os }}
@@ -36,9 +42,35 @@ jobs:
           python-version: "3.11"
 
       - name: Install build dependencies
+        shell: bash
         run: |
           python -m pip install --upgrade pip
           python -m pip install pyinstaller psutil flask flask-cors
+
+      - name: Install pythonnet (Windows only)
+        if: runner.os == 'Windows'
+        shell: bash
+        # pythonnet bridges Python <-> .NET so we can call into
+        # LibreHardwareMonitorLib.dll. Only meaningful on Windows.
+        run: |
+          python -m pip install "pythonnet>=3.0.3"
+
+      - name: Download LibreHardwareMonitorLib (Windows only)
+        if: runner.os == 'Windows'
+        shell: bash
+        # Pulls the net472 build of LHM and copies just the library DLLs into
+        # vendor/ where the PyInstaller spec picks them up. We use net472 so
+        # the bundled .NET Framework on Windows 10 1803+ is enough — no extra
+        # runtime install for end users.
+        run: |
+          set -euo pipefail
+          mkdir -p vendor lhm-extracted
+          curl -fsSL -o lhm.zip "https://github.com/LibreHardwareMonitor/LibreHardwareMonitor/releases/download/v${LHM_VERSION}/LibreHardwareMonitor-net472.zip"
+          unzip -q -o lhm.zip -d lhm-extracted
+          # Copy LHM core lib + its HidSharp dependency.
+          cp lhm-extracted/LibreHardwareMonitorLib.dll vendor/
+          cp lhm-extracted/HidSharp.dll vendor/
+          ls -la vendor/
 
       - name: Build with PyInstaller
         run: pyinstaller build/pc-agent.spec --clean --noconfirm

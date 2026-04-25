@@ -622,7 +622,7 @@ export function SensorCard({
             />
           ) : resolvedVisible.length === 0 ? (
             <Text style={styles.empty}>
-              Sensor data unavailable — make sure HWiNFO64 is running.
+              Sensor data unavailable on this PC.
             </Text>
           ) : useSplitLayout && featured && featuredItem ? (
             <>

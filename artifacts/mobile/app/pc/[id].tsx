@@ -935,8 +935,6 @@ export default function PCDetailScreen() {
         content = m.fans != null ? (
           <FansCard
             fans={m.fans}
-            baseUrl={`http://${safePc.host}:${safePc.port}`}
-            apiKey={safePc.apiKey}
             titleEdit={titleEdit}
             cardEdit={cardEdit}
           />
@@ -1271,7 +1269,7 @@ export default function PCDetailScreen() {
       {/* ── Extra Sensor Picker for built-in cards ── */}
       <CompactSensorPicker
         visible={extraSensorPickerFor != null}
-        title={replacingBuiltinField ? "Replace Field Sensor" : replacingExtraFor ? "Replace Sensor" : "Add HWiNFO64 Sensor"}
+        title={replacingBuiltinField ? "Replace Field Sensor" : replacingExtraFor ? "Replace Sensor" : "Add Sensor"}
         accentColor={extraSensorPickerFor ? (CARD_ACCENTS[extraSensorPickerFor as keyof typeof CARD_ACCENTS] ?? C.tint) : C.tint}
         sensors={allSensors}
         excludeLabels={

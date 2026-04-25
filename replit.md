@@ -28,8 +28,8 @@ iOS/Android Expo app that connects directly to PC agents over local WiFi (HTTP p
 
 ## PC Agent Distribution (Task #34 — single-binary install)
 - **End users get a single binary** built with PyInstaller. No Python install, no `pip`, no PowerShell, no `irm | iex`. They download `pc-agent.exe` (Windows) or `pc-agent` (macOS) and double-click.
-- `build/pc-agent.spec` — PyInstaller spec, onefile, console-mode, with hidden imports for psutil + flask + flask-cors and per-OS psutil submodules.
-- `.github/workflows/build-agent.yml` — CI matrix on `windows-latest` + `macos-latest`. Triggers on `v*` tag push; uploads `pc-agent-windows.exe` and `pc-agent-macos` to a GitHub Release.
+- `build/pc-agent.spec` — PyInstaller spec, onefile, console-mode, with hidden imports for psutil + flask + flask-cors and per-OS psutil submodules. On Windows the spec also bundles every DLL it finds in `vendor/` (LibreHardwareMonitor — see Task #35) and adds `pythonnet`, `clr`, `clr_loader`, `clr_loader.netfx` to hidden imports.
+- `.github/workflows/build-agent.yml` — CI matrix on `windows-latest` + `macos-latest`. Triggers on `v*` tag push; uploads `pc-agent-windows.exe` and `pc-agent-macos` to a GitHub Release. Pinned `LHM_VERSION` env var controls which LibreHardwareMonitor release to bundle.
 - Stable download URLs hard-coded into the mobile app (renaming the release asset would break pairing):
   - `https://github.com/adrianomelnic/pc-monitor-control/releases/latest/download/pc-agent-windows.exe`
   - `https://github.com/adrianomelnic/pc-monitor-control/releases/latest/download/pc-agent-macos`
@@ -38,6 +38,14 @@ iOS/Android Expo app that connects directly to PC agents over local WiFi (HTTP p
   - `components/AddPcSheet.tsx` Step 1 — Windows/macOS tab, big "Send download link to my PC" share button, QR code of the download URL, "Copy link" / "Open in browser" fallbacks, SmartScreen/Gatekeeper warning copy.
   - `app/setup.tsx` — short 4-step screen (Download / Double-click / Find IP / Add in app). The 700-line inlined `PYTHON_AGENT` string and the old `irm | iex` / `curl | bash` UI are gone.
 - **Bundled-agent legacy (Phase A of offline pairing — Task #29)** is still wired in (`assets/agent/pc_agent.py` + `metro.config.js` + `lib/agentAssets.ts` + `pnpm run sync-agent` predev/prebuild hook) but no UI references it any more. Kept in place so a future "phone hosts the binary over HTTP" task (#30) can reuse the asset pipeline without re-plumbing it.
+
+## Sensor Pipeline (Task #35 — drop the HWiNFO64 install)
+- **Bundled LibreHardwareMonitor.** On Windows the agent reads CPU/GPU/RAM temperatures, fan RPMs, voltages, currents, power, clocks, and load via `LibreHardwareMonitorLib.dll` called through `pythonnet`. The DLL ships inside the PyInstaller binary — end users install nothing extra. CI fetches the pinned net472 LHM release (`LHM_VERSION` env var in `build-agent.yml`, currently `0.9.4`) into `vendor/`, where `pc-agent.spec` picks it up.
+- **`read_lhm()` + `read_sensors()` in `pc_agent.py`.** `read_lhm()` lazy-initialises an LHM `Computer` (CPU/GPU/Memory/Motherboard/Controller/Storage enabled) and walks all hardware on every poll, mapping LHM `SensorType` strings to the same `{label,value,unit,type,component}` shape `read_hwinfo64()` already produced. `read_sensors()` tries LHM first; on any failure (DLL missing, .NET runtime broken, kernel driver refused, pythonnet not installed in dev) it latches `_LHM_FAILED=True` and silently falls through to the existing HWiNFO64 reader. The rest of the agent (and the mobile app) sees a uniform sensor stream regardless of which source was used.
+- **`PYTHONNET_RUNTIME=netfx`** is set inside `_init_lhm()` before importing `clr` so pythonnet binds to the .NET Framework runtime that ships with Windows 10 1803+ (matches the net472 LHM build we bundle). The DLL directory is also prepended to `PATH` so `HidSharp.dll` and other side-by-side deps resolve.
+- **`/sensor_debug` endpoint** reports which source is active (`lhm` / `hwinfo64` / `none`) plus reading counts and a few sample temps/fans — handy for CI smoke tests and user troubleshooting.
+- **Mobile UI is now source-agnostic.** All HWiNFO64-specific copy is gone: `FansCard.tsx` has no diagnosis button or 5-step HWiNFO64 setup blurb (just a generic "no fan sensors detected" empty state), `SensorPickerModal.tsx` says "No sensors detected", `SensorCard.tsx` says "Sensor data unavailable on this PC", and `pc/[id].tsx`'s extra-sensor picker title is "Add Sensor". The legacy `/hwinfo_debug` endpoint is kept on the agent side for backward compatibility but no UI calls it.
+- **Limitations (carried forward).** I cannot run PyInstaller, pythonnet, or LHM from this Linux container, so the actual bundling, .NET interop, and WinRing0 driver loading have to be smoke-tested on the first GitHub Actions tag push. If pythonnet 3.x's hooks under PyInstaller hooks-contrib don't cover everything the LHM bridge needs, expect a follow-up to tweak `pc-agent.spec` or pin specific package versions.
 
 ## HWiNFO64 Integration
 - Shared memory format: signature `{0x12345678, 0x53695748}`

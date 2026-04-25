@@ -1,13 +1,16 @@
 # PyInstaller spec for the PC Monitor Agent.
 #
 # Builds a single-file executable that bundles Python + psutil + Flask so the
-# end user does NOT need to install anything. Runs on the same OS it was
-# built on (PyInstaller is not a cross-compiler), so we rely on a CI matrix
-# with windows-latest and macos-latest runners — see
+# end user does NOT need to install anything. On Windows we additionally bundle
+# LibreHardwareMonitorLib.dll (and its HidSharp dependency) so sensor data
+# works out of the box without HWiNFO64. Runs on the same OS it was built on
+# (PyInstaller is not a cross-compiler), so we rely on a CI matrix with
+# windows-latest and macos-latest runners — see
 # .github/workflows/build-agent.yml.
 #
 # Build locally:
 #   pip install pyinstaller psutil flask flask-cors
+#   pip install pythonnet                 # Windows only, for the LHM bridge
 #   pyinstaller build/pc-agent.spec --clean --noconfirm
 #
 # Output:
@@ -38,8 +41,31 @@ HIDDEN_IMPORTS = [
     "itsdangerous",
 ]
 
+# Windows-only: pythonnet powers the LibreHardwareMonitor integration.
+# pyinstaller-hooks-contrib ships hook-pythonnet / hook-clr that bundle the
+# Python.Runtime.dll bridge automatically — we just need to keep them visible.
+DATAS = []
 if sys.platform == "win32":
-    HIDDEN_IMPORTS += ["winreg", "psutil._pswindows", "psutil._psutil_windows"]
+    HIDDEN_IMPORTS += [
+        "winreg",
+        "psutil._pswindows",
+        "psutil._psutil_windows",
+        "pythonnet",
+        "clr",
+        "clr_loader",
+        "clr_loader.netfx",
+    ]
+    # Bundle the LibreHardwareMonitor DLLs if vendor/ exists. The CI workflow
+    # downloads them; in dev they're optional (the agent silently falls back
+    # to HWiNFO64 if they're absent).
+    vendor_dir = ROOT / "vendor"
+    if vendor_dir.is_dir():
+        for dll in vendor_dir.glob("*.dll"):
+            DATAS.append((str(dll), "vendor"))
+        print(f"[pc-agent.spec] bundling {len(DATAS)} DLL(s) from {vendor_dir}")
+    else:
+        print(f"[pc-agent.spec] WARNING: {vendor_dir} not found — LHM will be "
+              f"unavailable in this build (HWiNFO64 fallback only)")
 elif sys.platform == "darwin":
     HIDDEN_IMPORTS += ["psutil._psosx", "psutil._psutil_osx"]
 else:
@@ -50,7 +76,7 @@ a = Analysis(
     [ENTRY_SCRIPT],
     pathex=[str(ROOT)],
     binaries=[],
-    datas=[],
+    datas=DATAS,
     hiddenimports=HIDDEN_IMPORTS,
     hookspath=[],
     hooksconfig={},

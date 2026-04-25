@@ -307,9 +307,9 @@ export function SensorPickerModal({
             {sensors.length === 0 ? (
               <View style={styles.emptyBox}>
                 <Feather name="alert-circle" size={28} color={C.textMuted} />
-                <Text style={styles.emptyTitle}>No HWiNFO64 Data</Text>
+                <Text style={styles.emptyTitle}>No sensors detected</Text>
                 <Text style={styles.emptyDesc}>
-                  Make sure HWiNFO64 is running with shared memory enabled on this PC.
+                  The agent could not read any hardware sensors on this PC. Check the agent's terminal window for an initialization error.
                 </Text>
               </View>
             ) : grouped.length === 0 ? (
