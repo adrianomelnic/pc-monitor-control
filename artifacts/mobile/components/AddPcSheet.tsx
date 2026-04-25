@@ -1,7 +1,9 @@
 import { Feather } from "@expo/vector-icons";
+import * as Sharing from "expo-sharing";
 import React, { useMemo, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -16,6 +18,7 @@ import {
 import { Theme } from "@/constants/themes";
 import { useTheme } from "@/context/ThemeContext";
 import { usePcs } from "@/context/PcsContext";
+import { getBundledAgentScriptUri } from "@/lib/agentAssets";
 
 interface AddPcSheetProps {
   visible: boolean;
@@ -74,6 +77,7 @@ export function AddPcSheet({ visible, onClose }: AddPcSheetProps) {
   const [port, setPort] = useState("8765");
   const [apiKey, setApiKey] = useState("");
   const [testState, setTestState] = useState<TestState>({ kind: "idle" });
+  const [sending, setSending] = useState(false);
 
   const reset = () => {
     setName("");
@@ -81,6 +85,33 @@ export function AddPcSheet({ visible, onClose }: AddPcSheetProps) {
     setPort("8765");
     setApiKey("");
     setTestState({ kind: "idle" });
+    setSending(false);
+  };
+
+  const handleSendAgent = async () => {
+    if (sending) return;
+    setSending(true);
+    try {
+      const isAvailable = await Sharing.isAvailableAsync();
+      if (!isAvailable) {
+        Alert.alert(
+          "Sharing not available",
+          "This device does not support the share sheet. You can still install the agent manually — see the Setup screen for instructions."
+        );
+        return;
+      }
+      const uri = await getBundledAgentScriptUri();
+      await Sharing.shareAsync(uri, {
+        mimeType: "text/x-python",
+        UTI: "public.python-script",
+        dialogTitle: "Send PC Agent to your computer",
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      Alert.alert("Could not share agent", msg);
+    } finally {
+      setSending(false);
+    }
   };
 
   const handleClose = () => {
@@ -279,10 +310,31 @@ export function AddPcSheet({ visible, onClose }: AddPcSheetProps) {
               />
             </View>
 
-            <View style={styles.setupBox}>
-              <Feather name="terminal" size={14} color={C.tint} />
-              <Text style={styles.setupText}>
-                Run the PC Agent on your computer:{"\n"}
+            <View style={styles.sendBox}>
+              <View style={styles.sendHeader}>
+                <Feather name="send" size={14} color={C.tint} />
+                <Text style={styles.sendTitle}>{fieldLabel("Don't have the agent yet?")}</Text>
+              </View>
+              <Text style={styles.sendDesc}>
+                Send pc_agent.py straight to your computer. Use AirDrop for the
+                fastest hand-off, or pick Mail / Files / Messages.
+              </Text>
+              <Pressable
+                style={[styles.sendBtn, sending && styles.sendBtnBusy]}
+                onPress={handleSendAgent}
+                disabled={sending}
+              >
+                {sending ? (
+                  <ActivityIndicator size="small" color={C.tint} />
+                ) : (
+                  <Feather name="share" size={14} color={C.tint} />
+                )}
+                <Text style={styles.sendBtnText}>
+                  {sending ? "Opening share sheet…" : "Send agent to PC"}
+                </Text>
+              </Pressable>
+              <Text style={styles.sendHint}>
+                On the PC, save the file then run:{" "}
                 <Text style={styles.setupCode}>python pc_agent.py</Text>
               </Text>
             </View>
@@ -447,22 +499,60 @@ const createStyles = (t: Theme) => {
       color: C.textSecondary,
       lineHeight: 18,
     },
-    setupBox: {
-      flexDirection: "row",
-      gap: 10,
+    sendBox: {
       backgroundColor: C.tint + "0D",
       borderRadius: t.buttonRadius,
       borderWidth: 1,
       borderColor: C.tint + "25",
       padding: 14,
       marginBottom: 20,
-      alignItems: "flex-start",
     },
-    setupText: {
-      flex: 1,
+    sendHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+      marginBottom: 6,
+    },
+    sendTitle: {
       fontSize: 12,
+      fontFamily: "Inter_600SemiBold",
+      color: C.text,
+      letterSpacing: 0.4,
+    },
+    sendDesc: {
+      fontSize: 12,
+      fontFamily: "Inter_400Regular",
       color: C.textSecondary,
       lineHeight: 18,
+      marginBottom: 12,
+    },
+    sendBtn: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 8,
+      backgroundColor: C.tint + "15",
+      borderWidth: 1,
+      borderColor: C.tint + "40",
+      borderRadius: t.buttonRadius,
+      paddingVertical: 11,
+      paddingHorizontal: 14,
+      marginBottom: 10,
+    },
+    sendBtnBusy: {
+      opacity: 0.7,
+    },
+    sendBtnText: {
+      fontSize: 13,
+      fontFamily: "Inter_600SemiBold",
+      color: C.tint,
+      letterSpacing: 0.3,
+    },
+    sendHint: {
+      fontSize: 11,
+      fontFamily: "Inter_400Regular",
+      color: C.textMuted,
+      lineHeight: 16,
     },
     setupCode: {
       fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace",

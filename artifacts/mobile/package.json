@@ -57,7 +57,10 @@
     "zod-validation-error": "^3.4.0"
   },
   "dependencies": {
+    "expo-asset": "^12.0.12",
     "expo-clipboard": "^8.0.8",
+    "expo-file-system": "^19.0.21",
+    "expo-sharing": "^14.0.8",
     "expo-updates": "~29.0.16",
     "react-native-draggable-flatlist": "^4.0.3"
   }

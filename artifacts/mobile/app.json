@@ -60,7 +60,8 @@
       ],
       "expo-font",
       "expo-web-browser",
-      "expo-updates"
+      "expo-updates",
+      "expo-asset"
     ],
     "experiments": {
       "typedRoutes": true,
