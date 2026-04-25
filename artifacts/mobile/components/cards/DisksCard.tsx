@@ -25,7 +25,7 @@ export function DisksCard({ disks, titleEdit, cardEdit }: Props) {
   const { theme } = useTheme();
   const C = theme.colors;
   const ACCENT = theme.cardAccents.disks;
-  const WRITE_COLOR = theme.cardAccents.gpu;
+  const WRITE_COLOR = theme.cardAccents.cpu;
   const styles = useMemo(() => createStyles(theme), [theme]);
   const sectionLabel = (s: string) => (theme.titleCase === "upper" ? s.toUpperCase() : s);
 

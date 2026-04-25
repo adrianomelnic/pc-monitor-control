@@ -48,7 +48,7 @@ export function NetworkCard({ interfaces, titleEdit, cardEdit }: Props) {
   const { theme } = useTheme();
   const ACCENT = theme.cardAccents.network;
   const UP_COLOR = theme.cardAccents.network;
-  const DOWN_COLOR = theme.cardAccents.gpu;
+  const DOWN_COLOR = theme.cardAccents.cpu;
   const styles = useMemo(() => createStyles(theme, ACCENT), [theme, ACCENT]);
   const sectionLabel = (s: string) => (theme.titleCase === "upper" ? s.toUpperCase() : s);
 
