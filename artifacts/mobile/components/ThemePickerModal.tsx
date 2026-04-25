@@ -268,7 +268,7 @@ export function ThemePickerModal({ visible, onClose }: Props) {
   return (
     <>
       <Modal
-        visible={visible}
+        visible={visible && !createVisible}
         transparent
         animationType="fade"
         onRequestClose={onClose}
