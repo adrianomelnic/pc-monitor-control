@@ -31,7 +31,7 @@ iOS/Android Expo app that connects directly to PC agents over local WiFi (HTTP p
 - `metro.config.js` — `.py`, `.ps1`, `.sh` added to `resolver.assetExts`
 - `lib/agentAssets.ts` — `getBundledAgentScriptUri()` resolves the bundled asset to a stable cache file URI named `pc_agent.py`
 - `components/AddPcSheet.tsx` — "Send agent to PC" section uses `expo-sharing` to open the OS share sheet (AirDrop / Mail / Messages / Files)
-- **Source-of-truth note**: if `pc_agent.py` at repo root changes, re-copy it to `artifacts/mobile/assets/agent/pc_agent.py` (no auto-sync). Phase B (phone-as-HTTP-server) intentionally deferred — would require a native module that breaks Expo Go.
+- **Auto-sync**: `pnpm run sync-agent` (also runs as `predev` and `prebuild` hook) copies repo-root `pc_agent.py` → `artifacts/mobile/assets/agent/pc_agent.py` so the bundled copy can never drift behind the source. Phase B (phone-as-HTTP-server) intentionally deferred — would require a native module that breaks Expo Go.
 
 ## HWiNFO64 Integration
 - Shared memory format: signature `{0x12345678, 0x53695748}`
