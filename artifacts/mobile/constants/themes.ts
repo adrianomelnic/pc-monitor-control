@@ -81,6 +81,29 @@ export interface ThemeDef {
   light?: ThemeVariant;
 }
 
+// ─── Color utilities ─────────────────────────────────────────────────────────
+
+/**
+ * Given any CSS hex color string (3- or 6-digit, with or without #),
+ * returns "#000" or "#fff" — whichever achieves higher contrast against
+ * that background — using the WCAG relative-luminance formula.
+ *
+ * Example usage in a theme definition:
+ *   tint: "#FF6D00",
+ *   tintForeground: contrastForeground("#FF6D00"),
+ */
+export function contrastForeground(hex: string): "#000" | "#fff" {
+  const h = hex.replace(/^#/, "");
+  const full = h.length === 3 ? h.split("").map((c) => c + c).join("") : h;
+  const r = parseInt(full.slice(0, 2), 16) / 255;
+  const g = parseInt(full.slice(2, 4), 16) / 255;
+  const b = parseInt(full.slice(4, 6), 16) / 255;
+  const toLinear = (c: number) =>
+    c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+  const L = 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
+  return L > 0.179 ? "#000" : "#fff";
+}
+
 // ─── Shape token presets ─────────────────────────────────────────────────────
 const SHAPE_TACTICAL: ThemeShape = {
   cardRadius: 4,
@@ -140,7 +163,7 @@ const STREAMLINK: ThemeDef = {
       cardBorder: "#2A2A2A",
       tint: "#44D62C",
       tintDark: "#2DA01E",
-      tintForeground: "#000",
+      tintForeground: contrastForeground("#44D62C"),
       tabIconDefault: "#444444",
       tabIconSelected: "#44D62C",
       danger: "#FF3B30",
@@ -180,7 +203,7 @@ const ROG: ThemeDef = {
       cardBorder: "#252525",
       tint: "#FF1744",
       tintDark: "#D50000",
-      tintForeground: "#fff",
+      tintForeground: contrastForeground("#FF1744"),
       tabIconDefault: "#505050",
       tabIconSelected: "#FF1744",
       danger: "#FF4444",
@@ -220,7 +243,7 @@ const CLASSIC: ThemeDef = {
       cardBorder: "#1F2A42",
       tint: "#00D4FF",
       tintDark: "#0288A8",
-      tintForeground: "#000",
+      tintForeground: contrastForeground("#00D4FF"),
       tabIconDefault: "#556B85",
       tabIconSelected: "#00D4FF",
       danger: "#FF6B6B",
@@ -253,7 +276,7 @@ const CLASSIC: ThemeDef = {
       cardBorder: "#D4DCE8",
       tint: "#0091C2",
       tintDark: "#006F94",
-      tintForeground: "#fff",
+      tintForeground: contrastForeground("#0091C2"),
       tabIconDefault: "#8296B0",
       tabIconSelected: "#0091C2",
       danger: "#E23B3B",
@@ -293,7 +316,7 @@ const CYBERPUNK: ThemeDef = {
       cardBorder: "#3B0A55",
       tint: "#FF00C8",
       tintDark: "#B80091",
-      tintForeground: "#fff",
+      tintForeground: contrastForeground("#FF00C8"),
       tabIconDefault: "#6A4D7A",
       tabIconSelected: "#FF00C8",
       danger: "#FF2266",
@@ -333,7 +356,7 @@ const MATRIX: ThemeDef = {
       cardBorder: "#133A22",
       tint: "#00FF66",
       tintDark: "#00B347",
-      tintForeground: "#000",
+      tintForeground: contrastForeground("#00FF66"),
       tabIconDefault: "#2A6A39",
       tabIconSelected: "#00FF66",
       danger: "#FF4466",
@@ -373,7 +396,7 @@ const OCEAN: ThemeDef = {
       cardBorder: "#1A4456",
       tint: "#00BFA5",
       tintDark: "#008572",
-      tintForeground: "#000",
+      tintForeground: contrastForeground("#00BFA5"),
       tabIconDefault: "#4A6E78",
       tabIconSelected: "#00BFA5",
       danger: "#FF6B6B",
@@ -406,7 +429,7 @@ const OCEAN: ThemeDef = {
       cardBorder: "#CFDEE3",
       tint: "#00897B",
       tintDark: "#00665B",
-      tintForeground: "#fff",
+      tintForeground: contrastForeground("#00897B"),
       tabIconDefault: "#7C9AA5",
       tabIconSelected: "#00897B",
       danger: "#D84545",
@@ -446,7 +469,7 @@ const SUNSET: ThemeDef = {
       cardBorder: "#4A2630",
       tint: "#FF6D00",
       tintDark: "#C75200",
-      tintForeground: "#000",
+      tintForeground: contrastForeground("#FF6D00"),
       tabIconDefault: "#7A5E4A",
       tabIconSelected: "#FF6D00",
       danger: "#FF3D7F",
@@ -479,7 +502,7 @@ const SUNSET: ThemeDef = {
       cardBorder: "#F0D5BF",
       tint: "#E65100",
       tintDark: "#B04000",
-      tintForeground: "#fff",
+      tintForeground: contrastForeground("#E65100"),
       tabIconDefault: "#A68872",
       tabIconSelected: "#E65100",
       danger: "#D81B60",
@@ -519,7 +542,7 @@ const NORD: ThemeDef = {
       cardBorder: "#4C566A",
       tint: "#88C0D0",
       tintDark: "#5E81AC",
-      tintForeground: "#000",
+      tintForeground: contrastForeground("#88C0D0"),
       tabIconDefault: "#5E6B80",
       tabIconSelected: "#88C0D0",
       danger: "#BF616A",
@@ -552,7 +575,7 @@ const NORD: ThemeDef = {
       cardBorder: "#D8DEE9",
       tint: "#5E81AC",
       tintDark: "#3B5C82",
-      tintForeground: "#fff",
+      tintForeground: contrastForeground("#5E81AC"),
       tabIconDefault: "#7A8290",
       tabIconSelected: "#5E81AC",
       danger: "#BF616A",
@@ -592,7 +615,7 @@ const MINIMAL: ThemeDef = {
       cardBorder: "#222222",
       tint: "#FFFFFF",
       tintDark: "#BFBFBF",
-      tintForeground: "#000",
+      tintForeground: contrastForeground("#FFFFFF"),
       tabIconDefault: "#5F5F5F",
       tabIconSelected: "#FFFFFF",
       danger: "#E66B6B",
@@ -625,7 +648,7 @@ const MINIMAL: ThemeDef = {
       cardBorder: "#DDDDDD",
       tint: "#000000",
       tintDark: "#333333",
-      tintForeground: "#fff",
+      tintForeground: contrastForeground("#000000"),
       tabIconDefault: "#8A8A8A",
       tabIconSelected: "#000000",
       danger: "#C84040",
