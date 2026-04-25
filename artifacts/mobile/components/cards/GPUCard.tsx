@@ -157,16 +157,16 @@ const createStyles = (t: Theme) => {
     heroRight: { flex: 1, gap: 6 },
     bigNum: {
       fontSize: 32,
-      fontWeight: "800",
+      fontFamily: "Inter_700Bold",
       letterSpacing: -1.5,
       fontVariant,
       lineHeight: 36,
     },
-    bigUnit: { fontSize: 16, fontWeight: "600" },
+    bigUnit: { fontSize: 16, fontFamily: "Inter_600SemiBold" },
     bigLabel: {
       fontSize: 9,
       color: C.textMuted,
-      fontWeight: "700",
+      fontFamily: "Inter_700Bold",
       marginTop: 2,
       letterSpacing: t.sectionLabelLetterSpacing,
     },
@@ -175,14 +175,14 @@ const createStyles = (t: Theme) => {
     barHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
     sectionLabel: {
       fontSize: 9,
-      fontWeight: "700",
+      fontFamily: "Inter_600SemiBold",
       color: C.textMuted,
       letterSpacing: t.sectionLabelLetterSpacing,
     },
     barCaption: {
       fontSize: 10,
       color: C.textSecondary,
-      fontWeight: "600",
+      fontFamily: "Inter_600SemiBold",
       fontVariant,
     },
     empty: {

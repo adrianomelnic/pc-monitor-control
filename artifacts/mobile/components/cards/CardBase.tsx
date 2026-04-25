@@ -31,7 +31,7 @@ export function TempBadge({ value }: TempBadgeProps) {
         borderColor: color + "44",
       }}
     >
-      <Text style={{ fontSize: 11, fontWeight: "800", color, fontVariant }}>
+      <Text style={{ fontSize: 11, fontFamily: "Inter_700Bold", color, fontVariant }}>
         {Math.round(value)}°C
       </Text>
     </View>
@@ -262,7 +262,7 @@ const createStyles = (t: Theme) => {
     },
     title: {
       fontSize: t.titleFontSize,
-      fontWeight: "700",
+      fontFamily: "Inter_700Bold",
       color: C.text,
       letterSpacing: t.titleLetterSpacing,
     },
@@ -301,13 +301,13 @@ const createStyles = (t: Theme) => {
     statLabel: {
       fontSize: 11,
       color: C.textMuted,
-      fontWeight: "600",
+      fontFamily: "Inter_600SemiBold",
       letterSpacing: t.sectionLabelLetterSpacing,
     },
     statValue: {
       fontSize: 12,
       color: C.text,
-      fontWeight: "700",
+      fontFamily: "Inter_700Bold",
       fontVariant,
       letterSpacing: 0.2,
     },
