@@ -26,12 +26,18 @@ iOS/Android Expo app that connects directly to PC agents over local WiFi (HTTP p
 - `components/cards/SensorCard.tsx` — custom sensor card component
 - `components/SensorPickerModal.tsx` — searchable HWiNFO64 sensor picker
 
-## Bundled Agent (Phase A of offline pairing — Task #29)
-- `assets/agent/pc_agent.py` — copy of repo-root `pc_agent.py`, bundled into the app via Metro
-- `metro.config.js` — `.py`, `.ps1`, `.sh` added to `resolver.assetExts`
-- `lib/agentAssets.ts` — `getBundledAgentScriptUri()` resolves the bundled asset to a stable cache file URI named `pc_agent.py`
-- `components/AddPcSheet.tsx` — "Send agent to PC" section uses `expo-sharing` to open the OS share sheet (AirDrop / Mail / Messages / Files)
-- **Auto-sync**: `pnpm run sync-agent` (also runs as `predev` and `prebuild` hook) copies repo-root `pc_agent.py` → `artifacts/mobile/assets/agent/pc_agent.py` so the bundled copy can never drift behind the source. Phase B (phone-as-HTTP-server) intentionally deferred — would require a native module that breaks Expo Go.
+## PC Agent Distribution (Task #34 — single-binary install)
+- **End users get a single binary** built with PyInstaller. No Python install, no `pip`, no PowerShell, no `irm | iex`. They download `pc-agent.exe` (Windows) or `pc-agent` (macOS) and double-click.
+- `build/pc-agent.spec` — PyInstaller spec, onefile, console-mode, with hidden imports for psutil + flask + flask-cors and per-OS psutil submodules.
+- `.github/workflows/build-agent.yml` — CI matrix on `windows-latest` + `macos-latest`. Triggers on `v*` tag push; uploads `pc-agent-windows.exe` and `pc-agent-macos` to a GitHub Release.
+- Stable download URLs hard-coded into the mobile app (renaming the release asset would break pairing):
+  - `https://github.com/adrianomelnic/pc-monitor-control/releases/latest/download/pc-agent-windows.exe`
+  - `https://github.com/adrianomelnic/pc-monitor-control/releases/latest/download/pc-agent-macos`
+- `pc_agent.py` `_ensure_admin()` is PyInstaller-aware: when `sys.frozen` is true, it forwards `sys.argv[1:]` (skipping the exe path itself) to the elevated re-launch.
+- Mobile UX:
+  - `components/AddPcSheet.tsx` Step 1 — Windows/macOS tab, big "Send download link to my PC" share button, QR code of the download URL, "Copy link" / "Open in browser" fallbacks, SmartScreen/Gatekeeper warning copy.
+  - `app/setup.tsx` — short 4-step screen (Download / Double-click / Find IP / Add in app). The 700-line inlined `PYTHON_AGENT` string and the old `irm | iex` / `curl | bash` UI are gone.
+- **Bundled-agent legacy (Phase A of offline pairing — Task #29)** is still wired in (`assets/agent/pc_agent.py` + `metro.config.js` + `lib/agentAssets.ts` + `pnpm run sync-agent` predev/prebuild hook) but no UI references it any more. Kept in place so a future "phone hosts the binary over HTTP" task (#30) can reuse the asset pipeline without re-plumbing it.
 
 ## HWiNFO64 Integration
 - Shared memory format: signature `{0x12345678, 0x53695748}`

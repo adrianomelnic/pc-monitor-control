@@ -1,8 +1,15 @@
 #!/usr/bin/env python3
 """
 PC Monitor Agent v2 - Full hardware monitoring.
-Install: python -m pip install psutil flask flask-cors
-Run: python pc_agent.py  (auto-elevates to admin on Windows via UAC)
+
+End users get this as a single-file binary built with PyInstaller — see
+build/pc-agent.spec and .github/workflows/build-agent.yml. They just
+double-click pc-agent.exe (Windows) or pc-agent (macOS) and it starts
+listening on port 8765.
+
+Developers can also run from source:
+  python -m pip install psutil flask flask-cors
+  python pc_agent.py     (auto-elevates to admin on Windows via UAC)
 """
 import os, platform, subprocess, time, socket, re, ctypes, sys
 import psutil
@@ -11,6 +18,8 @@ from flask_cors import CORS
 
 IS_WINDOWS = platform.system() == "Windows"
 IS_MAC = platform.system() == "Darwin"
+# True when running inside a PyInstaller bundle (sys.executable is the .exe).
+IS_FROZEN = getattr(sys, "frozen", False)
 
 # ── Auto-elevate to admin on Windows ────────────────────────────────────────
 def _ensure_admin():
@@ -21,8 +30,14 @@ def _ensure_admin():
     except Exception:
         already_admin = False
     if not already_admin:
-        # Re-launch this script with UAC elevation and exit the current process
-        params = " ".join(f'"{a}"' for a in sys.argv)
+        # Re-launch this process with UAC elevation and exit the current one.
+        # When frozen by PyInstaller, sys.executable IS the agent binary and
+        # sys.argv[0] is also that binary path — so we must skip argv[0],
+        # otherwise the elevated process gets the exe path as its first arg.
+        # When running as a plain .py script, sys.executable is python.exe
+        # and sys.argv[0] is the script path (a real argument we must keep).
+        argv_to_forward = sys.argv[1:] if IS_FROZEN else sys.argv
+        params = " ".join(f'"{a}"' for a in argv_to_forward)
         ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, params, None, 1)
         sys.exit(0)
 

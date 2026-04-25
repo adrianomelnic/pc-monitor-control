@@ -1,0 +1,84 @@
+name: Build PC Agent binaries
+
+# Triggered when a version tag is pushed. Tag name format: v1.0.0, v1.2.3-rc1, etc.
+on:
+  push:
+    tags:
+      - "v*"
+  # Allow manual dispatch from the Actions tab for testing.
+  workflow_dispatch:
+
+permissions:
+  contents: write  # needed to create the GitHub Release
+
+jobs:
+  build:
+    name: Build on ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            artifact_name: pc-agent.exe
+            release_name: pc-agent-windows.exe
+          - os: macos-latest
+            artifact_name: pc-agent
+            release_name: pc-agent-macos
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install build dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pyinstaller psutil flask flask-cors
+
+      - name: Build with PyInstaller
+        run: pyinstaller build/pc-agent.spec --clean --noconfirm
+
+      - name: Rename artifact for release
+        shell: bash
+        run: |
+          mkdir -p release
+          cp "dist/${{ matrix.artifact_name }}" "release/${{ matrix.release_name }}"
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.release_name }}
+          path: release/${{ matrix.release_name }}
+          if-no-files-found: error
+
+  release:
+    name: Publish GitHub Release
+    needs: build
+    # Only publish when triggered by a tag push, not workflow_dispatch.
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release
+
+      - name: Flatten artifact directory
+        run: |
+          mkdir -p flat
+          find release -type f -exec cp {} flat/ \;
+          ls -la flat/
+
+      - name: Create / update GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            flat/pc-agent-windows.exe
+            flat/pc-agent-macos
+          generate_release_notes: true
+          fail_on_unmatched_files: true

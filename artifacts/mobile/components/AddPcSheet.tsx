@@ -1,6 +1,7 @@
 import { Feather } from "@expo/vector-icons";
 import * as Clipboard from "expo-clipboard";
 import * as Haptics from "expo-haptics";
+import * as Linking from "expo-linking";
 import React, { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -22,12 +23,12 @@ import { Theme } from "@/constants/themes";
 import { useTheme } from "@/context/ThemeContext";
 import { usePcs } from "@/context/PcsContext";
 
-const INSTALL_PS1_URL =
-  "https://raw.githubusercontent.com/adrianomelnic/pc-monitor-control/main/scripts/install.ps1";
-const INSTALL_SH_URL =
-  "https://raw.githubusercontent.com/adrianomelnic/pc-monitor-control/main/scripts/install.sh";
-const WIN_CMD = `powershell -c "irm ${INSTALL_PS1_URL} | iex"`;
-const MAC_CMD = `curl -fsSL ${INSTALL_SH_URL} | bash`;
+// Stable URLs that GitHub redirects to the latest release asset. Built by
+// .github/workflows/build-agent.yml on every `v*` tag push.
+const RELEASES_BASE =
+  "https://github.com/adrianomelnic/pc-monitor-control/releases/latest/download";
+const WIN_DOWNLOAD_URL = `${RELEASES_BASE}/pc-agent-windows.exe`;
+const MAC_DOWNLOAD_URL = `${RELEASES_BASE}/pc-agent-macos`;
 
 interface AddPcSheetProps {
   visible: boolean;
@@ -50,14 +51,14 @@ function friendlyError(e: unknown): { message: string; detail: string } {
     return {
       message: "Connection timed out",
       detail:
-        "The PC did not respond in 8 seconds. Check that:\n• The PC Agent is running (python pc_agent.py)\n• The IP address is correct\n• Port 8765 is allowed through Windows Firewall\n• Phone and PC are on the same Wi-Fi",
+        "The PC did not respond in 8 seconds. Check that:\n• The PC Agent is running (you should see its terminal window open on the PC)\n• The IP address is correct\n• Port 8765 is allowed through Windows Firewall\n• Phone and PC are on the same Wi-Fi",
     };
   }
   if (low.includes("network request failed") || low.includes("econnrefused") || low.includes("refused")) {
     return {
       message: "Connection refused",
       detail:
-        "The PC is reachable but nothing is listening on that port. Make sure the PC Agent is running:\npython pc_agent.py",
+        "The PC is reachable but nothing is listening on that port. Open the PC Agent on your PC — its terminal window must stay open while you use the app.",
     };
   }
   if (low.includes("instant")) {
@@ -92,8 +93,8 @@ export function AddPcSheet({ visible, onClose }: AddPcSheetProps) {
   const [port, setPort] = useState("8765");
   const [apiKey, setApiKey] = useState("");
   const [testState, setTestState] = useState<TestState>({ kind: "idle" });
-  const [sending, setSending] = useState(false);
-  const [copiedCmd, setCopiedCmd] = useState(false);
+  const [sharing, setSharing] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
 
   useEffect(() => {
     if (visible) {
@@ -102,8 +103,11 @@ export function AddPcSheet({ visible, onClose }: AddPcSheetProps) {
     }
   }, [visible]);
 
-  const installCmd = osTab === "windows" ? WIN_CMD : MAC_CMD;
-  const installUrl = osTab === "windows" ? INSTALL_PS1_URL : INSTALL_SH_URL;
+  const downloadUrl = osTab === "windows" ? WIN_DOWNLOAD_URL : MAC_DOWNLOAD_URL;
+  // Downloaded filenames match the GitHub Release asset names (browsers save
+  // by URL basename), so what we tell the user matches what's in their
+  // Downloads folder.
+  const downloadFilename = osTab === "windows" ? "pc-agent-windows.exe" : "pc-agent-macos";
 
   const reset = () => {
     setStep("install");
@@ -113,8 +117,8 @@ export function AddPcSheet({ visible, onClose }: AddPcSheetProps) {
     setPort("8765");
     setApiKey("");
     setTestState({ kind: "idle" });
-    setSending(false);
-    setCopiedCmd(false);
+    setSharing(false);
+    setCopiedLink(false);
   };
 
   const handleClose = () => {
@@ -122,27 +126,38 @@ export function AddPcSheet({ visible, onClose }: AddPcSheetProps) {
     onClose();
   };
 
-  const handleSendCommand = async () => {
-    if (sending) return;
-    setSending(true);
+  const handleShareLink = async () => {
+    if (sharing) return;
+    setSharing(true);
     try {
+      const osLabel = osTab === "windows" ? "Windows" : "macOS";
       await Share.share({
-        message: installCmd,
-        title: "PC Monitor Agent installer",
+        message: `PC Monitor Agent for ${osLabel} — download and double-click to run:\n${downloadUrl}`,
+        url: downloadUrl,
+        title: "PC Monitor Agent",
       });
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       Alert.alert("Could not open share sheet", msg);
     } finally {
-      setSending(false);
+      setSharing(false);
     }
   };
 
-  const handleCopyCommand = async () => {
-    await Clipboard.setStringAsync(installCmd);
+  const handleCopyLink = async () => {
+    await Clipboard.setStringAsync(downloadUrl);
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    setCopiedCmd(true);
-    setTimeout(() => setCopiedCmd(false), 2500);
+    setCopiedLink(true);
+    setTimeout(() => setCopiedLink(false), 2500);
+  };
+
+  const handleOpenInBrowser = async () => {
+    try {
+      await Linking.openURL(downloadUrl);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      Alert.alert("Could not open link", msg);
+    }
   };
 
   const handleAdd = () => {
@@ -202,11 +217,16 @@ export function AddPcSheet({ visible, onClose }: AddPcSheetProps) {
   const canTest = host.trim().length > 0;
   const canAdd = name.trim().length > 0 && host.trim().length > 0;
 
+  const securityWarning =
+    osTab === "windows"
+      ? "Windows SmartScreen will say \u201CWindows protected your PC\u201D — click \u201CMore info\u201D \u2192 \u201CRun anyway\u201D. We don't have a code-signing certificate yet."
+      : "macOS will say \u201Ccannot be opened, developer cannot be verified\u201D — right-click the file in Finder \u2192 \u201COpen\u201D \u2192 confirm. We don't have a code-signing certificate yet.";
+
   const renderInstallStep = () => (
     <>
       <Text style={styles.hint}>
-        Run one command on your PC. It downloads the agent, installs the
-        Python dependencies, and starts it for you.
+        Download the agent on your PC and double-click it. No Python, no
+        installer, no admin tools to set up.
       </Text>
 
       <View style={styles.osTabRow}>
@@ -222,35 +242,29 @@ export function AddPcSheet({ visible, onClose }: AddPcSheetProps) {
               color={osTab === tab ? C.tintForeground : C.textSecondary}
             />
             <Text style={[styles.osTabText, osTab === tab && styles.osTabTextActive]}>
-              {tab === "windows" ? "Windows" : "macOS / Linux"}
+              {tab === "windows" ? "Windows" : "macOS"}
             </Text>
           </Pressable>
         ))}
       </View>
 
-      <View style={styles.cmdBox}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <Text style={styles.cmdText}>{installCmd}</Text>
-        </ScrollView>
-      </View>
-
       <Pressable
-        style={[styles.primaryBtn, sending && styles.primaryBtnBusy]}
-        onPress={handleSendCommand}
-        disabled={sending}
+        style={[styles.primaryBtn, sharing && styles.primaryBtnBusy]}
+        onPress={handleShareLink}
+        disabled={sharing}
       >
-        {sending ? (
+        {sharing ? (
           <ActivityIndicator size="small" color={C.tintForeground} />
         ) : (
           <Feather name="send" size={15} color={C.tintForeground} />
         )}
         <Text style={styles.primaryBtnText}>
-          {sending ? "Opening share sheet…" : "Send to my PC"}
+          {sharing ? "Opening share sheet\u2026" : "Send download link to my PC"}
         </Text>
       </Pressable>
       <Text style={styles.primaryHint}>
-        Share via AirDrop, Mail, or Messages — open it on your PC and paste
-        into {osTab === "windows" ? "PowerShell" : "Terminal"}.
+        Share via AirDrop, Mail, or Messages — open the link on your PC, then
+        double-click {downloadFilename}.
       </Text>
 
       <View style={styles.qrCard}>
@@ -261,7 +275,7 @@ export function AddPcSheet({ visible, onClose }: AddPcSheetProps) {
         <View style={styles.qrWrap}>
           <View style={styles.qrCanvas}>
             <QRCode
-              value={installUrl}
+              value={downloadUrl}
               size={148}
               color={theme.colors.text}
               backgroundColor={theme.colors.card}
@@ -277,24 +291,37 @@ export function AddPcSheet({ visible, onClose }: AddPcSheetProps) {
 
       <Pressable
         style={({ pressed }) => [styles.copyRow, pressed && { opacity: 0.7 }]}
-        onPress={handleCopyCommand}
+        onPress={handleCopyLink}
       >
         <Feather
-          name={copiedCmd ? "check" : "copy"}
+          name={copiedLink ? "check" : "copy"}
           size={14}
-          color={copiedCmd ? C.success : C.tint}
+          color={copiedLink ? C.success : C.tint}
         />
-        <Text style={[styles.copyRowText, copiedCmd && { color: C.success }]}>
-          {copiedCmd ? "Copied to clipboard" : "Copy command instead"}
+        <Text style={[styles.copyRowText, copiedLink && { color: C.success }]}>
+          {copiedLink ? "Link copied to clipboard" : "Copy download link"}
         </Text>
       </Pressable>
+
+      <Pressable
+        style={({ pressed }) => [styles.linkRow, pressed && { opacity: 0.7 }]}
+        onPress={handleOpenInBrowser}
+      >
+        <Feather name="external-link" size={13} color={C.textSecondary} />
+        <Text style={styles.linkRowText}>Open download in a browser</Text>
+      </Pressable>
+
+      <View style={styles.warningBox}>
+        <Feather name="shield" size={13} color={C.warning} style={{ marginTop: 2 }} />
+        <Text style={styles.warningText}>{securityWarning}</Text>
+      </View>
 
       <View style={styles.stepFooter}>
         <Pressable
           style={styles.primaryBtn}
           onPress={() => setStep("connect")}
         >
-          <Text style={styles.primaryBtnText}>I&apos;ve installed it</Text>
+          <Text style={styles.primaryBtnText}>I&apos;ve got it running</Text>
           <Feather name="arrow-right" size={15} color={C.tintForeground} />
         </Pressable>
         <Pressable
@@ -381,7 +408,7 @@ export function AddPcSheet({ visible, onClose }: AddPcSheetProps) {
                 !canTest && styles.testBtnTextDisabled,
               ]}
             >
-              {testState.kind === "testing" ? "Testing…" : "Test"}
+              {testState.kind === "testing" ? "Testing\u2026" : "Test"}
             </Text>
           </Pressable>
         </View>
@@ -569,7 +596,7 @@ const createStyles = (t: Theme) => {
     osTabRow: {
       flexDirection: "row",
       gap: 8,
-      marginBottom: 12,
+      marginBottom: 14,
     },
     osTab: {
       flex: 1,
@@ -595,20 +622,6 @@ const createStyles = (t: Theme) => {
     },
     osTabTextActive: {
       color: C.tintForeground,
-    },
-    cmdBox: {
-      backgroundColor: C.card,
-      borderWidth: 1,
-      borderColor: C.cardBorder,
-      borderRadius: t.buttonRadius,
-      paddingHorizontal: 12,
-      paddingVertical: 10,
-      marginBottom: 14,
-    },
-    cmdText: {
-      fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace",
-      fontSize: 12,
-      color: C.tint,
     },
     primaryBtn: {
       flexDirection: "row",
@@ -680,13 +693,45 @@ const createStyles = (t: Theme) => {
       justifyContent: "center",
       gap: 6,
       paddingVertical: 8,
-      marginBottom: 18,
+      marginBottom: 4,
     },
     copyRowText: {
       fontSize: 12,
       fontFamily: "Inter_600SemiBold",
       color: C.tint,
       letterSpacing: 0.3,
+    },
+    linkRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 6,
+      paddingVertical: 6,
+      marginBottom: 14,
+    },
+    linkRowText: {
+      fontSize: 12,
+      fontFamily: "Inter_500Medium",
+      color: C.textSecondary,
+      letterSpacing: 0.3,
+    },
+    warningBox: {
+      flexDirection: "row",
+      gap: 10,
+      backgroundColor: C.warning + "14",
+      borderWidth: 1,
+      borderColor: C.warning + "40",
+      borderRadius: t.buttonRadius,
+      padding: 12,
+      marginBottom: 18,
+      alignItems: "flex-start",
+    },
+    warningText: {
+      flex: 1,
+      fontSize: 11,
+      fontFamily: "Inter_400Regular",
+      color: C.textSecondary,
+      lineHeight: 16,
     },
     stepFooter: {
       gap: 10,
