@@ -1633,7 +1633,7 @@ const createStyles = (t: Theme) => {
   retryBtnText: {
     fontSize: 14,
     fontWeight: "700",
-    color: "#fff",
+    color: C.tintForeground,
   },
   terminalInput: {
     flexDirection: "row",

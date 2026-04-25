@@ -13,7 +13,7 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { Theme } from "@/constants/themes";
+import { Theme, contrastForeground } from "@/constants/themes";
 import { useTheme } from "@/context/ThemeContext";
 import { DEMO_PC_HOST, PC, usePcs } from "@/context/PcsContext";
 import { MetricRing } from "./MetricRing";
@@ -342,7 +342,7 @@ const createStyles = (t: Theme) => {
     demoBadgeText: {
       fontSize: 9,
       fontFamily: "Inter_700Bold",
-      color: "#fff",
+      color: contrastForeground("#FF6D00"),
       letterSpacing: 0.8,
     },
     statusDot: {
