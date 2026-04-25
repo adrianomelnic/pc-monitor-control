@@ -933,7 +933,7 @@ export default function AgentScreen() {
             style={({ pressed }) => [styles.cmdCopyBtn, copiedCmd && styles.cmdCopyBtnDone, pressed && { opacity: 0.8 }]}
             onPress={copyCmd}
           >
-            <Feather name={copiedCmd ? "check" : "copy"} size={14} color="#fff" />
+            <Feather name={copiedCmd ? "check" : "copy"} size={14} color={C.tintForeground} />
             <Text style={styles.cmdCopyText}>{copiedCmd ? "Copied!" : "Copy"}</Text>
           </Pressable>
         </View>
@@ -966,7 +966,7 @@ export default function AgentScreen() {
             <Feather
               name={copied ? "check" : "copy"}
               size={14}
-              color="#fff"
+              color={C.tintForeground}
             />
             <Text style={styles.copyBtnText}>{copied ? "Copied!" : "Manual: Copy to clipboard"}</Text>
           </Pressable>
@@ -1043,7 +1043,7 @@ const createStyles = (theme: Theme) => {
   stepNumText: {
     fontSize: 13,
     fontFamily: "Inter_700Bold",
-    color: "#000",
+    color: C.tintForeground,
   },
   stepContent: {
     flex: 1,
@@ -1114,7 +1114,7 @@ const createStyles = (theme: Theme) => {
     color: C.textSecondary,
   },
   osTabTextActive: {
-    color: "#000",
+    color: C.tintForeground,
   },
   cmdRow: {
     flexDirection: "row",
@@ -1146,7 +1146,7 @@ const createStyles = (theme: Theme) => {
   cmdCopyText: {
     fontSize: 12,
     fontFamily: "Inter_700Bold",
-    color: "#000",
+    color: C.tintForeground,
   },
   urlRow: {
     flexDirection: "row",
@@ -1213,7 +1213,7 @@ const createStyles = (theme: Theme) => {
   copyBtnText: {
     fontSize: 13,
     fontFamily: "Inter_700Bold",
-    color: "#000",
+    color: C.tintForeground,
   },
   codeScroll: {
     maxHeight: 300,

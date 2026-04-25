@@ -100,7 +100,7 @@ export default function HomeScreen() {
               setAddVisible(true);
             }}
           >
-            <Feather name="plus" size={20} color="#fff" />
+            <Feather name="plus" size={20} color={C.tintForeground} />
           </Pressable>
         </View>
       </View>
@@ -248,7 +248,7 @@ const createStyles = (t: Theme) => {
       paddingHorizontal: 24,
       paddingVertical: 12,
     },
-    emptyBtnText: { fontSize: 15, fontFamily: "Inter_700Bold", color: "#000" },
+    emptyBtnText: { fontSize: 15, fontFamily: "Inter_700Bold", color: C.tintForeground },
     demoBtn: {
       flexDirection: "row",
       alignItems: "center",

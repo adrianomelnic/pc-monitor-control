@@ -481,7 +481,7 @@ const createStyles = (t: Theme) => {
     addBtnText: {
       fontSize: 15,
       fontFamily: "Inter_700Bold",
-      color: "#000",
+      color: C.tintForeground,
     },
   });
 };
