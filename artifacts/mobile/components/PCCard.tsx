@@ -188,7 +188,9 @@ export function PCCard({ pc }: PCCardProps) {
           <View style={styles.offlineRow}>
             <Feather name="wifi-off" size={14} color={C.textMuted} />
             <Text style={styles.offlineText}>
-              {pc.lastSeen
+              {pc.lastError
+                ? `${pc.lastError}${pc.lastSeen ? ` · last seen ${new Date(pc.lastSeen).toLocaleTimeString()}` : ""}`
+                : pc.lastSeen
                 ? `Last seen ${new Date(pc.lastSeen).toLocaleTimeString()}`
                 : "Never connected"}
             </Text>

@@ -121,6 +121,12 @@ export interface PC {
   // the /version endpoint.
   agentVersion?: string;
   lastSeen?: Date;
+  // Last failure reason from /metrics polling. Surfaced under the PC name
+  // when the card is offline so users can tell the difference between
+  // "agent not reachable on the LAN", "agent rejected our API key",
+  // "agent returned malformed JSON", and "request timed out". Cleared on
+  // every successful poll. Not persisted to AsyncStorage.
+  lastError?: string;
 }
 
 export { DEMO_PC_HOST, DEMO_PC_ID };
@@ -266,7 +272,11 @@ export function PcsProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const savePcs = useCallback((updated: PC[]) => {
-    const toSave = updated.map(({ metrics, status, ...rest }) => rest);
+    // Strip volatile fields — `metrics` and `status` are recomputed on every
+    // poll and `lastError` is only meaningful for the current session.
+    const toSave = updated.map(
+      ({ metrics, status, lastError, ...rest }) => rest
+    );
     AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
   }, []);
 
@@ -331,6 +341,8 @@ export function PcsProvider({ children }: { children: React.ReactNode }) {
         metrics: data.metrics,
         os: data.os,
         lastSeen: new Date(),
+        // Clear any stale failure reason now that we've succeeded.
+        lastError: undefined,
       };
       // Older agents (pre-/version) don't include agentVersion in /metrics —
       // when the field is missing we leave the previous value untouched
@@ -349,7 +361,8 @@ export function PcsProvider({ children }: { children: React.ReactNode }) {
           err
         );
       }
-      return { status: "offline" };
+      const message = err instanceof Error ? err.message : String(err);
+      return { status: "offline", lastError: message };
     }
   }, []);
 
