@@ -259,6 +259,18 @@ function xhrPost(url: string, headers: Record<string, string>, body: string, tim
 export function PcsProvider({ children }: { children: React.ReactNode }) {
   const [pcs, setPcs] = useState<PC[]>([]);
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  // Per-PC single-flight lock for /metrics polling. The pc-agent's
+  // LibreHardwareMonitor reader uses a shared .NET `Computer` object that
+  // is NOT thread-safe — two simultaneous `_LHM_COMPUTER.Accept(...)`
+  // calls from concurrent Flask request threads will race and hang both,
+  // and the mobile-side timeout fires for every poll thereafter. The
+  // initial burst from `addPc` + the `[pcs.length]` `useEffect` (further
+  // doubled by React StrictMode in dev) easily fires 3–5 simultaneous
+  // requests, which triggers exactly that scenario. Skipping a poll when
+  // one is already in flight for the same PC keeps the agent at one
+  // concurrent reader and unblocks the home card on the user's next
+  // app reload — no PC-side re-install required.
+  const inFlight = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     AsyncStorage.getItem(STORAGE_KEY).then((raw) => {
@@ -366,23 +378,37 @@ export function PcsProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  // Fire one /metrics fetch for a PC, but only if none is in flight for
+  // that PC yet. Returns immediately when a poll is already pending so
+  // the burst that fires after `addPc` (StrictMode + addPc + useEffect)
+  // does not stack 3+ concurrent requests against the agent's
+  // single-threaded LHM reader.
+  const pollOne = useCallback(
+    (pc: PC) => {
+      if (inFlight.current.has(pc.id)) return;
+      inFlight.current.add(pc.id);
+      fetchMetrics(pc)
+        .then((updates) => applyUpdate(pc.id, updates))
+        .finally(() => {
+          inFlight.current.delete(pc.id);
+        });
+    },
+    [fetchMetrics, applyUpdate]
+  );
+
   const pollAll = useCallback(() => {
     setPcs((prev) => {
-      prev.forEach((pc) => {
-        fetchMetrics(pc).then((updates) => applyUpdate(pc.id, updates));
-      });
+      prev.forEach((pc) => pollOne(pc));
       return prev;
     });
-  }, [fetchMetrics, applyUpdate]);
+  }, [pollOne]);
 
   const refreshAll = useCallback(async () => {
     setPcs((prev) => {
-      prev.forEach((pc) => {
-        fetchMetrics(pc).then((updates) => applyUpdate(pc.id, updates));
-      });
+      prev.forEach((pc) => pollOne(pc));
       return prev.map((p) => ({ ...p, status: "connecting" as const }));
     });
-  }, [fetchMetrics, applyUpdate]);
+  }, [pollOne]);
 
   useEffect(() => {
     if (pcs.length === 0) return;
@@ -403,11 +429,18 @@ export function PcsProvider({ children }: { children: React.ReactNode }) {
       setPcs((prev) => {
         const updated = [...prev, newPc];
         savePcs(updated);
-        fetchMetrics(newPc).then((updates) => applyUpdate(newPc.id, updates));
         return updated;
       });
+      // Trigger the first poll OUTSIDE the setState updater. React StrictMode
+      // (and React 18 in general) intentionally invokes setState updaters
+      // twice in dev to surface impure code; firing fetchMetrics inside the
+      // updater therefore stacks two simultaneous /metrics requests, which
+      // races the agent's shared LHM .NET object. pollOne's single-flight
+      // guards us further against the [pcs.length] useEffect that pollAll's
+      // right after this call.
+      pollOne(newPc);
     },
-    [savePcs, fetchMetrics, applyUpdate]
+    [savePcs, pollOne]
   );
 
   const removePc = useCallback(
@@ -444,10 +477,10 @@ export function PcsProvider({ children }: { children: React.ReactNode }) {
       };
       const updated = [...prev, demoPc];
       savePcs(updated);
-      fetchMetrics(demoPc).then((upd) => applyUpdate(DEMO_PC_ID, upd));
       return updated;
     });
-  }, [savePcs, fetchMetrics, applyUpdate]);
+    pollOne({ ...DEMO_PC_META, id: DEMO_PC_ID, status: "connecting" });
+  }, [savePcs, pollOne]);
 
   const sendCommand = useCallback(
     async (
@@ -486,12 +519,10 @@ export function PcsProvider({ children }: { children: React.ReactNode }) {
   return (
     <PcsContext.Provider
       value={{ pcs, addPc, removePc, updatePc, refreshPc: async (id) => {
-        setPcs((prev) => {
-          const pc = prev.find((p) => p.id === id);
-          if (!pc) return prev;
-          fetchMetrics(pc).then((updates) => applyUpdate(id, updates));
-          return prev.map((p) => p.id === id ? { ...p, status: "connecting" } : p);
-        });
+        const pc = pcs.find((p) => p.id === id);
+        if (!pc) return;
+        setPcs((prev) => prev.map((p) => p.id === id ? { ...p, status: "connecting" } : p));
+        pollOne(pc);
       }, refreshAll, addDemoMode, sendCommand }}
     >
       {children}

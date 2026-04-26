@@ -165,6 +165,15 @@ def open_firewall_port(port):
 _LHM_COMPUTER = None
 _LHM_VISITOR = None
 _LHM_FAILED = False  # latch True after first failure so we don't retry every poll
+# LibreHardwareMonitor's `Computer` object holds .NET/WMI/SMBus state that is
+# NOT thread-safe — calling `_LHM_COMPUTER.Accept(_LHM_VISITOR)` from two
+# Flask request threads at the same time races the underlying sensor
+# enumeration via pythonnet and both threads hang indefinitely. Flask's
+# `app.run` defaults to `threaded=True`, so the polling burst from a freshly
+# launched mobile client (or from `curl` in a tight loop) reliably reproduces
+# the deadlock. Serialize all LHM reads behind a single process-wide lock.
+import threading as _threading
+_LHM_LOCK = _threading.Lock()
 
 # LHM SensorType enum string -> (our type tag, unit). These match the type
 # tags read_hwinfo64() emits, so the rest of the agent (and the mobile app)
@@ -258,49 +267,53 @@ def read_lhm():
             print(f"LibreHardwareMonitor init failed: {e}; falling back to HWiNFO64 if available")
             return None
 
+    # Serialize LHM enumeration across all Flask request threads — see the
+    # comment on _LHM_LOCK above. The lock covers the full Accept + walk so
+    # the visitor's intermediate state can't be observed by a second thread.
     try:
-        _LHM_COMPUTER.Accept(_LHM_VISITOR)
-        temps, fans, sensors = [], [], []
-        fan_counter = [0]
+        with _LHM_LOCK:
+            _LHM_COMPUTER.Accept(_LHM_VISITOR)
+            temps, fans, sensors = [], [], []
+            fan_counter = [0]
 
-        def _walk(hw, comp_name):
-            for sensor in hw.Sensors:
-                stype = str(sensor.SensorType)
-                mapping = _LHM_TYPE_MAP.get(stype)
-                if not mapping:
-                    continue  # skip Frequency, Control, Throughput, etc.
-                kind, unit = mapping
-                v = sensor.Value
-                if v is None:
-                    continue
-                try:
-                    value = float(v)
-                except (TypeError, ValueError):
-                    continue
-                label = str(sensor.Name) or ""
-                if not label and kind == "fan":
-                    fan_counter[0] += 1
-                    label = f"Fan #{fan_counter[0]}"
-                if not label:
-                    continue
-                sensors.append({
-                    "label": label,
-                    "value": round(value, 3),
-                    "unit": unit,
-                    "type": kind,
-                    "component": comp_name,
-                })
-                if kind == "temperature":
-                    temps.append({"label": label, "value": round(value, 1)})
-                elif kind == "fan":
-                    fans.append({"label": label, "rpm": round(value)})
-            for sub in hw.SubHardware:
-                _walk(sub, f"{comp_name} / {str(sub.Name)}")
+            def _walk(hw, comp_name):
+                for sensor in hw.Sensors:
+                    stype = str(sensor.SensorType)
+                    mapping = _LHM_TYPE_MAP.get(stype)
+                    if not mapping:
+                        continue  # skip Frequency, Control, Throughput, etc.
+                    kind, unit = mapping
+                    v = sensor.Value
+                    if v is None:
+                        continue
+                    try:
+                        value = float(v)
+                    except (TypeError, ValueError):
+                        continue
+                    label = str(sensor.Name) or ""
+                    if not label and kind == "fan":
+                        fan_counter[0] += 1
+                        label = f"Fan #{fan_counter[0]}"
+                    if not label:
+                        continue
+                    sensors.append({
+                        "label": label,
+                        "value": round(value, 3),
+                        "unit": unit,
+                        "type": kind,
+                        "component": comp_name,
+                    })
+                    if kind == "temperature":
+                        temps.append({"label": label, "value": round(value, 1)})
+                    elif kind == "fan":
+                        fans.append({"label": label, "rpm": round(value)})
+                for sub in hw.SubHardware:
+                    _walk(sub, f"{comp_name} / {str(sub.Name)}")
 
-        for hardware in _LHM_COMPUTER.Hardware:
-            _walk(hardware, str(hardware.Name))
+            for hardware in _LHM_COMPUTER.Hardware:
+                _walk(hardware, str(hardware.Name))
 
-        return {"temps": temps, "fans": fans, "sensors": sensors}
+            return {"temps": temps, "fans": fans, "sensors": sensors}
     except Exception as e:
         # Latch the failure so we don't keep paying the exception cost on every
         # poll — the HWiNFO64 fallback (if available) will take over for the
