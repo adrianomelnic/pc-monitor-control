@@ -31,8 +31,9 @@ iOS/Android Expo app that connects directly to PC agents over local WiFi (HTTP p
 - `build/pc-agent.spec` — PyInstaller spec, onefile, console-mode, with hidden imports for psutil + flask + flask-cors and per-OS psutil submodules. On Windows the spec also bundles every DLL it finds in `vendor/` (LibreHardwareMonitor — see Task #35) and adds `pythonnet`, `clr`, `clr_loader`, `clr_loader.netfx` to hidden imports.
 - `.github/workflows/build-agent.yml` — CI matrix on `windows-latest` + `macos-latest`. Triggers on `v*` tag push; uploads `pc-agent-windows.exe` and `pc-agent-macos` to a GitHub Release. Pinned `LHM_VERSION` env var controls which LibreHardwareMonitor release to bundle.
 - Stable download URLs hard-coded into the mobile app (renaming the release asset would break pairing):
-  - `https://github.com/adrianomelnic/pc-monitor-control/releases/latest/download/pc-agent-windows.exe`
-  - `https://github.com/adrianomelnic/pc-monitor-control/releases/latest/download/pc-agent-macos`
+  - `https://github.com/adrianomelnic/pc-monitor-control/releases/latest/download/pc-agent-windows.exe` — first release `v0.1.0` published Apr 26 2026, ~13.6 MB.
+  - `https://github.com/adrianomelnic/pc-monitor-control/releases/latest/download/pc-agent-macos` — first release `v0.1.0` published Apr 26 2026, ~10 MB.
+- **First release pipeline (Task #39).** `v0.1.0` was cut by tagging `refs/tags/v0.1.0` on `main` via the GitHub Git Data API (local `git push` is sandboxed). CI ran ~80 s end-to-end (windows-latest + macos-latest matrix → `softprops/action-gh-release@v2` upload). To cut a new release, push a fresh `v*` tag on a green `main` and the same workflow re-fires; no manual step needed. The classic PAT used to push must include both `repo` AND `workflow` scopes (writes to `.github/workflows/` are blocked otherwise).
 - `pc_agent.py` `_ensure_admin()` is PyInstaller-aware: when `sys.frozen` is true, it forwards `sys.argv[1:]` (skipping the exe path itself) to the elevated re-launch.
 - Mobile UX:
   - `components/AddPcSheet.tsx` Step 1 — Windows/macOS tab, big "Send download link to my PC" share button, QR code of the download URL, "Copy link" / "Open in browser" fallbacks, SmartScreen/Gatekeeper warning copy.
