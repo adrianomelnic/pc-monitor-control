@@ -82,6 +82,17 @@ jobs:
         run: |
           python -m pip install "pythonnet>=3.0.3"
 
+      - name: Install tray UI deps (Windows only)
+        if: runner.os == 'Windows'
+        shell: bash
+        # pystray drives the system-tray icon (Win32 backend, no Tk needed)
+        # and Pillow generates the icon image programmatically at runtime.
+        # The .exe is built with console=False so the tray menu is the
+        # user-facing surface — these packages must be present at build time
+        # so PyInstaller bundles them.
+        run: |
+          python -m pip install "pystray>=0.19" "Pillow>=10.0"
+
       - name: Download LibreHardwareMonitorLib (Windows only)
         if: runner.os == 'Windows'
         shell: bash

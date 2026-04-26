@@ -979,12 +979,34 @@ export default function PCDetailScreen() {
       case "gpu": {
         if (!m.gpu) { content = null; break; }
         const gpuSrc = builtinCard.sensorSource ?? {};
+        // LibreHardwareMonitor labels NVIDIA voltage/power sensors by their
+        // function name ("GPU Core", "GPU Package") and puts the GPU's full
+        // model in the `component` field (e.g. "NVIDIA GeForce RTX 3080 Ti").
+        // The previous label-only regex never matched those sensors so GPU
+        // voltage and power always showed "—". We now also accept any
+        // voltage/power sensor whose component string identifies it as a GPU
+        // (covers NVIDIA, AMD/Radeon, Intel Arc), which is also more robust
+        // for AMD cards whose labels vary by generation.
+        // Bare "amd" and "gpu" are too broad — they match "AMD Ryzen ..."
+        // CPU component strings and motherboard rails like "AGPUSetting",
+        // which would leak CPU voltage into the GPU card. Require either
+        // a vendor-specific GPU token (NVIDIA, GeForce, Radeon, Intel Arc)
+        // or a word-boundary "GPU" so "AMD Radeon" matches but "AMD Ryzen"
+        // does not.
+        const isGpuComponent = (c: string) =>
+          /nvidia|geforce|radeon|intel\s+arc|\bgpu\b/i.test(c);
         const gpuVoltageSensors = gpuSrc.voltage
           ? allSensors.filter(s => s.label === gpuSrc.voltage)
-          : allSensors.filter(s => s.type === "voltage" && /gpu.*core.*volt|gpu.*volt|gpu.*vdd/i.test(s.label));
+          : allSensors.filter(s =>
+              s.type === "voltage" &&
+              (/gpu.*volt|gpu.*vdd|gpu.*core/i.test(s.label) || isGpuComponent(s.component ?? ""))
+            );
         const gpuPowerSensors = gpuSrc.wattage
           ? allSensors.filter(s => s.label === gpuSrc.wattage)
-          : allSensors.filter(s => s.type === "power" && /gpu.*power|gpu.*wattage|gpu.*tdp/i.test(s.label));
+          : allSensors.filter(s =>
+              s.type === "power" &&
+              (/gpu.*power|gpu.*wattage|gpu.*tdp|gpu.*package/i.test(s.label) || isGpuComponent(s.component ?? ""))
+            );
         const augGpus = m.gpu.map((g, i) => ({
           ...g,
           voltage: gpuVoltageSensors[i]?.value ?? null,

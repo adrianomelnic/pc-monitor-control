@@ -59,6 +59,46 @@ def _ensure_admin():
 _ensure_admin()
 # ── End admin elevation ──────────────────────────────────────────────────────
 
+# ── Windowed-mode stdio redirect (must run before any module-level print) ──
+# When PyInstaller builds with `console=False` (our Windows release config —
+# see build/pc-agent.spec), `sys.stdout` and `sys.stderr` are not attached
+# to anything and every `print()` raises AttributeError. Several module-load
+# `print()` calls below (the "Initialising hardware info..." banner, the
+# CPU/GPU lines, LHM init failure messages, the tray-deps-missing fallback)
+# would crash before `__main__` ever runs. Redirect both streams to a
+# per-user log file IMMEDIATELY so those prints succeed AND the user has a
+# tail-able diagnostic file at %LOCALAPPDATA%\PCMonitorAgent\agent.log
+# (also exposed via the tray's "Show log file" menu item).
+_log_path: "str | None" = None
+def _redirect_stdio_to_logfile() -> None:
+    global _log_path
+    if not (IS_WINDOWS and IS_FROZEN):
+        # Console mode (running from source, or macOS / Linux build) — keep
+        # the real stdout so developers see startup output in their terminal.
+        return
+    try:
+        log_dir = os.path.join(
+            os.environ.get("LOCALAPPDATA", os.path.expanduser("~")),
+            "PCMonitorAgent",
+        )
+        os.makedirs(log_dir, exist_ok=True)
+        _log_path = os.path.join(log_dir, "agent.log")
+        # buffering=1 -> line-buffered so `Get-Content -Wait agent.log`
+        # streams logs as they happen, and crashes are flushed promptly.
+        f = open(_log_path, "a", buffering=1, encoding="utf-8", errors="replace")
+        sys.stdout = f
+        sys.stderr = f
+        print(f"\n=== PC Monitor Agent {AGENT_VERSION} starting at "
+              f"{time.strftime('%Y-%m-%d %H:%M:%S')} ===")
+    except Exception:
+        # Even if we can't open the log file, replace None stdout with an
+        # in-memory sink so subsequent print() calls don't crash. Better to
+        # lose logs than to crash before the tray icon appears.
+        import io
+        sys.stdout = sys.stdout or io.StringIO()
+        sys.stderr = sys.stderr or io.StringIO()
+_redirect_stdio_to_logfile()
+
 app = Flask(__name__)
 CORS(app)
 
@@ -1032,8 +1072,302 @@ def hwinfo_debug():
         return jsonify({"status": "exception", "error": str(e), "trace": traceback.format_exc()})
 
 
+# ── System tray + autostart + auto-update (Windows only) ───────────────────
+# Goals: end users should not see a terminal window after launch (the agent
+# is a background service, not a CLI tool); they should be able to toggle
+# "start with Windows" without editing the registry by hand; and they should
+# see at a glance whether a newer agent release is available on GitHub. The
+# tray icon is the home for all of that. macOS / Linux skip this and use the
+# original blocking `app.run` path so we don't ship a half-implemented UI on
+# platforms we haven't tested.
+TRAY_AVAILABLE = False
+if IS_WINDOWS:
+    try:
+        import pystray
+        from PIL import Image, ImageDraw
+        import winreg
+        TRAY_AVAILABLE = True
+    except ImportError as _tray_imp_err:
+        # pystray / Pillow may be missing in dev runs from source. The agent
+        # still works — just without the tray UI. The PyInstaller build always
+        # bundles them, so end-user .exe installs always get the tray.
+        print(f"tray UI disabled (missing dependency: {_tray_imp_err}); "
+              f"falling back to console mode")
+
+UPDATE_REPO          = "adrianomelnic/pc-monitor-control"
+UPDATE_API_URL       = f"https://api.github.com/repos/{UPDATE_REPO}/releases/latest"
+UPDATE_RELEASES_URL  = f"https://github.com/{UPDATE_REPO}/releases/latest"
+UPDATE_DOWNLOAD_URL  = f"https://github.com/{UPDATE_REPO}/releases/latest/download/pc-agent-windows.exe"
+AUTOSTART_REG_PATH   = r"Software\Microsoft\Windows\CurrentVersion\Run"
+AUTOSTART_VALUE_NAME = "PCMonitorAgent"
+UPDATE_CHECK_INTERVAL_SEC = 60 * 60  # poll GitHub once an hour
+
+# Module-level mutable state shared between the update worker thread and the
+# tray menu callbacks. Tray callbacks are pure reads, the worker thread does
+# all writes — so no lock is needed (CPython's GIL guarantees atomic word
+# writes for these simple types). `_log_path` is set much earlier (at module
+# import, see _redirect_stdio_to_logfile) so we don't redeclare it here.
+_tray_icon = None                # type: ignore[var-annotated]
+_update_status: str = "Checking for updates..."
+_update_available_version: "str | None" = None  # parsed tag, e.g. "0.2.0"
+_update_in_progress: bool = False
+
+def _version_tuple(v: str):
+    """Loose semver parse: ('1', '2', '3-rc1') -> (1, 2, 3). Used only for
+    'is GitHub release newer than installed?' comparisons, so tolerating
+    odd suffixes by stripping non-digits per part is fine."""
+    parts = []
+    for p in v.split("."):
+        m = re.match(r"(\d+)", p)
+        parts.append(int(m.group(1)) if m else 0)
+    return tuple(parts)
+
+def _autostart_is_enabled() -> bool:
+    """True if our HKCU\\…\\Run value exists. We don't validate the path —
+    if it's there, Windows will run it on next login, and that's what the
+    user toggle is asking about."""
+    if not IS_WINDOWS:
+        return False
+    try:
+        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, AUTOSTART_REG_PATH) as k:
+            winreg.QueryValueEx(k, AUTOSTART_VALUE_NAME)
+            return True
+    except FileNotFoundError:
+        return False
+    except OSError:
+        return False
+
+def _autostart_target() -> str:
+    """The command line we want Windows to execute on login. When running
+    as a frozen PyInstaller bundle, sys.executable is the agent .exe.
+    When running from source, fall back to `pythonw <script>` so a console
+    window doesn't pop up at every login (pythonw == windowed Python)."""
+    if IS_FROZEN:
+        return f'"{sys.executable}"'
+    pythonw = sys.executable.replace("python.exe", "pythonw.exe")
+    return f'"{pythonw}" "{os.path.abspath(__file__)}"'
+
+def _set_autostart(enable: bool) -> None:
+    if not IS_WINDOWS:
+        return
+    try:
+        with winreg.OpenKey(
+            winreg.HKEY_CURRENT_USER, AUTOSTART_REG_PATH, 0, winreg.KEY_SET_VALUE
+        ) as k:
+            if enable:
+                winreg.SetValueEx(
+                    k, AUTOSTART_VALUE_NAME, 0, winreg.REG_SZ, _autostart_target()
+                )
+            else:
+                try:
+                    winreg.DeleteValue(k, AUTOSTART_VALUE_NAME)
+                except FileNotFoundError:
+                    pass
+    except OSError as e:
+        print(f"autostart toggle failed: {e}")
+
+def _toggle_autostart(_icon=None, _item=None) -> None:
+    _set_autostart(not _autostart_is_enabled())
+    if _tray_icon is not None:
+        _tray_icon.update_menu()
+
+def _check_for_update_now() -> None:
+    """One-shot update check. Writes _update_status / _update_available_version
+    and refreshes the tray menu when done. Network errors are caught and
+    surfaced as a status string so the user can see the failure instead of
+    silent 'no update'."""
+    global _update_status, _update_available_version
+    try:
+        import urllib.request, json
+        req = urllib.request.Request(
+            UPDATE_API_URL,
+            headers={"User-Agent": f"pc-agent/{AGENT_VERSION}"},
+        )
+        with urllib.request.urlopen(req, timeout=10) as r:
+            data = json.load(r)
+        latest_tag = (data.get("tag_name") or "").lstrip("v").strip()
+        if latest_tag and _version_tuple(latest_tag) > _version_tuple(AGENT_VERSION):
+            _update_available_version = latest_tag
+            _update_status = f"Update available: v{latest_tag}"
+        else:
+            _update_available_version = None
+            _update_status = f"Up to date (v{AGENT_VERSION})"
+    except Exception as e:
+        _update_available_version = None
+        _update_status = f"Update check failed: {e}"
+    if _tray_icon is not None:
+        _tray_icon.update_menu()
+
+def _update_worker_loop() -> None:
+    """Background daemon: check on startup, then every UPDATE_CHECK_INTERVAL_SEC."""
+    while True:
+        _check_for_update_now()
+        time.sleep(UPDATE_CHECK_INTERVAL_SEC)
+
+def _install_update_async() -> None:
+    """Fire-and-forget self-update. Downloads pc-agent-windows.exe to
+    `pc-agent.new` next to the running .exe, then writes a small batch
+    file that waits for our process to exit, replaces the .exe, relaunches,
+    and self-deletes. We then shut down so the batch can do the rename
+    without sharing-violation. The re-entry guard is set BEFORE spawning
+    the worker thread so a rapid double-click on 'Install update' can't
+    spawn two concurrent installer threads (which would both download to
+    the same `pc-agent.new` and race the `move /y`)."""
+    global _update_in_progress
+    if _update_in_progress or not IS_FROZEN or not _update_available_version:
+        return
+    _update_in_progress = True
+    import threading
+    threading.Thread(target=_install_update, daemon=True, name="update-install").start()
+
+def _install_update() -> None:
+    global _update_status, _update_in_progress
+    try:
+        _update_status = "Downloading update..."
+        if _tray_icon is not None:
+            _tray_icon.update_menu()
+        import urllib.request
+        current_exe = sys.executable
+        target_dir = os.path.dirname(current_exe)
+        new_exe = os.path.join(target_dir, "pc-agent.new")
+        urllib.request.urlretrieve(UPDATE_DOWNLOAD_URL, new_exe)
+        # Sanity check — a real Windows agent build is ~13 MB; anything
+        # under 1 MB is almost certainly a 404 page or a redirect we didn't
+        # follow correctly. Capture the size BEFORE deleting so the error
+        # message doesn't have to re-stat a file we just removed.
+        size = os.path.getsize(new_exe)
+        if size < 1024 * 1024:
+            try: os.remove(new_exe)
+            except OSError: pass
+            raise RuntimeError(f"downloaded file too small ({size} bytes)")
+
+        batch_path = os.path.join(target_dir, "pc-agent-update.bat")
+        # `timeout /t 3` lets the current process exit so the .exe is no
+        # longer locked. `move /y` overwrites in place (same volume — both
+        # paths are in target_dir). `start ""` launches the new .exe
+        # detached. `del "%~f0"` deletes the batch itself last.
+        with open(batch_path, "w", encoding="utf-8") as f:
+            f.write(
+                "@echo off\r\n"
+                "timeout /t 3 /nobreak >nul\r\n"
+                f'move /y "{new_exe}" "{current_exe}" >nul\r\n'
+                f'start "" "{current_exe}"\r\n'
+                'del "%~f0"\r\n'
+            )
+        DETACHED_PROCESS = 0x00000008
+        CREATE_NEW_PROCESS_GROUP = 0x00000200
+        subprocess.Popen(
+            ["cmd", "/c", batch_path],
+            creationflags=DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP,
+            close_fds=True,
+        )
+        _update_status = "Installing update — agent will restart..."
+        if _tray_icon is not None:
+            _tray_icon.update_menu()
+        time.sleep(1)
+        if _tray_icon is not None:
+            _tray_icon.stop()
+        os._exit(0)
+    except Exception as e:
+        _update_status = f"Update failed: {e}"
+        if _tray_icon is not None:
+            _tray_icon.update_menu()
+    finally:
+        _update_in_progress = False
+
+def _open_releases_page(_icon=None, _item=None) -> None:
+    import webbrowser
+    webbrowser.open(UPDATE_RELEASES_URL)
+
+def _open_dashboard(_icon=None, _item=None) -> None:
+    import webbrowser
+    webbrowser.open(f"http://localhost:{PORT}/")
+
+def _open_log(_icon=None, _item=None) -> None:
+    if _log_path and os.path.isfile(_log_path):
+        try:
+            os.startfile(_log_path)  # type: ignore[attr-defined]
+        except Exception as e:
+            print(f"open log failed: {e}")
+
+def _on_update_clicked(_icon=None, _item=None) -> None:
+    if _update_available_version:
+        # Try in-place self-update first; if that fails, the user can still
+        # use "Open releases page" from the menu to download manually.
+        _install_update_async()
+    else:
+        # Re-check on demand so the user gets immediate feedback.
+        import threading
+        threading.Thread(target=_check_for_update_now, daemon=True,
+                         name="update-check-manual").start()
+
+def _make_tray_image() -> "Image.Image":
+    """Generate the tray icon programmatically so we don't have to ship a
+    PNG asset and worry about PyInstaller bundling the right path. 64×64
+    rounded square in the app accent green on a transparent background."""
+    img = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    d.rounded_rectangle((4, 4, 60, 60), radius=12, fill=(20, 20, 20, 255))
+    d.rounded_rectangle((14, 14, 50, 50), radius=4, outline=(0, 230, 118, 255), width=3)
+    d.rectangle((22, 36, 42, 42), fill=(0, 230, 118, 255))
+    return img
+
+def _build_tray_menu():
+    """The menu is rebuilt by pystray on every right-click, so callable
+    text/checked= produces a live status display without us having to
+    track when to refresh."""
+    return pystray.Menu(
+        pystray.MenuItem(f"PC Monitor Agent v{AGENT_VERSION}", None, enabled=False),
+        pystray.MenuItem(lambda _: f"Status: listening on port {PORT}", None, enabled=False),
+        pystray.MenuItem(lambda _: _update_status, None, enabled=False),
+        pystray.Menu.SEPARATOR,
+        pystray.MenuItem("Open dashboard", _open_dashboard),
+        pystray.MenuItem(
+            lambda _: (f"Install update v{_update_available_version}"
+                       if _update_available_version else "Check for updates"),
+            _on_update_clicked,
+        ),
+        pystray.MenuItem("Open releases page", _open_releases_page),
+        pystray.MenuItem(
+            "Start with Windows",
+            _toggle_autostart,
+            checked=lambda _: _autostart_is_enabled(),
+        ),
+        pystray.MenuItem("Show log file", _open_log,
+                         enabled=lambda _: bool(_log_path)),
+        pystray.Menu.SEPARATOR,
+        pystray.MenuItem("Quit", lambda icon, _: icon.stop()),
+    )
+
+def _run_tray_mode() -> None:
+    """Windows windowed-mode entry point: Flask runs in a daemon thread,
+    pystray runs the Win32 message loop on the main thread (it requires
+    that — calling Icon.run() from a worker thread silently does nothing)."""
+    global _tray_icon
+    import threading
+    threading.Thread(
+        target=lambda: app.run(host="0.0.0.0", port=PORT, debug=False, use_reloader=False),
+        daemon=True, name="flask-server",
+    ).start()
+    threading.Thread(target=_update_worker_loop, daemon=True, name="update-worker").start()
+    _tray_icon = pystray.Icon(
+        "pc-monitor-agent",
+        _make_tray_image(),
+        f"PC Monitor Agent v{AGENT_VERSION}",
+        _build_tray_menu(),
+    )
+    _tray_icon.run()  # blocks until the user picks Quit
+
+
 if __name__ == "__main__":
+    # Note: stdout/stderr are already redirected to the log file at module
+    # import time (see _redirect_stdio_to_logfile near the top), so prints
+    # below are safe even in PyInstaller windowed mode.
     print(f"PC Agent starting on port {PORT}")
     print(f"API Key: {'set' if API_KEY else 'not set (open access)'}")
     open_firewall_port(PORT)
-    app.run(host="0.0.0.0", port=PORT, debug=False)
+    if TRAY_AVAILABLE:
+        _run_tray_mode()
+    else:
+        # macOS / Linux / dev-from-source-without-pystray: original behavior.
+        app.run(host="0.0.0.0", port=PORT, debug=False)

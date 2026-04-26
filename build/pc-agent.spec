@@ -54,6 +54,17 @@ if sys.platform == "win32":
         "clr",
         "clr_loader",
         "clr_loader.netfx",
+        # System-tray UI: pystray uses Win32 APIs directly (no Tk), Pillow
+        # generates the icon image programmatically. PyInstaller's static
+        # analysis misses pystray's per-platform backend module and a few
+        # PIL helpers, so we list them explicitly to keep the windowed
+        # build's tray menu functional on a clean Windows machine.
+        "pystray",
+        "pystray._win32",
+        "PIL",
+        "PIL.Image",
+        "PIL.ImageDraw",
+        "PIL._tkinter_finder",
     ]
     # Bundle the LibreHardwareMonitor DLLs if vendor/ exists. The CI workflow
     # downloads them; in dev they're optional (the agent silently falls back
@@ -107,11 +118,16 @@ exe = EXE(
     upx=False,
     upx_exclude=[],
     runtime_tmpdir=None,
-    # Console mode: keeps a terminal window open so the user can see startup
-    # logs ("PC Agent starting on port 8765 ...") and any errors. Critical
-    # for a tool whose whole job is to be reachable from the phone — silent
-    # failures are the worst possible outcome.
-    console=True,
+    # Windowed (no console) on Windows: the agent is a background service
+    # whose UI surface is the tray icon, not a CLI tool — having a black
+    # terminal window stay open after the user double-clicks pc-agent.exe
+    # confused users into killing it (closing the window stops the agent).
+    # Startup messages and errors are no longer dropped: pc_agent.py's
+    # _setup_file_logging() redirects stdout/stderr to
+    #   %LOCALAPPDATA%\PCMonitorAgent\agent.log
+    # which the tray's "Show log file" menu item opens. macOS keeps the
+    # console window for now (no tray UI yet on that platform).
+    console=(sys.platform != "win32"),
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
