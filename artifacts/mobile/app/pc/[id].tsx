@@ -1,7 +1,8 @@
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
+import * as Linking from "expo-linking";
 import { router, useLocalSearchParams } from "expo-router";
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   Alert,
   Animated,
@@ -33,6 +34,51 @@ import { BuiltinCardConfig, BuiltinCardKind, CardConfig, CustomCardConfig, useDa
 import { BuiltinCardEdit, CardTitleEditConfig } from "@/components/cards/CardBase";
 import { DraggableFieldList } from "@/components/DraggableFieldList";
 import { usePcs, DEMO_PC_HOST, SensorReading } from "@/context/PcsContext";
+
+// GitHub release endpoint used to detect when a newer pc-agent build is
+// available. Mirrors the URLs used by setup.tsx / AddPcSheet.tsx so users
+// can be sent to the same download flow when an update is found — the
+// OS-specific direct-download URLs trigger an immediate file save instead
+// of dropping the user on the GitHub releases page.
+const LATEST_RELEASE_API_URL =
+  "https://api.github.com/repos/adrianomelnic/pc-monitor-control/releases/latest";
+const RELEASES_BASE =
+  "https://github.com/adrianomelnic/pc-monitor-control/releases/latest/download";
+const WIN_DOWNLOAD_URL = `${RELEASES_BASE}/pc-agent-windows.exe`;
+const MAC_DOWNLOAD_URL = `${RELEASES_BASE}/pc-agent-macos`;
+const RELEASES_PAGE_URL =
+  "https://github.com/adrianomelnic/pc-monitor-control/releases/latest";
+
+// Pick the right direct-download URL based on the OS string the agent
+// reports in /metrics (e.g. "Windows 10", "Darwin 23.5.0"). Falls back to
+// the releases page when we can't tell — better to land somewhere sane
+// than 404 on the wrong asset.
+function pickAgentDownloadUrl(osString: string | undefined): string {
+  const os = (osString ?? "").toLowerCase();
+  if (os.includes("windows")) return WIN_DOWNLOAD_URL;
+  if (os.includes("darwin") || os.includes("mac")) return MAC_DOWNLOAD_URL;
+  return RELEASES_PAGE_URL;
+}
+
+// Compare two semver-ish version strings ("1.2.3" vs "1.10.0"). Returns
+// negative if a < b, positive if a > b, 0 if equal. Falls back to a string
+// compare on non-numeric segments so prerelease tags don't crash the check.
+function compareVersions(a: string, b: string): number {
+  const pa = a.split(".");
+  const pb = b.split(".");
+  const len = Math.max(pa.length, pb.length);
+  for (let i = 0; i < len; i++) {
+    const na = parseInt(pa[i] ?? "0", 10);
+    const nb = parseInt(pb[i] ?? "0", 10);
+    if (Number.isFinite(na) && Number.isFinite(nb) && na !== nb) return na - nb;
+    if (!Number.isFinite(na) || !Number.isFinite(nb)) {
+      const sa = pa[i] ?? "";
+      const sb = pb[i] ?? "";
+      if (sa !== sb) return sa < sb ? -1 : 1;
+    }
+  }
+  return 0;
+}
 
 const CARD_NAMES: Record<string, string> = {
   thermals: "Thermals & Fans",
@@ -166,6 +212,25 @@ export default function PCDetailScreen() {
   const [iconPickerKey, setIconPickerKey] = useState<string | null>(null);
   const [editingFieldLabel, setEditingFieldLabel] = useState<{ kind: BuiltinCardKind; key: string } | null>(null);
   const [fieldLabelDraft, setFieldLabelDraft] = useState("");
+  // Latest agent version published on GitHub. Fetched once per mount; used
+  // only to decide whether to show an "Update available" hint next to the
+  // running agent's version. A failed fetch (offline, GitHub rate limit,
+  // demo mode, etc.) just leaves it null and we silently skip the hint.
+  const [latestAgentVersion, setLatestAgentVersion] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch(LATEST_RELEASE_API_URL, { headers: { Accept: "application/vnd.github+json" } })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (cancelled || !data) return;
+        const tag = typeof data.tag_name === "string" ? data.tag_name : "";
+        const stripped = tag.replace(/^v/, "").trim();
+        if (stripped) setLatestAgentVersion(stripped);
+      })
+      .catch(() => { /* offline or rate-limited — hint just won't show */ });
+    return () => { cancelled = true; };
+  }, []);
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 : insets.bottom;
@@ -995,6 +1060,44 @@ export default function PCDetailScreen() {
             </Text>
           </View>
         </View>
+        {/* Sub-row: agent version + optional update hint. Only shown for
+            real (non-demo) PCs that have reported a version, since the
+            whole point is to help users tell if their pc-agent install is
+            stale vs. the latest GitHub release. */}
+        {!isDemo && pc.agentVersion && (() => {
+          const updateAvailable =
+            !!latestAgentVersion &&
+            compareVersions(pc.agentVersion, latestAgentVersion) < 0;
+          return (
+            <View style={styles.agentVersionRow}>
+              <Text style={styles.agentVersionText}>
+                Agent v{pc.agentVersion}
+              </Text>
+              {updateAvailable && (
+                <Pressable
+                  onPress={() => {
+                    Haptics.selectionAsync();
+                    // Reuse the OS-specific direct-download URLs from
+                    // setup.tsx / AddPcSheet so this matches the rest of
+                    // the app's download flow (immediate file save when
+                    // we know the OS, releases page as a safe fallback).
+                    Linking.openURL(pickAgentDownloadUrl(pc.os)).catch(() => {});
+                  }}
+                  hitSlop={6}
+                  style={({ pressed }) => [
+                    styles.updateHintBtn,
+                    pressed && { opacity: 0.7 },
+                  ]}
+                >
+                  <Feather name="download" size={11} color={C.warning} />
+                  <Text style={[styles.updateHintText, { color: C.warning }]}>
+                    Update to v{latestAgentVersion}
+                  </Text>
+                </Pressable>
+              )}
+            </View>
+          );
+        })()}
         {/* Row 2: action buttons (right-aligned) */}
         {pc.status === "online" ? (
           <View style={styles.headerRow2}>
@@ -1429,6 +1532,35 @@ const createStyles = (t: Theme) => {
   statusText: {
     fontSize: 13,
     fontWeight: "600",
+  },
+  agentVersionRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingLeft: 44, // align under the PC name (past the back-arrow column)
+    gap: 8,
+    flexWrap: "wrap",
+  },
+  agentVersionText: {
+    fontSize: 11,
+    fontWeight: "500",
+    color: C.textMuted,
+    letterSpacing: 0.2,
+  },
+  updateHintBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: 999,
+    backgroundColor: C.warning + "1A",
+    borderWidth: 1,
+    borderColor: C.warning + "55",
+  },
+  updateHintText: {
+    fontSize: 10.5,
+    fontWeight: "700",
+    letterSpacing: 0.2,
   },
   infoCard: {
     backgroundColor: C.card,

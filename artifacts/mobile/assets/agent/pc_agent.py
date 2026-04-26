@@ -28,6 +28,14 @@ IS_MAC = platform.system() == "Darwin"
 # True when running inside a PyInstaller bundle (sys.executable is the .exe).
 IS_FROZEN = getattr(sys, "frozen", False)
 
+# Agent version reported via /version and embedded in /metrics responses so
+# the mobile app can show users which build is running and surface an
+# "update available" hint when a newer GitHub release exists.
+# Bump on every release tag — and the CI build pipeline
+# (.github/workflows/build-agent.yml) rewrites this string at build time to
+# match the pushed git tag, so it can never drift from the published release.
+AGENT_VERSION = "0.1.0"
+
 # ── Auto-elevate to admin on Windows ────────────────────────────────────────
 def _ensure_admin():
     if not IS_WINDOWS:
@@ -695,6 +703,16 @@ def get_network(prev_io, elapsed):
     except Exception:
         return [], {}
 
+@app.route("/version")
+def version():
+    """Return the running agent's version. The mobile app polls /metrics
+    (which already includes agentVersion) for the connected case, but a
+    standalone /version endpoint is handy for quick "what's installed?"
+    checks from a browser without needing the API key to fetch full metrics."""
+    auth = check_key()
+    if auth: return auth
+    return jsonify({"version": AGENT_VERSION})
+
 @app.route("/metrics")
 def metrics():
     global _prev_net_io, _prev_disk_io, _prev_time
@@ -735,6 +753,7 @@ def _collect_metrics():
     return jsonify({
         "os": platform.system() + " " + platform.release(),
         "hostname": socket.gethostname(),
+        "agentVersion": AGENT_VERSION,
         "metrics": {
             "cpuUsage": cpu_info.get("usageTotal", 0),
             "ramUsage": ram_info["used"],

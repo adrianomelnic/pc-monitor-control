@@ -115,6 +115,11 @@ export interface PC {
   status: "online" | "offline" | "connecting";
   metrics?: PCMetrics;
   os?: string;
+  // Version string reported by the running pc-agent (e.g. "0.1.0"). Mobile
+  // shows this on the PC detail header so users can sanity-check that their
+  // PC is on the latest release. Undefined for older agents that pre-date
+  // the /version endpoint.
+  agentVersion?: string;
   lastSeen?: Date;
 }
 
@@ -210,6 +215,7 @@ export function PcsProvider({ children }: { children: React.ReactNode }) {
         status: "online",
         metrics: generateDemoMetrics(),
         os: "Windows 11 Pro",
+        agentVersion: "demo",
         lastSeen: new Date(),
       };
     }
@@ -217,12 +223,19 @@ export function PcsProvider({ children }: { children: React.ReactNode }) {
       const headers: Record<string, string> = {};
       if (pc.apiKey) headers["X-API-Key"] = pc.apiKey;
       const data = await xhrGet(buildUrl(pc, "/metrics"), headers, 12000);
-      return {
+      const updates: Partial<PC> = {
         status: "online",
         metrics: data.metrics,
         os: data.os,
         lastSeen: new Date(),
       };
+      // Older agents (pre-/version) don't include agentVersion in /metrics —
+      // when the field is missing we leave the previous value untouched
+      // rather than spreading `undefined` over it.
+      if (typeof data.agentVersion === "string") {
+        updates.agentVersion = data.agentVersion;
+      }
+      return updates;
     } catch {
       return { status: "offline" };
     }
