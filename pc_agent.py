@@ -28,6 +28,18 @@ IS_MAC = platform.system() == "Darwin"
 # True when running inside a PyInstaller bundle (sys.executable is the .exe).
 IS_FROZEN = getattr(sys, "frozen", False)
 
+# Every subprocess.run / Popen call from a windowed PyInstaller .exe (our
+# Windows release config — see build/pc-agent.spec, console=False) flashes
+# a brief cmd / conhost console window unless we explicitly pass
+# CREATE_NO_WINDOW. Because the agent polls metrics roughly once per second
+# and each metrics handler shells out to nvidia-smi / wmic / etc., the
+# user sees a continuous flicker of black windows on their desktop. This
+# kwarg dict gets splatted into every subprocess call below; on macOS /
+# Linux it's empty so the calls are unchanged. CREATE_NO_WINDOW is a
+# Windows-only flag (0x08000000); we use the literal so this module still
+# imports on non-Windows where subprocess.CREATE_NO_WINDOW doesn't exist.
+_NO_WINDOW_KW = {"creationflags": 0x08000000} if IS_WINDOWS else {}
+
 # Agent version reported via /version and embedded in /metrics responses so
 # the mobile app can show users which build is running and surface an
 # "update available" hint when a newer GitHub release exists.
@@ -132,7 +144,7 @@ def _init_cpu_name():
             r = subprocess.run(
                 ["powershell", "-NoProfile", "-Command",
                  "(Get-CimInstance Win32_Processor).Name"],
-                capture_output=True, text=True, timeout=8)
+                capture_output=True, text=True, timeout=8, **_NO_WINDOW_KW)
             name = r.stdout.strip()
             if name:
                 return name
@@ -141,7 +153,8 @@ def _init_cpu_name():
         # 3) wmic legacy fallback
         try:
             r = subprocess.run(["wmic", "cpu", "get", "name"],
-                               capture_output=True, text=True, timeout=5)
+                               capture_output=True, text=True, timeout=5,
+                               **_NO_WINDOW_KW)
             lines = [l.strip() for l in r.stdout.splitlines()
                      if l.strip() and l.strip().lower() != "name"]
             if lines:
@@ -155,7 +168,7 @@ def _init_gpu_names():
     try:
         r = subprocess.run(
             ["nvidia-smi", "--query-gpu=name", "--format=csv,noheader"],
-            capture_output=True, text=True, timeout=8
+            capture_output=True, text=True, timeout=8, **_NO_WINDOW_KW
         )
         if r.returncode == 0:
             return [l.strip() for l in r.stdout.strip().splitlines() if l.strip()]
@@ -165,7 +178,7 @@ def _init_gpu_names():
         try:
             r = subprocess.run(
                 ["wmic", "path", "win32_videocontroller", "get", "name"],
-                capture_output=True, text=True, timeout=5
+                capture_output=True, text=True, timeout=5, **_NO_WINDOW_KW
             )
             lines = [l.strip() for l in r.stdout.splitlines()
                      if l.strip() and l.strip().lower() != "name"]
@@ -193,7 +206,7 @@ def open_firewall_port(port):
             ["netsh", "advfirewall", "firewall", "add", "rule",
              f"name={rule_name}", "dir=in", "action=allow",
              "protocol=TCP", f"localport={port}"],
-            capture_output=True, check=False
+            capture_output=True, check=False, **_NO_WINDOW_KW
         )
         print(f"Firewall rule added for port {port} (or already exists)")
     except Exception as e:
@@ -620,7 +633,7 @@ def get_gpu_info():
              "--query-gpu=utilization.gpu,memory.used,memory.total,"
              "temperature.gpu,clocks.current.graphics,clocks.current.memory",
              "--format=csv,noheader,nounits"],
-            capture_output=True, text=True, timeout=5
+            capture_output=True, text=True, timeout=5, **_NO_WINDOW_KW
         )
         if r.returncode == 0:
             for i, line in enumerate(r.stdout.strip().splitlines()):
@@ -861,7 +874,7 @@ def command():
 
     if cmd == "shutdown":
         if IS_WINDOWS:
-            subprocess.Popen("shutdown /s /t 5", shell=True)
+            subprocess.Popen("shutdown /s /t 5", shell=True, **_NO_WINDOW_KW)
         elif IS_MAC:
             subprocess.Popen("sudo shutdown -h +0", shell=True)
         else:
@@ -870,14 +883,15 @@ def command():
 
     elif cmd == "restart":
         if IS_WINDOWS:
-            subprocess.Popen("shutdown /r /t 5", shell=True)
+            subprocess.Popen("shutdown /r /t 5", shell=True, **_NO_WINDOW_KW)
         else:
             subprocess.Popen("sudo shutdown -r +0", shell=True)
         return jsonify({"success": True, "output": "Restarting in 5 seconds..."})
 
     elif cmd == "sleep":
         if IS_WINDOWS:
-            subprocess.Popen("rundll32.exe powrprof.dll,SetSuspendState 0,1,0", shell=True)
+            subprocess.Popen("rundll32.exe powrprof.dll,SetSuspendState 0,1,0",
+                             shell=True, **_NO_WINDOW_KW)
         elif IS_MAC:
             subprocess.Popen("pmset sleepnow", shell=True)
         else:
@@ -886,7 +900,8 @@ def command():
 
     elif cmd == "lock":
         if IS_WINDOWS:
-            subprocess.Popen("rundll32.exe user32.dll,LockWorkStation", shell=True)
+            subprocess.Popen("rundll32.exe user32.dll,LockWorkStation",
+                             shell=True, **_NO_WINDOW_KW)
         elif IS_MAC:
             subprocess.Popen("pmset displaysleepnow", shell=True)
         else:
@@ -898,7 +913,7 @@ def command():
         try:
             result = subprocess.run(
                 shell_cmd, capture_output=True, text=True,
-                timeout=30, shell=True
+                timeout=30, shell=True, **_NO_WINDOW_KW
             )
             output = result.stdout or result.stderr or "(no output)"
             return jsonify({"success": result.returncode == 0, "output": output})
