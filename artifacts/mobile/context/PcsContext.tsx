@@ -143,6 +143,71 @@ interface PcsContextType {
 const PcsContext = createContext<PcsContextType>({} as PcsContextType);
 const STORAGE_KEY = "pcs_v1";
 
+// Standard JSON does not allow NaN, Infinity, or -Infinity tokens, but
+// Python's `json.dumps()` (which Flask's `jsonify` uses) emits them by
+// default. The pc-agent's /metrics output can contain these whenever a
+// hardware sensor is unreadable (LibreHardwareMonitor returns float NaN
+// for failed channels). When that happens, JS `JSON.parse` throws — and
+// without this fallback a single broken sensor reading would make the
+// whole PC appear offline. Try a sanitized re-parse before giving up.
+//
+// Walks the response character-by-character so the rewrite is restricted
+// to *value* positions; tokens inside string literals (e.g. a sensor
+// label like "Infinity Fabric Clock") are copied through verbatim. A
+// naive `\b(?:-?Infinity|NaN)\b` regex would corrupt those strings.
+function sanitizeNonFiniteJsonTokens(text: string): string {
+  let out = "";
+  let i = 0;
+  const n = text.length;
+  while (i < n) {
+    const ch = text.charCodeAt(i);
+    // Copy a JSON string literal (including escapes) verbatim.
+    if (ch === 0x22 /* " */) {
+      out += '"';
+      i++;
+      while (i < n) {
+        const cc = text.charCodeAt(i);
+        if (cc === 0x5c /* \ */ && i + 1 < n) {
+          out += text[i] + text[i + 1];
+          i += 2;
+          continue;
+        }
+        out += text[i];
+        i++;
+        if (cc === 0x22 /* " */) break;
+      }
+      continue;
+    }
+    // Outside a string, look for the three non-finite tokens.
+    if (ch === 0x4e /* N */ && text.startsWith("NaN", i)) {
+      out += "null";
+      i += 3;
+      continue;
+    }
+    if (ch === 0x49 /* I */ && text.startsWith("Infinity", i)) {
+      out += "null";
+      i += 8;
+      continue;
+    }
+    if (ch === 0x2d /* - */ && text.startsWith("-Infinity", i)) {
+      out += "null";
+      i += 9;
+      continue;
+    }
+    out += text[i];
+    i++;
+  }
+  return out;
+}
+
+function safeJsonParse(text: string): any {
+  try {
+    return JSON.parse(text);
+  } catch {
+    return JSON.parse(sanitizeNonFiniteJsonTokens(text));
+  }
+}
+
 function xhrGet(url: string, headers: Record<string, string>, timeoutMs: number): Promise<any> {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
@@ -150,7 +215,7 @@ function xhrGet(url: string, headers: Record<string, string>, timeoutMs: number)
     xhr.onload = () => {
       clearTimeout(timer);
       if (xhr.status >= 200 && xhr.status < 300) {
-        try { resolve(JSON.parse(xhr.responseText)); }
+        try { resolve(safeJsonParse(xhr.responseText)); }
         catch { reject(new Error(`Parse error`)); }
       } else {
         reject(new Error(`HTTP ${xhr.status}`));
@@ -205,6 +270,44 @@ export function PcsProvider({ children }: { children: React.ReactNode }) {
     AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
   }, []);
 
+  // Merge a fetchMetrics result into the PC list. Persists only on
+  // *meaningful* transitions — not on every poll — so AsyncStorage
+  // doesn't take a write every 2s per online PC. The triggers:
+  //   - First successful poll for a PC (lastSeen previously undefined).
+  //     Without this, a phone restart wipes lastSeen and the card falls
+  //     back to "Never connected" even though the agent is responding.
+  //   - Status change (e.g. online → offline). Captures the latest
+  //     lastSeen at the moment we lose connectivity, so the offline view
+  //     after app restart shows "Last seen 2:34 PM" rather than the
+  //     timestamp from when the PC was first added hours ago.
+  //   - os or agentVersion changes (rare — Windows version bump, agent
+  //     auto-update, etc.).
+  const applyUpdate = useCallback(
+    (id: string, updates: Partial<PC>) => {
+      setPcs((cur) => {
+        const prev = cur.find((p) => p.id === id);
+        const next = cur.map((p) => (p.id === id ? { ...p, ...updates } : p));
+        if (!prev) return next;
+
+        const firstConnection =
+          prev.lastSeen === undefined && updates.lastSeen !== undefined;
+        const statusChanged =
+          updates.status !== undefined && updates.status !== prev.status;
+        const osChanged =
+          updates.os !== undefined && updates.os !== prev.os;
+        const versionChanged =
+          updates.agentVersion !== undefined &&
+          updates.agentVersion !== prev.agentVersion;
+
+        if (firstConnection || statusChanged || osChanged || versionChanged) {
+          savePcs(next);
+        }
+        return next;
+      });
+    },
+    [savePcs]
+  );
+
   const buildUrl = (pc: PC, path: string) =>
     `http://${pc.host}:${pc.port}${path}`;
 
@@ -236,7 +339,16 @@ export function PcsProvider({ children }: { children: React.ReactNode }) {
         updates.agentVersion = data.agentVersion;
       }
       return updates;
-    } catch {
+    } catch (err) {
+      // Surface the actual reason in dev logs so a "stuck on Offline" report
+      // (network unreachable vs. parse error vs. HTTP 401) is diagnosable
+      // without needing to attach a debugger.
+      if (__DEV__) {
+        console.warn(
+          `[PcsContext] /metrics ${pc.host}:${pc.port} failed:`,
+          err
+        );
+      }
       return { status: "offline" };
     }
   }, []);
@@ -244,28 +356,20 @@ export function PcsProvider({ children }: { children: React.ReactNode }) {
   const pollAll = useCallback(() => {
     setPcs((prev) => {
       prev.forEach((pc) => {
-        fetchMetrics(pc).then((updates) => {
-          setPcs((cur) =>
-            cur.map((p) => (p.id === pc.id ? { ...p, ...updates } : p))
-          );
-        });
+        fetchMetrics(pc).then((updates) => applyUpdate(pc.id, updates));
       });
       return prev;
     });
-  }, [fetchMetrics]);
+  }, [fetchMetrics, applyUpdate]);
 
   const refreshAll = useCallback(async () => {
     setPcs((prev) => {
       prev.forEach((pc) => {
-        fetchMetrics(pc).then((updates) => {
-          setPcs((cur) =>
-            cur.map((p) => (p.id === pc.id ? { ...p, ...updates } : p))
-          );
-        });
+        fetchMetrics(pc).then((updates) => applyUpdate(pc.id, updates));
       });
       return prev.map((p) => ({ ...p, status: "connecting" as const }));
     });
-  }, [fetchMetrics]);
+  }, [fetchMetrics, applyUpdate]);
 
   useEffect(() => {
     if (pcs.length === 0) return;
@@ -286,15 +390,11 @@ export function PcsProvider({ children }: { children: React.ReactNode }) {
       setPcs((prev) => {
         const updated = [...prev, newPc];
         savePcs(updated);
-        fetchMetrics(newPc).then((updates) => {
-          setPcs((cur) =>
-            cur.map((p) => (p.id === newPc.id ? { ...p, ...updates } : p))
-          );
-        });
+        fetchMetrics(newPc).then((updates) => applyUpdate(newPc.id, updates));
         return updated;
       });
     },
-    [savePcs, fetchMetrics]
+    [savePcs, fetchMetrics, applyUpdate]
   );
 
   const removePc = useCallback(
@@ -331,12 +431,10 @@ export function PcsProvider({ children }: { children: React.ReactNode }) {
       };
       const updated = [...prev, demoPc];
       savePcs(updated);
-      fetchMetrics(demoPc).then((upd) => {
-        setPcs((cur) => cur.map((p) => (p.id === DEMO_PC_ID ? { ...p, ...upd } : p)));
-      });
+      fetchMetrics(demoPc).then((upd) => applyUpdate(DEMO_PC_ID, upd));
       return updated;
     });
-  }, [savePcs, fetchMetrics]);
+  }, [savePcs, fetchMetrics, applyUpdate]);
 
   const sendCommand = useCallback(
     async (
@@ -378,9 +476,7 @@ export function PcsProvider({ children }: { children: React.ReactNode }) {
         setPcs((prev) => {
           const pc = prev.find((p) => p.id === id);
           if (!pc) return prev;
-          fetchMetrics(pc).then((updates) => {
-            setPcs((cur) => cur.map((p) => (p.id === id ? { ...p, ...updates } : p)));
-          });
+          fetchMetrics(pc).then((updates) => applyUpdate(id, updates));
           return prev.map((p) => p.id === id ? { ...p, status: "connecting" } : p);
         });
       }, refreshAll, addDemoMode, sendCommand }}

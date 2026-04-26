@@ -18,7 +18,7 @@ Developers can also run from source:
   python -m pip install pythonnet      # Windows only, for the LHM path
   python pc_agent.py                   (auto-elevates to admin on Windows via UAC)
 """
-import os, platform, subprocess, time, socket, re, ctypes, sys
+import os, platform, subprocess, time, socket, re, ctypes, sys, math
 import psutil
 from flask import Flask, jsonify, request
 from flask_cors import CORS
@@ -703,6 +703,29 @@ def get_network(prev_io, elapsed):
     except Exception:
         return [], {}
 
+def _strip_non_finite(obj):
+    """Recursively replace NaN, +Infinity, and -Infinity floats with
+    None so the resulting payload is valid standard JSON.
+
+    Python's ``json.dumps`` (which Flask's ``jsonify`` uses) defaults to
+    ``allow_nan=True`` and emits the bareword tokens ``NaN``/``Infinity``,
+    which JS ``JSON.parse`` rejects. Hardware sensors regularly return
+    NaN for unreadable channels (LibreHardwareMonitor in particular),
+    and ``round(nan, n)`` propagates the NaN. Without this guard a single
+    bad sensor would make the whole ``/metrics`` response unparseable on
+    the phone and every PC would appear offline.
+
+    The mobile app also has a defensive fallback parser, but sanitising
+    here keeps third-party clients (curl, browsers, scripts) honest too.
+    """
+    if isinstance(obj, float):
+        return obj if math.isfinite(obj) else None
+    if isinstance(obj, dict):
+        return {k: _strip_non_finite(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [_strip_non_finite(v) for v in obj]
+    return obj
+
 @app.route("/version")
 def version():
     """Return the running agent's version. The mobile app polls /metrics
@@ -750,7 +773,7 @@ def _collect_metrics():
     net_up = sum(i["speedUp"] for i in network)
     net_down = sum(i["speedDown"] for i in network)
 
-    return jsonify({
+    return jsonify(_strip_non_finite({
         "os": platform.system() + " " + platform.release(),
         "hostname": socket.gethostname(),
         "agentVersion": AGENT_VERSION,
@@ -773,7 +796,7 @@ def _collect_metrics():
             "network": network,
             "sensors": sensor_data.get("sensors", []) if sensor_data else [],
         }
-    })
+    }))
 
 @app.route("/command", methods=["POST"])
 def command():
