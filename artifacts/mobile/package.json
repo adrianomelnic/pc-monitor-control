@@ -4,6 +4,9 @@
   "private": true,
   "main": "expo-router/entry",
   "scripts": {
+    "sync-agent": "node -e \"const fs=require('fs'),p=require('path');const src=p.resolve('../../pc_agent.py'),dst=p.resolve('assets/agent/pc_agent.py');if(!fs.existsSync(src)){console.error('repo-root pc_agent.py not found at',src);process.exit(1);}fs.mkdirSync(p.dirname(dst),{recursive:true});fs.copyFileSync(src,dst);console.log('synced',src,'->',dst);\"",
+    "predev": "pnpm run sync-agent",
+    "prebuild": "pnpm run sync-agent",
     "dev": "EXPO_OFFLINE=1 EXPO_NO_TELEMETRY=1 EXPO_PACKAGER_PROXY_URL=https://$REPLIT_EXPO_DEV_DOMAIN EXPO_PUBLIC_DOMAIN=$REPLIT_DEV_DOMAIN EXPO_PUBLIC_REPL_ID=$REPL_ID REACT_NATIVE_PACKAGER_HOSTNAME=$REPLIT_DEV_DOMAIN pnpm exec expo start --localhost --port $PORT",
     "build": "node scripts/build.js",
     "serve": "node server/serve.js",
@@ -57,8 +60,12 @@
     "zod-validation-error": "^3.4.0"
   },
   "dependencies": {
+    "expo-asset": "^12.0.12",
     "expo-clipboard": "^8.0.8",
+    "expo-file-system": "^19.0.21",
+    "expo-sharing": "^14.0.8",
     "expo-updates": "~29.0.16",
-    "react-native-draggable-flatlist": "^4.0.3"
+    "react-native-draggable-flatlist": "^4.0.3",
+    "react-native-qrcode-svg": "^6.3.21"
   }
 }

@@ -726,7 +726,7 @@ export default function PCDetailScreen() {
               }}
               hitSlop={6}
             >
-              <Feather name="x" size={16} color="#fff" />
+              <Feather name="x" size={16} color={C.dangerForeground} />
             </Pressable>
           </>
         )}
@@ -935,8 +935,6 @@ export default function PCDetailScreen() {
         content = m.fans != null ? (
           <FansCard
             fans={m.fans}
-            baseUrl={`http://${safePc.host}:${safePc.port}`}
-            apiKey={safePc.apiKey}
             titleEdit={titleEdit}
             cardEdit={cardEdit}
           />
@@ -1271,7 +1269,7 @@ export default function PCDetailScreen() {
       {/* ── Extra Sensor Picker for built-in cards ── */}
       <CompactSensorPicker
         visible={extraSensorPickerFor != null}
-        title={replacingBuiltinField ? "Replace Field Sensor" : replacingExtraFor ? "Replace Sensor" : "Add HWiNFO64 Sensor"}
+        title={replacingBuiltinField ? "Replace Field Sensor" : replacingExtraFor ? "Replace Sensor" : "Add Sensor"}
         accentColor={extraSensorPickerFor ? (CARD_ACCENTS[extraSensorPickerFor as keyof typeof CARD_ACCENTS] ?? C.tint) : C.tint}
         sensors={allSensors}
         excludeLabels={
@@ -1633,7 +1631,7 @@ const createStyles = (t: Theme) => {
   retryBtnText: {
     fontSize: 14,
     fontWeight: "700",
-    color: "#fff",
+    color: C.tintForeground,
   },
   terminalInput: {
     flexDirection: "row",

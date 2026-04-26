@@ -179,19 +179,19 @@ const createStyles = (t: Theme) => {
     },
     bigNum: {
       fontSize: 32,
-      fontWeight: "800",
+      fontFamily: "Inter_700Bold",
       letterSpacing: -1.5,
       fontVariant,
       lineHeight: 36,
     },
     bigUnit: {
       fontSize: 16,
-      fontWeight: "600",
+      fontFamily: "Inter_600SemiBold",
     },
     bigLabel: {
       fontSize: 9,
       color: C.textMuted,
-      fontWeight: "700",
+      fontFamily: "Inter_700Bold",
       marginTop: 2,
       letterSpacing: t.sectionLabelLetterSpacing,
     },
@@ -204,7 +204,7 @@ const createStyles = (t: Theme) => {
     },
     sectionLabel: {
       fontSize: 9,
-      fontWeight: "700",
+      fontFamily: "Inter_600SemiBold",
       color: C.textMuted,
       letterSpacing: t.sectionLabelLetterSpacing,
     },
@@ -224,12 +224,12 @@ const createStyles = (t: Theme) => {
     coreLabel: {
       fontSize: 9,
       color: C.textMuted,
-      fontWeight: "700",
+      fontFamily: "Inter_700Bold",
       letterSpacing: 0.5,
     },
     corePct: {
       fontSize: 10,
-      fontWeight: "800",
+      fontFamily: "Inter_700Bold",
       fontVariant,
     },
     verticalChartRow: {
@@ -257,7 +257,7 @@ const createStyles = (t: Theme) => {
     verticalBarNum: {
       fontSize: 8,
       color: C.textMuted,
-      fontWeight: "700",
+      fontFamily: "Inter_700Bold",
     },
     cpuBarHeader: {
       flexDirection: "row",
@@ -266,7 +266,7 @@ const createStyles = (t: Theme) => {
     },
     cpuBarPct: {
       fontSize: 11,
-      fontWeight: "800",
+      fontFamily: "Inter_700Bold",
       fontVariant,
     },
   });

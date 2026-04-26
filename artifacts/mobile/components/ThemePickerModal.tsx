@@ -1,7 +1,8 @@
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import {
+  Alert,
   Modal,
   Pressable,
   ScrollView,
@@ -20,6 +21,7 @@ import {
   supportsLight,
 } from "@/constants/themes";
 import { useTheme } from "@/context/ThemeContext";
+import { CreateThemeModal } from "@/components/CreateThemeModal";
 
 interface Props {
   visible: boolean;
@@ -27,9 +29,10 @@ interface Props {
 }
 
 export function ThemePickerModal({ visible, onClose }: Props) {
-  const { theme, themeId, mode, setThemeId, setMode } = useTheme();
+  const { theme, themeId, mode, setThemeId, setMode, customThemes, deleteCustomTheme } = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const C = theme.colors;
+  const [createVisible, setCreateVisible] = useState(false);
 
   const renderMiniPreview = (id: ThemeId, m: ResolvedMode) => {
     const preview = resolveTheme(id, m);
@@ -63,6 +66,27 @@ export function ThemePickerModal({ visible, onClose }: Props) {
               { backgroundColor: pc.tint + "55", width: 22 },
             ]}
           />
+        </View>
+      </View>
+    );
+  };
+
+  const renderCustomMiniPreview = (tint: string) => {
+    return (
+      <View
+        style={[
+          styles.themePreview,
+          { backgroundColor: "#0A0A0A", borderColor: "#252525", flex: 1 },
+        ]}
+      >
+        <View
+          style={[
+            styles.themePreviewCard,
+            { backgroundColor: "#141414", borderColor: "#252525", borderLeftWidth: 2, borderLeftColor: tint },
+          ]}
+        >
+          <View style={[styles.themePreviewBar, { backgroundColor: tint, width: 14 }]} />
+          <View style={[styles.themePreviewBar, { backgroundColor: tint + "55", width: 22 }]} />
         </View>
       </View>
     );
@@ -124,13 +148,82 @@ export function ThemePickerModal({ visible, onClose }: Props) {
     );
   };
 
+  const renderCustomTile = (def: { id: string; label: string; tint: string; createdAt: number }) => {
+    const selected = themeId === def.id;
+    return (
+      <Pressable
+        key={def.id}
+        onPress={() => {
+          if (themeId !== def.id) {
+            Haptics.selectionAsync();
+            setThemeId(def.id);
+          }
+        }}
+        style={({ pressed }) => [
+          styles.themeTile,
+          {
+            borderColor: selected ? def.tint : C.cardBorder,
+            backgroundColor: selected ? def.tint + "12" : C.backgroundTertiary,
+          },
+          pressed && { opacity: 0.85 },
+        ]}
+      >
+        <View style={styles.themePreviewRow}>
+          {renderCustomMiniPreview(def.tint)}
+        </View>
+        <View style={styles.themeTileInfo}>
+          <View style={styles.themeTileLabelRow}>
+            <Text
+              style={[styles.themeTileLabel, { color: selected ? def.tint : C.text }]}
+              numberOfLines={1}
+            >
+              {def.label}
+            </Text>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+              {selected ? <Feather name="check-circle" size={14} color={def.tint} /> : null}
+              <Pressable
+                onPress={() => {
+                  Alert.alert(
+                    "Delete theme",
+                    `Delete "${def.label}"? This cannot be undone.`,
+                    [
+                      { text: "Cancel", style: "cancel" },
+                      {
+                        text: "Delete",
+                        style: "destructive",
+                        onPress: () => {
+                          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+                          deleteCustomTheme(def.id);
+                        },
+                      },
+                    ]
+                  );
+                }}
+                hitSlop={8}
+              >
+                <Feather name="trash-2" size={13} color={C.textMuted} />
+              </Pressable>
+            </View>
+          </View>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 5, marginTop: 2 }}>
+            <View style={[styles.customTintDot, { backgroundColor: def.tint }]} />
+            <Text style={styles.themeTileSub} numberOfLines={1}>
+              {def.tint.toUpperCase()} · Dark only
+            </Text>
+          </View>
+        </View>
+      </Pressable>
+    );
+  };
+
   const renderModeButton = (
     m: ThemeMode,
     label: string,
     iconName: keyof typeof Feather.glyphMap,
   ) => {
     const selected = mode === m;
-    const activeThemeHasLight = supportsLight(themeId);
+    const isCustomActive = !Object.keys(THEME_DEFS).includes(themeId);
+    const activeThemeHasLight = isCustomActive ? false : supportsLight(themeId as ThemeId);
     const disabled = m === "light" && !activeThemeHasLight;
 
     return (
@@ -170,60 +263,96 @@ export function ThemePickerModal({ visible, onClose }: Props) {
     );
   };
 
+  const isCustomActive = !Object.keys(THEME_DEFS).includes(themeId);
+
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="fade"
-      onRequestClose={onClose}
-      statusBarTranslucent
-    >
-      <Pressable style={styles.backdrop} onPress={onClose}>
-        <Pressable style={styles.sheet} onPress={() => {}}>
-          <View style={styles.header}>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.title}>Appearance</Text>
-              <Text style={styles.subtitle}>
-                Choose a theme and preferred mode. Changes apply instantly.
-              </Text>
+    <>
+      <Modal
+        visible={visible && !createVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={onClose}
+        statusBarTranslucent
+      >
+        <Pressable style={styles.backdrop} onPress={onClose}>
+          <Pressable style={styles.sheet} onPress={() => {}}>
+            <View style={styles.header}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.title}>Appearance</Text>
+                <Text style={styles.subtitle}>
+                  Choose a theme and preferred mode. Changes apply instantly.
+                </Text>
+              </View>
+              <Pressable
+                onPress={onClose}
+                hitSlop={10}
+                style={({ pressed }) => [
+                  styles.closeBtn,
+                  pressed && { opacity: 0.7 },
+                ]}
+              >
+                <Feather name="x" size={18} color={C.textSecondary} />
+              </Pressable>
             </View>
-            <Pressable
-              onPress={onClose}
-              hitSlop={10}
-              style={({ pressed }) => [
-                styles.closeBtn,
-                pressed && { opacity: 0.7 },
-              ]}
+
+            <ScrollView
+              style={styles.body}
+              contentContainerStyle={styles.bodyContent}
+              showsVerticalScrollIndicator={false}
             >
-              <Feather name="x" size={18} color={C.textSecondary} />
-            </Pressable>
-          </View>
+              <Text style={styles.groupLabel}>Theme</Text>
+              <View style={styles.grid}>
+                {THEME_ORDER.map((id) => renderThemeTile(id))}
+              </View>
 
-          <ScrollView
-            style={styles.body}
-            contentContainerStyle={styles.bodyContent}
-            showsVerticalScrollIndicator={false}
-          >
-            <Text style={styles.groupLabel}>Theme</Text>
-            <View style={styles.grid}>
-              {THEME_ORDER.map((id) => renderThemeTile(id))}
-            </View>
+              {customThemes.length > 0 && (
+                <>
+                  <Text style={styles.groupLabel}>Custom</Text>
+                  <View style={styles.grid}>
+                    {customThemes.map((def) => renderCustomTile(def))}
+                  </View>
+                </>
+              )}
 
-            <Text style={styles.groupLabel}>Mode</Text>
-            <View style={styles.modeRow}>
-              {renderModeButton("light", "Light", "sun")}
-              {renderModeButton("dark", "Dark", "moon")}
-              {renderModeButton("auto", "Auto", "smartphone")}
-            </View>
-            {!supportsLight(themeId) ? (
-              <Text style={styles.modeHint}>
-                {THEME_DEFS[themeId].label} is a dark-only theme.
-              </Text>
-            ) : null}
-          </ScrollView>
+              <Pressable
+                onPress={() => setCreateVisible(true)}
+                style={({ pressed }) => [
+                  styles.createBtn,
+                  { borderColor: C.tint + "55", backgroundColor: C.tint + "0A" },
+                  pressed && { opacity: 0.8 },
+                ]}
+              >
+                <Feather name="plus" size={15} color={C.tint} />
+                <Text style={[styles.createBtnText, { color: C.tint }]}>
+                  Create theme
+                </Text>
+              </Pressable>
+
+              <Text style={[styles.groupLabel, { marginTop: 16 }]}>Mode</Text>
+              <View style={styles.modeRow}>
+                {renderModeButton("light", "Light", "sun")}
+                {renderModeButton("dark", "Dark", "moon")}
+                {renderModeButton("auto", "Auto", "smartphone")}
+              </View>
+              {!isCustomActive && !supportsLight(themeId as ThemeId) ? (
+                <Text style={styles.modeHint}>
+                  {THEME_DEFS[themeId as ThemeId].label} is a dark-only theme.
+                </Text>
+              ) : isCustomActive ? (
+                <Text style={styles.modeHint}>
+                  Custom themes are dark only.
+                </Text>
+              ) : null}
+            </ScrollView>
+          </Pressable>
         </Pressable>
-      </Pressable>
-    </Modal>
+      </Modal>
+
+      <CreateThemeModal
+        visible={createVisible}
+        onClose={() => setCreateVisible(false)}
+      />
+    </>
   );
 }
 
@@ -256,12 +385,14 @@ const createStyles = (theme: Theme) => {
       gap: 12,
     },
     title: {
-      fontSize: 17,
-      fontWeight: "700",
+      fontSize: 15,
+      fontFamily: "Inter_600SemiBold",
       color: C.text,
+      letterSpacing: 0.3,
     },
     subtitle: {
       fontSize: 12,
+      fontFamily: "Inter_400Regular",
       color: C.textSecondary,
       marginTop: 4,
     },
@@ -281,10 +412,10 @@ const createStyles = (theme: Theme) => {
     },
     groupLabel: {
       fontSize: 11,
-      fontWeight: "700",
+      fontFamily: "Inter_600SemiBold",
       color: C.textMuted,
-      letterSpacing: theme.titleCase === "upper" ? 1.2 : 0.4,
-      textTransform: theme.titleCase === "upper" ? "uppercase" : "none",
+      letterSpacing: 2,
+      textTransform: "uppercase",
       marginBottom: 8,
       marginTop: 4,
     },
@@ -336,11 +467,12 @@ const createStyles = (theme: Theme) => {
     },
     themeTileLabel: {
       fontSize: 13,
-      fontWeight: "700",
+      fontFamily: "Inter_700Bold",
       flexShrink: 1,
     },
     themeTileSub: {
       fontSize: 10,
+      fontFamily: "Inter_400Regular",
       color: C.textSecondary,
     },
     themeTileBadge: {
@@ -351,8 +483,29 @@ const createStyles = (theme: Theme) => {
     },
     themeTileBadgeText: {
       fontSize: 9,
+      fontFamily: "Inter_600SemiBold",
       color: C.textSecondary,
-      fontWeight: "600",
+      letterSpacing: 0.3,
+    },
+    customTintDot: {
+      width: 8,
+      height: 8,
+      borderRadius: 4,
+    },
+    createBtn: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 8,
+      borderWidth: 1,
+      borderStyle: "dashed",
+      borderRadius: theme.buttonRadius,
+      paddingVertical: 11,
+      marginBottom: 4,
+    },
+    createBtnText: {
+      fontSize: 13,
+      fontFamily: "Inter_600SemiBold",
       letterSpacing: 0.3,
     },
     modeRow: {
@@ -371,8 +524,8 @@ const createStyles = (theme: Theme) => {
     },
     modeButtonText: {
       fontSize: 12,
-      fontWeight: "700",
-      letterSpacing: theme.titleCase === "upper" ? 0.5 : 0,
+      fontFamily: "Inter_600SemiBold",
+      letterSpacing: 0.5,
     },
     modeHint: {
       fontSize: 11,

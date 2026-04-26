@@ -13,7 +13,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ACCENT_COLORS, CustomCardLayout } from "@/context/DashboardContext";
 import { SensorReading } from "@/context/PcsContext";
-import { Theme, tabularNumsVariant, accentEdgeStyle } from "@/constants/themes";
+import { Theme, tabularNumsVariant, accentEdgeStyle, contrastForeground } from "@/constants/themes";
 import { useTheme } from "@/context/ThemeContext";
 
 // ─── Icon picker options ──────────────────────────────────────────────────────
@@ -307,9 +307,9 @@ export function SensorPickerModal({
             {sensors.length === 0 ? (
               <View style={styles.emptyBox}>
                 <Feather name="alert-circle" size={28} color={C.textMuted} />
-                <Text style={styles.emptyTitle}>No HWiNFO64 Data</Text>
+                <Text style={styles.emptyTitle}>No sensors detected</Text>
                 <Text style={styles.emptyDesc}>
-                  Make sure HWiNFO64 is running with shared memory enabled on this PC.
+                  The agent could not read any hardware sensors on this PC. Check the agent's terminal window for an initialization error.
                 </Text>
               </View>
             ) : grouped.length === 0 ? (
@@ -330,8 +330,8 @@ export function SensorPickerModal({
                         onPress={() => toggleGroup(comp, items)}
                         hitSlop={6}
                       >
-                        {allSelected && <Feather name="check" size={11} color="#fff" />}
-                        {someSelected && <View style={styles.groupCheckDash} />}
+                        {allSelected && <Feather name="check" size={11} color={contrastForeground(accentColor)} />}
+                        {someSelected && <View style={[styles.groupCheckDash, { backgroundColor: contrastForeground(accentColor) }]} />}
                       </Pressable>
 
                       <Pressable style={styles.groupHeaderLabel} onPress={() => toggleCollapse(comp)}>
@@ -361,7 +361,7 @@ export function SensorPickerModal({
                           activeOpacity={0.7}
                         >
                           <View style={[styles.checkbox, isSelected && { backgroundColor: accentColor, borderColor: accentColor }]}>
-                            {isSelected && <Feather name="check" size={11} color="#fff" />}
+                            {isSelected && <Feather name="check" size={11} color={contrastForeground(accentColor)} />}
                           </View>
 
                           <View style={[styles.typeBadge, { backgroundColor: badge.color + "20" }]}>
@@ -482,7 +482,7 @@ const createStyles = (t: Theme) => {
       justifyContent: "center",
       flexShrink: 0,
     },
-    groupCheckDash: { width: 10, height: 2, backgroundColor: "#fff", borderRadius: 1 },
+    groupCheckDash: { width: 10, height: 2, borderRadius: 1 },
     groupName: { flex: 1, fontSize: 12, fontWeight: "700", color: C.text, lineHeight: 16 },
     groupCount: { fontSize: 11, color: C.textMuted, fontWeight: "600", fontVariant },
     sensorRow: {

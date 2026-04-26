@@ -241,7 +241,7 @@ const createStyles = (t: Theme) => {
     tileIcon: { marginBottom: 5, opacity: 0.5 },
     tileLabel: {
       fontSize: 8,
-      fontWeight: "700",
+      fontFamily: "Inter_600SemiBold",
       color: C.textMuted,
       letterSpacing: t.sectionLabelLetterSpacing,
       marginBottom: 3,
@@ -249,14 +249,14 @@ const createStyles = (t: Theme) => {
     },
     tileValue: {
       fontSize: 22,
-      fontWeight: "800",
+      fontFamily: "Inter_700Bold",
       textAlign: "center",
       lineHeight: 26,
       fontVariant,
     },
     tileUnit: {
       fontSize: 8,
-      fontWeight: "700",
+      fontFamily: "Inter_600SemiBold",
       letterSpacing: t.sectionLabelLetterSpacing,
       marginTop: 1,
       opacity: 0.7,

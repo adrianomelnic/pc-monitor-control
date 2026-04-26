@@ -9,13 +9,13 @@ import React, {
 } from "react";
 import { DEMO_PC_HOST, DEMO_PC_ID, DEMO_PC_META, generateDemoMetrics } from "@/lib/demoData";
 
-// ─── Sensor reading from HWiNFO64 (all types) ─────────────────────────────────
+// ─── Sensor reading from the PC agent (LibreHardwareMonitor or HWiNFO64) ──────
 export interface SensorReading {
   label: string;
   value: number;
   unit: string;
   type: 'temperature' | 'voltage' | 'fan' | 'current' | 'power' | 'clock' | 'usage' | 'other';
-  component?: string; // hardware component name from HWiNFO64 (e.g. "CPU [#0]", "GPU [#0]")
+  component?: string; // hardware component name (e.g. "CPU", "GPU [#0]")
 }
 
 // ─── Detailed component types ─────────────────────────────────────────────────
@@ -102,7 +102,7 @@ export interface PCMetrics {
   fans?: FanInfo[];
   disks?: DiskInfo[];
   network?: NetworkInterface[];
-  // All HWiNFO64 readings (for custom sensor cards)
+  // All sensor readings the agent could enumerate (for custom sensor cards)
   sensors?: SensorReading[];
 }
 
