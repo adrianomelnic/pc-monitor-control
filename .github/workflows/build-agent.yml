@@ -41,6 +41,33 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Stamp release tag into AGENT_VERSION
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: bash
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        # Rewrite the AGENT_VERSION constant in pc_agent.py to match the git
+        # tag that triggered this build (stripping the leading 'v'). This way
+        # the version the agent reports at runtime can never drift from the
+        # version of the GitHub Release the user downloaded.
+        # Runs after setup-python so we use the explicitly-pinned interpreter.
+        run: |
+          python - <<'PY'
+          import os, re, pathlib, sys
+          tag = os.environ["RELEASE_TAG"].lstrip("v")
+          p = pathlib.Path("pc_agent.py")
+          src = p.read_text()
+          new, n = re.subn(
+              r'^AGENT_VERSION\s*=\s*"[^"]*"',
+              f'AGENT_VERSION = "{tag}"',
+              src, count=1, flags=re.M,
+          )
+          if n != 1:
+              sys.exit("ERROR: could not find AGENT_VERSION line in pc_agent.py")
+          p.write_text(new)
+          print(f"Stamped AGENT_VERSION = {tag}")
+          PY
+
       - name: Install build dependencies
         shell: bash
         run: |
@@ -54,6 +81,17 @@ jobs:
         # LibreHardwareMonitorLib.dll. Only meaningful on Windows.
         run: |
           python -m pip install "pythonnet>=3.0.3"
+
+      - name: Install tray UI deps (Windows only)
+        if: runner.os == 'Windows'
+        shell: bash
+        # pystray drives the system-tray icon (Win32 backend, no Tk needed)
+        # and Pillow generates the icon image programmatically at runtime.
+        # The .exe is built with console=False so the tray menu is the
+        # user-facing surface — these packages must be present at build time
+        # so PyInstaller bundles them.
+        run: |
+          python -m pip install "pystray>=0.19" "Pillow>=10.0"
 
       - name: Download LibreHardwareMonitorLib (Windows only)
         if: runner.os == 'Windows'
@@ -72,8 +110,15 @@ jobs:
           cp lhm-extracted/HidSharp.dll vendor/
           ls -la vendor/
 
+      - name: Verify tray deps are importable (Windows only)
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          python -c "import pystray; from PIL import Image, ImageDraw; print('pystray', pystray.__version__, '+ Pillow OK')"
+
       - name: Build with PyInstaller
-        run: pyinstaller build/pc-agent.spec --clean --noconfirm
+        shell: bash
+        run: python -m PyInstaller build/pc-agent.spec --clean --noconfirm
 
       - name: Rename artifact for release
         shell: bash
