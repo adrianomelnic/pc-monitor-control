@@ -1125,14 +1125,16 @@ TRAY_AVAILABLE = False
 if IS_WINDOWS:
     try:
         import pystray
+        import pystray._base   # force PyInstaller to bundle the base class
+        import pystray._win32  # force-bundle the Win32 backend
         from PIL import Image, ImageDraw
         import winreg
         TRAY_AVAILABLE = True
-    except ImportError as _tray_imp_err:
+    except Exception as _tray_imp_err:
         # pystray / Pillow may be missing in dev runs from source. The agent
         # still works — just without the tray UI. The PyInstaller build always
         # bundles them, so end-user .exe installs always get the tray.
-        print(f"tray UI disabled (missing dependency: {_tray_imp_err}); "
+        print(f"tray UI disabled ({type(_tray_imp_err).__name__}: {_tray_imp_err}); "
               f"falling back to console mode")
 
 UPDATE_REPO          = "adrianomelnic/pc-monitor-control"
