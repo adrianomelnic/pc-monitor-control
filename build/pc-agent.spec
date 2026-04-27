@@ -59,11 +59,20 @@ if sys.platform == "win32":
         # analysis misses pystray's per-platform backend module and a few
         # PIL helpers, so we list them explicitly to keep the windowed
         # build's tray menu functional on a clean Windows machine.
+        # NOTE: pystray._base MUST be listed — it is the abstract base class
+        # that _win32.py inherits from and imports explicitly, but PyInstaller
+        # never sees it because _win32 does `from ._base import ...` which
+        # fools the static analyser into thinking _base is already bundled.
         "pystray",
+        "pystray._base",
         "pystray._win32",
+        "pystray._util",
         "PIL",
         "PIL.Image",
         "PIL.ImageDraw",
+        "PIL.ImageColor",
+        "PIL.PngImagePlugin",
+        "PIL._imaging",
         "PIL._tkinter_finder",
     ]
     # Bundle the LibreHardwareMonitor DLLs if vendor/ exists. The CI workflow
