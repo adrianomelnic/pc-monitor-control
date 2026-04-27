@@ -19,6 +19,7 @@
 
 import sys
 from pathlib import Path
+from PyInstaller.utils.hooks import collect_submodules, collect_data_files
 
 # pc_agent.py lives at the repo root. The spec file is run from the repo root
 # (CI does `pyinstaller build/pc-agent.spec`), so `Path.cwd()` is the repo root.
@@ -55,19 +56,13 @@ if sys.platform == "win32":
         "clr_loader",
         "clr_loader.netfx",
         # System-tray UI: pystray uses Win32 APIs directly (no Tk), Pillow
-        # generates the icon image programmatically. PyInstaller's static
-        # analysis misses pystray's per-platform backend module and a few
-        # PIL helpers, so we list them explicitly to keep the windowed
-        # build's tray menu functional on a clean Windows machine.
-        # Keep this list minimal — v0.2.1 used exactly these and the tray
-        # worked; adding extra entries (._base, ._util, PIL._imaging, etc.)
-        # caused PyInstaller to produce a bundle where pystray was missing.
-        "pystray",
-        "pystray._win32",
+        # generates the icon image programmatically.  We use collect_submodules
+        # (evaluated at PyInstaller analysis time against the installed package)
+        # so every pystray submodule is bundled regardless of version layout.
+        *collect_submodules("pystray"),
         "PIL",
         "PIL.Image",
         "PIL.ImageDraw",
-        "PIL._tkinter_finder",
     ]
     # Bundle the LibreHardwareMonitor DLLs if vendor/ exists. The CI workflow
     # downloads them; in dev they're optional (the agent silently falls back
