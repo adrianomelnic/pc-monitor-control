@@ -1154,6 +1154,11 @@ _tray_icon = None                # type: ignore[var-annotated]
 _update_status: str = "Checking for updates..."
 _update_available_version: "str | None" = None  # parsed tag, e.g. "0.2.0"
 _update_in_progress: bool = False
+# Set to True only inside the explicit "Quit" menu callback so _run_tray_mode
+# can distinguish "user intentionally quit" from "pystray silently returned
+# without ever showing the icon" (the latter has no exception but should keep
+# Flask alive).
+_quit_requested: bool = False
 
 def _version_tuple(v: str):
     """Loose semver parse: ('1', '2', '3-rc1') -> (1, 2, 3). Used only for
@@ -1355,6 +1360,16 @@ def _make_tray_image() -> "Image.Image":
     d.rectangle((22, 36, 42, 42), fill=(0, 230, 118, 255))
     return img
 
+def _on_quit_clicked(icon=None, _item=None) -> None:
+    """Explicit quit from the tray menu.  Sets the flag BEFORE stopping the
+    icon so _run_tray_mode can distinguish an intentional quit (process should
+    exit) from a silent early return of icon.run() (we should stay alive and
+    keep Flask running)."""
+    global _quit_requested
+    _quit_requested = True
+    if icon is not None:
+        icon.stop()
+
 def _build_tray_menu():
     """The menu is rebuilt by pystray on every right-click, so callable
     text/checked= produces a live status display without us having to
@@ -1379,7 +1394,7 @@ def _build_tray_menu():
         pystray.MenuItem("Show log file", _open_log,
                          enabled=lambda _: bool(_log_path)),
         pystray.Menu.SEPARATOR,
-        pystray.MenuItem("Quit", lambda icon, _: icon.stop()),
+        pystray.MenuItem("Quit", _on_quit_clicked),
     )
 
 def _run_tray_mode() -> bool:
@@ -1410,10 +1425,19 @@ def _run_tray_mode() -> bool:
             f"PC Monitor Agent v{AGENT_VERSION}",
             _build_tray_menu(),
         )
-        _tray_icon.run()  # blocks until the user picks Quit
-        return True
+        _tray_icon.run()  # blocks until icon.stop() is called
+        # run() returned — was it an explicit Quit or a silent early return?
+        if _quit_requested:
+            print("User clicked Quit from tray menu — exiting.")
+            return True   # caller should let the process exit
+        # pystray returned without exception but without an explicit Quit
+        # (e.g. Win32 message loop failed to create a window). Fall through
+        # to headless mode.
+        print("pystray.run() returned unexpectedly (no icon shown?); "
+              "keeping Flask alive in headless mode")
+        return False
     except Exception as e:
-        print(f"pystray tray failed to start ({type(e).__name__}: {e}); "
+        print(f"pystray tray failed ({type(e).__name__}: {e}); "
               f"agent will keep running without a tray icon")
         return False
 
