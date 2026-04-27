@@ -114,7 +114,7 @@ jobs:
         if: runner.os == 'Windows'
         shell: bash
         run: |
-          python -c "import pystray; from PIL import Image, ImageDraw; print('pystray', pystray.__version__, '+ Pillow OK')"
+          python -c "import pystray, PIL.Image, PIL.ImageDraw; print('pystray + Pillow OK')"
 
       - name: Build with PyInstaller
         shell: bash
