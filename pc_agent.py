@@ -1382,24 +1382,40 @@ def _build_tray_menu():
         pystray.MenuItem("Quit", lambda icon, _: icon.stop()),
     )
 
-def _run_tray_mode() -> None:
+def _run_tray_mode() -> bool:
     """Windows windowed-mode entry point: Flask runs in a daemon thread,
     pystray runs the Win32 message loop on the main thread (it requires
-    that — calling Icon.run() from a worker thread silently does nothing)."""
+    that — calling Icon.run() from a worker thread silently does nothing).
+
+    Returns True if the tray ran and exited normally (user clicked Quit),
+    False if pystray failed to initialise so the caller can fall back to
+    blocking app.run() instead.  Flask is started as a daemon thread first
+    so the HTTP server is always up regardless of tray outcome."""
     global _tray_icon
     import threading
-    threading.Thread(
+
+    # Start Flask in the background FIRST so the HTTP server is reachable
+    # even if the tray initialisation subsequently fails.
+    flask_thread = threading.Thread(
         target=lambda: app.run(host="0.0.0.0", port=PORT, debug=False, use_reloader=False),
         daemon=True, name="flask-server",
-    ).start()
-    threading.Thread(target=_update_worker_loop, daemon=True, name="update-worker").start()
-    _tray_icon = pystray.Icon(
-        "pc-monitor-agent",
-        _make_tray_image(),
-        f"PC Monitor Agent v{AGENT_VERSION}",
-        _build_tray_menu(),
     )
-    _tray_icon.run()  # blocks until the user picks Quit
+    flask_thread.start()
+    threading.Thread(target=_update_worker_loop, daemon=True, name="update-worker").start()
+
+    try:
+        _tray_icon = pystray.Icon(
+            "pc-monitor-agent",
+            _make_tray_image(),
+            f"PC Monitor Agent v{AGENT_VERSION}",
+            _build_tray_menu(),
+        )
+        _tray_icon.run()  # blocks until the user picks Quit
+        return True
+    except Exception as e:
+        print(f"pystray tray failed to start ({type(e).__name__}: {e}); "
+              f"agent will keep running without a tray icon")
+        return False
 
 
 if __name__ == "__main__":
@@ -1408,9 +1424,18 @@ if __name__ == "__main__":
     # below are safe even in PyInstaller windowed mode.
     print(f"PC Agent starting on port {PORT}")
     print(f"API Key: {'set' if API_KEY else 'not set (open access)'}")
+    print(f"TRAY_AVAILABLE={TRAY_AVAILABLE}")
     open_firewall_port(PORT)
     if TRAY_AVAILABLE:
-        _run_tray_mode()
+        tray_ok = _run_tray_mode()
+        if not tray_ok:
+            # Tray failed but Flask daemon is already running in the
+            # background (started inside _run_tray_mode before the tray
+            # attempt).  Block the main thread so the process doesn't exit
+            # and take down those daemon threads with it.
+            print("Tray unavailable — agent running headless, HTTP only.")
+            import threading
+            threading.Event().wait()   # sleep forever; Ctrl+C / task-kill to stop
     else:
         # macOS / Linux / dev-from-source-without-pystray: original behavior.
         app.run(host="0.0.0.0", port=PORT, debug=False)
