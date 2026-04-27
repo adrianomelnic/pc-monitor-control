@@ -1125,8 +1125,6 @@ TRAY_AVAILABLE = False
 if IS_WINDOWS:
     try:
         import pystray
-        import pystray._base   # force PyInstaller to bundle the base class
-        import pystray._win32  # force-bundle the Win32 backend
         from PIL import Image, ImageDraw
         import winreg
         TRAY_AVAILABLE = True
