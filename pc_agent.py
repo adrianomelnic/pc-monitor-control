@@ -576,7 +576,14 @@ def get_cpu_info(hwinfo_data=None):
                 key=lambda s: int(re.search(r"\d+", s["label"]).group())
             )
             if core_load_sensors:
-                per_core = [round(float(s["value"]), 1) for s in core_load_sensors]
+                lhm_per_core = [round(float(s["value"]), 1) for s in core_load_sensors]
+                # Only use LHM per-core if it covers most logical cores.
+                # LHM sometimes exposes only P-core load sensors (e.g., 8 for an
+                # i9-13900K that has 24 logical cores). In that case psutil's
+                # full per-core array is more informative.
+                if len(lhm_per_core) >= max(cores_logical // 2, 1):
+                    per_core = lhm_per_core
+                # else: keep psutil's full per_core array
 
         # Try psutil temps first, then HWiNFO64 (Windows needs HWiNFO64)
         temp = None
@@ -590,8 +597,8 @@ def get_cpu_info(hwinfo_data=None):
             pass
         if temp is None:
             temp = get_cpu_temp_hwinfo(hwinfo_data)
-        # Try HWiNFO64 clock sensors for real-time current frequency
-        # psutil.cpu_freq().current is static on Windows (always shows rated base clock)
+        # Try LHM / HWiNFO64 clock sensors for real-time current frequency.
+        # psutil.cpu_freq().current is static on Windows (always shows rated base clock).
         freq_current_mhz = None
         hw_sensors = (hwinfo_data.get("sensors") or []) if hwinfo_data else []
         clock_sensors = [s for s in hw_sensors if s.get("type") == "clock"]
@@ -599,6 +606,7 @@ def get_cpu_info(hwinfo_data=None):
         p_eff_clocks = [
             s["value"] for s in clock_sensors
             if re.search(r"p-core.*effective", s.get("label", ""), re.I)
+            and s.get("value", 0) > 100
         ]
         if p_eff_clocks:
             freq_current_mhz = round(sum(p_eff_clocks) / len(p_eff_clocks))
@@ -607,6 +615,7 @@ def get_cpu_info(hwinfo_data=None):
             eff_clocks = [
                 s["value"] for s in clock_sensors
                 if re.search(r"effective\s+clock", s.get("label", ""), re.I)
+                and s.get("value", 0) > 100
             ]
             if eff_clocks:
                 freq_current_mhz = round(sum(eff_clocks) / len(eff_clocks))
@@ -616,26 +625,40 @@ def get_cpu_info(hwinfo_data=None):
                     s["value"] for s in clock_sensors
                     if re.search(r"[pe]-core.*clock|cpu.*core.*clock", s.get("label", ""), re.I)
                     and not re.search(r"effective|bus|ring|llc", s.get("label", ""), re.I)
-                    and s.get("value", 0) > 500
+                    and s.get("value", 0) > 100
                 ]
                 if core_clocks:
                     freq_current_mhz = round(sum(core_clocks) / len(core_clocks))
+        # 4. PowerShell Win32_Processor.CurrentClockSpeed — real-time value that
+        #    Windows reads from the hardware on each WMI query (unlike psutil which
+        #    reads the static rated frequency from the registry).
+        if freq_current_mhz is None and IS_WINDOWS:
+            try:
+                r = subprocess.run(
+                    ["powershell", "-NoProfile", "-Command",
+                     "(Get-CimInstance Win32_Processor).CurrentClockSpeed"],
+                    capture_output=True, text=True, timeout=3, **_NO_WINDOW_KW)
+                ps_clock = r.stdout.strip()
+                if ps_clock.isdigit():
+                    freq_current_mhz = int(ps_clock)
+            except Exception:
+                pass
         # Final fallback: psutil (static base clock on Windows)
         if freq_current_mhz is None:
             freq_current_mhz = round(freq.current) if freq else 0
 
-        # freqMax: highest single-core clock from HWiNFO64 (real boost), fallback to psutil
+        # freqMax: highest single-core clock from LHM/HWiNFO64 (real boost), fallback to psutil
         max_core_clocks = [
             s["value"] for s in clock_sensors
             if re.search(r"[pe]-core.*clock|cpu.*core.*clock", s.get("label", ""), re.I)
             and not re.search(r"effective|bus|ring|llc", s.get("label", ""), re.I)
-            and s.get("value", 0) > 500
+            and s.get("value", 0) > 100
         ]
         if max_core_clocks:
             freq_max_mhz = round(max(max_core_clocks))
         else:
-            eff_vals = [s["value"] for s in clock_sensors if re.search(r"effective\s+clock", s.get("label", ""), re.I)]
-            freq_max_mhz = round(max(eff_vals)) if eff_vals else (round(freq.max) if freq and freq.max else 0)
+            eff_vals = [s["value"] for s in clock_sensors if re.search(r"effective\s+clock", s.get("label", ""), re.I) and s.get("value", 0) > 100]
+            freq_max_mhz = round(max(eff_vals)) if eff_vals else (round(freq.max) if freq and freq.max else freq_current_mhz)
 
         return {
             "name": name,

@@ -18,7 +18,7 @@ Developers can also run from source:
   python -m pip install pythonnet      # Windows only, for the LHM path
   python pc_agent.py                   (auto-elevates to admin on Windows via UAC)
 """
-import os, platform, subprocess, time, socket, re, ctypes, sys
+import os, platform, subprocess, time, socket, re, ctypes, sys, math
 import psutil
 from flask import Flask, jsonify, request
 from flask_cors import CORS
@@ -27,6 +27,26 @@ IS_WINDOWS = platform.system() == "Windows"
 IS_MAC = platform.system() == "Darwin"
 # True when running inside a PyInstaller bundle (sys.executable is the .exe).
 IS_FROZEN = getattr(sys, "frozen", False)
+
+# Every subprocess.run / Popen call from a windowed PyInstaller .exe (our
+# Windows release config — see build/pc-agent.spec, console=False) flashes
+# a brief cmd / conhost console window unless we explicitly pass
+# CREATE_NO_WINDOW. Because the agent polls metrics roughly once per second
+# and each metrics handler shells out to nvidia-smi / wmic / etc., the
+# user sees a continuous flicker of black windows on their desktop. This
+# kwarg dict gets splatted into every subprocess call below; on macOS /
+# Linux it's empty so the calls are unchanged. CREATE_NO_WINDOW is a
+# Windows-only flag (0x08000000); we use the literal so this module still
+# imports on non-Windows where subprocess.CREATE_NO_WINDOW doesn't exist.
+_NO_WINDOW_KW = {"creationflags": 0x08000000} if IS_WINDOWS else {}
+
+# Agent version reported via /version and embedded in /metrics responses so
+# the mobile app can show users which build is running and surface an
+# "update available" hint when a newer GitHub release exists.
+# Bump on every release tag — and the CI build pipeline
+# (.github/workflows/build-agent.yml) rewrites this string at build time to
+# match the pushed git tag, so it can never drift from the published release.
+AGENT_VERSION = "0.1.0"
 
 # ── Auto-elevate to admin on Windows ────────────────────────────────────────
 def _ensure_admin():
@@ -50,6 +70,46 @@ def _ensure_admin():
 
 _ensure_admin()
 # ── End admin elevation ──────────────────────────────────────────────────────
+
+# ── Windowed-mode stdio redirect (must run before any module-level print) ──
+# When PyInstaller builds with `console=False` (our Windows release config —
+# see build/pc-agent.spec), `sys.stdout` and `sys.stderr` are not attached
+# to anything and every `print()` raises AttributeError. Several module-load
+# `print()` calls below (the "Initialising hardware info..." banner, the
+# CPU/GPU lines, LHM init failure messages, the tray-deps-missing fallback)
+# would crash before `__main__` ever runs. Redirect both streams to a
+# per-user log file IMMEDIATELY so those prints succeed AND the user has a
+# tail-able diagnostic file at %LOCALAPPDATA%\PCMonitorAgent\agent.log
+# (also exposed via the tray's "Show log file" menu item).
+_log_path: "str | None" = None
+def _redirect_stdio_to_logfile() -> None:
+    global _log_path
+    if not (IS_WINDOWS and IS_FROZEN):
+        # Console mode (running from source, or macOS / Linux build) — keep
+        # the real stdout so developers see startup output in their terminal.
+        return
+    try:
+        log_dir = os.path.join(
+            os.environ.get("LOCALAPPDATA", os.path.expanduser("~")),
+            "PCMonitorAgent",
+        )
+        os.makedirs(log_dir, exist_ok=True)
+        _log_path = os.path.join(log_dir, "agent.log")
+        # buffering=1 -> line-buffered so `Get-Content -Wait agent.log`
+        # streams logs as they happen, and crashes are flushed promptly.
+        f = open(_log_path, "a", buffering=1, encoding="utf-8", errors="replace")
+        sys.stdout = f
+        sys.stderr = f
+        print(f"\n=== PC Monitor Agent {AGENT_VERSION} starting at "
+              f"{time.strftime('%Y-%m-%d %H:%M:%S')} ===")
+    except Exception:
+        # Even if we can't open the log file, replace None stdout with an
+        # in-memory sink so subsequent print() calls don't crash. Better to
+        # lose logs than to crash before the tray icon appears.
+        import io
+        sys.stdout = sys.stdout or io.StringIO()
+        sys.stderr = sys.stderr or io.StringIO()
+_redirect_stdio_to_logfile()
 
 app = Flask(__name__)
 CORS(app)
@@ -84,7 +144,7 @@ def _init_cpu_name():
             r = subprocess.run(
                 ["powershell", "-NoProfile", "-Command",
                  "(Get-CimInstance Win32_Processor).Name"],
-                capture_output=True, text=True, timeout=8)
+                capture_output=True, text=True, timeout=8, **_NO_WINDOW_KW)
             name = r.stdout.strip()
             if name:
                 return name
@@ -93,7 +153,8 @@ def _init_cpu_name():
         # 3) wmic legacy fallback
         try:
             r = subprocess.run(["wmic", "cpu", "get", "name"],
-                               capture_output=True, text=True, timeout=5)
+                               capture_output=True, text=True, timeout=5,
+                               **_NO_WINDOW_KW)
             lines = [l.strip() for l in r.stdout.splitlines()
                      if l.strip() and l.strip().lower() != "name"]
             if lines:
@@ -107,7 +168,7 @@ def _init_gpu_names():
     try:
         r = subprocess.run(
             ["nvidia-smi", "--query-gpu=name", "--format=csv,noheader"],
-            capture_output=True, text=True, timeout=8
+            capture_output=True, text=True, timeout=8, **_NO_WINDOW_KW
         )
         if r.returncode == 0:
             return [l.strip() for l in r.stdout.strip().splitlines() if l.strip()]
@@ -117,7 +178,7 @@ def _init_gpu_names():
         try:
             r = subprocess.run(
                 ["wmic", "path", "win32_videocontroller", "get", "name"],
-                capture_output=True, text=True, timeout=5
+                capture_output=True, text=True, timeout=5, **_NO_WINDOW_KW
             )
             lines = [l.strip() for l in r.stdout.splitlines()
                      if l.strip() and l.strip().lower() != "name"]
@@ -145,7 +206,7 @@ def open_firewall_port(port):
             ["netsh", "advfirewall", "firewall", "add", "rule",
              f"name={rule_name}", "dir=in", "action=allow",
              "protocol=TCP", f"localport={port}"],
-            capture_output=True, check=False
+            capture_output=True, check=False, **_NO_WINDOW_KW
         )
         print(f"Firewall rule added for port {port} (or already exists)")
     except Exception as e:
@@ -157,6 +218,15 @@ def open_firewall_port(port):
 _LHM_COMPUTER = None
 _LHM_VISITOR = None
 _LHM_FAILED = False  # latch True after first failure so we don't retry every poll
+# LibreHardwareMonitor's `Computer` object holds .NET/WMI/SMBus state that is
+# NOT thread-safe — calling `_LHM_COMPUTER.Accept(_LHM_VISITOR)` from two
+# Flask request threads at the same time races the underlying sensor
+# enumeration via pythonnet and both threads hang indefinitely. Flask's
+# `app.run` defaults to `threaded=True`, so the polling burst from a freshly
+# launched mobile client (or from `curl` in a tight loop) reliably reproduces
+# the deadlock. Serialize all LHM reads behind a single process-wide lock.
+import threading as _threading
+_LHM_LOCK = _threading.Lock()
 
 # LHM SensorType enum string -> (our type tag, unit). These match the type
 # tags read_hwinfo64() emits, so the rest of the agent (and the mobile app)
@@ -250,49 +320,53 @@ def read_lhm():
             print(f"LibreHardwareMonitor init failed: {e}; falling back to HWiNFO64 if available")
             return None
 
+    # Serialize LHM enumeration across all Flask request threads — see the
+    # comment on _LHM_LOCK above. The lock covers the full Accept + walk so
+    # the visitor's intermediate state can't be observed by a second thread.
     try:
-        _LHM_COMPUTER.Accept(_LHM_VISITOR)
-        temps, fans, sensors = [], [], []
-        fan_counter = [0]
+        with _LHM_LOCK:
+            _LHM_COMPUTER.Accept(_LHM_VISITOR)
+            temps, fans, sensors = [], [], []
+            fan_counter = [0]
 
-        def _walk(hw, comp_name):
-            for sensor in hw.Sensors:
-                stype = str(sensor.SensorType)
-                mapping = _LHM_TYPE_MAP.get(stype)
-                if not mapping:
-                    continue  # skip Frequency, Control, Throughput, etc.
-                kind, unit = mapping
-                v = sensor.Value
-                if v is None:
-                    continue
-                try:
-                    value = float(v)
-                except (TypeError, ValueError):
-                    continue
-                label = str(sensor.Name) or ""
-                if not label and kind == "fan":
-                    fan_counter[0] += 1
-                    label = f"Fan #{fan_counter[0]}"
-                if not label:
-                    continue
-                sensors.append({
-                    "label": label,
-                    "value": round(value, 3),
-                    "unit": unit,
-                    "type": kind,
-                    "component": comp_name,
-                })
-                if kind == "temperature":
-                    temps.append({"label": label, "value": round(value, 1)})
-                elif kind == "fan":
-                    fans.append({"label": label, "rpm": round(value)})
-            for sub in hw.SubHardware:
-                _walk(sub, f"{comp_name} / {str(sub.Name)}")
+            def _walk(hw, comp_name):
+                for sensor in hw.Sensors:
+                    stype = str(sensor.SensorType)
+                    mapping = _LHM_TYPE_MAP.get(stype)
+                    if not mapping:
+                        continue  # skip Frequency, Control, Throughput, etc.
+                    kind, unit = mapping
+                    v = sensor.Value
+                    if v is None:
+                        continue
+                    try:
+                        value = float(v)
+                    except (TypeError, ValueError):
+                        continue
+                    label = str(sensor.Name) or ""
+                    if not label and kind == "fan":
+                        fan_counter[0] += 1
+                        label = f"Fan #{fan_counter[0]}"
+                    if not label:
+                        continue
+                    sensors.append({
+                        "label": label,
+                        "value": round(value, 3),
+                        "unit": unit,
+                        "type": kind,
+                        "component": comp_name,
+                    })
+                    if kind == "temperature":
+                        temps.append({"label": label, "value": round(value, 1)})
+                    elif kind == "fan":
+                        fans.append({"label": label, "rpm": round(value)})
+                for sub in hw.SubHardware:
+                    _walk(sub, f"{comp_name} / {str(sub.Name)}")
 
-        for hardware in _LHM_COMPUTER.Hardware:
-            _walk(hardware, str(hardware.Name))
+            for hardware in _LHM_COMPUTER.Hardware:
+                _walk(hardware, str(hardware.Name))
 
-        return {"temps": temps, "fans": fans, "sensors": sensors}
+            return {"temps": temps, "fans": fans, "sensors": sensors}
     except Exception as e:
         # Latch the failure so we don't keep paying the exception cost on every
         # poll — the HWiNFO64 fallback (if available) will take over for the
@@ -478,6 +552,39 @@ def get_cpu_info(hwinfo_data=None):
         cores_physical = psutil.cpu_count(logical=False) or 1
         per_core = psutil.cpu_percent(percpu=True)
         usage_total = round(sum(per_core) / len(per_core), 1) if per_core else 0
+
+        # Prefer LHM / HWiNFO64 load sensors over psutil when available.
+        # psutil.cpu_percent() can read near-zero on Windows with P+E core CPUs because
+        # Windows' performance counter diverges from actual hardware load in certain
+        # parking states. LHM reads directly from MSR/hardware and is more accurate.
+        if hwinfo_data:
+            load_sensors = [s for s in (hwinfo_data.get("sensors") or []) if s.get("type") == "usage"]
+            # Total
+            cpu_total_s = next(
+                (s for s in load_sensors
+                 if re.search(r"^cpu[\s_-]*total$", s.get("label", ""), re.I)
+                 and s.get("value") is not None),
+                None
+            )
+            if cpu_total_s is not None:
+                usage_total = round(float(cpu_total_s["value"]), 1)
+            # Per-core: "CPU Core #1", "CPU Core #2", … sorted numerically.
+            core_load_sensors = sorted(
+                [s for s in load_sensors
+                 if re.search(r"^cpu\s+core\s+#\d+$", s.get("label", ""), re.I)
+                 and s.get("value") is not None],
+                key=lambda s: int(re.search(r"\d+", s["label"]).group())
+            )
+            if core_load_sensors:
+                lhm_per_core = [round(float(s["value"]), 1) for s in core_load_sensors]
+                # Only use LHM per-core if it covers most logical cores.
+                # LHM sometimes exposes only P-core load sensors (e.g., 8 for an
+                # i9-13900K that has 24 logical cores). In that case psutil's
+                # full per-core array is more informative.
+                if len(lhm_per_core) >= max(cores_logical // 2, 1):
+                    per_core = lhm_per_core
+                # else: keep psutil's full per_core array
+
         # Try psutil temps first, then HWiNFO64 (Windows needs HWiNFO64)
         temp = None
         try:
@@ -490,8 +597,8 @@ def get_cpu_info(hwinfo_data=None):
             pass
         if temp is None:
             temp = get_cpu_temp_hwinfo(hwinfo_data)
-        # Try HWiNFO64 clock sensors for real-time current frequency
-        # psutil.cpu_freq().current is static on Windows (always shows rated base clock)
+        # Try LHM / HWiNFO64 clock sensors for real-time current frequency.
+        # psutil.cpu_freq().current is static on Windows (always shows rated base clock).
         freq_current_mhz = None
         hw_sensors = (hwinfo_data.get("sensors") or []) if hwinfo_data else []
         clock_sensors = [s for s in hw_sensors if s.get("type") == "clock"]
@@ -499,6 +606,7 @@ def get_cpu_info(hwinfo_data=None):
         p_eff_clocks = [
             s["value"] for s in clock_sensors
             if re.search(r"p-core.*effective", s.get("label", ""), re.I)
+            and s.get("value", 0) > 100
         ]
         if p_eff_clocks:
             freq_current_mhz = round(sum(p_eff_clocks) / len(p_eff_clocks))
@@ -507,6 +615,7 @@ def get_cpu_info(hwinfo_data=None):
             eff_clocks = [
                 s["value"] for s in clock_sensors
                 if re.search(r"effective\s+clock", s.get("label", ""), re.I)
+                and s.get("value", 0) > 100
             ]
             if eff_clocks:
                 freq_current_mhz = round(sum(eff_clocks) / len(eff_clocks))
@@ -516,26 +625,40 @@ def get_cpu_info(hwinfo_data=None):
                     s["value"] for s in clock_sensors
                     if re.search(r"[pe]-core.*clock|cpu.*core.*clock", s.get("label", ""), re.I)
                     and not re.search(r"effective|bus|ring|llc", s.get("label", ""), re.I)
-                    and s.get("value", 0) > 500
+                    and s.get("value", 0) > 100
                 ]
                 if core_clocks:
                     freq_current_mhz = round(sum(core_clocks) / len(core_clocks))
+        # 4. PowerShell Win32_Processor.CurrentClockSpeed — real-time value that
+        #    Windows reads from the hardware on each WMI query (unlike psutil which
+        #    reads the static rated frequency from the registry).
+        if freq_current_mhz is None and IS_WINDOWS:
+            try:
+                r = subprocess.run(
+                    ["powershell", "-NoProfile", "-Command",
+                     "(Get-CimInstance Win32_Processor).CurrentClockSpeed"],
+                    capture_output=True, text=True, timeout=3, **_NO_WINDOW_KW)
+                ps_clock = r.stdout.strip()
+                if ps_clock.isdigit():
+                    freq_current_mhz = int(ps_clock)
+            except Exception:
+                pass
         # Final fallback: psutil (static base clock on Windows)
         if freq_current_mhz is None:
             freq_current_mhz = round(freq.current) if freq else 0
 
-        # freqMax: highest single-core clock from HWiNFO64 (real boost), fallback to psutil
+        # freqMax: highest single-core clock from LHM/HWiNFO64 (real boost), fallback to psutil
         max_core_clocks = [
             s["value"] for s in clock_sensors
             if re.search(r"[pe]-core.*clock|cpu.*core.*clock", s.get("label", ""), re.I)
             and not re.search(r"effective|bus|ring|llc", s.get("label", ""), re.I)
-            and s.get("value", 0) > 500
+            and s.get("value", 0) > 100
         ]
         if max_core_clocks:
             freq_max_mhz = round(max(max_core_clocks))
         else:
-            eff_vals = [s["value"] for s in clock_sensors if re.search(r"effective\s+clock", s.get("label", ""), re.I)]
-            freq_max_mhz = round(max(eff_vals)) if eff_vals else (round(freq.max) if freq and freq.max else 0)
+            eff_vals = [s["value"] for s in clock_sensors if re.search(r"effective\s+clock", s.get("label", ""), re.I) and s.get("value", 0) > 100]
+            freq_max_mhz = round(max(eff_vals)) if eff_vals else (round(freq.max) if freq and freq.max else freq_current_mhz)
 
         return {
             "name": name,
@@ -559,7 +682,7 @@ def get_gpu_info():
              "--query-gpu=utilization.gpu,memory.used,memory.total,"
              "temperature.gpu,clocks.current.graphics,clocks.current.memory",
              "--format=csv,noheader,nounits"],
-            capture_output=True, text=True, timeout=5
+            capture_output=True, text=True, timeout=5, **_NO_WINDOW_KW
         )
         if r.returncode == 0:
             for i, line in enumerate(r.stdout.strip().splitlines()):
@@ -695,6 +818,39 @@ def get_network(prev_io, elapsed):
     except Exception:
         return [], {}
 
+def _strip_non_finite(obj):
+    """Recursively replace NaN, +Infinity, and -Infinity floats with
+    None so the resulting payload is valid standard JSON.
+
+    Python's ``json.dumps`` (which Flask's ``jsonify`` uses) defaults to
+    ``allow_nan=True`` and emits the bareword tokens ``NaN``/``Infinity``,
+    which JS ``JSON.parse`` rejects. Hardware sensors regularly return
+    NaN for unreadable channels (LibreHardwareMonitor in particular),
+    and ``round(nan, n)`` propagates the NaN. Without this guard a single
+    bad sensor would make the whole ``/metrics`` response unparseable on
+    the phone and every PC would appear offline.
+
+    The mobile app also has a defensive fallback parser, but sanitising
+    here keeps third-party clients (curl, browsers, scripts) honest too.
+    """
+    if isinstance(obj, float):
+        return obj if math.isfinite(obj) else None
+    if isinstance(obj, dict):
+        return {k: _strip_non_finite(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [_strip_non_finite(v) for v in obj]
+    return obj
+
+@app.route("/version")
+def version():
+    """Return the running agent's version. The mobile app polls /metrics
+    (which already includes agentVersion) for the connected case, but a
+    standalone /version endpoint is handy for quick "what's installed?"
+    checks from a browser without needing the API key to fetch full metrics."""
+    auth = check_key()
+    if auth: return auth
+    return jsonify({"version": AGENT_VERSION})
+
 @app.route("/metrics")
 def metrics():
     global _prev_net_io, _prev_disk_io, _prev_time
@@ -732,9 +888,10 @@ def _collect_metrics():
     net_up = sum(i["speedUp"] for i in network)
     net_down = sum(i["speedDown"] for i in network)
 
-    return jsonify({
+    return jsonify(_strip_non_finite({
         "os": platform.system() + " " + platform.release(),
         "hostname": socket.gethostname(),
+        "agentVersion": AGENT_VERSION,
         "metrics": {
             "cpuUsage": cpu_info.get("usageTotal", 0),
             "ramUsage": ram_info["used"],
@@ -754,7 +911,7 @@ def _collect_metrics():
             "network": network,
             "sensors": sensor_data.get("sensors", []) if sensor_data else [],
         }
-    })
+    }))
 
 @app.route("/command", methods=["POST"])
 def command():
@@ -766,7 +923,7 @@ def command():
 
     if cmd == "shutdown":
         if IS_WINDOWS:
-            subprocess.Popen("shutdown /s /t 5", shell=True)
+            subprocess.Popen("shutdown /s /t 5", shell=True, **_NO_WINDOW_KW)
         elif IS_MAC:
             subprocess.Popen("sudo shutdown -h +0", shell=True)
         else:
@@ -775,14 +932,15 @@ def command():
 
     elif cmd == "restart":
         if IS_WINDOWS:
-            subprocess.Popen("shutdown /r /t 5", shell=True)
+            subprocess.Popen("shutdown /r /t 5", shell=True, **_NO_WINDOW_KW)
         else:
             subprocess.Popen("sudo shutdown -r +0", shell=True)
         return jsonify({"success": True, "output": "Restarting in 5 seconds..."})
 
     elif cmd == "sleep":
         if IS_WINDOWS:
-            subprocess.Popen("rundll32.exe powrprof.dll,SetSuspendState 0,1,0", shell=True)
+            subprocess.Popen("rundll32.exe powrprof.dll,SetSuspendState 0,1,0",
+                             shell=True, **_NO_WINDOW_KW)
         elif IS_MAC:
             subprocess.Popen("pmset sleepnow", shell=True)
         else:
@@ -791,7 +949,8 @@ def command():
 
     elif cmd == "lock":
         if IS_WINDOWS:
-            subprocess.Popen("rundll32.exe user32.dll,LockWorkStation", shell=True)
+            subprocess.Popen("rundll32.exe user32.dll,LockWorkStation",
+                             shell=True, **_NO_WINDOW_KW)
         elif IS_MAC:
             subprocess.Popen("pmset displaysleepnow", shell=True)
         else:
@@ -803,7 +962,7 @@ def command():
         try:
             result = subprocess.run(
                 shell_cmd, capture_output=True, text=True,
-                timeout=30, shell=True
+                timeout=30, shell=True, **_NO_WINDOW_KW
             )
             output = result.stdout or result.stderr or "(no output)"
             return jsonify({"success": result.returncode == 0, "output": output})
@@ -977,8 +1136,351 @@ def hwinfo_debug():
         return jsonify({"status": "exception", "error": str(e), "trace": traceback.format_exc()})
 
 
+# ── System tray + autostart + auto-update (Windows only) ───────────────────
+# Goals: end users should not see a terminal window after launch (the agent
+# is a background service, not a CLI tool); they should be able to toggle
+# "start with Windows" without editing the registry by hand; and they should
+# see at a glance whether a newer agent release is available on GitHub. The
+# tray icon is the home for all of that. macOS / Linux skip this and use the
+# original blocking `app.run` path so we don't ship a half-implemented UI on
+# platforms we haven't tested.
+TRAY_AVAILABLE = False
+if IS_WINDOWS:
+    try:
+        import pystray
+        from PIL import Image, ImageDraw
+        import winreg
+        TRAY_AVAILABLE = True
+    except Exception as _tray_imp_err:
+        # pystray / Pillow may be missing in dev runs from source. The agent
+        # still works — just without the tray UI. The PyInstaller build always
+        # bundles them, so end-user .exe installs always get the tray.
+        print(f"tray UI disabled ({type(_tray_imp_err).__name__}: {_tray_imp_err}); "
+              f"falling back to console mode")
+
+UPDATE_REPO          = "adrianomelnic/pc-monitor-control"
+UPDATE_API_URL       = f"https://api.github.com/repos/{UPDATE_REPO}/releases/latest"
+UPDATE_RELEASES_URL  = f"https://github.com/{UPDATE_REPO}/releases/latest"
+UPDATE_DOWNLOAD_URL  = f"https://github.com/{UPDATE_REPO}/releases/latest/download/pc-agent-windows.exe"
+AUTOSTART_REG_PATH   = r"Software\Microsoft\Windows\CurrentVersion\Run"
+AUTOSTART_VALUE_NAME = "PCMonitorAgent"
+UPDATE_CHECK_INTERVAL_SEC = 60 * 60  # poll GitHub once an hour
+
+# Module-level mutable state shared between the update worker thread and the
+# tray menu callbacks. Tray callbacks are pure reads, the worker thread does
+# all writes — so no lock is needed (CPython's GIL guarantees atomic word
+# writes for these simple types). `_log_path` is set much earlier (at module
+# import, see _redirect_stdio_to_logfile) so we don't redeclare it here.
+_tray_icon = None                # type: ignore[var-annotated]
+_update_status: str = "Checking for updates..."
+_update_available_version: "str | None" = None  # parsed tag, e.g. "0.2.0"
+_update_in_progress: bool = False
+# Set to True only inside the explicit "Quit" menu callback so _run_tray_mode
+# can distinguish "user intentionally quit" from "pystray silently returned
+# without ever showing the icon" (the latter has no exception but should keep
+# Flask alive).
+_quit_requested: bool = False
+
+def _version_tuple(v: str):
+    """Loose semver parse: ('1', '2', '3-rc1') -> (1, 2, 3). Used only for
+    'is GitHub release newer than installed?' comparisons, so tolerating
+    odd suffixes by stripping non-digits per part is fine."""
+    parts = []
+    for p in v.split("."):
+        m = re.match(r"(\d+)", p)
+        parts.append(int(m.group(1)) if m else 0)
+    return tuple(parts)
+
+def _autostart_is_enabled() -> bool:
+    """True if our HKCU\\…\\Run value exists. We don't validate the path —
+    if it's there, Windows will run it on next login, and that's what the
+    user toggle is asking about."""
+    if not IS_WINDOWS:
+        return False
+    try:
+        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, AUTOSTART_REG_PATH) as k:
+            winreg.QueryValueEx(k, AUTOSTART_VALUE_NAME)
+            return True
+    except FileNotFoundError:
+        return False
+    except OSError:
+        return False
+
+def _autostart_target() -> str:
+    """The command line we want Windows to execute on login. When running
+    as a frozen PyInstaller bundle, sys.executable is the agent .exe.
+    When running from source, fall back to `pythonw <script>` so a console
+    window doesn't pop up at every login (pythonw == windowed Python)."""
+    if IS_FROZEN:
+        return f'"{sys.executable}"'
+    pythonw = sys.executable.replace("python.exe", "pythonw.exe")
+    return f'"{pythonw}" "{os.path.abspath(__file__)}"'
+
+def _set_autostart(enable: bool) -> None:
+    if not IS_WINDOWS:
+        return
+    try:
+        with winreg.OpenKey(
+            winreg.HKEY_CURRENT_USER, AUTOSTART_REG_PATH, 0, winreg.KEY_SET_VALUE
+        ) as k:
+            if enable:
+                winreg.SetValueEx(
+                    k, AUTOSTART_VALUE_NAME, 0, winreg.REG_SZ, _autostart_target()
+                )
+            else:
+                try:
+                    winreg.DeleteValue(k, AUTOSTART_VALUE_NAME)
+                except FileNotFoundError:
+                    pass
+    except OSError as e:
+        print(f"autostart toggle failed: {e}")
+
+def _toggle_autostart(_icon=None, _item=None) -> None:
+    _set_autostart(not _autostart_is_enabled())
+    if _tray_icon is not None:
+        _tray_icon.update_menu()
+
+def _check_for_update_now() -> None:
+    """One-shot update check. Writes _update_status / _update_available_version
+    and refreshes the tray menu when done. Network errors are caught and
+    surfaced as a status string so the user can see the failure instead of
+    silent 'no update'."""
+    global _update_status, _update_available_version
+    try:
+        import urllib.request, json
+        req = urllib.request.Request(
+            UPDATE_API_URL,
+            headers={"User-Agent": f"pc-agent/{AGENT_VERSION}"},
+        )
+        with urllib.request.urlopen(req, timeout=10) as r:
+            data = json.load(r)
+        latest_tag = (data.get("tag_name") or "").lstrip("v").strip()
+        if latest_tag and _version_tuple(latest_tag) > _version_tuple(AGENT_VERSION):
+            _update_available_version = latest_tag
+            _update_status = f"Update available: v{latest_tag}"
+        else:
+            _update_available_version = None
+            _update_status = f"Up to date (v{AGENT_VERSION})"
+    except Exception as e:
+        _update_available_version = None
+        _update_status = f"Update check failed: {e}"
+    if _tray_icon is not None:
+        _tray_icon.update_menu()
+
+def _update_worker_loop() -> None:
+    """Background daemon: check on startup, then every UPDATE_CHECK_INTERVAL_SEC."""
+    while True:
+        _check_for_update_now()
+        time.sleep(UPDATE_CHECK_INTERVAL_SEC)
+
+def _install_update_async() -> None:
+    """Fire-and-forget self-update. Downloads pc-agent-windows.exe to
+    `pc-agent.new` next to the running .exe, then writes a small batch
+    file that waits for our process to exit, replaces the .exe, relaunches,
+    and self-deletes. We then shut down so the batch can do the rename
+    without sharing-violation. The re-entry guard is set BEFORE spawning
+    the worker thread so a rapid double-click on 'Install update' can't
+    spawn two concurrent installer threads (which would both download to
+    the same `pc-agent.new` and race the `move /y`)."""
+    global _update_in_progress
+    if _update_in_progress or not IS_FROZEN or not _update_available_version:
+        return
+    _update_in_progress = True
+    import threading
+    threading.Thread(target=_install_update, daemon=True, name="update-install").start()
+
+def _install_update() -> None:
+    global _update_status, _update_in_progress
+    try:
+        _update_status = "Downloading update..."
+        if _tray_icon is not None:
+            _tray_icon.update_menu()
+        import urllib.request
+        current_exe = sys.executable
+        target_dir = os.path.dirname(current_exe)
+        new_exe = os.path.join(target_dir, "pc-agent.new")
+        urllib.request.urlretrieve(UPDATE_DOWNLOAD_URL, new_exe)
+        # Sanity check — a real Windows agent build is ~13 MB; anything
+        # under 1 MB is almost certainly a 404 page or a redirect we didn't
+        # follow correctly. Capture the size BEFORE deleting so the error
+        # message doesn't have to re-stat a file we just removed.
+        size = os.path.getsize(new_exe)
+        if size < 1024 * 1024:
+            try: os.remove(new_exe)
+            except OSError: pass
+            raise RuntimeError(f"downloaded file too small ({size} bytes)")
+
+        batch_path = os.path.join(target_dir, "pc-agent-update.bat")
+        # `timeout /t 3` lets the current process exit so the .exe is no
+        # longer locked. `move /y` overwrites in place (same volume — both
+        # paths are in target_dir). `start ""` launches the new .exe
+        # detached. `del "%~f0"` deletes the batch itself last.
+        with open(batch_path, "w", encoding="utf-8") as f:
+            f.write(
+                "@echo off\r\n"
+                "timeout /t 3 /nobreak >nul\r\n"
+                f'move /y "{new_exe}" "{current_exe}" >nul\r\n'
+                f'start "" "{current_exe}"\r\n'
+                'del "%~f0"\r\n'
+            )
+        DETACHED_PROCESS = 0x00000008
+        CREATE_NEW_PROCESS_GROUP = 0x00000200
+        subprocess.Popen(
+            ["cmd", "/c", batch_path],
+            creationflags=DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP,
+            close_fds=True,
+        )
+        _update_status = "Installing update — agent will restart..."
+        if _tray_icon is not None:
+            _tray_icon.update_menu()
+        time.sleep(1)
+        if _tray_icon is not None:
+            _tray_icon.stop()
+        os._exit(0)
+    except Exception as e:
+        _update_status = f"Update failed: {e}"
+        if _tray_icon is not None:
+            _tray_icon.update_menu()
+    finally:
+        _update_in_progress = False
+
+def _open_releases_page(_icon=None, _item=None) -> None:
+    import webbrowser
+    webbrowser.open(UPDATE_RELEASES_URL)
+
+def _open_dashboard(_icon=None, _item=None) -> None:
+    import webbrowser
+    webbrowser.open(f"http://localhost:{PORT}/")
+
+def _open_log(_icon=None, _item=None) -> None:
+    if _log_path and os.path.isfile(_log_path):
+        try:
+            os.startfile(_log_path)  # type: ignore[attr-defined]
+        except Exception as e:
+            print(f"open log failed: {e}")
+
+def _on_update_clicked(_icon=None, _item=None) -> None:
+    if _update_available_version:
+        # Try in-place self-update first; if that fails, the user can still
+        # use "Open releases page" from the menu to download manually.
+        _install_update_async()
+    else:
+        # Re-check on demand so the user gets immediate feedback.
+        import threading
+        threading.Thread(target=_check_for_update_now, daemon=True,
+                         name="update-check-manual").start()
+
+def _make_tray_image() -> "Image.Image":
+    """Generate the tray icon programmatically so we don't have to ship a
+    PNG asset and worry about PyInstaller bundling the right path. 64×64
+    rounded square in the app accent green on a transparent background."""
+    img = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    d.rounded_rectangle((4, 4, 60, 60), radius=12, fill=(20, 20, 20, 255))
+    d.rounded_rectangle((14, 14, 50, 50), radius=4, outline=(0, 230, 118, 255), width=3)
+    d.rectangle((22, 36, 42, 42), fill=(0, 230, 118, 255))
+    return img
+
+def _on_quit_clicked(icon=None, _item=None) -> None:
+    """Explicit quit from the tray menu.  Sets the flag BEFORE stopping the
+    icon so _run_tray_mode can distinguish an intentional quit (process should
+    exit) from a silent early return of icon.run() (we should stay alive and
+    keep Flask running)."""
+    global _quit_requested
+    _quit_requested = True
+    if icon is not None:
+        icon.stop()
+
+def _build_tray_menu():
+    """The menu is rebuilt by pystray on every right-click, so callable
+    text/checked= produces a live status display without us having to
+    track when to refresh."""
+    return pystray.Menu(
+        pystray.MenuItem(f"PC Monitor Agent v{AGENT_VERSION}", None, enabled=False),
+        pystray.MenuItem(lambda _: f"Status: listening on port {PORT}", None, enabled=False),
+        pystray.MenuItem(lambda _: _update_status, None, enabled=False),
+        pystray.Menu.SEPARATOR,
+        pystray.MenuItem("Open dashboard", _open_dashboard),
+        pystray.MenuItem(
+            lambda _: (f"Install update v{_update_available_version}"
+                       if _update_available_version else "Check for updates"),
+            _on_update_clicked,
+        ),
+        pystray.MenuItem("Open releases page", _open_releases_page),
+        pystray.MenuItem(
+            "Start with Windows",
+            _toggle_autostart,
+            checked=lambda _: _autostart_is_enabled(),
+        ),
+        pystray.MenuItem("Show log file", _open_log,
+                         enabled=lambda _: bool(_log_path)),
+        pystray.Menu.SEPARATOR,
+        pystray.MenuItem("Quit", _on_quit_clicked),
+    )
+
+def _run_tray_mode() -> bool:
+    """Windows windowed-mode entry point: Flask runs in a daemon thread,
+    pystray runs the Win32 message loop on the main thread (it requires
+    that — calling Icon.run() from a worker thread silently does nothing).
+
+    Returns True if the tray ran and exited normally (user clicked Quit),
+    False if pystray failed to initialise so the caller can fall back to
+    blocking app.run() instead.  Flask is started as a daemon thread first
+    so the HTTP server is always up regardless of tray outcome."""
+    global _tray_icon
+    import threading
+
+    # Start Flask in the background FIRST so the HTTP server is reachable
+    # even if the tray initialisation subsequently fails.
+    flask_thread = threading.Thread(
+        target=lambda: app.run(host="0.0.0.0", port=PORT, debug=False, use_reloader=False),
+        daemon=True, name="flask-server",
+    )
+    flask_thread.start()
+    threading.Thread(target=_update_worker_loop, daemon=True, name="update-worker").start()
+
+    try:
+        _tray_icon = pystray.Icon(
+            "pc-monitor-agent",
+            _make_tray_image(),
+            f"PC Monitor Agent v{AGENT_VERSION}",
+            _build_tray_menu(),
+        )
+        _tray_icon.run()  # blocks until icon.stop() is called
+        # run() returned — was it an explicit Quit or a silent early return?
+        if _quit_requested:
+            print("User clicked Quit from tray menu — exiting.")
+            return True   # caller should let the process exit
+        # pystray returned without exception but without an explicit Quit
+        # (e.g. Win32 message loop failed to create a window). Fall through
+        # to headless mode.
+        print("pystray.run() returned unexpectedly (no icon shown?); "
+              "keeping Flask alive in headless mode")
+        return False
+    except Exception as e:
+        print(f"pystray tray failed ({type(e).__name__}: {e}); "
+              f"agent will keep running without a tray icon")
+        return False
+
+
 if __name__ == "__main__":
+    # Note: stdout/stderr are already redirected to the log file at module
+    # import time (see _redirect_stdio_to_logfile near the top), so prints
+    # below are safe even in PyInstaller windowed mode.
     print(f"PC Agent starting on port {PORT}")
     print(f"API Key: {'set' if API_KEY else 'not set (open access)'}")
+    print(f"TRAY_AVAILABLE={TRAY_AVAILABLE}")
     open_firewall_port(PORT)
-    app.run(host="0.0.0.0", port=PORT, debug=False)
+    if TRAY_AVAILABLE:
+        tray_ok = _run_tray_mode()
+        if not tray_ok:
+            # Tray failed but Flask daemon is already running in the
+            # background (started inside _run_tray_mode before the tray
+            # attempt).  Block the main thread so the process doesn't exit
+            # and take down those daemon threads with it.
+            print("Tray unavailable — agent running headless, HTTP only.")
+            import threading
+            threading.Event().wait()   # sleep forever; Ctrl+C / task-kill to stop
+    else:
+        # macOS / Linux / dev-from-source-without-pystray: original behavior.
+        app.run(host="0.0.0.0", port=PORT, debug=False)
