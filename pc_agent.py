@@ -375,10 +375,21 @@ def read_lhm():
         print(f"LibreHardwareMonitor read error: {e}; falling back to HWiNFO64 if available")
         return None
 
-def read_sensors():
-    """Try LibreHardwareMonitor first, fall back to HWiNFO64 shared memory.
-    Returns {temps, fans, sensors} or None if neither source is available.
+def read_sensors(source="auto"):
+    """Return sensor data from the requested source.
+
+    source:
+      "auto"     — try LHM first, fall back to HWiNFO64 (original behaviour).
+      "lhm"      — LHM only; returns None if LHM is unavailable.
+      "hwinfo64" — HWiNFO64 only (must be running with shared memory enabled).
+
+    Returns {temps, fans, sensors} or None if the chosen source is unavailable.
     """
+    if source == "hwinfo64":
+        return read_hwinfo64()
+    if source == "lhm":
+        return read_lhm()   # may be None if LHM failed/unavailable
+    # "auto": LHM first, HWiNFO64 fallback
     data = read_lhm()
     if data is not None:
         return data
@@ -856,21 +867,27 @@ def metrics():
     global _prev_net_io, _prev_disk_io, _prev_time
     auth = check_key()
     if auth: return auth
+    # ?source=auto|lhm|hwinfo64 — lets the mobile app choose which sensor
+    # backend to use per-PC (e.g. switch to HWiNFO64 when LHM doesn't expose
+    # GPU voltage/power for a particular NVIDIA card).
+    source = request.args.get("source", "auto")
+    if source not in ("auto", "lhm", "hwinfo64"):
+        source = "auto"
     try:
-        return _collect_metrics()
+        return _collect_metrics(source)
     except Exception as exc:
         import traceback
         print(f"[ERROR] /metrics failed: {exc}")
         traceback.print_exc()
         return jsonify({"error": str(exc)}), 500
 
-def _collect_metrics():
+def _collect_metrics(source="auto"):
     global _prev_net_io, _prev_disk_io, _prev_time
 
     now = time.time()
     elapsed = max(now - _prev_time, 0.1)
 
-    sensor_data = read_sensors()
+    sensor_data = read_sensors(source)
     cpu_info = get_cpu_info(sensor_data)
     gpu_info = get_gpu_info()
     ram_info = get_ram_info()
