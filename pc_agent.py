@@ -809,9 +809,18 @@ def get_disks(prev_io, elapsed):
             try:
                 usage = psutil.disk_usage(part.mountpoint)
                 read_spd = write_spd = 0.0
-                dev_key = part.device.replace("\\\\.\\", "").rstrip("\\").rstrip(":")
-                for key in [dev_key, part.device, part.mountpoint]:
-                    if key in curr_io and prev_io and key in prev_io:
+                # psutil key formats vary by platform and version:
+                #   Windows 5.9+  → "C:"   (logical disk with colon)
+                #   Windows older → "C"    (colon stripped)
+                #   Linux/macOS   → "sda1" (no /dev/ prefix)
+                # Build all plausible candidates and take the first match.
+                win_base = part.device.replace("\\\\.\\", "").rstrip("\\")  # "C:"
+                posix_base = part.device.split("/")[-1] if "/" in part.device else ""
+                candidates = [win_base, win_base.rstrip(":"), posix_base,
+                               part.device, part.mountpoint,
+                               part.mountpoint.rstrip("/\\")]
+                for key in candidates:
+                    if key and key in curr_io and prev_io and key in prev_io:
                         read_spd = max(0, (curr_io[key].read_bytes - prev_io[key].read_bytes) / elapsed / 1024)
                         write_spd = max(0, (curr_io[key].write_bytes - prev_io[key].write_bytes) / elapsed / 1024)
                         break
