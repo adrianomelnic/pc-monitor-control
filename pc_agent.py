@@ -122,8 +122,39 @@ _prev_net_io = {}
 _prev_disk_io = {}
 _prev_time = time.time()
 
-# Warm up cpu_percent (first call always returns 0)
-psutil.cpu_percent(percpu=True)
+# ── CPU usage background sampler ─────────────────────────────────────────────
+# psutil.cpu_percent(interval=None) returns the delta since the LAST call. A
+# single warmup at startup means the first real request returns the average over
+# the entire lifetime of the agent (often many hours of mostly-idle time) which
+# can read near-zero even when the CPU is currently under load.
+#
+# Keeping a background thread that samples every 2 s ensures the window is
+# always ≤ 2 s, so the values the app reads are real-time and match what
+# Windows Task Manager shows.  The per-core array from psutil uses
+# NtQuerySystemInformation which reads \Processor Information\% Processor Utility
+# — the same counter Task Manager uses — rather than LHM's frequency-normalised
+# "CPU Total" sensor which often under-reports on P+E core Intel CPUs.
+_cpu_sampler_lock = _threading.Lock()
+_cpu_total_cached: float = 0.0
+_cpu_per_core_cached: list = []
+
+def _cpu_sampler():
+    global _cpu_total_cached, _cpu_per_core_cached
+    # Prime the counter so the first real delta window starts now, not at import time
+    psutil.cpu_percent(percpu=True)
+    import time as _time
+    while True:
+        _time.sleep(2)
+        try:
+            per_core = psutil.cpu_percent(percpu=True)
+            total    = round(sum(per_core) / len(per_core), 1) if per_core else 0.0
+            with _cpu_sampler_lock:
+                _cpu_per_core_cached = [round(v, 1) for v in per_core]
+                _cpu_total_cached    = total
+        except Exception:
+            pass
+
+_threading.Thread(target=_cpu_sampler, daemon=True, name="cpu-sampler").start()
 
 # Cache slow one-time queries at startup so metrics endpoint stays fast
 def _init_cpu_name():
@@ -561,24 +592,20 @@ def get_cpu_info(hwinfo_data=None):
         freq = psutil.cpu_freq()
         cores_logical = psutil.cpu_count(logical=True) or 1
         cores_physical = psutil.cpu_count(logical=False) or 1
-        per_core = psutil.cpu_percent(percpu=True)
-        usage_total = round(sum(per_core) / len(per_core), 1) if per_core else 0
 
-        # Prefer LHM / HWiNFO64 load sensors over psutil when available.
-        # psutil.cpu_percent() can read near-zero on Windows with P+E core CPUs because
-        # Windows' performance counter diverges from actual hardware load in certain
-        # parking states. LHM reads directly from MSR/hardware and is more accurate.
+        # Use the background-sampler cache so the measurement window is always
+        # ≤ 2 s (matches Task Manager) rather than the full lifetime of the agent.
+        with _cpu_sampler_lock:
+            per_core   = list(_cpu_per_core_cached) if _cpu_per_core_cached else psutil.cpu_percent(percpu=True)
+            usage_total = _cpu_total_cached if _cpu_per_core_cached else round(sum(per_core) / max(len(per_core), 1), 1)
+
+        # LHM / HWiNFO64 per-core load sensors — useful for per-core breakdown
+        # but we do NOT override usage_total from LHM: LHM's "CPU Total" sensor
+        # on Intel P+E core CPUs uses a frequency-normalised metric that reads
+        # much lower than what Task Manager shows (% Processor Utility).
+        # psutil uses NtQuerySystemInformation → same counter as Task Manager.
         if hwinfo_data:
             load_sensors = [s for s in (hwinfo_data.get("sensors") or []) if s.get("type") == "usage"]
-            # Total
-            cpu_total_s = next(
-                (s for s in load_sensors
-                 if re.search(r"^cpu[\s_-]*total$", s.get("label", ""), re.I)
-                 and s.get("value") is not None),
-                None
-            )
-            if cpu_total_s is not None:
-                usage_total = round(float(cpu_total_s["value"]), 1)
             # Per-core: "CPU Core #1", "CPU Core #2", … sorted numerically.
             core_load_sensors = sorted(
                 [s for s in load_sensors
@@ -588,13 +615,16 @@ def get_cpu_info(hwinfo_data=None):
             )
             if core_load_sensors:
                 lhm_per_core = [round(float(s["value"]), 1) for s in core_load_sensors]
-                # Only use LHM per-core if it covers most logical cores.
-                # LHM sometimes exposes only P-core load sensors (e.g., 8 for an
-                # i9-13900K that has 24 logical cores). In that case psutil's
-                # full per-core array is more informative.
-                if len(lhm_per_core) >= max(cores_logical // 2, 1):
+                # Use LHM per-core ONLY if psutil shows all zeros (sampler not
+                # ready yet on first boot) AND LHM covers most logical cores.
+                # Prefer psutil because it reads % Processor Utility per logical
+                # processor, matching Task Manager. LHM reads MSR MPERF/TSC which
+                # can give lower values on P+E core Intel CPUs.
+                psutil_all_zero = all(v == 0.0 for v in per_core)
+                lhm_covers_cores = len(lhm_per_core) >= max(cores_logical // 2, 1)
+                if psutil_all_zero and lhm_covers_cores:
                     per_core = lhm_per_core
-                # else: keep psutil's full per_core array
+                # else: keep psutil's per_core array (accurate, matches Task Manager)
 
         # Try psutil temps first, then HWiNFO64 (Windows needs HWiNFO64)
         temp = None
