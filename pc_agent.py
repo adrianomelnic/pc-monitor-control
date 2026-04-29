@@ -18,7 +18,7 @@ Developers can also run from source:
   python -m pip install pythonnet      # Windows only, for the LHM path
   python pc_agent.py                   (auto-elevates to admin on Windows via UAC)
 """
-import os, platform, subprocess, time, socket, re, ctypes, sys, math
+import os, platform, subprocess, time, socket, re, ctypes, sys, math, threading as _threading
 import psutil
 from flask import Flask, jsonify, request
 from flask_cors import CORS
@@ -256,7 +256,6 @@ _LHM_FAILED = False  # latch True after first failure so we don't retry every po
 # `app.run` defaults to `threaded=True`, so the polling burst from a freshly
 # launched mobile client (or from `curl` in a tight loop) reliably reproduces
 # the deadlock. Serialize all LHM reads behind a single process-wide lock.
-import threading as _threading
 _LHM_LOCK = _threading.Lock()
 
 # LHM SensorType enum string -> (our type tag, unit). These match the type
