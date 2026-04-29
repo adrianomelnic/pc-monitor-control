@@ -805,31 +805,94 @@ def get_fans(hwinfo_data=None):
         pass
     return fans
 
+def _build_vol_to_key(io_dict):
+    """Build a normalised map from drive-letter tokens → actual psutil key.
+
+    psutil.disk_io_counters(perdisk=True) key formats by platform / version:
+      Windows Physical Disk counter (most common on Win 10/11):
+        "0 C:"        – single-partition physical disk 0 → C:
+        "0 C: D:"     – physical disk 0 with two volumes
+        "1 C:"        – physical disk 1 → C:
+      Windows Logical Disk counter (older psutil or explicit perdisk=False):
+        "C:", "D:"
+      Windows even older:
+        "C", "D"
+      Linux / macOS:
+        "sda1", "nvme0n1p1"   (no /dev/ prefix)
+
+    The resulting map lets us look up any plausible candidate string and find
+    the real key so the speed delta can be computed correctly.
+    """
+    m = {}
+    for raw in io_dict:
+        m[raw] = raw                          # exact match always works
+        m[raw.upper()] = raw                  # case-insensitive exact
+
+        # Windows compound key like "0 C:" or "0 C: D:" — split on whitespace
+        # and extract every token that looks like a drive letter or "X:".
+        for tok in raw.split():
+            tok_up = tok.upper()
+            if len(tok_up) == 2 and tok_up[1] == ":" and tok_up[0].isalpha():
+                # "C:" style token
+                if tok_up not in m:
+                    m[tok_up] = raw
+                if tok_up.rstrip(":") not in m:
+                    m[tok_up.rstrip(":")] = raw   # bare "C" fallback
+            elif len(tok_up) == 1 and tok_up.isalpha():
+                # bare letter token
+                if tok_up + ":" not in m:
+                    m[tok_up + ":"] = raw
+                if tok_up not in m:
+                    m[tok_up] = raw
+
+        # POSIX: strip /dev/ prefix so "sda1" matches "/dev/sda1"
+        if raw.startswith("/dev/"):
+            base = raw[5:]
+            if base not in m:
+                m[base] = raw
+    return m
+
+
 def get_disks(prev_io, elapsed):
     disks = []
     try:
         curr_io = psutil.disk_io_counters(perdisk=True) or {}
+        vol_map = _build_vol_to_key(curr_io)   # normalised lookup
+        prev_vol_map = _build_vol_to_key(prev_io) if prev_io else {}
+
         for part in psutil.disk_partitions(all=False):
             if IS_WINDOWS and "cdrom" in part.opts:
                 continue
             try:
                 usage = psutil.disk_usage(part.mountpoint)
                 read_spd = write_spd = 0.0
-                # psutil key formats vary by platform and version:
-                #   Windows 5.9+  → "C:"   (logical disk with colon)
-                #   Windows older → "C"    (colon stripped)
-                #   Linux/macOS   → "sda1" (no /dev/ prefix)
-                # Build all plausible candidates and take the first match.
+
+                # Generate all plausible candidate strings for this partition.
                 win_base = part.device.replace("\\\\.\\", "").rstrip("\\")  # "C:"
                 posix_base = part.device.split("/")[-1] if "/" in part.device else ""
-                candidates = [win_base, win_base.rstrip(":"), posix_base,
-                               part.device, part.mountpoint,
-                               part.mountpoint.rstrip("/\\")]
-                for key in candidates:
-                    if key and key in curr_io and prev_io and key in prev_io:
-                        read_spd = max(0, (curr_io[key].read_bytes - prev_io[key].read_bytes) / elapsed / 1024)
-                        write_spd = max(0, (curr_io[key].write_bytes - prev_io[key].write_bytes) / elapsed / 1024)
+                candidates = [
+                    win_base,                           # "C:"
+                    win_base.upper(),
+                    win_base.rstrip(":"),               # "C"
+                    win_base.rstrip(":").upper(),
+                    posix_base,                         # "sda1"
+                    part.device,                        # "C:\\" or "/dev/sda1"
+                    part.mountpoint,                    # "C:\\" or "/mnt/data"
+                    part.mountpoint.rstrip("/\\"),
+                ]
+
+                for cand in candidates:
+                    if not cand:
+                        continue
+                    curr_key = vol_map.get(cand) or vol_map.get(cand.upper())
+                    prev_key = prev_vol_map.get(cand) or prev_vol_map.get(cand.upper())
+                    if curr_key and prev_key and curr_key in curr_io and prev_key in prev_io:
+                        read_spd = max(0, (curr_io[curr_key].read_bytes
+                                          - prev_io[prev_key].read_bytes) / elapsed / 1024)
+                        write_spd = max(0, (curr_io[curr_key].write_bytes
+                                           - prev_io[prev_key].write_bytes) / elapsed / 1024)
                         break
+
                 disks.append({
                     "device": part.device,
                     "mountpoint": part.mountpoint,
