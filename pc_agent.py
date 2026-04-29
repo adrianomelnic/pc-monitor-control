@@ -121,6 +121,12 @@ PORT = int(os.environ.get("PC_AGENT_PORT", 8765))
 _prev_net_io = {}
 _prev_disk_io = {}
 _prev_time = time.time()
+# Guards _prev_net_io / _prev_disk_io / _prev_time against concurrent /metrics
+# requests racing each other: Flask runs with threaded=True so two requests can
+# arrive simultaneously, leading to one seeing a fresh _prev_time but the stale
+# _prev_net_io from before the other request updated it — causing elapsed ≈ 0
+# and therefore speed ≈ 0 on the next render.
+_io_state_lock = _threading.Lock()
 
 # ── CPU usage background sampler ─────────────────────────────────────────────
 # psutil.cpu_percent(interval=None) returns the delta since the LAST call. A
@@ -841,6 +847,30 @@ def get_disks(prev_io, elapsed):
     except Exception:
         return [], {}
 
+def _is_virtual_iface(name: str) -> bool:
+    """Return True for loopback, pseudo-interfaces, and well-known virtual
+    adapters that should be excluded from the network speed display.
+    Mirrors the isVirtualIface() filter in the mobile NetworkCard component."""
+    n = name.lower()
+    return (
+        n == "lo" or
+        "loopback" in n or
+        "pseudo" in n or
+        n.startswith("tun") or
+        n.startswith("tap") or
+        n.startswith("veth") or
+        "docker" in n or
+        "vmware" in n or
+        "vethernet" in n or
+        "tailscale" in n or
+        "tunnel" in n or
+        "teredo" in n or
+        "isatap" in n or
+        "6to4" in n or
+        "virtual" in n
+    )
+
+
 def get_network(prev_io, elapsed):
     interfaces = []
     try:
@@ -849,6 +879,8 @@ def get_network(prev_io, elapsed):
         for name, s in curr_io.items():
             if_stat = stats.get(name)
             if not if_stat or not if_stat.isup:
+                continue
+            if _is_virtual_iface(name):
                 continue
             spd_up = spd_down = 0.0
             if prev_io and name in prev_io:
@@ -922,8 +954,16 @@ def metrics():
 def _collect_metrics(source="auto"):
     global _prev_net_io, _prev_disk_io, _prev_time
 
+    # Atomically snapshot the current I/O baseline so two concurrent Flask
+    # threads don't see a stale _prev_time paired with an already-updated
+    # _prev_net_io (which would yield elapsed ≈ 0 → speed ≈ 0 on one thread).
+    with _io_state_lock:
+        snap_disk_io = _prev_disk_io
+        snap_net_io  = _prev_net_io
+        snap_time    = _prev_time
+
     now = time.time()
-    elapsed = max(now - _prev_time, 0.1)
+    elapsed = max(now - snap_time, 0.1)
 
     sensor_data = read_sensors(source)
     cpu_info = get_cpu_info(sensor_data)
@@ -931,12 +971,16 @@ def _collect_metrics(source="auto"):
     ram_info = get_ram_info()
     ram_info["temperature"] = get_memory_temp_hwinfo(sensor_data)
     fans = get_fans(sensor_data)
-    disks, new_disk_io = get_disks(_prev_disk_io, elapsed)
-    network, new_net_io = get_network(_prev_net_io, elapsed)
+    disks, new_disk_io = get_disks(snap_disk_io, elapsed)
+    network, new_net_io = get_network(snap_net_io, elapsed)
 
-    _prev_disk_io = new_disk_io
-    _prev_net_io = new_net_io
-    _prev_time = now
+    # Write back only if our timestamp is strictly newer — a slow concurrent
+    # request that finishes late should not overwrite a fresher result.
+    with _io_state_lock:
+        if now > _prev_time:
+            _prev_disk_io = new_disk_io
+            _prev_net_io  = new_net_io
+            _prev_time    = now
 
     # Flat fields for backward compat
     primary_disk = disks[0] if disks else None
