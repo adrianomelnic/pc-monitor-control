@@ -805,15 +805,92 @@ def get_fans(hwinfo_data=None):
         pass
     return fans
 
+# ── PhysicalDriveN → drive-letter mapping (Windows) ────────────────────────
+# psutil on Windows 11 / modern psutil builds returns keys like "PhysicalDrive0"
+# instead of drive letters ("C:", "D:").  We query the OS once (via wmic or
+# PowerShell) to build the physical-disk-number → volume-letter map and cache
+# it for 5 minutes — drives rarely change while the agent is running.
+_physdrive_vol_map_cache: "dict[str, list[str]]" = {}
+_physdrive_vol_map_ts: float = 0.0
+
+def _win_physdrive_to_vol_map() -> "dict[str, list[str]]":
+    """Return {"PhysicalDrive0": ["D:"], "PhysicalDrive1": ["C:"]} etc.
+    Tries wmic first (available Windows 7–11), then falls back to
+    PowerShell Get-CimInstance (Windows 10+).  Cached 5 minutes."""
+    global _physdrive_vol_map_cache, _physdrive_vol_map_ts
+    if not IS_WINDOWS:
+        return {}
+    now = time.time()
+    if now - _physdrive_vol_map_ts < 300.0 and _physdrive_vol_map_cache:
+        return _physdrive_vol_map_cache
+
+    m: "dict[str, list[str]]" = {}
+    import subprocess
+    NO_WIN = 0x08000000  # CREATE_NO_WINDOW — suppresses any console flash
+
+    def _parse_assoc(text: str) -> None:
+        # Handles both wmic and PowerShell output.
+        # wmic line:  ...Win32_DiskPartition.DeviceID="Disk #0, Partition #0" ... DeviceID="C:"
+        # PS line:    Antecedent : ... Disk #0, Partition #0 ...  / Dependent: DeviceID="C:"
+        for line in text.splitlines():
+            m_disk = re.search(r'Disk\s*#\s*(\d+)', line, re.I)
+            m_vol  = re.search(r'DeviceID="([A-Za-z]:)"', line)
+            if not m_vol:
+                # PowerShell may quote differently: DeviceID = C:
+                m_vol = re.search(r'DeviceID\s*[=:]\s*"?([A-Za-z]:)"?', line, re.I)
+            if m_disk and m_vol:
+                key = f"PhysicalDrive{m_disk.group(1)}"
+                vol = m_vol.group(1).upper() + (":" if ":" not in m_vol.group(1) else "")
+                m.setdefault(key, [])
+                if vol not in m[key]:
+                    m[key].append(vol)
+
+    # Try wmic (deprecated but present on most Windows installs)
+    try:
+        r = subprocess.run(
+            ["wmic", "path", "Win32_LogicalDiskToPartition",
+             "get", "Antecedent,Dependent"],
+            capture_output=True, text=True, timeout=8,
+            creationflags=NO_WIN,
+        )
+        if r.returncode == 0 and "DeviceID" in r.stdout:
+            _parse_assoc(r.stdout)
+    except Exception:
+        pass
+
+    # Fallback: PowerShell Get-CimInstance (works even if wmic is removed)
+    if not m:
+        try:
+            ps_cmd = (
+                "Get-CimInstance Win32_LogicalDiskToPartition | "
+                "ForEach-Object { $_.Antecedent.ToString() + ' -> ' + $_.Dependent.ToString() }"
+            )
+            r = subprocess.run(
+                ["powershell", "-NoProfile", "-NonInteractive",
+                 "-Command", ps_cmd],
+                capture_output=True, text=True, timeout=12,
+                creationflags=NO_WIN,
+            )
+            if r.returncode == 0:
+                _parse_assoc(r.stdout)
+        except Exception:
+            pass
+
+    _physdrive_vol_map_cache = m
+    _physdrive_vol_map_ts    = now
+    return m
+
+
 def _build_vol_to_key(io_dict):
     """Build a normalised map from drive-letter tokens → actual psutil key.
 
     psutil.disk_io_counters(perdisk=True) key formats by platform / version:
-      Windows Physical Disk counter (most common on Win 10/11):
+      Windows 11 / modern psutil (confirmed):
+        "PhysicalDrive0", "PhysicalDrive1"   ← NO drive letters; need WMI map
+      Windows Physical Disk counter (older psutil):
         "0 C:"        – single-partition physical disk 0 → C:
         "0 C: D:"     – physical disk 0 with two volumes
-        "1 C:"        – physical disk 1 → C:
-      Windows Logical Disk counter (older psutil or explicit perdisk=False):
+      Windows Logical Disk counter:
         "C:", "D:"
       Windows even older:
         "C", "D"
@@ -824,9 +901,24 @@ def _build_vol_to_key(io_dict):
     the real key so the speed delta can be computed correctly.
     """
     m = {}
+
+    # Pre-fetch the PhysicalDriveN → vol-letters map if any key needs it.
+    has_physdrive = any(k.startswith("PhysicalDrive") for k in io_dict)
+    physdrive_map = _win_physdrive_to_vol_map() if has_physdrive else {}
+
     for raw in io_dict:
         m[raw] = raw                          # exact match always works
         m[raw.upper()] = raw                  # case-insensitive exact
+
+        # Windows 11: "PhysicalDrive0" → look up drive letters via WMI
+        if raw.startswith("PhysicalDrive") and physdrive_map:
+            for vol in physdrive_map.get(raw, []):
+                vol_up = vol.upper()
+                if vol_up not in m:
+                    m[vol_up] = raw               # "D:" -> "PhysicalDrive0"
+                bare = vol_up.rstrip(":")
+                if bare not in m:
+                    m[bare] = raw                 # "D"  -> "PhysicalDrive0"
 
         # Windows compound key like "0 C:" or "0 C: D:" — split on whitespace
         # and extract every token that looks like a drive letter or "X:".
@@ -1020,6 +1112,47 @@ def _strip_non_finite(obj):
     if isinstance(obj, list):
         return [_strip_non_finite(v) for v in obj]
     return obj
+
+@app.route("/")
+def index():
+    """Minimal status page — what 'Open dashboard' in the tray opens."""
+    html = f"""<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PC Monitor Agent</title>
+<style>
+  body{{font-family:system-ui,sans-serif;background:#111;color:#eee;
+        margin:0;display:flex;align-items:center;justify-content:center;
+        min-height:100vh;}}
+  .card{{background:#1a1a1a;border:1px solid #333;border-radius:12px;
+         padding:32px 40px;max-width:420px;width:100%;}}
+  h1{{margin:0 0 6px;font-size:1.3rem;color:#22c55e;}}
+  p{{margin:4px 0;color:#aaa;font-size:.9rem;}}
+  .dot{{display:inline-block;width:8px;height:8px;border-radius:50%;
+        background:#22c55e;margin-right:6px;}}
+  a{{color:#22c55e;text-decoration:none;}}
+  a:hover{{text-decoration:underline;}}
+  ul{{margin:16px 0 0;padding:0 0 0 18px;color:#aaa;font-size:.85rem;line-height:1.9;}}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1><span class="dot"></span>PC Monitor Agent v{AGENT_VERSION}</h1>
+  <p>Running on port {PORT}</p>
+  <p style="margin-top:12px;color:#666;font-size:.8rem;">API endpoints:</p>
+  <ul>
+    <li><a href="/metrics">/metrics</a> — full sensor snapshot</li>
+    <li><a href="/version">/version</a> — version info</li>
+    <li><a href="/sensor_debug">/sensor_debug</a> — sensor source</li>
+    <li><a href="/disk_io_debug">/disk_io_debug</a> — disk I/O keys</li>
+  </ul>
+</div>
+</body>
+</html>"""
+    from flask import Response
+    return Response(html, mimetype="text/html")
+
 
 @app.route("/version")
 def version():
@@ -1350,6 +1483,10 @@ def disk_io_debug():
         }
     except Exception as e:
         result["perdisk_error"] = str(e)
+        perdisk = {}
+
+    if IS_WINDOWS and any(k.startswith("PhysicalDrive") for k in perdisk):
+        result["physdrive_vol_map"] = _win_physdrive_to_vol_map()
 
     try:
         agg = psutil.disk_io_counters(perdisk=False)
@@ -1561,16 +1698,31 @@ def _install_update() -> None:
             raise RuntimeError(f"downloaded file too small ({size} bytes)")
 
         batch_path = os.path.join(target_dir, "pc-agent-update.bat")
-        # `timeout /t 3` lets the current process exit so the .exe is no
-        # longer locked. `move /y` overwrites in place (same volume — both
-        # paths are in target_dir). `start ""` launches the new .exe
-        # detached. `del "%~f0"` deletes the batch itself last.
+        # We use PowerShell Start-Process to launch the replacement exe so it
+        # starts in a completely fresh environment — inheriting nothing from this
+        # process tree.  This prevents PyInstaller's _MEIPASS / _MEIPASS2RTHLPTH
+        # env-vars (pointing to THIS exe's now-deleted extraction dir) from being
+        # visible to the new exe's bootloader, which was causing the intermittent
+        # "Failed to load Python DLL …\_MEI…\python311.dll" error on first launch
+        # after an in-place self-update.
+        #
+        # The 5-second wait is intentionally conservative: os._exit(0) below is
+        # nearly instant, but Windows file-system caches and antivirus may hold a
+        # handle on the exe for a second or two after the process exits.
+        # `move /y` (same volume) is an atomic rename; `Start-Process` creates a
+        # new top-level process with no console/env inheritance.
+        ps_launcher = os.path.join(target_dir, "pc-agent-start.ps1")
+        safe_exe = current_exe.replace("'", "''")  # escape single-quotes for PS
+        with open(ps_launcher, "w", encoding="utf-8") as f:
+            f.write(f"Start-Process '{safe_exe}'\r\n")
         with open(batch_path, "w", encoding="utf-8") as f:
             f.write(
                 "@echo off\r\n"
-                "timeout /t 3 /nobreak >nul\r\n"
+                "timeout /t 5 /nobreak >nul\r\n"
                 f'move /y "{new_exe}" "{current_exe}" >nul\r\n'
-                f'start "" "{current_exe}"\r\n'
+                f'powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass'
+                f' -File "{ps_launcher}"\r\n'
+                f'del "{ps_launcher}" >nul 2>&1\r\n'
                 'del "%~f0"\r\n'
             )
         DETACHED_PROCESS = 0x00000008
