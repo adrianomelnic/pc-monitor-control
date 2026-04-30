@@ -860,53 +860,89 @@ def get_disks(prev_io, elapsed):
         vol_map = _build_vol_to_key(curr_io)   # normalised lookup
         prev_vol_map = _build_vol_to_key(prev_io) if prev_io else {}
 
+        # Aggregate fallback: if per-disk key matching fails (unknown key format,
+        # insufficient permissions, or empty perdisk dict) we fall back to the
+        # system-wide totals split evenly across unmatched disks.
+        # Stored under the special key "__agg__" so the prev snapshot is tracked.
+        try:
+            agg_curr = psutil.disk_io_counters(perdisk=False)
+        except Exception:
+            agg_curr = None
+        agg_prev = prev_io.get("__agg__") if prev_io else None
+
+        # Pass 1: collect partitions and per-disk match results.
+        raw_parts = []
         for part in psutil.disk_partitions(all=False):
             if IS_WINDOWS and "cdrom" in part.opts:
                 continue
             try:
                 usage = psutil.disk_usage(part.mountpoint)
-                read_spd = write_spd = 0.0
-
-                # Generate all plausible candidate strings for this partition.
-                win_base = part.device.replace("\\\\.\\", "").rstrip("\\")  # "C:"
-                posix_base = part.device.split("/")[-1] if "/" in part.device else ""
-                candidates = [
-                    win_base,                           # "C:"
-                    win_base.upper(),
-                    win_base.rstrip(":"),               # "C"
-                    win_base.rstrip(":").upper(),
-                    posix_base,                         # "sda1"
-                    part.device,                        # "C:\\" or "/dev/sda1"
-                    part.mountpoint,                    # "C:\\" or "/mnt/data"
-                    part.mountpoint.rstrip("/\\"),
-                ]
-
-                for cand in candidates:
-                    if not cand:
-                        continue
-                    curr_key = vol_map.get(cand) or vol_map.get(cand.upper())
-                    prev_key = prev_vol_map.get(cand) or prev_vol_map.get(cand.upper())
-                    if curr_key and prev_key and curr_key in curr_io and prev_key in prev_io:
-                        read_spd = max(0, (curr_io[curr_key].read_bytes
-                                          - prev_io[prev_key].read_bytes) / elapsed / 1024)
-                        write_spd = max(0, (curr_io[curr_key].write_bytes
-                                           - prev_io[prev_key].write_bytes) / elapsed / 1024)
-                        break
-
-                disks.append({
-                    "device": part.device,
-                    "mountpoint": part.mountpoint,
-                    "fstype": part.fstype,
-                    "total": round(usage.total / 1024 / 1024),
-                    "used": round(usage.used / 1024 / 1024),
-                    "free": round(usage.free / 1024 / 1024),
-                    "percent": round(usage.percent, 1),
-                    "readSpeed": round(read_spd, 1),
-                    "writeSpeed": round(write_spd, 1),
-                })
             except Exception:
                 continue
-        return disks, curr_io
+
+            win_base = part.device.replace("\\\\.\\", "").rstrip("\\")  # "C:"
+            posix_base = part.device.split("/")[-1] if "/" in part.device else ""
+            candidates = [
+                win_base,                           # "C:"
+                win_base.upper(),
+                win_base.rstrip(":"),               # "C"
+                win_base.rstrip(":").upper(),
+                posix_base,                         # "sda1"
+                part.device,                        # "C:\\" or "/dev/sda1"
+                part.mountpoint,                    # "C:\\" or "/mnt/data"
+                part.mountpoint.rstrip("/\\"),
+            ]
+
+            read_spd = write_spd = 0.0
+            matched = False
+            for cand in candidates:
+                if not cand:
+                    continue
+                curr_key = vol_map.get(cand) or vol_map.get(cand.upper())
+                prev_key = prev_vol_map.get(cand) or prev_vol_map.get(cand.upper())
+                if curr_key and prev_key and curr_key in curr_io and prev_key in prev_io:
+                    read_spd = max(0, (curr_io[curr_key].read_bytes
+                                      - prev_io[prev_key].read_bytes) / elapsed / 1024)
+                    write_spd = max(0, (curr_io[curr_key].write_bytes
+                                       - prev_io[prev_key].write_bytes) / elapsed / 1024)
+                    matched = True
+                    break
+
+            raw_parts.append({
+                "device": part.device, "mountpoint": part.mountpoint,
+                "fstype": part.fstype, "usage": usage,
+                "read_spd": read_spd, "write_spd": write_spd, "matched": matched,
+            })
+
+        # Pass 2: apply aggregate fallback to unmatched partitions.
+        unmatched = [p for p in raw_parts if not p["matched"]]
+        if unmatched and agg_curr and agg_prev and elapsed > 0:
+            n = max(len(unmatched), 1)
+            agg_read = max(0, (agg_curr.read_bytes  - agg_prev.read_bytes)  / elapsed / 1024) / n
+            agg_write = max(0, (agg_curr.write_bytes - agg_prev.write_bytes) / elapsed / 1024) / n
+            for p in unmatched:
+                p["read_spd"]  = agg_read
+                p["write_spd"] = agg_write
+
+        for p in raw_parts:
+            u = p["usage"]
+            disks.append({
+                "device": p["device"],
+                "mountpoint": p["mountpoint"],
+                "fstype": p["fstype"],
+                "total": round(u.total / 1024 / 1024),
+                "used":  round(u.used  / 1024 / 1024),
+                "free":  round(u.free  / 1024 / 1024),
+                "percent": round(u.percent, 1),
+                "readSpeed":  round(p["read_spd"],  1),
+                "writeSpeed": round(p["write_spd"], 1),
+            })
+
+        # Persist curr_io + aggregate so next call can compute deltas.
+        new_io = dict(curr_io)
+        if agg_curr:
+            new_io["__agg__"] = agg_curr
+        return disks, new_io
     except Exception:
         return [], {}
 
@@ -1296,6 +1332,58 @@ def hwinfo_debug():
     except Exception as e:
         import traceback
         return jsonify({"status": "exception", "error": str(e), "trace": traceback.format_exc()})
+
+
+@app.route("/disk_io_debug")
+def disk_io_debug():
+    """Diagnostic endpoint: returns the raw psutil disk I/O keys so we can
+    see exactly what format this OS/psutil version uses and debug why
+    per-disk speed matching might fail.  No API-key check — it contains
+    no sensitive data (just key names and byte counters)."""
+    result = {}
+    try:
+        perdisk = psutil.disk_io_counters(perdisk=True) or {}
+        result["perdisk_keys"] = list(perdisk.keys())
+        result["perdisk_sample"] = {
+            k: {"read_bytes": v.read_bytes, "write_bytes": v.write_bytes}
+            for k, v in list(perdisk.items())[:8]
+        }
+    except Exception as e:
+        result["perdisk_error"] = str(e)
+
+    try:
+        agg = psutil.disk_io_counters(perdisk=False)
+        result["aggregate"] = {"read_bytes": agg.read_bytes, "write_bytes": agg.write_bytes} if agg else None
+    except Exception as e:
+        result["aggregate_error"] = str(e)
+
+    parts = []
+    try:
+        vol_map = _build_vol_to_key(perdisk) if "perdisk_keys" in result else {}
+        for part in psutil.disk_partitions(all=False):
+            if IS_WINDOWS and "cdrom" in (part.opts or ""):
+                continue
+            win_base = part.device.replace("\\\\.\\", "").rstrip("\\")
+            candidates = [win_base, win_base.upper(), win_base.rstrip(":"),
+                          part.device, part.mountpoint]
+            matched = None
+            for c in candidates:
+                k = vol_map.get(c) or vol_map.get(c.upper() if c else c)
+                if k:
+                    matched = k
+                    break
+            parts.append({
+                "device": part.device,
+                "mountpoint": part.mountpoint,
+                "fstype": part.fstype,
+                "win_base_derived": win_base,
+                "candidates_tried": [c for c in candidates if c],
+                "matched_perdisk_key": matched,
+            })
+    except Exception as e:
+        result["partitions_error"] = str(e)
+    result["partitions"] = parts
+    return jsonify(result)
 
 
 # ── System tray + autostart + auto-update (Windows only) ───────────────────
