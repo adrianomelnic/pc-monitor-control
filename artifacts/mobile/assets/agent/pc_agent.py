@@ -46,7 +46,7 @@ _NO_WINDOW_KW = {"creationflags": 0x08000000} if IS_WINDOWS else {}
 # Bump on every release tag — and the CI build pipeline
 # (.github/workflows/build-agent.yml) rewrites this string at build time to
 # match the pushed git tag, so it can never drift from the published release.
-AGENT_VERSION = "0.1.0"
+AGENT_VERSION = "0.6.8"
 
 # ── Auto-elevate to admin on Windows ────────────────────────────────────────
 def _ensure_admin():
