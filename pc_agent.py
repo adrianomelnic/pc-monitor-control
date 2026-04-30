@@ -46,7 +46,7 @@ _NO_WINDOW_KW = {"creationflags": 0x08000000} if IS_WINDOWS else {}
 # Bump on every release tag — and the CI build pipeline
 # (.github/workflows/build-agent.yml) rewrites this string at build time to
 # match the pushed git tag, so it can never drift from the published release.
-AGENT_VERSION = "0.6.8"
+AGENT_VERSION = "0.6.9"
 
 # ── Auto-elevate to admin on Windows ────────────────────────────────────────
 def _ensure_admin():
@@ -150,7 +150,7 @@ def _cpu_sampler():
     psutil.cpu_percent(percpu=True)
     import time as _time
     while True:
-        _time.sleep(2)
+        _time.sleep(1)
         try:
             per_core = psutil.cpu_percent(percpu=True)
             total    = round(sum(per_core) / len(per_core), 1) if per_core else 0.0
