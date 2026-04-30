@@ -115,7 +115,15 @@ exe = EXE(
     strip=False,
     upx=False,
     upx_exclude=[],
-    runtime_tmpdir=None,
+    # Extract the bundled archive next to the exe instead of %TEMP%.
+    # %TEMP% extractions are re-done on every launch AND get scanned by
+    # Windows Defender each time — this is what causes the intermittent
+    # "Failed to load Python DLL" error after an in-place self-update.
+    # With runtime_tmpdir='.', PyInstaller creates _MEI<hash> in the same
+    # directory as pc-agent.exe, keeps the files across restarts (no
+    # re-extract when the hash matches), and avoids the AV-scan race.
+    # '.' means the directory containing the exe, not the CWD.
+    runtime_tmpdir="." if sys.platform == "win32" else None,
     # Windowed (no console) on Windows: the agent is a background service
     # whose UI surface is the tray icon, not a CLI tool — having a black
     # terminal window stay open after the user double-clicks pc-agent.exe
