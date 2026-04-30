@@ -805,15 +805,92 @@ def get_fans(hwinfo_data=None):
         pass
     return fans
 
+# ── PhysicalDriveN → drive-letter mapping (Windows) ────────────────────────
+# psutil on Windows 11 / modern psutil builds returns keys like "PhysicalDrive0"
+# instead of drive letters ("C:", "D:").  We query the OS once (via wmic or
+# PowerShell) to build the physical-disk-number → volume-letter map and cache
+# it for 5 minutes — drives rarely change while the agent is running.
+_physdrive_vol_map_cache: "dict[str, list[str]]" = {}
+_physdrive_vol_map_ts: float = 0.0
+
+def _win_physdrive_to_vol_map() -> "dict[str, list[str]]":
+    """Return {"PhysicalDrive0": ["D:"], "PhysicalDrive1": ["C:"]} etc.
+    Tries wmic first (available Windows 7–11), then falls back to
+    PowerShell Get-CimInstance (Windows 10+).  Cached 5 minutes."""
+    global _physdrive_vol_map_cache, _physdrive_vol_map_ts
+    if not IS_WINDOWS:
+        return {}
+    now = time.time()
+    if now - _physdrive_vol_map_ts < 300.0 and _physdrive_vol_map_cache:
+        return _physdrive_vol_map_cache
+
+    m: "dict[str, list[str]]" = {}
+    import subprocess
+    NO_WIN = 0x08000000  # CREATE_NO_WINDOW — suppresses any console flash
+
+    def _parse_assoc(text: str) -> None:
+        # Handles both wmic and PowerShell output.
+        # wmic line:  ...Win32_DiskPartition.DeviceID="Disk #0, Partition #0" ... DeviceID="C:"
+        # PS line:    Antecedent : ... Disk #0, Partition #0 ...  / Dependent: DeviceID="C:"
+        for line in text.splitlines():
+            m_disk = re.search(r'Disk\s*#\s*(\d+)', line, re.I)
+            m_vol  = re.search(r'DeviceID="([A-Za-z]:)"', line)
+            if not m_vol:
+                # PowerShell may quote differently: DeviceID = C:
+                m_vol = re.search(r'DeviceID\s*[=:]\s*"?([A-Za-z]:)"?', line, re.I)
+            if m_disk and m_vol:
+                key = f"PhysicalDrive{m_disk.group(1)}"
+                vol = m_vol.group(1).upper() + (":" if ":" not in m_vol.group(1) else "")
+                m.setdefault(key, [])
+                if vol not in m[key]:
+                    m[key].append(vol)
+
+    # Try wmic (deprecated but present on most Windows installs)
+    try:
+        r = subprocess.run(
+            ["wmic", "path", "Win32_LogicalDiskToPartition",
+             "get", "Antecedent,Dependent"],
+            capture_output=True, text=True, timeout=8,
+            creationflags=NO_WIN,
+        )
+        if r.returncode == 0 and "DeviceID" in r.stdout:
+            _parse_assoc(r.stdout)
+    except Exception:
+        pass
+
+    # Fallback: PowerShell Get-CimInstance (works even if wmic is removed)
+    if not m:
+        try:
+            ps_cmd = (
+                "Get-CimInstance Win32_LogicalDiskToPartition | "
+                "ForEach-Object { $_.Antecedent.ToString() + ' -> ' + $_.Dependent.ToString() }"
+            )
+            r = subprocess.run(
+                ["powershell", "-NoProfile", "-NonInteractive",
+                 "-Command", ps_cmd],
+                capture_output=True, text=True, timeout=12,
+                creationflags=NO_WIN,
+            )
+            if r.returncode == 0:
+                _parse_assoc(r.stdout)
+        except Exception:
+            pass
+
+    _physdrive_vol_map_cache = m
+    _physdrive_vol_map_ts    = now
+    return m
+
+
 def _build_vol_to_key(io_dict):
     """Build a normalised map from drive-letter tokens → actual psutil key.
 
     psutil.disk_io_counters(perdisk=True) key formats by platform / version:
-      Windows Physical Disk counter (most common on Win 10/11):
+      Windows 11 / modern psutil (confirmed):
+        "PhysicalDrive0", "PhysicalDrive1"   ← NO drive letters; need WMI map
+      Windows Physical Disk counter (older psutil):
         "0 C:"        – single-partition physical disk 0 → C:
         "0 C: D:"     – physical disk 0 with two volumes
-        "1 C:"        – physical disk 1 → C:
-      Windows Logical Disk counter (older psutil or explicit perdisk=False):
+      Windows Logical Disk counter:
         "C:", "D:"
       Windows even older:
         "C", "D"
@@ -824,9 +901,24 @@ def _build_vol_to_key(io_dict):
     the real key so the speed delta can be computed correctly.
     """
     m = {}
+
+    # Pre-fetch the PhysicalDriveN → vol-letters map if any key needs it.
+    has_physdrive = any(k.startswith("PhysicalDrive") for k in io_dict)
+    physdrive_map = _win_physdrive_to_vol_map() if has_physdrive else {}
+
     for raw in io_dict:
         m[raw] = raw                          # exact match always works
         m[raw.upper()] = raw                  # case-insensitive exact
+
+        # Windows 11: "PhysicalDrive0" → look up drive letters via WMI
+        if raw.startswith("PhysicalDrive") and physdrive_map:
+            for vol in physdrive_map.get(raw, []):
+                vol_up = vol.upper()
+                if vol_up not in m:
+                    m[vol_up] = raw               # "D:" -> "PhysicalDrive0"
+                bare = vol_up.rstrip(":")
+                if bare not in m:
+                    m[bare] = raw                 # "D"  -> "PhysicalDrive0"
 
         # Windows compound key like "0 C:" or "0 C: D:" — split on whitespace
         # and extract every token that looks like a drive letter or "X:".
@@ -1350,6 +1442,10 @@ def disk_io_debug():
         }
     except Exception as e:
         result["perdisk_error"] = str(e)
+        perdisk = {}
+
+    if IS_WINDOWS and any(k.startswith("PhysicalDrive") for k in perdisk):
+        result["physdrive_vol_map"] = _win_physdrive_to_vol_map()
 
     try:
         agg = psutil.disk_io_counters(perdisk=False)
