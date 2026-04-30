@@ -1113,6 +1113,47 @@ def _strip_non_finite(obj):
         return [_strip_non_finite(v) for v in obj]
     return obj
 
+@app.route("/")
+def index():
+    """Minimal status page — what 'Open dashboard' in the tray opens."""
+    html = f"""<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PC Monitor Agent</title>
+<style>
+  body{{font-family:system-ui,sans-serif;background:#111;color:#eee;
+        margin:0;display:flex;align-items:center;justify-content:center;
+        min-height:100vh;}}
+  .card{{background:#1a1a1a;border:1px solid #333;border-radius:12px;
+         padding:32px 40px;max-width:420px;width:100%;}}
+  h1{{margin:0 0 6px;font-size:1.3rem;color:#22c55e;}}
+  p{{margin:4px 0;color:#aaa;font-size:.9rem;}}
+  .dot{{display:inline-block;width:8px;height:8px;border-radius:50%;
+        background:#22c55e;margin-right:6px;}}
+  a{{color:#22c55e;text-decoration:none;}}
+  a:hover{{text-decoration:underline;}}
+  ul{{margin:16px 0 0;padding:0 0 0 18px;color:#aaa;font-size:.85rem;line-height:1.9;}}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1><span class="dot"></span>PC Monitor Agent v{AGENT_VERSION}</h1>
+  <p>Running on port {PORT}</p>
+  <p style="margin-top:12px;color:#666;font-size:.8rem;">API endpoints:</p>
+  <ul>
+    <li><a href="/metrics">/metrics</a> — full sensor snapshot</li>
+    <li><a href="/version">/version</a> — version info</li>
+    <li><a href="/sensor_debug">/sensor_debug</a> — sensor source</li>
+    <li><a href="/disk_io_debug">/disk_io_debug</a> — disk I/O keys</li>
+  </ul>
+</div>
+</body>
+</html>"""
+    from flask import Response
+    return Response(html, mimetype="text/html")
+
+
 @app.route("/version")
 def version():
     """Return the running agent's version. The mobile app polls /metrics
@@ -1657,16 +1698,31 @@ def _install_update() -> None:
             raise RuntimeError(f"downloaded file too small ({size} bytes)")
 
         batch_path = os.path.join(target_dir, "pc-agent-update.bat")
-        # `timeout /t 3` lets the current process exit so the .exe is no
-        # longer locked. `move /y` overwrites in place (same volume — both
-        # paths are in target_dir). `start ""` launches the new .exe
-        # detached. `del "%~f0"` deletes the batch itself last.
+        # We use PowerShell Start-Process to launch the replacement exe so it
+        # starts in a completely fresh environment — inheriting nothing from this
+        # process tree.  This prevents PyInstaller's _MEIPASS / _MEIPASS2RTHLPTH
+        # env-vars (pointing to THIS exe's now-deleted extraction dir) from being
+        # visible to the new exe's bootloader, which was causing the intermittent
+        # "Failed to load Python DLL …\_MEI…\python311.dll" error on first launch
+        # after an in-place self-update.
+        #
+        # The 5-second wait is intentionally conservative: os._exit(0) below is
+        # nearly instant, but Windows file-system caches and antivirus may hold a
+        # handle on the exe for a second or two after the process exits.
+        # `move /y` (same volume) is an atomic rename; `Start-Process` creates a
+        # new top-level process with no console/env inheritance.
+        ps_launcher = os.path.join(target_dir, "pc-agent-start.ps1")
+        safe_exe = current_exe.replace("'", "''")  # escape single-quotes for PS
+        with open(ps_launcher, "w", encoding="utf-8") as f:
+            f.write(f"Start-Process '{safe_exe}'\r\n")
         with open(batch_path, "w", encoding="utf-8") as f:
             f.write(
                 "@echo off\r\n"
-                "timeout /t 3 /nobreak >nul\r\n"
+                "timeout /t 5 /nobreak >nul\r\n"
                 f'move /y "{new_exe}" "{current_exe}" >nul\r\n'
-                f'start "" "{current_exe}"\r\n'
+                f'powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass'
+                f' -File "{ps_launcher}"\r\n'
+                f'del "{ps_launcher}" >nul 2>&1\r\n'
                 'del "%~f0"\r\n'
             )
         DETACHED_PROCESS = 0x00000008
